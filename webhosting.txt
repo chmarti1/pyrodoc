@@ -1,5 +1,0 @@
-Service         Product         Capacity                Transfer    Price/mo
-Amazon          Lightsail       20GB/512MB, 1Core       1TB         $3.50
-Amazon          Lightsail       40GB/1GB, 1 Core        2TB         $5.00
-A2              Shared Lite     UNL/0.5GB, 1 Core       UNL         $9.99/7.99/3.94
-

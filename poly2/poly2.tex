@@ -1,0 +1,251 @@
+\documentclass[twocolumn,letterpaper,11pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\begin{document}
+
+\section{Evaluation of functional groups}
+In the evaluation of empirical fits for thermodynamic properties, it is necessary to calculate complicated functions of many terms on one or two variables.  In simple cases like ideal gases, there are standard forms of these equations that can be applied across many species simply by adjusting coefficients (e.g. a polynomial).  However, especially when formulating precise relationships for multi-phase substances, whole new terms can appear to address the eccentricities of the specific substances.  
+
+There are two pragmatic approaches to address the problem.  Classically, special algorithms have been encoded to evaluate each substance or sub-group of substances with similar irregularities.  Alternately, we can find a way to encode the functional form in the species data, and use a standard algorithm to evaluate all species.  The challenge of the latter is finding an encoding that can still be efficiently evaluated.  After all, flexibility in software often comes at the cost of performance.
+
+\subsection{Groups on one variable}
+PYroMat groups are divided in to functions of one or two variables.  Beginning with a function of one variable,
+\begin{align}
+g_1(x) = \sum_k \prod_m a_4\,f_{k,m}{^{a_5}}(a_1 x^{a_2} + a_3) + a_6, \label{eqn:g1}
+\end{align}
+when $f$ is one of a set of known functions: \verb|exp()|, \verb|log()|, \verb|p()| (a polynomial), or \verb|x| (the identity function).  How many terms are included, which functions are used, and the $a$ coefficient values are specific to the property and the species.
+
+At first glance, this looks quite contrived, so it bears some discussion.  Let us start with the case that $a_1=a_2=a_4=a_5=1$ and $a_3=a_6=0$.  Then,
+\begin{align}
+g_1(x) = \sum_k \prod_m f_{k,m}(x),\label{eqn:g1:simple}
+\end{align}
+which is just a collection of functions of $x$.  It might appear $g(x) = f_1(x)f_2(x) + f_3(x) \ldots$
+
+The group is comprised of a sum of \emph{terms}, each of which is a multiplication of individual functions.  The functions could be any of the four available functions.  A single $f()$ could even be a polynomial, for which we develop an efficient evaluation algorithm below.
+
+However, Equation \ref{eqn:g1:simple} is not sufficiently tunable to allow us to construct the wide varieties of terms that appear in many of the property formulations.  For that, we resort to pre- and post-modifiers, the $a$ coefficients.  Pre-modifiers $a_1, a_2, a_3$ affect $x$ \emph{before} it is passed as an argument to $f$.  The post-modifiers $a_4,a_5,a_6$ are used to modify the function's result.  These represent an exponent, multiplier, and offset.
+
+The following is a group that can be constructed this way
+\begin{align}
+g(x) &= \exp\left(-x^2\right) (0.5 x^2 - .012 x + .1)\ldots\nonumber\\
+    & \hspace{2em} + \frac{x^4 - 2}{1.5 + 2\sqrt{x^3 - 2}}\ldots\nonumber\\
+    & \hspace{2em} + x^{-0.5} (1 + 0.1x + 0.225x^2)
+\end{align}
+These may look strange, but all of these are terms that can be found in property models.
+
+\subsection{Groups on two variables}
+An equivalent is needed for properties of two variables.
+\begin{subequations}
+\begin{align}
+X &= a_1 x^{a_2} + a_3\\
+Y &= a_4 y^{a_5} + a_6\\
+g_2(x,y) &= \sum_k \prod_m a_7 f_{m,k}{^{a_8}} (X,Y) + a_9
+\end{align}
+\end{subequations}
+
+
+\section{Polynomials of two variables}
+In the evaluaiton of empirical thermodynamic properties, there is often the problem of evaluating polynomial expansions on two variables.  These expansions are typically of the form
+\begin{align}
+p(x,y) = \sum_{i,j} c_{i,j} x^i y^j\label{eqn:general}
+\end{align}
+where $a$ and $b$ are real coefficients such that $i$ and $j$ are integer indices.
+
+\subsection{Modifying polynomials for non-integer and negative powers}
+Fractional and negative exponents are also possible within this framework if we were to accept input values $X$, and $Y$, and adjust them according to pre-exponentials $a$ and $b$,
+\begin{align}
+x &= X^a\\
+y &= Y^b.
+\end{align}
+The new polynomial formed is
+\begin{align}
+p(X,Y) = \sum_{i,j} c_{i,j} X^{ai} Y^{bj}.
+\end{align}
+For example, were $a=0.25$, then the expansion on $X$ could proceed in fractions of 4 even though the evaluation algorithm we use is purely expressed in integer exponents.  It is relatively computationally inexpensive to apply these exponentials prior to the code's execution.  It would be far more costly to apply them to each term.
+
+Similarly, negative exponentials can be achieved by using post-exponential terms
+\begin{align}
+P(X,Y) = X^\alpha Y^\beta p(X,Y).
+\end{align}
+When $\alpha$ or $\beta$ are non-zero, the effective exponents are all shifted positively or negatively by a single multiplication operation.
+
+\subsection{Efficient evaluation of the polynomial}
+
+The PYroMat polynomial evaluation algorithm is an expansion with purely integer exponents.
+\begin{align}
+p(x,y) = \sum_{i,j} c_{i,j} x^i y^j
+\end{align}
+However, evaluating each term individually requires two expensive calls to a \verb|pow| function and two floating point multiplications.
+
+The widely accepted method for evaluating a polynomial of one variable is to construct a recursive expansion
+\begin{align}
+q(y) = c_0 + y ( c_1 + y ( c_2 + y ( \ldots
+\end{align}
+If there are $n$ coefficients, then this amounts to only $m$ multiplications with no \verb|pow| calls.  In order to extend this algorithm to two variables, more elegant notation will be helpful.  If we name the intermediate value calculated in the process of these recursions $q$, then a polynomial with $n$ terms implies the series
+\begin{align}
+q_n &= c_n\\
+q_j(y) &= c_j + y\,q_{j+1}(y)\\
+q_0(y) &= q(y).
+\end{align}
+This is a series beginning with $q_n$, and proceeding backwards through the values of $j$ to $q_0$, which is the final value for $q(y)$.  In practice, there is no need to keep the old values of $q$, so a single register may be used to hold the latest value.
+
+How can this be extended to a polynomial of two variables?  We may consider the polynomials to be nested; the evaluation of a polynomial on $Y$ determines the individual coefficients for a polynomial on $X$.
+\begin{align}
+p(x,y) &= \sum_i q_i(y) x^i\\
+q_i(y) &= \sum_j c_{i,j} y^j
+\end{align}
+
+We only need a minor modification to the intermediate values for the $x$ polynomial since there will be a separate expansion for each value of $i$.  If there are $n$ $j$ terms,
+\begin{subequations}
+\begin{align}
+q_{i,n}(y) &= c_{n,j}\\
+q_{i,j}(y) &= c_{i,j} + y\,q_{i+1,j}(y)\\
+q_{i,0}(y) &= q_i(y).
+\end{align}
+\end{subequations}
+
+If there are $m$ $x$ terms,
+\begin{subequations}
+\begin{align}
+p_m(x) &= q_m(x)\\
+p_i(x,y) &= q_i(x) + y\,p_{i+1}(x,y)\\
+p_0(x,y) &= p(x,y).
+\end{align}
+\end{subequations}
+
+\subsection{Efficient evaluation of derivatives}
+The partial derivatives of the polynomial can be efficiently evaluated along with the polynomial itself. To relax the already cumbersome notation, the functional dependencies $(y)$ and $(x,y)$ will be dropped.  For the purpose of thermodynamic property evaluation, the first two derivatives will suffice.
+
+Let us begin with the simpler task of calculating the derivatives of $q_j$.
+\begin{subequations}
+\begin{align}
+q_{i,n|y} &= 0\\
+q_{i,j|y} &= q_{i+1,j} + y\,q_{i+1,j|y}\\
+q_{i,0|y} &= q_{i|y}
+\end{align}
+\end{subequations}
+
+\begin{subequations}
+\begin{align}
+q_{i,n|yy} &= 0\\
+q_{i,j|yy} &= 2 q_{i,j+1|y} + y\,q_{i,j+1|yy}\\
+q_{i,0|yy} &= q_{i|yy}
+\end{align}
+\end{subequations}
+
+The derivatives on $p$ are constructed somewhat differently because they can be in both $x$ and $y$.  Beginning with $y$,
+\begin{subequations}
+\begin{align}
+p_{n|y} &= 0\\
+p_{j|y} &= q_{i|y} + x\,p_{j+1|y}\\
+p_{0|y} &= p_y
+\end{align}
+\end{subequations}
+
+\begin{subequations}
+\begin{align}
+p_{m|yy} &= 0\\
+p_{i|yy} &= q_{i|yy} + x\,q_{i+1|yy}\\
+p_{0|yy} &= p_{yy}
+\end{align}
+\end{subequations}
+
+The derivatives on $x$ appear
+\begin{subequations}
+\begin{align}
+p_{m|x} &= 0\\
+p_{i|x} &= p_{i+1} + x\,p_{i+1|x}\\
+p_{0|x} &= p_x
+\end{align}
+\end{subequations}
+
+\begin{subequations}
+\begin{align}
+p_{n|xx} &= 0\\
+p_{i|xx} &= 2 p_{i+1|x} + x\,p_{i+1|xx}\\
+p_{0|xx} &= p_{xx}
+\end{align}
+\end{subequations}
+
+Finally, the cross-term (both $x$ and $y$) appears
+\begin{subequations}
+\begin{align}
+p_{n|xy} &= 0\\
+p_{i|xy} &= p_{i+1|y} + y\,p_{i+1|xy}\\
+p_{0|xy} &= p_{xy}
+\end{align}
+\end{subequations}
+
+\subsection{Implementation of the algorithm}
+In practice, this cumbersome notation can be drastically simplified in code because it is not necessary to distinguish between $p$ and $q$ in their various incarnations; provided care is taken not to overwrite a value before it is needed.
+
+In most practical polynomials of two variables of given order, very few of the possible coefficients may be non-zero, so storing and looping over all $m\times n$ coefficients may not be sensible.  Instead, it is common to take an approach closer to spare matrix storage.
+
+If we have one-dimensional arrays of polynomial coefficients, $c_k$, and exponents, $a_k$ and $b_k$, the polynomial will be constructed as
+\begin{align}
+p(X,Y) = \sum_k=0^{N-1} c_k X^{a_k} Y^{b_k}.
+\end{align}
+In this way, the polynomial
+\begin{align}
+p(X,Y) = -0.1 X^2 + XY + 0.5 Y^2 - Y - 0.2
+\end{align}
+may be represented by
+\begin{align}
+a &= \left[ 2,\ 1,\ 0,\ 0,\ 0\right]\\
+b &= \left[ 0,\ 1,\ 2,\ 1,\ 0\right]\\
+c &= \left[ -0.1,\ 1,\ 0.5,\ -1,\ 0.2\right]
+\end{align}
+
+For the algorithm to function efficiently, it is reasonable to impose some prior sorting of the exponent values.  Since the series above requires that we interact with higher-order terms first, let us assert that the polynomial should be expressed in order of descending exponents on $X$ and then $Y$.
+
+In Algorithm \ref{alg:poly2}, we employ an outer loop on the values of $i$ and an inner loop on the values of $j$.  If coefficients are absent from the arrays (if the $i,j$ pair is not found), then the coefficient is presumed to be zero.  Starting with the maximum value for each exponent, the indices are reduced incrementally until the $i,j$ combination corresponding to the next row ($k$) is found.
+
+This is extremely practical for polynomials where most of the possible combinations are not represented, and does not cost much for cases where they are.
+
+\begin{algorithm}
+\caption{Efficient evaluation of a polynomial of two variables}\label{alg:poly2}
+\begin{algorithmic}[1]
+\REQUIRE $a,b,c \in \mathbb{R}^N$
+\REQUIRE The coefficient order is sorted in descending order of $a$ and then $b$ so that\\
+$a_k \ge a_{k+1}\ \forall\ k \in [0,N-1)$\\
+$b_k > b_{k+1}\ \forall\ k : a_k = a_{k+1}$
+\ENSURE $p$, $p_x$, $p_y$, $p_{xx}$, $p_{xy}$, $p_{yy}$ are equal to the polynomial and its derivatives.
+
+\STATE $p, p_x, p_y, p_{xx}, p_{xy}, p_{yy} \leftarrow 0$
+\STATE $i_{max} \leftarrow a[0]$
+\STATE $k \leftarrow 0$
+\FOR{$i=i_{max}$ to $0$}
+    \IF{$k < N$ \AND $a_k$ equals $i$}
+        \STATE $j_{max} \leftarrow b_k$
+        \STATE $q,q_y,q_{yy} \leftarrow 0$
+        \FOR{$j=j_{max}$ to $0$}
+            \STATE $q_{yy} \leftarrow 2 q_y + y q_{yy}$
+            \STATE $q_y \leftarrow q + y q_y$
+            \IF{$k<N$ \AND $a_k$ is $i$ \AND $b_k$ is $j$}
+                \STATE $q \leftarrow c_k + y q$
+                \STATE $k \leftarrow k+1$
+            \ELSE
+                \STATE $q \leftarrow y q$
+            \ENDIF
+        \ENDFOR
+        \STATE $p_{yy} \leftarrow q_{yy} + x p_{yy}$
+        \STATE $p_{xx} \leftarrow 2 p_x + x p_{xx}$
+        \STATE $p_{xy} \leftarrow p_y + x p_{xy}$
+        \STATE $p_x \leftarrow p + x p_x$
+        \STATE $p_y \leftarrow q_y + x p_y$
+        \STATE $p \leftarrow q + x p$
+    \ELSE
+        \STATE $p_{yy} \leftarrow x p_{yy}$
+        \STATE $p_{xx} \leftarrow 2 p_x + x p_{xx}$
+        \STATE $p_{xy} \leftarrow p_y + x p_{xy}$
+        \STATE $p_x \leftarrow p + x p_x$
+        \STATE $p_y \leftarrow x p_y$
+        \STATE $p \leftarrow x p$
+    \ENDIF
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+\end{document}
