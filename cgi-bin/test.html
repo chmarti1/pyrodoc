@@ -3,33 +3,42 @@
 <head>
 <title>Test</title>
 <style>
-td.tabH {
+th {
     text-align: center;
     font-weight: bold;
+    font-size: 12pt;
 }
-td.tabEC {
+tr.trU {
     text-align: center;
-    padding: 10px 10px 10px 10px;
+    font-size: 10pt;
 }
-td.tabER {
+tr.trE {
+    font-size: 10pt;
+}
+tr.tdC {
     text-align: center;
-    padding: 10px 10px 10px 10px;
+    padding: 2px 15px 2px 15px;
 }
-td.tabEL {
+tr.tdR {
     text-align: center;
-    padding: 10px 10px 10px 10px;
+    padding: 2px 15px 2px 15px;
 }
-td.tabE1 {
+td.tdL {
+    text-align: center;
+    padding: 2px 15px 2px 15px;
+}
+td.tdDL {
     text-align: right;
-    padding: 10px 0px 10px 10px;
+    padding: 2px 0px 2px 15px;
 }
-td.tabE2 {
+td.tdDR {
     text-align: left;
-    padding: 10px 10px 10px 0px;
+    padding: 2px 15px 2px 0px;
 }
 </style>
 </head>
 <body><table>
-<tr><td class="tabH">First</td><td class="tabH">Second</td></tr>
-<tr><td class=tabU>kg</td><td class=tabU>m</td></tr><tr><td colspan=2> <hr /></td></tr>
-</table></body></html>
+<tr><th colspan=2>First</th><th colspan=2>Second</th></tr>
+<tr><th colspan=2>1<sup>st</sup></th><th colspan=2>2<sup>nd</sup></th></tr>
+<tr class=trU><td colspan=2>(&times10<sup>6</sup>) kg</td><td colspan=2>(&times10<sup>6</sup>) N/m</td></tr><tr><td colspan=4> <hr /></td></tr>
+<tr class=trE><td class=tdDL>124</td><td class=tdDR>.520</td><td class=tdDL>1</td><td class=tdDR>.23000</td></tr><tr class=trE><td class=tdDL>2</td><td class=tdDR>.50000</td><td class=tdDL>0</td><td class=tdDR>.0</td></tr></table></body></html>
