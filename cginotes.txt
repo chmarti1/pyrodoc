@@ -1,0 +1,7 @@
+To configure CGI in apache:
+
+1) Make sure the cgid.load, cgid.conf, and cgi.load modules are linked in modules-enabled
+2) Make sure the ScriptAlias "/cgi-bin/" "/var/www/cgi-bin/" directive appears in the appropriate sites configuration
+3) Make sure www-data has priviledges to the html and cgi directories
+4) Make sure libapache2-mod-python package is installed
+5) Make sure the CGI response includes a "Content-type: text/html" header.

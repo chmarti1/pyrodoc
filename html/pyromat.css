@@ -201,3 +201,51 @@ a:hover {
     margin-bottom:20px;
 }
 
+/* Live formatting rules
+ *
+ */
+
+th {
+    text-align: center;
+    font-weight: bold;
+    font-size: 12pt;
+}
+tr.trU {
+    text-align: center;
+    font-size: 10pt;
+}
+tr.trE {
+    font-size: 10pt;
+}
+td.tdC {
+    text-align: center;
+    padding: 2px 15px 2px 15px;
+}
+td.tdR {
+    text-align: right;
+    padding: 2px 15px 2px 15px;
+}
+td.tdL {
+    text-align: left;
+    padding: 2px 15px 2px 15px;
+}
+td.tdDL {
+    text-align: right;
+    padding: 2px 0px 2px 15px;
+}
+td.tdDR {
+    text-align: left;
+    padding: 2px 15px 2px 0px;
+}
+#sec1 {
+    width: 800px;
+    font-size: 12pt;
+    text-align: left;
+}
+#sec2 {
+    width: 800px;
+}
+#sec3 {
+    width: 
+}
+
