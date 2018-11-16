@@ -5,13 +5,9 @@ import os
 import cgi
 import pyromat as pm
 import numpy as np
-import matplotlib
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
-
-# Make things safe for matplotlib
-os.environ['HOME'] = '/tmp/'
-os.environ['DISPLAY'] = ':0'
-matplotlib.use('Agg')
 
 # Print the header so the page will display even if something goes wrong
 print("Content-type: text/html")
@@ -20,6 +16,7 @@ print("")
 
 args = cgi.FieldStorage()
 
+species = args['id'].value
 Tmin = float(args['Tmin'].value)
 Tmax = float(args['Tmax'].value)
 Tstep = float(args['Tstep'].value)
@@ -32,7 +29,7 @@ unit_s = pm.config['unit_energy'] + '/' + pm.config['unit_matter'] + ' ' + pm.co
 unit_cp = unit_s
 
 T = np.arange(Tmin, Tmax+Tstep, Tstep)
-SS = pm.get('mp.H2O')
+SS = pm.get(species)
 h,s,d = SS.hsd(T=T,p=p)
 cp = SS.cp(T=T,p=p)
 
@@ -51,7 +48,9 @@ tab_text = pmcgi.html_column_table(labels, units, (T,d,cp,h,s))
 
 P = pmcgi.PMPage('test.html')
 P.replace(tab_text, start='<table id="isobar_table"', stop="</table>", incl=True)
-P.replace('<img id="isobar_plot" class="figure" src="dat/isobar.png">',start='<img id="isobar_plot"', stop='>', incl=True)
+
+plotsrc = ' class="figure" src="isobar_plot.py?id={:s}&Tmax={:f}&Tmin={:f}&p={:f}"'.format(species,Tmax,Tmin,p)
+P.replace(plotsrc, start='<img id="isobar_plot"', stop='>')
 
 P.write()
 

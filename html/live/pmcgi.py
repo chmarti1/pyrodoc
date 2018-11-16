@@ -4,9 +4,79 @@
 import os
 import sys
 import numpy as np
+import cgi
 
 config = {}
 
+
+
+def error_response(message):
+    print("Content-type: text/html")
+    print("")
+    print("<html>")
+    print("<head></head><body>")
+    print("<h1>Error</h1>")
+    print(message)
+    print("</body></html>")
+
+
+def argparse(args):
+    """Pull arguments from cgi form interface and convert them to requested type
+
+    arg1, arg2, ... = argparse([('arg1', float), ('arg2', int, 3), ...])
+
+The ARGS list names the arguments to find from the cgi form.  The 
+simplest way to request an argument value is by simply specifying its
+name as a string.  The values will be returned as strings.
+
+    arg1, arg2 = argparse(['arg1', 'arg2'])
+
+If the elements are tuples, then the first value is the argument name 
+and the second is the type to which the value should be converted.  
+
+    arg1, arg2 = argparse([('arg1', float), ('arg2', int)])
+
+If there is a third element in the argument tuples, it is treated as a 
+default value to be applied if the argument is not found.  Arguments 
+with no default values that are omitted are treated as mandatory.
+
+    arg1, ... = argparse([('arg1', float, 3.5), ... ])
+
+These modes may be intermixed.  Each element of the argument list is
+treated individually.
+
+If a mandatory argument is not found or if type conversion fails, then 
+the function will print an error page to stdout and evoke the exit() 
+funciton.
+"""
+    out = []
+    cgi_args = cgi.FieldStorage()
+    for this in args:
+        conv = str
+        default = None
+        if isinstance(this, tuple):
+            arg = this[0]
+            if len(this) > 1:
+                conv = this[1]
+            if len(this) > 2:
+                default = this[2]
+        else:
+            arg = this
+            
+        if arg not in cgi_args:
+            if default is None:
+                error_response("The mandatory argument, " + arg + ", was not supplied.")
+                exit()
+            else:
+               out.append(default)
+        else:
+            try:
+                out.append(conv(cgi_args[arg].value))
+            except:
+                error_response("The " + arg + " value, " + repr(cgi_args[arg].value) + " failed to be converted by " + repr(conv) + ".")
+                exit()
+    return out
+        
 
 def idgen(length=32, charset=None):
     """Generate a random series of characters
@@ -70,6 +140,7 @@ to a file.
     def __init__(self, fromfile):
         self.fromfile = fromfile
         self._text = ''
+        self._insert = []
         self.load()
         
     def load(self):
@@ -78,13 +149,112 @@ to a file.
         with open(self.fromfile, 'r') as ff:
             self._text = ff.read()
 
-    def replace(self, text, start, stop=None, incl=False):
-        """Replace text in the template file text
-    Page.replace( replace_with, start )
+
+    def insert(self, text, start, stop=None, wait=False):
+        """Insert text by line and column number
+    Page.insert( text, (line, column))
         OR
-    Page.replace( replace_with, start, stop )
+    Page.insert( text, start=(line, column), stop=(line,column))
         OR
-    Page.replace( replace_with, start, stop, keep=False)
+    Page.insert(text, start=(line, column), wait=True)
+    
+Faster than using fnr, INSERT uses the line number and column number 
+from the original file to identify the start and stop for the insert.
+If there is no stop, then text will be inserted at line, column without
+replacing any text.  If a stop location is specified, then all the text
+between start and stop will be replaced with the new text.
+
+For example, consider a file with the text:
+---
+I do not smirk, but if I did, this 
+would be a good opportunity.  Sir,
+I protest.  I am not a merry man!
+If winning is not important, then
+Commander, why keep score?
+---
+The original file is 5 lines, and the longest has 35 characters 
+(including a trailing space).  
+
+To insert without deleting, one might call
+>>> Page.insert( "Today \nis a good day to die.  ", (1, 30))
+
+To replace the word "smirk" with "dance", one might call
+>>> Page.insert( "dance", (0, 9), (0,14))
+
+The total result of which would be
+---
+I do not dance, but if I did, this 
+would be a good opportunity.  Today
+is a good day to die.  Sir,
+I protest.  I am not a merry man!
+If winning is not important, then
+Commander, why keep score?
+---
+
+*** WAIT ***
+Because the order in which successive insertions are performed is 
+essential, they should always be executed end-to-beginning.  To make 
+matters worse, multiple insertions means multiple scannings of the 
+entire document looking for newlines and counting columns.  For greater
+efficiency, the insertion can be scheduled but not executed in the Page
+object.  In this way, many insertions can be scheduled then executed all
+at once.
+
+>>> Page.insert(..., wait=True)
+>>> Page.insert(..., wait=True)
+>>> Page.insert(..., wait=True)
+>>> Page.insert_exec()
+
+Calling insert() without a wait=True directive will not only execute the
+current insertion, but all other pending insertions as well.
+"""
+        # Verify the inputs
+        if not isinstance(start,tuple):
+            raise Exception('PMCGI: insert() start must be a tuple')
+        elif len(start)!=2 or not isinstance(start[0],int) or not isinstance(start[1],int):
+            raise Exception('PMCGI: insert() start must be a tuple of two integers.')
+        
+
+        if stop is None:
+            # If there is no stop, then it is the start string.
+            self._insert.append(start + start + (text,))
+        else:
+            # Verify the inputs
+            if not isinstance(stop,tuple):
+                raise Exception('PMCGI: insert() start must be a tuple')
+            elif len(stop)!=2 or not isinstance(stop[0],int) or not isinstance(stop[1],int):
+                raise Exception('PMCGI: insert() start must be a tuple of two integers.')
+
+            self._insert.append(start + stop + (text,))
+            
+        if not wait:
+            self.insert_exec()
+
+
+    def insert_exec(self, nl='\n'):
+        """See insert() documentation"""
+        # Organize the insertions in reverse order
+        self._insert.sort(reverse=True)
+        # now, map out the lines
+        newlines = []
+        index = self._text.find(nl)
+        while index>=0:
+            newlines.append(index)
+            index = self._text.find('\n',index+1)
+        
+        for line, col, stopline, stopcol, text in self._insert:
+            ii = newlines[line-1] + col + 1 if line>0 else col
+            jj = newlines[stopline-1] + stopcol + 1 if stopline>0 else stopcol
+            self._text = self._text[:ii] + text + self._text[jj:]
+        
+
+    def fnr(self, text, start, stop=None, incl=False):
+        """Find-N-Replace text in the template file text
+    Page.fnr( replace_with, start )
+        OR
+    Page.fnr( replace_with, start, stop )
+        OR
+    Page.fnr( replace_with, start, stop, keep=False)
     
 The REPLACE method searches the page for a block of text and replaces it
 with the text in REPLACE_WITH.  There are three modes:
@@ -189,6 +359,65 @@ td.tdDR {
 </head>
 <body>""" + segment + '</body></html>')
 
+
+
+def html_select(values, labels=None, sname=None, sid=None, sclass=None,\
+        selected=None, select=True):
+    """HTML_SELECT - construct an html select (dropdown menu)
+    html_text = html_select(values)
+    
+This function constructs the markup language for representing a dropdown
+menu in html.  The VALUES list is interpreted as a list of choices to
+include in the menu.  The SNAME, SID, and SCLASS keywords specify the
+name, id, and class assigned to the select.  For example,
+
+>>> html_select(['a','b'], name='letter')
+
+produces markup
+<select name="letter"><option value="a">a</option><option value="b">b</option></select>
+
+If the SELECT keyword is set to False, then the bracketing <select>
+</select> elements will be omitted.  This is useful for inserting 
+<option></option> elements in an existing select.
+
+Notice that by default the text displayed for each option will be the 
+same as the value.  To change this behavior, set the keyword, LABELS, to 
+a second list of strings with the corresponding strings to be displayed.
+For example
+
+>>> html_select(['a','b'], text=['A','B'], select=False)
+
+produces markup
+<option value="a">A</option><option value="b">B</option>
+
+The SELECTED keyword allows an option to be selected by default.  The
+specified value should correspond to the option's value and not its 
+text.
+>>> html_select(['a','b'], text=['A','B'], select=False, selected='a')
+
+produces markup
+<option value="a" selected>A</option><option value="b">B</option>
+"""
+    out = ""
+    # Create the starting select
+    if select:
+        out += '<select'
+        if sname:
+            out += ' ' + name
+        if sid:
+            out += ' ' + sid
+        if sclass:
+            out += ' ' + sclass
+    # Build the menu
+    for index,value in enumerate(values):
+        # If the labels are not specified, use the values
+        label = value if labels is None else labels[index]
+        out += '<option value="' + value + '"'
+        if value == selected:
+            out += " selected"
+            selected = None
+        out += '>' + label + '</option>'
+    return out
 
 
 def html_column_table(labels, units, columns, 
@@ -432,9 +661,11 @@ thousands, thousdandths
                     whol = '{:d}'.format(temp)
                     # Isolate the fractional part
                     # Promote the significant figures to an integer
-                    temp = int(np.round((this-temp)*10**(sf[jj]-pp-1)))
+                    # How many fractional digits are left?
+                    pp = sf[jj] - pp - 1
+                    temp = int(np.round((this-temp)*10**pp))
                     if temp>0:
-                        frac = '{:d}'.format(temp)
+                        frac = ('{:0' + str(pp) + '}').format(temp)
                     else:
                         frac = ''
 

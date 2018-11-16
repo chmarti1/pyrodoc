@@ -205,6 +205,16 @@ a:hover {
  *
  */
 
+.lcol {
+    width:300px;
+    float:left;
+}
+
+.rcol {
+    width:300px;
+    float:right;
+}
+
 th {
     text-align: center;
     font-weight: bold;
