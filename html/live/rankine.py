@@ -101,42 +101,29 @@ T4,x4 = F.T_s(s=s3, p=p4, quality=True)
 h4 = F.h(T=T4,x=x4)
 d4 = F.d(T=T4,x=x4)
 
-P.insert(\
-"""
-<br>
-<b>(1) Condenser Exit - Pump Inlet</b><br>
-p<sub>1</sub> = {5:f} {0:s}<br>
-T<sub>1</sub> = {6:f} {1:s}<br>
-&rho;<sub>1</sub> = {7:f} {3:s}/{4:s}<br>
-h<sub>1</sub> = {8:f} {2:s}/{3:s}<br>
-s<sub>1</sub> = {9:f} {2:s}/{3:s}{1:s}<br>
-<br>
-<b>(2) Pump Exit - Boiler Inlet</b><br>
-p<sub>2</sub> = {10:f} {0:s}<br>
-T<sub>2</sub> = {11:f} {1:s}<br>
-&rho;<sub>2</sub> = {12:f} {3:s}/{4:s}<br>
-h<sub>2</sub> = {13:f} {2:s}/{3:s}<br>
-s<sub>2</sub> = {14:f} {2:s}/{3:s}{1:s}<br>
-<br>
-<b>(3) Boiler Exit - Piston/Turbine Inlet</b><br>
-p<sub>3</sub> = {15:f} {0:s}<br>
-T<sub>3</sub> = {16:f} {1:s}<br>
-&rho;<sub>3</sub> = {17:f} {3:s}/{4:s}<br>
-h<sub>3</sub> = {18:f} {2:s}/{3:s}<br>
-s<sub>3</sub> = {19:f} {2:s}/{3:s}{1:s}<br>
-<br>
-<b>(4) Piston/Turbine Exit - Condernser Inlet</b><br>
-p<sub>4</sub> = {20:f} {0:s}<br>
-T<sub>4</sub> = {21:f} {1:s}<br>
-&rho;<sub>4</sub> = {22:f} {3:s}/{4:s}<br>
-h<sub>4</sub> = {23:f} {2:s}/{3:s}<br>
-s<sub>4</sub> = {24:f} {2:s}/{3:s}{1:s}<br>
-""".format(\
-        up,uT,uE,uM,uV,\
-        float(p1),float(T1),float(d1),float(h1),float(s1),\
-        float(p2),float(T2),float(d2),float(h2),float(s2),\
-        float(p3),float(T3),float(d3),float(h3),float(s3),\
-        float(p4),float(T4),float(d4),float(h4),float(s4) ), (58,0), wait=True)
+
+# Insert the cgi call to build the image
+P.insert(
+        '<img class="figure" src="rankine_plot.py?id={:s}&p1={:f}&p2={:f}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
+                species, float(p1), float(p2), up, uT, uE, uM, uV),\
+        (57,0))
+
+
+# Construct table lists for displaying
+# This inspires some future code to automatically collapse the arrays
+# to make the float() conversions unnecessary
+st = [1,2,3,4]
+T = [float(T1), float(T2), float(T3), float(T4)]
+p = [float(p1), float(p2), float(p3), float(p4)]
+d = [float(d1), float(d2), float(d3), float(d4)]
+h = [float(h1), float(h2), float(h3), float(h4)]
+s = [float(s1), float(s2), float(s3), float(s4)]
+# build label and unit lists
+labels = ['','T', 'p', '&rho;', 'h', 's']
+units = ['', uT, up, uM+'/'+uV, uE+'/'+uM, uE+'/'+uM+uT]
+P.insert('<center>' + 
+        pmcgi.html_column_table(labels, units, (st,T,p,d,h,s), thousands=',')\
+        + '</center>', (58,0))
 
 P.insert_exec()
 

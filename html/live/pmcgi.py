@@ -233,8 +233,8 @@ current insertion, but all other pending insertions as well.
 
     def insert_exec(self, nl='\n'):
         """See insert() documentation"""
-        # Organize the insertions in reverse order
-        self._insert.sort(reverse=True)
+        # Organize the insertions in order by insertion location
+        self._insert.sort()
         # now, map out the lines
         newlines = []
         index = self._text.find(nl)
@@ -242,7 +242,8 @@ current insertion, but all other pending insertions as well.
             newlines.append(index)
             index = self._text.find('\n',index+1)
         
-        for line, col, stopline, stopcol, text in self._insert:
+        while self._insert:
+            line, col, stopline, stopcol, text = self._insert.pop()
             ii = newlines[line-1] + col + 1 if line>0 else col
             jj = newlines[stopline-1] + stopcol + 1 if stopline>0 else stopcol
             self._text = self._text[:ii] + text + self._text[jj:]
