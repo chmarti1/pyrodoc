@@ -104,7 +104,7 @@ d4 = F.d(T=T4,x=x4)
 
 # Insert the cgi call to build the image
 P.insert(
-        '<img class="figure" src="rankine_plot.py?id={:s}&p1={:f}&p2={:f}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
+        '<img class="figure" src="/cgi-bin/live/rankine_plot.py?id={:s}&p1={:f}&p2={:f}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
                 species, float(p1), float(p2), up, uT, uE, uM, uV),\
         (57,0))
 
