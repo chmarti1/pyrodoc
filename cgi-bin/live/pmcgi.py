@@ -249,6 +249,39 @@ current insertion, but all other pending insertions as well.
             self._text = self._text[:ii] + text + self._text[jj:]
         
 
+    def find_line(self, text):
+        """Return the line number where the first instance of "text" is found.
+    line = Page.find_line(text)
+    
+This is useful in combination with insert() operations.  The intended 
+use case is that comment tags "<!-- A -->" could be inserted in key 
+locations so the line numbers used in the insert operations will be less
+brittle to changes made in the file.  The entire line must be identical
+to the text being tested.
+
+For example, if a comment tag were
+placed the line before an important segment:
+
+line = Page.find_line("<!-- A -->")
+Page.insert(new_text, (line+1, col))
+"""
+        start = 0
+        stop = self._text.find('\n',start)
+        line = 0
+        while stop>=0 and start<len(self._text):
+            if self._text[start:stop] == text:
+                return line
+            line +=1
+            start=stop+1
+            stop = self._text.find('\n',start)
+        # If this is the last line
+        if self._text[start:] == text:
+            return line
+        
+        return -1
+                
+                
+
     def fnr(self, text, start, stop=None, incl=False):
         """Find-N-Replace text in the template file text
     Page.fnr( replace_with, start )

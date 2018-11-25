@@ -28,6 +28,14 @@ species, p1, p2, up, uT, uE, uM, uV = pmcgi.argparse([
         ('uV') ])
 
 
+# Apply the units
+pm.config['unit_temperature'] = uT
+pm.config['unit_pressure'] = up
+pm.config['unit_matter'] = uM
+pm.config['unit_energy'] = uE
+pm.config['unit_volume'] = uV
+
+
 this = pm.get(species)
 
 # Calculate the states
@@ -64,8 +72,19 @@ d4 = F.d(T=T4,x=x4)
 f = plt.figure()
 ax = f.add_subplot(111)
 
+
+# Draw the saturation bounds
+Tt = F.triple()[0]
+Tc = F.critical()[0]
+temp = (Tc - Tt) * .0001
+T = np.linspace(Tt+temp, Tc-temp, 100)
+sL, sV = F.ss(T)
+ax.plot(sL, T, lw=2,color='k')
+ax.plot(sV, T, lw=2,color='k')
+
 # 1-2
-p = np.linspace(p1,p2,20)
+# Modify p1 by 0.1% to move it above the saturation curve
+p = np.linspace(p1*1.001,p2,20)
 T = F.T_s(s=s1, p=p)
 s = s1 * np.ones_like(p,dtype=float)
 ax.plot(s,T,lw=2,color='r')
@@ -82,7 +101,8 @@ s = s3 * np.ones_like(p,dtype=float)
 ax.plot(s,T,lw=2,color='r')
 
 # 4-1
-s = np.linspace(s4,s1,50)
+# Modify s1 by 0.1% to move it off the saturation curve
+s = np.linspace(s4,s1*0.999,50)
 T = F.T_s(s,p=p1)
 ax.plot(s,T,lw=2,color='r')
 

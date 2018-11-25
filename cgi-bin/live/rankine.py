@@ -33,36 +33,38 @@ for name in pm.dat.data:
     if name.startswith('mp.'):
         values.append(name)
         
+# Insert the argument values
+line = P.find_line('<!-- inputs -->')
 P.insert(\
         pmcgi.html_select(values,select=False, selected=species),\
-        (param_line,56), wait=True)
+        (line+3,56), wait=True)
 
-# Insert the argument values
-P.insert(str(p1), (param_line+1,83), wait=True)
-P.insert(str(p2), (param_line+2,80), wait=True)
+P.insert(str(p1), (line+4,83), wait=True)
+P.insert(str(p2), (line+5,80), wait=True)
 
 # Build the available units menu
 # Pressure
+line = P.find_line('<!-- units -->')
 text = pmcgi.html_select(
         pm.units.pressure.get(), selected=up, select=False)
-P.insert(text, (units_line, 55), wait=True)
+P.insert(text, (line+4, 55), wait=True)
 # Temperature
 text = pmcgi.html_select(
         pm.units.temperature.get(), selected=uT, select=False)
-P.insert(text, (units_line+1, 58), wait=True)
+P.insert(text, (line+5, 58), wait=True)
 # Energy
 text = pmcgi.html_select(
         pm.units.energy.get(), selected=uE, select=False)
-P.insert(text, (units_line+2, 53), wait=True)
+P.insert(text, (line+6, 53), wait=True)
 # Matter
 text = pmcgi.html_select(\
         pm.units.mass.get() + pm.units.molar.get(), \
         selected=uM, select=False)
-P.insert(text, (units_line+3, 53), wait=True)
+P.insert(text, (line+7, 53), wait=True)
 # Volume
 text = pmcgi.html_select(\
         pm.units.volume.get(), selected=uV, select=False)
-P.insert(text, (units_line+4, 53), wait=True)
+P.insert(text, (line+8, 53), wait=True)
 
 
 # Apply the units
@@ -72,8 +74,36 @@ pm.config['unit_matter'] = uM
 pm.config['unit_energy'] = uE
 pm.config['unit_volume'] = uV
 
+
+# Find the results line
+line = P.find_line('<!-- results -->')
+
 # Calculate the states
 F = pm.get(species)
+
+# But first, do some error checking
+# p2 must be greater than p1
+if p1 >= p2:
+    P.insert("ERROR: The boiler pressure must be greater than the condenser pressure",
+            (line+1,0))
+    P.write()
+    exit()
+
+# p1 must be above the triple point
+_,pt = F.triple()
+if p1 < pt:
+    P.insert("ERROR: The condenser pressure was below the triple point pressure, {:f} {:s}".format(\
+            pt, up), (line+1,0))
+    P.write()
+    exit()
+    
+# p2 must be below the critical point
+_,pc = F.critical()
+if p2 > pc:
+    P.insert("ERROR: The boiler pressure was above the critical pressure, {:f} {:s}".format(\
+            pc, up), (line+1,0))
+    P.write()
+    exit()
 
 # The condenser exit will be on the dome
 T1 = F.Ts(p1)           # Saturation temperature
@@ -106,7 +136,7 @@ d4 = F.d(T=T4,x=x4)
 P.insert(
         '<img class="figure" src="/cgi-bin/live/rankine_plot.py?id={:s}&p1={:f}&p2={:f}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
                 species, float(p1), float(p2), up, uT, uE, uM, uV),\
-        (57,0))
+        (line+1,0))
 
 
 # Construct table lists for displaying
@@ -121,9 +151,10 @@ s = [float(s1), float(s2), float(s3), float(s4)]
 # build label and unit lists
 labels = ['','T', 'p', '&rho;', 'h', 's']
 units = ['', uT, up, uM+'/'+uV, uE+'/'+uM, uE+'/'+uM+uT]
+
 P.insert('<center>' + 
         pmcgi.html_column_table(labels, units, (st,T,p,d,h,s), thousands=',')\
-        + '</center>', (58,0))
+        + '</center>', (line+2,0))
 
 P.insert_exec()
 

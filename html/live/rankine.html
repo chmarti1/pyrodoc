@@ -24,10 +24,15 @@ function toggle_vis(target_id){
 <iframe name="menu" id="menu" src="/menu.html"></iframe>
 
 <div id="content">
+<div class="title">
+<h1>The Rankine Cycle</h1>
+</div>
+
 
 <form action="rankine.py" method="POST">
     <fieldset>
         <legend><b>Rankine Cycle Parameters</b></legend>
+<!-- inputs -->
         <div class="lcol">
         <table id="values">
             <tr><td>Fluid    </td><td><select name="id"></select></td></tr>
@@ -38,6 +43,7 @@ function toggle_vis(target_id){
         <input type="submit" value="Update">
         </div>
         
+<!-- units -->
         <div class="rcol">
         <a href="#" onClick="javascript:toggle_vis('units')">Units (Show/Hide)</a><br>
         <table id="units" style="visibility:hidden;">
@@ -54,9 +60,32 @@ function toggle_vis(target_id){
     </fieldset>
 </form>
 
+<!-- results -->
 <div class="section">
 
 
+</div>
+
+<div class="subtitle">
+<h2>About the Rankine Cycle</h2>
+</div>
+<div class="section">
+    <p>
+    Sometimes referred to as the "steam" cycle, the Rankine cycle drove an industrial revolution and still drives most of our power plants today.  In the rankine cycle, a liquid (usually water) is pumped into a boiler, where it is heated to a boil.  Steam is pulled from the boiler and expanded to do work.  In the old steam engines, the work was done by a piston.  In modern power generation systems, it is all done by turbines.  Finally, the low pressure vapor/liquid mix is cooled in a condenser.  Pure liquid is drawn from the bottom of the condenser, so it will be on the saturated liquid line.
+    </p>
+    <p>
+    Modern Rankine cycles differ a little from the one described here because they use an additional process known as super-heating.  Superheaters exchange additional heat to the steam after the boiler to push it past the saturated vapor point.  This gives some extra performance and it eliminates the problems caused by having liquid condense in the turbines.  Some heat exchangers are designed to do both boiling and superheating, but many systems treat these as separate processes.
+    </p>
+    <img class="figure" src='/fig/rankine.png'></img>
+    <p>
+    Since the boiler and condenser outlets are on the saturation curves, the entire process can be specified from two parameters; the condenser pressure and the boiler pressure.  In most systems, the condenser is at or near atmospheric pressure, which is enforced by dumping the liquid into an open reservoir prior to pumping.  The entire system is beautifully simple, but it suffers from two serious challenges: the rate of heat addition must be carefully regulated, and the feed water pump must be carefully regulated.
+    </p>
+    <p>
+    The boiler pressure is determined by a balance between the rate at which steam is drawn by the piston/turbine against the rate of heat addition.  If the rate of steam drawn from the boiler outpaces the rate of heat addition, the pressure and temperature in the boiler will drop, and the system's performance will suffer.  On the other hand, if the rate of heat addition wins out, then the temperature and pressure will rise until the boiler explodes.  These catestrophic failures were not uncommon among early steam engines.  Modern systems use active actuation of fuel flow rates to stabilize the boiler pressure.  Pre-diesel train engines forced exhausted steam through a venturi or "funnel" to draw air through the fire box; if the rate of steam exhaust declined, so would the coal burning rate.
+    </p>
+    <p>
+    Meanwhile, the heat transfer to steam is far slower than to liquid water.  If the feed water pump is too slow, then the liquid level will drop, and there is a risk that the boiler walls could melt.  If the feed water pump is too fast, then it will flood the boiler and push liquid into the piston/turbine.  
+    </p>
 </div>
 
 <iframe src="/author.html" id="contact"></iframe>
