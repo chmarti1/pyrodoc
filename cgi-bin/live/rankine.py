@@ -75,16 +75,20 @@ pm.config['unit_energy'] = uE
 pm.config['unit_volume'] = uV
 
 
-# Find the results line
+# Find the results line in the original HTML
 line = P.find_line('<!-- results -->')
 
-# Calculate the states
+# # # # # # # # # # # # # 
+# Calculate the states  #
+# # # # # # # # # # # # # 
 F = pm.get(species)
 
 # But first, do some error checking
 # p2 must be greater than p1
 if p1 >= p2:
-    P.insert("ERROR: The boiler pressure must be greater than the condenser pressure",
+    P.insert("""<div class="error">
+ERROR<br>The boiler pressure must be greater than the condenser pressure
+</div>""",
             (line+1,0))
     P.write()
     exit()
@@ -92,15 +96,18 @@ if p1 >= p2:
 # p1 must be above the triple point
 _,pt = F.triple()
 if p1 < pt:
-    P.insert("ERROR: The condenser pressure was below the triple point pressure, {:f} {:s}".format(\
-            pt, up), (line+1,0))
+    P.insert("""<div class="error">
+ERROR<br>The condenser pressure was below the triple point pressure, {:f} {:s}
+</div>""".format(pt, up), (line+1,0))
     P.write()
     exit()
     
 # p2 must be below the critical point
 _,pc = F.critical()
 if p2 > pc:
-    P.insert("ERROR: The boiler pressure was above the critical pressure, {:f} {:s}".format(\
+    P.insert("""<div class="error">
+ERROR<br>The boiler pressure was above the critical pressure, {:f} {:s}
+</div>""".format(\
             pc, up), (line+1,0))
     P.write()
     exit()
@@ -131,6 +138,12 @@ T4,x4 = F.T_s(s=s3, p=p4, quality=True)
 h4 = F.h(T=T4,x=x4)
 d4 = F.d(T=T4,x=x4)
 
+# Calculate performance characteristics
+W12 = float(h1 - h2)
+Q23 = float(h3 - h2)
+W34 = float(h3 - h4)
+Q41 = float(h1 - h4)
+n = float(W34 / Q23)
 
 # Insert the cgi call to build the image
 P.insert(
@@ -152,9 +165,19 @@ s = [float(s1), float(s2), float(s3), float(s4)]
 labels = ['','T', 'p', '&rho;', 'h', 's']
 units = ['', uT, up, uM+'/'+uV, uE+'/'+uM, uE+'/'+uM+uT]
 
-P.insert('<center>' + 
+P.insert('<h3>Cycle States</h3><center>' + 
         pmcgi.html_column_table(labels, units, (st,T,p,d,h,s), thousands=',')\
-        + '</center>', (line+2,0))
+        + '</center>', (line+2,0), wait=True)
+
+P.insert("""<h3>Performance</h3>
+<center><table>
+<tr><th>Parameter</th><th>Symb.</th><th>Value</th><th>Units</th></tr>
+<tr><td>Pump Work</td><td>W<sub>1-2</sub></td><td>{5:f}</td><td>{2:s}/{3:s}</td></tr>
+<tr><td>Boiler Heat</td><td>Q<sub>2-3</sub></td><td>{6:f}</td><td>{2:s}/{3:s}</td></tr>
+<tr><td>Work Out</td><td>W<sub>3-4</sub></td><td>{7:f}</td><td>{2:s}/{3:s}</td></tr>
+<tr><td>Condenser Heat</td><td>Q<sub>4-1</sub></td><td>{8:f}</td><td>{2:s}/{3:s}</td></tr>
+<tr><td>Efficiency</td><td>&eta;</sub></td><td>{9:.2f}</td><td>%</td></tr>
+</table></center>""".format(up,uT,uE,uM,uV,W12,Q23,W34,Q41,100*n), (line+3,0), wait=True)
 
 P.insert_exec()
 
