@@ -93,10 +93,10 @@ else:
 v1 = 1/d1
 
 # Insert the cgi call to build the image
-# P.insert(
-#         '<img class="figure" src="/cgi-bin/live/rankine_plot.py?id={:s}&p1={:f}&p2={:f}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
-#                 species, float(p1), float(p2), up, uT, uE, uM, uV),\
-#         (line+1,0))
+P.insert(
+        '<img class="figure" src="/cgi-bin/live/pointdata_plot.py?id={:s}&p1={:f}&s1={:f}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
+                species, float(p1), float(s1), up, uT, uE, uM, uV),\
+        (line+1,0))
 
 
 # Construct table lists for displaying
