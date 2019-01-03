@@ -3,6 +3,7 @@
 import pmcgi
 import os
 import pyromat as pm
+import pyromat.solve as pmsolve
 import numpy as np
 
 source = '/var/www/html/live/pointdata.html'
@@ -13,10 +14,11 @@ units_line = 43
 print("Content-type: text/html")
 print("")
 
-species, p1, s1, up, uT, uE, uM, uV = pmcgi.argparse([
+species, p1, s1, T1, up, uT, uE, uM, uV = pmcgi.argparse([
         ('id',str,'mp.H2O'), 
-        ('p1',float,101.325),
-        ('s1',float,5),
+        ('p1',float,-9999),
+        ('s1',float,-9999),
+        ('T1',float,-9999),
         ('up',str,'kPa'),
         ('uT',str,'K'),
         ('uE',str,'kJ'),
@@ -32,15 +34,6 @@ for name in pm.dat.data:
     if name.startswith('mp.'):
         values.append(name)
         
-# Insert the argument values
-line = P.find_line('<!-- inputs -->')
-P.insert(\
-        pmcgi.html_select(values,select=False, selected=species),\
-        (line+3,56), wait=True)
-
-P.insert(str(p1), (line+4,73), wait=True)
-P.insert(str(s1), (line+5,72), wait=True)
-
 # Build the available units menu
 # Pressure
 line = P.find_line('<!-- units -->')
@@ -74,23 +67,53 @@ pm.config['unit_energy'] = uE
 pm.config['unit_volume'] = uV
 
 
-# Find the results line in the original HTML
-line = P.find_line('<!-- results -->')
-
-# # # # # # # # # # # # # 
+# # # # # # # # # # # # #
 # Calculate the states  #
 # # # # # # # # # # # # # 
 F = pm.get(species)
+sval = ''
+Tval = ''
+pval = ''
 
-# We don't know where the state will be exactly
-T1,x1 = F.T_s(p=p1,s=s1,quality=True)  # Saturation temperature
-if x1>0:
-    d1 = F.d(T=T1,x=x1)
-    h1 = F.h(T=T1,x=x1)
-else:
-    d1 = F.d(T=T1,p=p1)
-    h1 = F.h(T=T1,p=p1)
-v1 = 1/d1
+
+if p1>0 and s1>0:
+    pval = p1
+    sval = s1
+    # We don't know where the state will be exactly
+    T1,x1 = F.T_s(p=p1,s=s1,quality=True)  # Saturation temperature
+    if x1>0:
+        d1 = F.d(T=T1,x=x1)
+        h1 = F.h(T=T1,x=x1)
+    else:
+        d1 = F.d(T=T1,p=p1)
+        h1 = F.h(T=T1,p=p1)
+    v1 = 1/d1
+elif T1>0 and s1>0:
+    Tval = T1
+    sval = s1
+    P_T = pmsolve.solve1n('p', f=F.T_s, param_init=20)
+    p1 = P_T(T1, s=s1)
+    T1, x1 = F.T_s(p=p1, s=s1, quality=True)
+    if x1 > 0:
+        h1, s1, d1 = F.hsd(T=T1, x=x1)
+    else:
+        h1, s1, d1 = F.hsd(p=p1, T=T1)
+    v1 = 1 / d1
+    p1 = F.p(T=T1, d=d1)
+else: #use default p&s vals:
+    p1 = 101.325
+    s1 = 4
+    pval = p1
+    sval = s1
+    # We don't know where the state will be exactly
+    T1,x1 = F.T_s(p=p1,s=s1,quality=True)  # Saturation temperature
+    if x1>0:
+        d1 = F.d(T=T1,x=x1)
+        h1 = F.h(T=T1,x=x1)
+    else:
+        d1 = F.d(T=T1,p=p1)
+        h1 = F.h(T=T1,p=p1)
+    v1 = 1/d1
 
 # Insert the cgi call to build the image
 P.insert(
@@ -98,7 +121,19 @@ P.insert(
                 species, float(p1), float(s1), up, uT, uE, uM, uV),\
         (line+1,0))
 
+# Insert the argument values
+line = P.find_line('<!-- inputs -->')
+P.insert(\
+        pmcgi.html_select(values,select=False, selected=species),\
+        (line+3,56), wait=True)
 
+P.insert(str(pval), (line+4,73), wait=True)
+P.insert(str(sval), (line+5,72), wait=True)
+P.insert(str(Tval), (line+6,76), wait=True)
+
+
+# Find the results line in the original HTML
+line = P.find_line('<!-- results -->')
 # Construct table lists for displaying
 # This inspires some future code to automatically collapse the arrays
 # to make the float() conversions unnecessary
