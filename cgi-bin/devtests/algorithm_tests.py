@@ -50,7 +50,7 @@ print('P&h: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2
 p1 = 400
 v1 = 1.3
 d1 = 1/v1
-h1 = steam.h(p=p1,d=d1)
+#h1 = steam.h(p=p1,d=d1)
 T1,x1 = steam.T_h(p=p1,h=h1,quality=True)
 if x1>0:
     h1,s1,d1 = steam.hsd(T=T1,x=x1)
