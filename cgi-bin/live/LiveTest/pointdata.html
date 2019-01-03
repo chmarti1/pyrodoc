@@ -1,14 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE HTML>
+
+<html>
 <head>
-    <title>Single Point Properties | PYroMat</title>
+    <title>Thermodynamic Property Data | PYroMat</title>
     <link rel="stylesheet" type="text/css" href="/pyromat.css">
     <meta name="description" content="getting python">
     <meta name="keywords" content="python,thermo,thermodynamic,property,properties">
     <meta name="author" content="J. Ranalli">
-
-    <script>
-    function toggle_vis(target_id){
+    
+<script>
+function toggle_vis(target_id){
     var target_obj = document.getElementById(target_id);
     if (target_obj.style.visibility=='visible'){
         target_obj.style.visibility = 'hidden';
@@ -19,17 +20,18 @@
 </script>
 </head>
 <body>
+
 <iframe name="menu" id="menu" src="/menu.html"></iframe>
 
 <div id="content">
 <div class="title">
-<h1>Property data</h1>
+<h1>The Rankine Cycle</h1>
 </div>
 
 
-    <form action="pointdata.py" method="POST">
+<form action="pointdata.py" method="POST">
     <fieldset>
-        <legend><b>Property Data</b></legend>
+        <legend><b>Rankine Cycle Parameters</b></legend>
 <!-- inputs -->
         <div class="lcol">
         <table id="values">
@@ -40,7 +42,7 @@
         </table>
         <input type="submit" value="Update">
         </div>
-
+        
 <!-- units -->
         <div class="rcol">
         <a href="#" onClick="javascript:toggle_vis('units')">Units (Show/Hide)</a><br>
@@ -54,11 +56,15 @@
 
         </table>
         </div>
-
+        
     </fieldset>
 </form>
 
-<iframe src="/author.html" id="contact"></iframe>
+<!-- results -->
+<div class="section">
+
+
+</div>
 
 </body>
 </html>
