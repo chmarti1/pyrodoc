@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-steam = pm.get('mp.H2O')
+F = pm.get('mp.H2O')
 
 up = 'kPa'
 uT = 'K'
@@ -22,13 +22,13 @@ pm.config['unit_volume'] = uV
 p1 = 100
 s1 = 1
 
-T1,x1 = steam.T_s(p=p1,s=s1,quality=True)
+T1,x1 = F.T_s(p=p1, s=s1, quality=True)
 if x1>0:
-    h1,s1,d1 = steam.hsd(T=T1,x=x1)
+    h1,s1,d1 = F.hsd(T=T1, x=x1)
 else:
-    h1,s1,d1 = steam.hsd(p=p1,T=T1)
+    h1,s1,d1 = F.hsd(p=p1, T=T1)
 v1 = 1/d1
-p1 = steam.p(T=T1,d=d1)
+p1 = F.p(T=T1, d=d1)
 #Summary
 print('P&s: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2f}'.format(T=T1[0],p=p1[0],x=x1[0],v=v1[0],h=h1[0],s=s1[0]))
 
@@ -36,9 +36,9 @@ print('P&s: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2
 p1 = 100
 T1 = 400
 x1 = [-1]
-h1,s1,d1 = steam.hsd(p=p1,T=T1)
+h1,s1,d1 = F.hsd(p=p1, T=T1)
 v1 = 1/d1
-p1 = steam.p(T=T1,d=d1)
+p1 = F.p(T=T1, d=d1)
 T1 = [T1]
 #Summary
 print('P&T: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2f}'.format(T=T1[0],p=p1[0],x=x1[0],v=v1[0],h=h1[0],s=s1[0]))
@@ -48,13 +48,13 @@ print('P&T: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2
 p1 = 200
 h1 = 4000
 
-T1,x1 = steam.T_h(p=p1,h=h1,quality=True)
+T1,x1 = F.T_h(p=p1, h=h1, quality=True)
 if x1>0:
-    h1,s1,d1 = steam.hsd(T=T1,x=x1)
+    h1,s1,d1 = F.hsd(T=T1, x=x1)
 else:
-    h1,s1,d1 = steam.hsd(p=p1,T=T1)
+    h1,s1,d1 = F.hsd(p=p1, T=T1)
 v1 = 1/d1
-p1 = steam.p(T=T1,d=d1)
+p1 = F.p(T=T1, d=d1)
 #Summary
 print('P&h: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2f}'.format(T=T1[0],p=p1[0],x=x1[0],v=v1[0],h=h1[0],s=s1[0]))
 
@@ -62,14 +62,14 @@ print('P&h: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2
 p1 = 400
 v1 = 1.3
 d1 = 1/v1
-#h1 = steam.h(p=p1,d=d1)
-T1,x1 = steam.T_h(p=p1,h=h1,quality=True)
+h1 = F.h(p=p1,d=d1)
+T1,x1 = F.T_h(p=p1, h=h1, quality=True)
 if x1>0:
-    h1,s1,d1 = steam.hsd(T=T1,x=x1)
+    h1,s1,d1 = F.hsd(T=T1, x=x1)
 else:
-    h1,s1,d1 = steam.hsd(p=p1,T=T1)
+    h1,s1,d1 = F.hsd(p=p1, T=T1)
 v1 = 1/d1
-p1 = steam.p(T=T1,d=d1)
+p1 = F.p(T=T1, d=d1)
 #Summary
 print('P&v: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2f}'.format(T=T1[0],p=p1[0],x=x1[0],v=v1[0],h=h1[0],s=s1[0]))
 
@@ -78,15 +78,15 @@ print('P&v: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2
 T1 = 400
 s1 = 5
 
-P_T = pmsolve.solve1n('p', f=steam.T_s, param_init=20)
+P_T = pmsolve.solve1n('p', f=F.T_s, param_init=20)
 p1 = P_T(T1,s=s1)
-T1,x1 = steam.T_s(p=p1,s=s1,quality=True)
+T1,x1 = F.T_s(p=p1, s=s1, quality=True)
 if x1>0:
-    h1,s1,d1 = steam.hsd(T=T1,x=x1)
+    h1,s1,d1 = F.hsd(T=T1, x=x1)
 else:
-    h1,s1,d1 = steam.hsd(p=p1,T=T1)
+    h1,s1,d1 = F.hsd(p=p1, T=T1)
 v1 = 1/d1
-p1 = steam.p(T=T1,d=d1)
+p1 = F.p(T=T1, d=d1)
 #Summary
 print('T&s: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2f}'.format(T=T1[0],p=p1[0],x=x1[0],v=v1[0],h=h1[0],s=s1[0]))
 
@@ -94,15 +94,15 @@ print('T&s: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2
 T1 = 400
 h1 = 2100
 
-P_T = pmsolve.solve1n('p', f=steam.T_h, param_init=20)
+P_T = pmsolve.solve1n('p', f=F.T_h, param_init=20)
 p1 = P_T(T1,h=h1)
-T1,x1 = steam.T_h(p=p1,h=h1,quality=True)
+T1,x1 = F.T_h(p=p1, h=h1, quality=True)
 if x1>0:
-    h1,s1,d1 = steam.hsd(T=T1,x=x1)
+    h1,s1,d1 = F.hsd(T=T1, x=x1)
 else:
-    h1,s1,d1 = steam.hsd(p=p1,T=T1)
+    h1,s1,d1 = F.hsd(p=p1, T=T1)
 v1 = 1/d1
-p1 = steam.p(T=T1,d=d1)
+p1 = F.p(T=T1, d=d1)
 #Summary
 print('T&h: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2f}'.format(T=T1[0],p=p1[0],x=x1[0],v=v1[0],h=h1[0],s=s1[0]))
 
@@ -110,20 +110,20 @@ print('T&h: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2
 T1 = 800
 v1 = .1
 d1 = 1/v1
-P_v = pmsolve.solve1n('p', f=steam.T, param_init=400) #Extremely sensitive to guess
+P_v = pmsolve.solve1n('p', f=F.T, param_init=400) #Extremely sensitive to guess
 p1 = P_v(T1,d=d1)
-T1 = steam.T(p=p1,d=d1)
-if T1<steam.critical()[0]:
-    ds = steam.ds(T=T1)
+T1 = F.T(p=p1, d=d1)
+if T1<F.critical()[0]:
+    ds = F.ds(T=T1)
     x1 = (1/d1-1/ds[0])/(1/ds[1]-1/ds[0])
 else:
     x1 = -1
 if x1>0 and x1<=1:
-    h1,s1,d1 = steam.hsd(T=T1,x=x1)
+    h1,s1,d1 = F.hsd(T=T1, x=x1)
 else:
-    h1,s1,d1,x1 = steam.hsd(p=p1,T=T1,quality=True)
+    h1,s1,d1,x1 = F.hsd(p=p1, T=T1, quality=True)
 v1 = 1/d1
-p1 = steam.p(T=T1,d=d1)
+p1 = F.p(T=T1, d=d1)
 #Summary
 print('T&v: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2f}'.format(T=T1[0],p=p1[0],x=x1[0],v=v1[0],h=h1[0],s=s1[0]))
 
@@ -131,30 +131,30 @@ print('T&v: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2
 h1 = 2100
 v1 = 0.5
 d1 = 1/v1
-P_v = pmsolve.solve1n('p', f=steam.h, param_init=300) #Extremely sensitive to guess
+P_v = pmsolve.solve1n('p', f=F.h, param_init=300) #Extremely sensitive to guess
 p1 = P_v(h1,d=d1)
-T1,x1 = steam.T_h(p=p1,h=h1,quality=True)
+T1,x1 = F.T_h(p=p1, h=h1, quality=True)
 if x1>0:
-    h1,s1,d1 = steam.hsd(T=T1,x=x1)
+    h1,s1,d1 = F.hsd(T=T1, x=x1)
 else:
-    h1,s1,d1 = steam.hsd(p=p1,T=T1)
+    h1,s1,d1 = F.hsd(p=p1, T=T1)
 v1 = 1 / d1
-p1 = steam.p(T=T1,d=d1)
+p1 = F.p(T=T1, d=d1)
 print('d&h: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2f}'.format(T=T1[0],p=p1[0],x=x1[0],v=v1[0],h=h1[0],s=s1[0]))
 
 #d&s
 s1 = 7
 v1 = 0.5
 d1 = 1/v1
-P_v = pmsolve.solve1n('p', f=steam.s, param_init=300) #Extremely sensitive to guess
+P_v = pmsolve.solve1n('p', f=F.s, param_init=300) #Extremely sensitive to guess
 p1 = P_v(s1,d=d1)
-T1,x1 = steam.T_s(p=p1,s=s1,quality=True)
+T1,x1 = F.T_s(p=p1, s=s1, quality=True)
 if x1>0:
-    h1,s1,d1 = steam.hsd(T=T1,x=x1)
+    h1,s1,d1 = F.hsd(T=T1, x=x1)
 else:
-    h1,s1,d1 = steam.hsd(p=p1,T=T1)
+    h1,s1,d1 = F.hsd(p=p1, T=T1)
 v1 = 1 / d1
-p1 = steam.p(T=T1,d=d1)
+p1 = F.p(T=T1, d=d1)
 print('d&s: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2f}'.format(T=T1[0],p=p1[0],x=x1[0],v=v1[0],h=h1[0],s=s1[0]))
 
 #s&h - can't be done without a new function?
@@ -166,12 +166,12 @@ ax = f.add_subplot(111)
 
 
 # Draw the saturation bounds
-Tt = steam.triple()[0]
-Tc = steam.critical()[0]
+Tt = F.triple()[0]
+Tc = F.critical()[0]
 #temp = (Tc - Tt) * .001
 temp = 1e-10
 T = np.linspace(Tt+temp, Tc-temp, 100)
-sL, sV = steam.ss(T)
+sL, sV = F.ss(T)
 ax.plot(sL, T, lw=2,color='k')
 ax.plot(sV, T, lw=2,color='k')
 
@@ -179,12 +179,12 @@ ax.plot(sV, T, lw=2,color='k')
 ax.plot(s1,T1,'rx',lw=2)
 
 #Add an isobar
-plim = steam.plim()
-Tlim = steam.Tlim()
-smin = steam.s(T = Tlim[0],p=p1)
-smax = steam.s(T = Tlim[1],p=p1)
+plim = F.plim()
+Tlim = F.Tlim()
+smin = F.s(T = Tlim[0], p=p1)
+smax = F.s(T = Tlim[1], p=p1)
 s = np.linspace(smin,smax,100)
-T = steam.T_s(p=p1,s=s)
+T = F.T_s(p=p1, s=s)
 ax.plot(s,T,'b:',lw=1)
 
 # Dress up the plot
