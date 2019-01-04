@@ -1,0 +1,121 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+    <title>The S.H. Rankine Cycle | PYroMat</title>
+    <link rel="stylesheet" type="text/css" href="/pyromat.css">
+    <meta name="description" content="getting python">
+    <meta name="keywords" content="python,thermo,thermodynamic,property,properties">
+    <meta name="author" content="C.R. Martin">
+    
+<script>
+function toggle_vis(target_id){
+    var target_obj = document.getElementById(target_id);
+    if (target_obj.style.visibility=='visible'){
+        target_obj.style.visibility = 'hidden';
+    } else {
+        target_obj.style.visibility = 'visible';
+    }
+}
+</script>
+</head>
+<body>
+
+<iframe name="menu" id="menu" src="/menu.html"></iframe>
+
+<div id="content">
+<div class="title">
+<h1>The Rankine Cycle with Super-Heat</h1>
+</div>
+
+
+<form action="rankinesh.py" method="GET">
+    <fieldset>
+        <legend><b>Rankine Super-Heat Cycle Parameters</b></legend>
+<!-- inputs -->
+        <div class="lcol">
+        <table id="values">
+            <tr><td>Fluid    </td><td><select name="id"></select></td></tr>
+            <tr><td>Condenser Press.</td><td><input name="p1" type="text" value=""></td></tr>
+            <tr><td>Boiler Press.</td><td><input name="p2" type="text" value=""></td></tr>
+            <tr><td>Pump &eta;</td><td><input name="eta12" type="text" value=""></td></tr>
+            <tr><td>Boiler &eta;</td><td><input name="eta23" type="text" value=""></td></tr>
+            <tr><td>Super H. &eta;</td><td><input name="eta34" type="text" value=""></td></tr>
+            <tr><td>Turbine &eta;</td><td><input name="eta45" type="text" value=""></td></tr>
+        </table>
+        
+<!-- superheat -->
+        <p>Specify one OR none for saturated vap. at state 4:</p>
+        <table id="ovalues">
+            <tr><td>Super H. Temp.</td><td><input name="T4" type="text" value=""></td></tr>
+            <tr><td>Super H. Heat</td><td><input name="q34" type="text" value=""></td></tr>
+        </table>
+        <input type="submit" value="Update">
+        </div>
+        
+<!-- units -->
+        <div class="rcol">
+        <a href="#" onClick="javascript:toggle_vis('units')">Units (Show/Hide)</a><br>
+        <table id="units" style="visibility:hidden;">
+            <tr><td>Pressure</td><td><select name="up"></select></td></tr>
+            <tr><td>Temperature</td><td><select name="uT"></select></td></tr>
+            <tr><td>Energy</td><td><select name="uE"></select></td></tr>
+            <tr><td>Matter</td><td><select name="uM"></select></td></tr>
+            <tr><td>Volume</td><td><select name="uV"></select></td></tr>
+
+
+        </table>
+        </div>
+        
+    </fieldset>
+</form>
+
+<!-- results -->
+<div class="section">
+
+
+</div>
+
+<div class="subtitle">
+<h2>About the Rankine Cycle</h2>
+</div>
+<div class="section">
+    <p>
+    Sometimes referred to as the "steam" cycle, the Rankine cycle drove an industrial revolution and still drives most of our power plants today.  In the rankine cycle, a liquid (usually water) is pumped into a boiler, where it is heated to a boil.  The super-heater further heats the saturated vapor into a super-heated vapor before routing the vapor to a turbine or piston to do work.  In the old steam engines, the work was done by a piston, but in modern power generation systems, it is all done by turbines.  Finally, the low pressure vapor/liquid mix is cooled in a condenser.  Pure liquid is drawn from the bottom of the condenser, so it will be on the saturated liquid line.
+    </p>
+    <p>
+    <b>State 1: Reservoir</b> This saturated liquid is just out of the condenser, and it is often at ambient pressure.  However, if the reservoir is unvented, then it can be at other pressures.
+    </p>
+    <p>
+    <b>Process 1-2: Pump</b> The feed-water pump accepts the saturated liquid and pumps it up to the boiler pressure.  Liquids require remarkably less energy than gases to compress, so this process is relatively inexpensive in terms of energy.
+    </p>
+    <p>
+    <b>State 2: Boiler Inlet</b> The liquid is now at pressure and ready to be heated
+    </p>
+    <p>
+    <b>Process 2-3: Boiler</b> Liquid is heated in the boiler until it comes to a boil.  
+    </p>
+    <p>
+    <b>State 3: Boiler Outlet</b> The outlet of a boiler always draws from the top so that vapor will be removed while the lower-energy liquid is left behind.  As a result, the boiler outlet will always a saturated vapor.  Some systems combine super-heating with the boiler, but not all.
+    </p>
+    <p>
+    <b>Process 3-4: Super-Heater</b> The saturated vapor is further heated into the super-heated region.  Because the heat transfer characteristics of vapor are so drastically dissimilar to liquid, this is often a separately heat exchanger.  A boiler with low water level can also act like a super-heater but with drastically lower mass flow.
+    </p>
+    <p>
+    <b>State 4: Super-Heated Vapor</b> Safely in the super-heated domain, we are ready to extract work.
+    </p>
+    <p>
+    <b>Process 4-5: Turbine/Piston</b> Finally, we are ready to extract work.  Many power systems suffer when liquid is condensing during the process, so adding a super-heater can really pay dividends.
+    </p>
+    <p>
+    <b>State 5: Turbine/Piston Exhaust</b> Now back to the reservoir pressure, the working fluid can be a liquid/vapor mix or it can still be a super-heated vapor.  Either way, there is still quite a bit of thermal energy to extract to return to state 1.
+    </p>
+    <p>
+    <b>Process 5-1: Condenser</b> Finally, the condenser cools all the remaining steam back into a saturated liquid.  Just like saturated vapor was drawn from the top of the boiler, saturated liquid is drawn from the bottom of the condenser.
+    </p>
+</div>
+
+<iframe src="/author.html" id="contact"></iframe>
+
+</body>
+</html>
