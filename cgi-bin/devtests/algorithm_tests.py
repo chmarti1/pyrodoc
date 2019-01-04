@@ -32,6 +32,18 @@ p1 = steam.p(T=T1,d=d1)
 #Summary
 print('P&s: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2f}'.format(T=T1[0],p=p1[0],x=x1[0],v=v1[0],h=h1[0],s=s1[0]))
 
+#P&T
+p1 = 100
+T1 = 400
+x1 = [-1]
+h1,s1,d1 = steam.hsd(p=p1,T=T1)
+v1 = 1/d1
+p1 = steam.p(T=T1,d=d1)
+T1 = [T1]
+#Summary
+print('P&T: T={T:0.2f}, p={p:0.2f}, v={v:0.2g}, h={h:0.2f}, s={s:0.2f}, x={x:0.2f}'.format(T=T1[0],p=p1[0],x=x1[0],v=v1[0],h=h1[0],s=s1[0]))
+
+
 #P&h
 p1 = 200
 h1 = 4000

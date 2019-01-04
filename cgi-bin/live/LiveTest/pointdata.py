@@ -1,14 +1,10 @@
 #!/usr/bin/python
 
-import cgitb
-
-cgitb.enable()
-
 import pmcgi
 import os
 import pyromat as pm
-import pyromat.solve as pmsolve
 import numpy as np
+import pyromat.solve as pmsolve
 
 source = '/var/www/html/live/pointdata.html'
 param_line = 32
@@ -31,6 +27,10 @@ species, p1, s1, T1, up, uT, uE, uM, uV = pmcgi.argparse([
 
 P = pmcgi.PMPage(source)
 
+inpline = P.find_line('<!-- inputs -->')
+unitline = P.find_line('<!-- units -->')
+resline = P.find_line('<!-- results -->')
+
 # Build the substance menu
 # Include all multiphase collection members
 values = []
@@ -40,27 +40,27 @@ for name in pm.dat.data:
 
 # Build the available units menu
 # Pressure
-line = P.find_line('<!-- units -->')
+
 text = pmcgi.html_select(
     pm.units.pressure.get(), selected=up, select=False)
-P.insert(text, (line + 4, 55), wait=True)
+P.insert(text, (unitline + 4, 55), wait=True)
 # Temperature
 text = pmcgi.html_select(
     pm.units.temperature.get(), selected=uT, select=False)
-P.insert(text, (line + 5, 58), wait=True)
+P.insert(text, (unitline + 5, 58), wait=True)
 # Energy
 text = pmcgi.html_select(
     pm.units.energy.get(), selected=uE, select=False)
-P.insert(text, (line + 6, 53), wait=True)
+P.insert(text, (unitline + 6, 53), wait=True)
 # Matter
 text = pmcgi.html_select( \
     pm.units.mass.get() + pm.units.molar.get(), \
     selected=uM, select=False)
-P.insert(text, (line + 7, 53), wait=True)
+P.insert(text, (unitline + 7, 53), wait=True)
 # Volume
 text = pmcgi.html_select( \
     pm.units.volume.get(), selected=uV, select=False)
-P.insert(text, (line + 8, 53), wait=True)
+P.insert(text, (unitline + 8, 53), wait=True)
 
 # Apply the units
 pm.config['unit_temperature'] = uT
@@ -101,6 +101,13 @@ elif T1 > 0 and s1 > 0:
         h1, s1, d1 = F.hsd(p=p1, T=T1)
     v1 = 1 / d1
     p1 = F.p(T=T1, d=d1)
+elif T1 > 0 and p1 > 0:
+    Tval = T1
+    pval = p1
+    h1, s1, d1 = F.hsd(p=p1, T=T1)
+    v1 = 1 / d1
+    p1 = F.p(T=T1, d=d1)
+    x1 = -1
 else:  # use default p&s vals:
     p1 = 101.325
     s1 = 4
@@ -116,24 +123,17 @@ else:  # use default p&s vals:
         h1 = F.h(T=T1, p=p1)
     v1 = 1 / d1
 
-# Insert the cgi call to build the image
-P.insert(
-    '<img class="figure" src="/cgi-bin/live/pointdata_plot.py?id={:s}&p1={:f}&s1={:f}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
-        species, float(p1), float(s1), up, uT, uE, uM, uV), \
-    (line + 1, 0))
-
 # Insert the argument values
-line = P.find_line('<!-- inputs -->')
 P.insert( \
     pmcgi.html_select(values, select=False, selected=species), \
-    (line + 3, 56), wait=True)
+    (inpline + 3, 56), wait=True)
 
-P.insert(str(pval), (line + 4, 73), wait=True)
-P.insert(str(sval), (line + 5, 72), wait=True)
-P.insert(str(Tval), (line + 6, 76), wait=True)
+P.insert(str(pval), (inpline + 4, 73), wait=True)
+P.insert(str(sval), (inpline + 5, 72), wait=True)
+P.insert(str(Tval), (inpline + 6, 76), wait=True)
 
 # Find the results line in the original HTML
-line = P.find_line('<!-- results -->')
+
 # Construct table lists for displaying
 # This inspires some future code to automatically collapse the arrays
 # to make the float() conversions unnecessary
@@ -158,8 +158,15 @@ units = ['', uT, up, uV + '/' + uM, uE + '/' + uM, uE + '/' + uM + uT, '']
 
 P.insert('<h3>Cycle States</h3><center>' +
          pmcgi.html_column_table(labels, units, (st, T, p, v, h, s, x), thousands=',') \
-         + '</center>', (line + 2, 0), wait=True)
+         + '</center>', (resline + 2, 0), wait=True)
+
+# Insert the cgi call to build the image
+P.insert(
+    '<img class="figure" src="/cgi-bin/live/pointdata_plot.py?id={:s}&p1={:f}&s1={:f}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
+        species, float(p1), float(s1), up, uT, uE, uM, uV), \
+    (resline + 1, 0))
 
 P.insert_exec()
+
 
 P.write()

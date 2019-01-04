@@ -13,6 +13,20 @@ import numpy as np
 import sys
 
 
+import contextlib
+import io
+import sys
+
+#Silence STDOUT warnings
+#https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
+@contextlib.contextmanager
+def nostdout():
+    save_stdout = sys.stdout
+    sys.stdout = io.BytesIO()
+    yield
+    sys.stdout = save_stdout
+
+
 species, p1, s1, up, uT, uE, uM, uV = pmcgi.argparse([
         ('id'), 
         ('p1',float), 
@@ -55,7 +69,7 @@ ax = f.add_subplot(111)
 # Draw the saturation bounds
 Tt = F.triple()[0]
 Tc = F.critical()[0]
-temp = (Tc - Tt) * .0001
+temp = (Tc - Tt) * .00001
 T = np.linspace(Tt+temp, Tc-temp, 100)
 sL, sV = F.ss(T)
 ax.plot(sL, T, lw=2,color='k')
@@ -70,8 +84,9 @@ Tmax = F.Tlim()[1]
 smin = F.s(T=Tmin,p=p1)
 smax = F.s(T=Tmax,p=p1)
 s = np.linspace(smin,smax,100)
-#T = F.T_s(p=p1,s=s)
-#ax.plot(s,T,lw=2,color='b',linestyle=':')
+with nostdout():
+    T = F.T_s(p=p1,s=s)
+    ax.plot(s,T,lw=2,color='b',linestyle=':')
 
 # Dress up the plot
 ax.set_xlabel('Entropy (' + uE + '/' + uM + uT + ')')
