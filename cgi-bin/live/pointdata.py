@@ -254,10 +254,13 @@ if x1 >= 0:
     x = [float(x1)]
 else:
     #x = [float(x1)]
-    if (s1>F.ss(p=p1)[1]):
-       x=['vapor']
+    Tc,pc,dc = F.critical(density=True)
+    if (p1>pc and T1>Tc):
+        x = ['supercritical']
+    elif (d1<dc):
+        x=['vapor']
     else:
-       x=['liquid']
+        x=['liquid']
 
 # build label and unit lists
 labels = ['T', 'p', 'v', 'h', 's', 'x']
