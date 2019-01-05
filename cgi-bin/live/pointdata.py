@@ -261,7 +261,7 @@ else:
 
 # build label and unit lists
 labels = ['T', 'p', 'v', 'h', 's', 'x']
-units = [uT, up, uV + '/' + uM, uE + '/' + uM, uE + '/' + uM + uT, '']
+units = [uT, up, uV + '/' + uM, uE + '/' + uM, uE + '/' + uM + uT, '-']
 
 P.insert('<h3>State Properties</h3><center>' +
          pmcgi.html_column_table(labels, units, (T, p, v, h, s, x), thousands=',')

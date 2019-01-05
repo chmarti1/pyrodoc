@@ -110,7 +110,7 @@ cols = [73,76]
 lu.setinputs(P,vals,cols,inpline)
 
 # Construct table lists for displaying, funky typing required for pmcgi code
-st = ['liquid','vapor'] #1 is liq, 2 is vap  
+st = ['liquid','vapor'] #1 is liq, 2 is vap
 T = [float(T1), float(T1)]
 p = [float(p1), float(p1)]
 v = [float(vf), float(vg)]
