@@ -242,7 +242,6 @@ lu.setinputs(P,vals,cols,inpline)
 # # # # # # # # # # # # #
 
 # Construct table lists for displaying, funky typing required for pmcgi code
-st = [1]
 T = [float(T1)]
 p = [float(p1)]
 v = [float(v1)]
@@ -258,11 +257,11 @@ else: #TODO: allow this to be displayed as a string clearly
     #    x=['liquid']
 
 # build label and unit lists
-labels = ['', 'T', 'p', 'v', 'h', 's', 'x']
-units = ['', uT, up, uV + '/' + uM, uE + '/' + uM, uE + '/' + uM + uT, '']
+labels = ['T', 'p', 'v', 'h', 's', 'x']
+units = [uT, up, uV + '/' + uM, uE + '/' + uM, uE + '/' + uM + uT, '']
 
 P.insert('<h3>State Properties</h3><center>' +
-         pmcgi.html_column_table(labels, units, (st, T, p, v, h, s, x), thousands=',')
+         pmcgi.html_column_table(labels, units, (T, p, v, h, s, x), thousands=',')
          + '</center>', (resline, 0), wait=True)
 
 # Insert the cgi call to build the image

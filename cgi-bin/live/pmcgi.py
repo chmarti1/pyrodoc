@@ -7,7 +7,7 @@ import numpy as np
 import cgi
 
 config = {}
-
+cgi_args = cgi.FieldStorage()
 
 
 def error_response(message):
@@ -50,7 +50,8 @@ the function will print an error page to stdout and evoke the exit()
 funciton.
 """
     out = []
-    cgi_args = cgi.FieldStorage()
+    # Now a global variable
+    #cgi_args = cgi.FieldStorage()
     for this in args:
         conv = str
         default = None
@@ -77,6 +78,21 @@ funciton.
                 exit()
     return out
         
+
+def buildget():
+    """Build a GET arg string equivalent to the one supplied
+"""
+    out = '?'
+    # Now a global variable
+    #cgi_args = cgi.FieldStorage()
+    kk = cgi_args.keys()
+    while kk:
+        this = kk.pop(0)
+        out += this + '=' + str(cgi_args[this].value)
+        if kk:
+            out += '&'
+    return out
+    
 
 def idgen(length=32, charset=None):
     """Generate a random series of characters
@@ -575,7 +591,10 @@ thousands, thousdandths
     # pre-process the columns
     for ii in range(Ncol):
         C = columns[ii]
-        pp = int(np.floor(np.log10(np.max(np.abs(C)))))
+        try:
+            pp = int(np.floor(np.log10(np.max(np.abs(C)))))
+        except OverflowError: #Occurs, e.g. when quality is zero, resulting in infinite log10
+            pp = 0 #just call it O(1)
         P[ii] = pp
         # If the multiplier is being used
         if scale[ii] == 'm':
@@ -627,7 +646,7 @@ thousands, thousdandths
         out += '<tr class=trE>'
         for jj in range(Ncol):
             # Grab the value to be converted to text
-            this = columns[jj][ii]
+            this = float(columns[jj][ii])
             
             # Extract the sign and detect the place of the most
             # significant digit
@@ -682,7 +701,7 @@ thousands, thousdandths
                 elif pp<0:
                     whol = '0'
                     # Promote the significant figures to an integer
-                    temp = int(np.round(this*10**(sf[jj]-pp)))
+                    temp = int(np.round(this*10**(sf[jj]-pp-1)))
                     # If the result is significant
                     if temp:
                         frac = '0'*(-pp-1) + '{:d}'.format(temp)
