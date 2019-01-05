@@ -2,7 +2,7 @@
 
 <html>
 <head>
-    <title>Thermodynamic Property Data | PYroMat</title>
+    <title>Saturation Property Data | PYroMat</title>
     <link rel="stylesheet" type="text/css" href="/pyromat.css">
     <meta name="description" content="getting python">
     <meta name="keywords" content="python,thermo,thermodynamic,property,properties">
@@ -25,23 +25,19 @@ function toggle_vis(target_id){
 
 <div id="content">
 <div class="title">
-<h1>The Rankine Cycle</h1>
+<h1>Saturation Properties</h1>
 </div>
 
 
-<form action="pointdata.py" method="POST">
+<form action="../../cgi-bin/live/satdata.py" method="POST">
     <fieldset>
-        <legend><b>Rankine Cycle Parameters</b></legend>
+        <legend><b>Saturation State Parameters</b></legend>
 <!-- inputs -->
         <div class="lcol">
         <table id="values">
             <tr><td>Fluid    </td><td><select name="id"></select></td></tr>
             <tr><td>Pressure</td><td><input name="p1" type="text" value=""></td></tr>
             <tr><td>Temperature</td><td><input name="T1" type="text" value=""></td></tr>
-            <tr><td>Enthalpy</td><td><input name="h1" type="text" value=""></td></tr>
-            <tr><td>Entropy</td><td><input name="s1" type="text" value=""></td></tr>
-            <tr><td>Specific Volume</td><td><input name="v1" type="text" value=""></td></tr>
-            <tr><td>Quality</td><td><input name="x1" type="text" value=""></td></tr>
 
         </table>
         <input type="submit" value="Update">
