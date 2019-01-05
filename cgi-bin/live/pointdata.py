@@ -48,7 +48,7 @@ except:
 lu.unitsetup(P,up,uT,uE,uM,uV,unitline)
 
 #Set up the species spinner
-lu.setspeciesselect(P,species,speciesline,56)
+lu.setspeciesselect(P,species,speciesline,52)
 
 # Apply the units within pyromat
 pm.config['unit_temperature'] = uT
@@ -214,7 +214,7 @@ try:
         xval = x1
 
         p1 = F.ps(T=T1)
-        h1, s1, d1 = F.hsd(T=T1, x=x1) #TODO: make pyromat throw an error if x>1
+        h1, s1, d1 = F.hsd(T=T1, x=x1)
         v1 = 1/d1
     elif x1 >=0 and p1 >= 0: #P&x
         #set the input box labels
@@ -226,14 +226,17 @@ try:
         v1 = 1/d1
     else:  #not supported
         lu.perror(P,'Specifying this pair of properties is not supported by pyromat. ', errline)
-except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e: #This means we ran into a pyromat error, show the user
+except (pm.utility.PMParamError) as e: #This means we ran into a pyromat error, show the user
     lu.perror(P, 'Pyromat produced an error: '+str(e), errline)
+except (pm.utility.PMAnalysisError) as e:
+    lu.perror(P, 'Pyromat produced a PMAnalysisError: Often this occurs when a value for v, h or s would '+
+                 'result in temperature or pressure falling outside acceptable limits.', errline)
 except Exception as e: #This means that one of the typical pyromat errors wasn't encountered
     lu.perror(P, 'Python error: ' + str(e), errline)
 
 # Put the input values back into the input boxes
 vals = [str(pval),str(Tval),str(hval),str(sval),str(vval),str(xval)]
-cols = [73,76,73,72,80,72]
+cols = [73,76,82,81,80,72]
 lu.setinputs(P,vals,cols,inpline)
 
 
@@ -247,14 +250,14 @@ p = [float(p1)]
 v = [float(v1)]
 h = [float(h1)]
 s = [float(s1)]
-if x1 >= 0: #TODO: fix the logarithm error when x = 0
+if x1 >= 0:
     x = [float(x1)]
-else: #TODO: allow this to be displayed as a string clearly
-    x = [float(x1)]
-    # if (s1>F.ss(p=p1)[1]):
-    #    x=['vapor']
-    # else:
-    #    x=['liquid']
+else:
+    #x = [float(x1)]
+    if (s1>F.ss(p=p1)[1]):
+       x=['vapor']
+    else:
+       x=['liquid']
 
 # build label and unit lists
 labels = ['T', 'p', 'v', 'h', 's', 'x']

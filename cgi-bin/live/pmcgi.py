@@ -587,7 +587,7 @@ thousands, thousdandths
     M = [0] * Ncol     # M is the column multiplier
     rescale_f = False
     ID = idgen()
-    
+
     # pre-process the columns
     for ii in range(Ncol):
         C = columns[ii]
@@ -595,6 +595,8 @@ thousands, thousdandths
             pp = int(np.floor(np.log10(np.max(np.abs(C)))))
         except OverflowError: #Occurs, e.g. when quality is zero, resulting in infinite log10
             pp = 0 #just call it O(1)
+        except TypeError: #can't convert, is it a string?
+            pp = 0
         P[ii] = pp
         # If the multiplier is being used
         if scale[ii] == 'm':
@@ -646,7 +648,20 @@ thousands, thousdandths
         out += '<tr class=trE>'
         for jj in range(Ncol):
             # Grab the value to be converted to text
-            this = float(columns[jj][ii])
+            try:
+                this = float(columns[jj][ii])
+            except ValueError: #Assume it's a string?
+                this = str(columns[jj][ii])
+                # Case out the column alignment modes
+                if align[jj] == 'd':
+                    out += '<td class=tdC>' + this + '</td><td></td>'
+                elif align[jj] == 'l':
+                    out += '<td class=tdL>' + this + '</td>'
+                elif align[jj] == 'c':
+                    out += '<td class=tdC>' + this + '</td>'
+                elif align[jj] == 'r':
+                    out += '<td class=tdR>' + this + '</td>'
+                continue #move on
             
             # Extract the sign and detect the place of the most
             # significant digit

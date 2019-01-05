@@ -110,7 +110,7 @@ cols = [73,76]
 lu.setinputs(P,vals,cols,inpline)
 
 # Construct table lists for displaying, funky typing required for pmcgi code
-st = [1,2] #1 is liq, 2 is vap #TODO make this work with text
+st = ['liquid','vapor'] #1 is liq, 2 is vap  
 T = [float(T1), float(T1)]
 p = [float(p1), float(p1)]
 v = [float(vf), float(vg)]
@@ -119,7 +119,7 @@ h = [float(hf), float(hg)]
 s = [float(sf), float(sg)]
 
 # build label and unit lists
-labels = ['', 'T', 'p', 'v', 'u', 'h', 's']
+labels = ['Phase', 'T', 'p', 'v', 'u', 'h', 's']
 units = ['', uT, up, uV + '/' + uM, uE + '/' + uM, uE + '/' + uM, uE + '/' + uM + uT]
 
 P.insert('<h3>Saturation Properties</h3><center>' +

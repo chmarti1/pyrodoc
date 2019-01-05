@@ -29,17 +29,23 @@ function toggle_vis(target_id){
 </div>
 
 
+<div class="section">
+    <h2>The State Principle</h2>
+    <p>The state principle guarantees that any two independent, intensive properties are enough to fix the state.
+    Fixing the state allows any additional intensive property to be found. Try entering any pair of properties below.
+</div>
+
 <form action="../../cgi-bin/live/pointdata.py" method="POST">
     <fieldset>
         <legend><b>State Parameters</b></legend>
 <!-- inputs -->
         <div class="lcol">
         <table id="values">
-            <tr><td>Fluid    </td><td><select name="id"></select></td></tr>
+            <tr><td>Fluid</td><td><select name="id"></select></td></tr>
             <tr><td>Pressure</td><td><input name="p1" type="text" value=""></td></tr>
             <tr><td>Temperature</td><td><input name="T1" type="text" value=""></td></tr>
-            <tr><td>Enthalpy</td><td><input name="h1" type="text" value=""></td></tr>
-            <tr><td>Entropy</td><td><input name="s1" type="text" value=""></td></tr>
+            <tr><td>Specific Enthalpy</td><td><input name="h1" type="text" value=""></td></tr>
+            <tr><td>Specific Entropy</td><td><input name="s1" type="text" value=""></td></tr>
             <tr><td>Specific Volume</td><td><input name="v1" type="text" value=""></td></tr>
             <tr><td>Quality</td><td><input name="x1" type="text" value=""></td></tr>
 
