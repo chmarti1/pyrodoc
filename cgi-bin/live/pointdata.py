@@ -5,10 +5,10 @@ import os
 import pyromat as pm
 import numpy as np
 import pyromat.solve as pmsolve
+import liveutils as lu
+
 
 source = '/var/www/html/live/pointdata.html'
-param_line = 32
-units_line = 43
 
 # Print the header so the page will display even if something goes wrong
 print("Content-type: text/html")
@@ -18,16 +18,12 @@ print("")
 P = pmcgi.PMPage(source)
 
 #find critical lines in the
-inpline = P.find_line('<!-- inputs -->')
-unitline = P.find_line('<!-- units -->')
-resline = P.find_line('<!-- results -->')
-
-# Build the substance menu
-# Include all multiphase collection members
-values = []
-for name in pm.dat.data:
-    if name.startswith('mp.'):
-        values.append(name)
+speciesline = P.find_line('<!-- inputs -->')+3 #line to insert the species spinner
+inpline = P.find_line('<!-- inputs -->')+4 #line to begin the input boxes
+unitline = P.find_line('<!-- units -->')+4 #line where we begin the unit selector mess
+resline = P.find_line('<!-- results -->')+1 #line where we begin the results
+errline = P.find_line('<!-- errors -->') +1 #line where we insert errors
+chartline = P.find_line('<!-- charts -->')+1 #line where we begin inserting a chart
 
 #Try to parse the user's inputs
 try:
@@ -46,34 +42,13 @@ try:
         ('uV', str, 'm3')])
 except:
     #An example way to get here is by entering letters into the boxes
-    P.insert("""<div class="error">
-    ERROR<br>Unable to parse one of the inputs. Make sure you are using numbers.""",
-             (resline + 1, 0))
-    P.write()
-    exit()
+    lu.perror(P,'Unable to parse one of the inputs. Make sure you are using valid numbers.',errline)
 
-# Build the available units menu based on the user's selections
-# Pressure
-text = pmcgi.html_select(
-    pm.units.pressure.get(), selected=up, select=False)
-P.insert(text, (unitline + 4, 55), wait=True)
-# Temperature
-text = pmcgi.html_select(
-    pm.units.temperature.get(), selected=uT, select=False)
-P.insert(text, (unitline + 5, 58), wait=True)
-# Energy
-text = pmcgi.html_select(
-    pm.units.energy.get(), selected=uE, select=False)
-P.insert(text, (unitline + 6, 53), wait=True)
-# Matter
-text = pmcgi.html_select(
-    pm.units.mass.get() + pm.units.molar.get(),
-    selected=uM, select=False)
-P.insert(text, (unitline + 7, 53), wait=True)
-# Volume
-text = pmcgi.html_select(
-    pm.units.volume.get(), selected=uV, select=False)
-P.insert(text, (unitline + 8, 53), wait=True)
+#Set up the unit selector
+lu.unitsetup(P,up,uT,uE,uM,uV,unitline)
+
+#Set up the species spinner
+lu.setspeciesselect(P,species,speciesline,56)
 
 # Apply the units within pyromat
 pm.config['unit_temperature'] = uT
@@ -85,6 +60,7 @@ pm.config['unit_volume'] = uV
 # # # # # # # # # # # # #
 # Calculate the states  #
 # # # # # # # # # # # # #
+
 #Get the substance object
 F = pm.get(species)
 
@@ -95,11 +71,7 @@ sval = Tval = pval = hval = vval = xval = ''
 #check for cases where too few or too many properties are specified (zero specified results in defaults)
 ins = np.array([p1,T1,s1,v1,h1,x1]) #test array for counting how many properties were specified
 if (sum(ins>=0)==1) or (sum(ins>=0)>2):
-    P.insert("""<div class="error">
-    ERROR<br>Must specify exactly 2 properties to define a state""",
-             (resline + 1, 0))
-    P.write()
-    exit()
+    lu.perror(P,'Must specify exactly two properties to define a state.', errline)
 elif (sum(ins>=0)==0):
     p1 = 101.325
     T1 = 300
@@ -253,36 +225,21 @@ try:
         h1, s1, d1 = F.hsd(T=T1, x=x1)
         v1 = 1/d1
     else:  #not supported
-        P.insert("""<div class="error">
-                ERROR<br>Specifying this pair of properties is not supported by pyromat. """,
-                 (resline + 1, 0))
-        P.write()
-        exit()
+        lu.perror(P,'Specifying this pair of properties is not supported by pyromat. ', errline)
 except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e: #This means we ran into a pyromat error, show the user
-    P.insert("""<div class="error">
-        ERROR<br>Pyromat produced an error: """+str(e),
-             (resline + 1, 0))
-    P.write()
-    exit()
+    lu.perror(P, 'Pyromat produced an error: '+str(e), errline)
 except Exception as e: #This means that one of the typical pyromat errors wasn't encountered
-    P.insert("""<div class="error">
-        ERROR<br>Python error: """+str(e),
-             (resline + 1, 0))
-    P.write()
-    exit()
-
+    lu.perror(P, 'Python error: ' + str(e), errline)
 
 # Put the input values back into the input boxes
-P.insert(
-            pmcgi.html_select(values, select=False, selected=species),
-                (inpline + 3, 56), wait=True)
+vals = [str(pval),str(Tval),str(hval),str(sval),str(vval),str(xval)]
+cols = [73,76,73,72,80,72]
+lu.setinputs(P,vals,cols,inpline)
 
-P.insert(str(pval), (inpline + 4, 73), wait=True)
-P.insert(str(Tval), (inpline + 5, 76), wait=True)
-P.insert(str(hval), (inpline + 6, 73), wait=True)
-P.insert(str(sval), (inpline + 7, 72), wait=True)
-P.insert(str(vval), (inpline + 8, 80), wait=True)
-P.insert(str(xval), (inpline + 9, 72), wait=True)
+
+# # # # # # # # # # # # #
+# Display Output Values #
+# # # # # # # # # # # # #
 
 # Construct table lists for displaying, funky typing required for pmcgi code
 st = [1]
@@ -306,13 +263,13 @@ units = ['', uT, up, uV + '/' + uM, uE + '/' + uM, uE + '/' + uM + uT, '']
 
 P.insert('<h3>State Properties</h3><center>' +
          pmcgi.html_column_table(labels, units, (st, T, p, v, h, s, x), thousands=',')
-         + '</center>', (resline + 1, 0), wait=True)
+         + '</center>', (resline, 0), wait=True)
 
 # Insert the cgi call to build the image
 P.insert(
     '<img class="figure" src="/cgi-bin/live/pointdata_plot.py?id={:s}&p1={:f}&s1={:f}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
         species, float(p1), float(s1), up, uT, uE, uM, uV),
-    (resline + 2, 0))
+    (chartline, 0))
 
 
 #Perform the write operation
