@@ -112,6 +112,7 @@ line = P.find_line('<!-- results -->')
 # # # # # # # # # # # # # 
 try:
     RC = cycle.RankineSHCycle()
+    RC.param['fluid'] = species
     RC.param['p1'] = p1
     RC.param['p2'] = p2
     RC.param['q34'] = q34
