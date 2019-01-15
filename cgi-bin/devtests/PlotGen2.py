@@ -1,8 +1,10 @@
 import pyroplot
 import pyromat as pm
 
-F = pm.get('mp.H2O')
+water = pm.get('mp.H2O')
+R134 = pm.get('mp.C2H2F4')
 
 pm.config['unit_pressure'] = 'MPa'
 
-pyroplot.Ts(F)
+pyroplot.Ts(R134)
+pyroplot.Ts(water)

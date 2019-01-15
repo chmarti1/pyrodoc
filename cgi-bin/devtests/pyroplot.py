@@ -22,11 +22,38 @@ config = {
     'd_color':[0.5,0.5,1.0],
     'd_width':1,
     'd_style':'-',
-    'h_color':[0.5,1.0,0.5],
+    'h_color':[0.3,0.6,0.3],
     'h_width':1,
     'h_style':'-',
 }
 
+def _slope_ratio(figure,axis):
+    """Get the ratio of the mathematical derivative to the geometric
+    slope on any given figure axis.
+
+    ratio = _slope_ratio(figure,axis)
+
+    Result can be used as: geom_slope = math_slope * ratio"""
+
+    # Ratio of plot axes
+    size = figure.get_size_inches() * figure.dpi
+    w = size[0]
+    h = size[1]
+    origin = axis.get_position()
+    originx_pct = origin.get_points()[0][0]
+    originy_pct = origin.get_points()[0][1]
+    maxx_pct = origin.get_points()[1][0]
+    maxy_pct = origin.get_points()[1][1]
+    xlim_low = axis.get_xlim()[0]
+    xlim_hi = axis.get_xlim()[1]
+    ylim_low = axis.get_ylim()[0]
+    ylim_hi = axis.get_ylim()[1]
+    xpix = w * (maxx_pct - originx_pct)
+    ypix = h * (maxy_pct - originy_pct)
+    xrange = xlim_hi - xlim_low
+    yrange = ylim_hi - ylim_low
+    r = (xrange / xpix) / (yrange / ypix)  # dydx*r where r= (xrange/xpix)/(yrange/ypix)
+    return r
 
 def _interval(start, stop, count, inc=[1,2,5]):
     """Auto-generate conveniently spaced values in a range
@@ -142,7 +169,9 @@ def Tp(mpobj, fig=None, ax=None, Tlim=None, plim=None, dlines=None):
     
     if dlines is None:
         dlim = [dc/1000., dc]
-        DLINES = np.flip(_log_interval(dlim[0], dlim[1], 10), 0)
+        DLINES = np.flip(_log_interval(dlim[0], dlim[1], 10,[0,1,2,3,4,5,6,7,8,9]), 0)
+        #DLINES = np.flip(1/np.logspace(-3, 1, 10))
+        DLINES = np.flip(1 / _log_interval(0.001, 10, 10,[0,1,2,3,4,5,6,7,8,9]))
     else:
         DLINES = np.asarray(dlines)
     
@@ -182,7 +211,7 @@ def Tp(mpobj, fig=None, ax=None, Tlim=None, plim=None, dlines=None):
     return ax
 
 
-def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=None):
+def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=None, hlines=None):
     """Temperature-enthalpy diagram
     ax = TS(mpobj)
     
@@ -212,7 +241,7 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
     if dlines is None:
         dlim = [dc/1000., 2*dc]
         DLINES = np.flip(_log_interval(dlim[0], dlim[1], 10), 0)
-        DLINES = np.flip(1/np.logspace(-3,1,10))
+        #DLINES = np.flip(1/np.logspace(-3,1,10))
     else:
         DLINES = np.asarray(dlines)
     
@@ -224,12 +253,11 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
     else:
         PLINES = np.asarray(plines)
 
-    if True: #hlines is None
-        hlim = [100,5000]
+    if hlines is None:
+        hlim = [mpobj.h(T=1.05*Tlim[0],p=0.95*plim[1]),mpobj.h(T=0.95*Tlim[1],p=0.95*plim[1])]
         HLINES = np.linspace(hlim[0],hlim[1],15)
     else:
-        pass
-        #HLINES = np.asarray(hlines)
+        HLINES = np.asarray(hlines)
 
     Tn = (Tc - Tt) / 1000.
 
@@ -254,20 +282,21 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
 
 
     # Lines of constant enthalpy
-    for h in HLINES:
+    for h in HLINES[:]: #Copy HLINES for the iteration, so that we can remove ones that fail
         try:
-            psp = np.logspace(-2, 3, 20)
+            #psp = np.logspace(-2, 3, 20)
+            psp = np.logspace(np.log10(1e-5*plim[1]),np.log10(0.95*plim[1]),20)
             Th, xh = mpobj.T_h(p=psp, h=h, quality=True)
             sh = mpobj.s(T=Th, p=psp)
-            if max(xh) > 0:
+            if (max(xh) > 0):
                 sh[xh > 0] = mpobj.s(T=Th[xh > 0], x=xh[xh > 0])
             ax.plot(sh, Th,
                     config['h_style'],
                     color=config['h_color'],
                     lw=config['h_width'])
-        except:
-            print('h=',h,' failed')
-
+        except pm.utility.PMAnalysisError:
+            HLINES.remove(h)
+            print('h=',h,' failed due to iter1_() guess error')
 
     # Generate the dome
     T = np.linspace(Tt+Tn,Tc-Tn,101)
@@ -282,37 +311,23 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
             color=config['sat_color'],
             lw=config['sat_width'])
 
-    #Ratio of plot axes
-    size = fig.get_size_inches() * fig.dpi
-    w = size[0]
-    h = size[1]
-    origin = ax.get_position()
-    originx_pct = origin.get_points()[0][0]
-    originy_pct = origin.get_points()[0][1]
-    maxx_pct = origin.get_points()[1][0]
-    maxy_pct = origin.get_points()[1][1]
-    xlim_low = ax.get_xlim()[0]
-    xlim_hi = ax.get_xlim()[1]
-    ylim_low = ax.get_ylim()[0]
-    ylim_hi = ax.get_ylim()[1]
-    xpix = w*(maxx_pct-originx_pct)
-    ypix = h*(maxy_pct-originy_pct)
-    xrange = xlim_hi-xlim_low
-    yrange = ylim_hi-ylim_low
-    r = (xrange/xpix)/(yrange/ypix)#dydx*r where r= (xrange/xpix)/(yrange/ypix)
-
+    # Get the scaling ratio for slopes
+    r = _slope_ratio(fig,ax)
 
     # LABELS of constant pressure
-    dT = 0.8*(Tc-Tt)/len(PLINES)
     for p in PLINES:
+        if p==PLINES[0] or p==PLINES[-1]:
+            unit = '%s' % (pm.config['unit_pressure'])
+        else:
+            unit = ''
         T = Tlim[1]
         s = mpobj.s(T=T,p=p)
-        Tl = T - 300
+        Tl = T - (Tlim[1] - Tlim[0]) /4
         sl = mpobj.s(T=Tl,p=p)
         dTds = (T-Tl)/(s-sl)
         ang = np.arctan(dTds*r)#*1/1.4*s/(Tlim[1]-Tlim[0]))
         slope = np.degrees(ang)
-        label = '%s%s'%(str(p),pm.config['unit_pressure'])
+        label = '%s '%(str(p))+unit
         ax.text(s, T, label,
                 color=config['p_color'],
                 ha='right',
@@ -321,28 +336,36 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
                 rotation=slope[0])
         
     # LABELS of constant volume
-    T = Tlim[1] - 0.05*(Tlim[1] - Tlim[0])
-    dT = 0.8*(Tc - Tt)/len(DLINES)
+    T = Tlim[1] - .25*(Tlim[1] - Tlim[0]) #T position
     for d in DLINES:
+        if d==DLINES[0] or d==DLINES[-1]:
+            unit = '%s/%s' % (pm.config['unit_volume'], pm.config['unit_matter'])
+        else:
+            unit = ''
         s = mpobj.s(T, d=d)
-        Tl = T - 300
+        Tl = T - (Tlim[1] - Tlim[0]) /4
         sl = mpobj.s(T=Tl, d=d)
         dTds = (T - Tl) / (s - sl)
         ang = np.arctan(dTds * r)  # *1/1.4*s/(Tlim[1]-Tlim[0]))
         slope = np.degrees(ang)
-        label = '%0.2g%s/%s'%(1/d,pm.config['unit_volume'],pm.config['unit_matter'],)
+        label = '%0.2g '%(1/d)+unit
         ax.text(s, T, label,
                 color=config['d_color'],
                 ha='right',
                 va='top',
                 rotation=slope[0])
-        T-=dT
+        #T-=dT
 
     # LABELS of constant enthalpy
     dT = 0.8 * (Tc - Tt) / len(HLINES)
     for h in HLINES:
-        p = 0.01
-        pl = 0.1
+        if h==HLINES[0] or h==HLINES[-1]:
+            unit = '%s/%s' % (pm.config['unit_energy'], pm.config['unit_matter'])
+        else:
+            unit = ''
+
+        p = psp[0]
+        pl = psp[2]
         try:
             T, x = mpobj.T_h(p=p, h=h, quality=True)
             s = mpobj.s(T=T, p=p)
@@ -355,11 +378,11 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
             dTds = (T - Tl) / (s - sl)
             ang = np.arctan(dTds * r)  # *1/1.4*s/(Tlim[1]-Tlim[0]))
             slope = np.degrees(ang)
-            label = '%d%s/%s' % (h, pm.config['unit_energy'], pm.config['unit_matter'],)
+            label = '%d ' % (h) + unit
             ax.text(s, T, label,
                     color=config['h_color'],
-                    ha='center',
-                    va='center',
+                    ha='left',
+                    va='top',
                     rotation=slope[0])
         except:
             print('h=',h,' failed')
