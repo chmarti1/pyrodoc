@@ -22,6 +22,9 @@ config = {
     'd_color':[0.5,0.5,1.0],
     'd_width':1,
     'd_style':'-',
+    'h_color':[0.5,1.0,0.5],
+    'h_width':1,
+    'h_style':'-',
 }
 
 
@@ -209,6 +212,7 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
     if dlines is None:
         dlim = [dc/1000., 2*dc]
         DLINES = np.flip(_log_interval(dlim[0], dlim[1], 10), 0)
+        DLINES = np.flip(1/np.logspace(-3,1,10))
     else:
         DLINES = np.asarray(dlines)
     
@@ -219,6 +223,13 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
         PLINES = _log_interval(plim[0], plim[1], 10)
     else:
         PLINES = np.asarray(plines)
+
+    if True: #hlines is None
+        hlim = [100,5000]
+        HLINES = np.linspace(hlim[0],hlim[1],15)
+    else:
+        pass
+        #HLINES = np.asarray(hlines)
 
     Tn = (Tc - Tt) / 1000.
 
@@ -240,7 +251,24 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
                 config['d_style'],
                 color=config['d_color'],
                 lw=config['d_width'])
-                
+
+
+    # Lines of constant enthalpy
+    for h in HLINES:
+        try:
+            psp = np.logspace(-2, 3, 20)
+            Th, xh = mpobj.T_h(p=psp, h=h, quality=True)
+            sh = mpobj.s(T=Th, p=psp)
+            if max(xh) > 0:
+                sh[xh > 0] = mpobj.s(T=Th[xh > 0], x=xh[xh > 0])
+            ax.plot(sh, Th,
+                    config['h_style'],
+                    color=config['h_color'],
+                    lw=config['h_width'])
+        except:
+            print('h=',h,' failed')
+
+
     # Generate the dome
     T = np.linspace(Tt+Tn,Tc-Tn,101)
     ssL,ssV = mpobj.ss(T)
@@ -253,37 +281,90 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
             ls=config['sat_style'],
             color=config['sat_color'],
             lw=config['sat_width'])
-                
+
+    #Ratio of plot axes
+    size = fig.get_size_inches() * fig.dpi
+    w = size[0]
+    h = size[1]
+    origin = ax.get_position()
+    originx_pct = origin.get_points()[0][0]
+    originy_pct = origin.get_points()[0][1]
+    maxx_pct = origin.get_points()[1][0]
+    maxy_pct = origin.get_points()[1][1]
+    xlim_low = ax.get_xlim()[0]
+    xlim_hi = ax.get_xlim()[1]
+    ylim_low = ax.get_ylim()[0]
+    ylim_hi = ax.get_ylim()[1]
+    xpix = w*(maxx_pct-originx_pct)
+    ypix = h*(maxy_pct-originy_pct)
+    xrange = xlim_hi-xlim_low
+    yrange = ylim_hi-ylim_low
+    r = (xrange/xpix)/(yrange/ypix)#dydx*r where r= (xrange/xpix)/(yrange/ypix)
+
+
     # LABELS of constant pressure
     dT = 0.8*(Tc-Tt)/len(PLINES)
     for p in PLINES:
-        if p<pc:
-            T = mpobj.Ts(p)
-            ss = mpobj.ss(T)
-            s = 0.7*ss[0]+0.3*ss[1]
-        else:
-            T = Tc + (Tlim[1]-Tc) * (p-pc)/(plim[1]-pc)
-            s = mpobj.s(T=T,p=p)
+        T = Tlim[1]
+        s = mpobj.s(T=T,p=p)
+        Tl = T - 300
+        sl = mpobj.s(T=Tl,p=p)
+        dTds = (T-Tl)/(s-sl)
+        ang = np.arctan(dTds*r)#*1/1.4*s/(Tlim[1]-Tlim[0]))
+        slope = np.degrees(ang)
         label = '%s%s'%(str(p),pm.config['unit_pressure'])
         ax.text(s, T, label,
                 color=config['p_color'],
-                ha='center',
-                va='center',
-                backgroundcolor='w')
+                ha='right',
+                va='top',
+                #backgroundcolor='w',
+                rotation=slope[0])
         
-    # LABELS of constant density
+    # LABELS of constant volume
     T = Tlim[1] - 0.05*(Tlim[1] - Tlim[0])
     dT = 0.8*(Tc - Tt)/len(DLINES)
     for d in DLINES:
         s = mpobj.s(T, d=d)
-        label = '%s%s/%s'%(str(d),pm.config['unit_matter'],pm.config['unit_volume'])
+        Tl = T - 300
+        sl = mpobj.s(T=Tl, d=d)
+        dTds = (T - Tl) / (s - sl)
+        ang = np.arctan(dTds * r)  # *1/1.4*s/(Tlim[1]-Tlim[0]))
+        slope = np.degrees(ang)
+        label = '%0.2g%s/%s'%(1/d,pm.config['unit_volume'],pm.config['unit_matter'],)
         ax.text(s, T, label,
                 color=config['d_color'],
-                ha='center',
-                va='center',
-                backgroundcolor='w')
+                ha='right',
+                va='top',
+                rotation=slope[0])
         T-=dT
-        
+
+    # LABELS of constant enthalpy
+    dT = 0.8 * (Tc - Tt) / len(HLINES)
+    for h in HLINES:
+        p = 0.01
+        pl = 0.1
+        try:
+            T, x = mpobj.T_h(p=p, h=h, quality=True)
+            s = mpobj.s(T=T, p=p)
+            if x > 0:
+                s = mpobj.s(T=T, x=x)
+            Tl, xl = mpobj.T_h(p=pl, h=h, quality=True)
+            sl = mpobj.s(T=Tl, p=pl)
+            if xl > 0:
+                sl = mpobj.s(T=Tl, x=xl)
+            dTds = (T - Tl) / (s - sl)
+            ang = np.arctan(dTds * r)  # *1/1.4*s/(Tlim[1]-Tlim[0]))
+            slope = np.degrees(ang)
+            label = '%d%s/%s' % (h, pm.config['unit_energy'], pm.config['unit_matter'],)
+            ax.text(s, T, label,
+                    color=config['h_color'],
+                    ha='center',
+                    va='center',
+                    rotation=slope[0])
+        except:
+            print('h=',h,' failed')
+
+
     # Label the s-axis
     ax.set_xlabel('s [%s/(%s%s)]'%(
             pm.config['unit_energy'],
