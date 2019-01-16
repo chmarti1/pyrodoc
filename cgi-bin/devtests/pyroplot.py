@@ -55,6 +55,34 @@ def _slope_ratio(figure,axis):
     r = (xrange / xpix) / (yrange / ypix)  # dydx*r where r= (xrange/xpix)/(yrange/ypix)
     return r
 
+def _slope_ratio_logx(figure,axis):
+    """Get the ratio of the mathematical derivative to the geometric
+    slope on any given figure axis, based on a semilog-x scale.
+
+    ratio = _slope_ratio_logx(figure,axis)
+
+    Result can be used as: geom_slope = math_slope * ratio"""
+
+    # Ratio of plot axes
+    size = figure.get_size_inches() * figure.dpi
+    w = size[0]
+    h = size[1]
+    origin = axis.get_position()
+    originx_pct = origin.get_points()[0][0]
+    originy_pct = origin.get_points()[0][1]
+    maxx_pct = origin.get_points()[1][0]
+    maxy_pct = origin.get_points()[1][1]
+    xlim_low = axis.get_xlim()[0]
+    xlim_hi = axis.get_xlim()[1]
+    ylim_low = axis.get_ylim()[0]
+    ylim_hi = axis.get_ylim()[1]
+    xpix = w * (maxx_pct - originx_pct)
+    ypix = h * (maxy_pct - originy_pct)
+    xrange = np.log10(xlim_hi/xlim_low)
+    yrange = ylim_hi - ylim_low
+    r = (xrange / xpix) / (yrange / ypix)  # dydx*r where r= (xrange/xpix)/(yrange/ypix)
+    return r
+
 def _interval(start, stop, count, inc=[1,2,5]):
     """Auto-generate conveniently spaced values in a range
     array = _interval(start, stop, count)
@@ -136,6 +164,45 @@ up to the nearest integer multiple of the selected incrementer.
     return out
 
 
+def _dlines(mpobj):
+    """Returns the default density lines for a given mpobject"""
+    Tc,pc,dc = mpobj.critical(density=True)
+    dlim = [dc / 1000., 2 * dc]
+    DLINES = np.flip(_log_interval(dlim[0], dlim[1], 10, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]), 0)
+    DLINES = np.flip(1/np.logspace(-3,1,10))
+    return DLINES
+
+def _plines(mpobj):
+    """Returns the default pressure lines for a given mpobject"""
+    plim = mpobj.plim()
+    Tt,pt = mpobj.triple()
+    # Force plim to be greater than pt
+    plim[0] = max(pt, plim[0])
+    PLINES = _log_interval(plim[0], plim[1], 10)
+    return PLINES
+
+def _hlines(mpobj):
+    """Returns the default enthalpy lines for a given mpobject"""
+    plim = mpobj.plim()
+    Tt,pt = mpobj.triple()
+    # Force plim to be greater than pt
+    plim[0] = max(pt, plim[0])
+    Tlim = mpobj.Tlim()
+    hlim = [mpobj.h(T=1.05 * Tlim[0], p=0.95 * plim[1]), mpobj.h(T=0.95 * Tlim[1], p=0.95 * plim[1])]
+    HLINES = np.linspace(hlim[0], hlim[1], 15)
+    return HLINES
+
+def _slines(mpobj):
+    """Returns the default entropy lines for a given mpobject"""
+    plim = mpobj.plim()
+    Tt,pt = mpobj.triple()
+    # Force plim to be greater than pt
+    plim[0] = max(pt, plim[0])
+    Tlim = mpobj.Tlim()
+    slim = [mpobj.s(T=1.05 * Tlim[0], p= 1.05* plim[0]), mpobj.s(T=0.95 * Tlim[1], p=1.05 * plim[0])]
+    SLINES = np.linspace(slim[0], slim[1], 15)
+    return SLINES
+
 def Tp(mpobj, fig=None, ax=None, Tlim=None, plim=None, dlines=None):
     """Temperature-pressure diagram
 """
@@ -168,10 +235,8 @@ def Tp(mpobj, fig=None, ax=None, Tlim=None, plim=None, dlines=None):
     plim[0] = max(plim[0], pt)
     
     if dlines is None:
-        dlim = [dc/1000., dc]
-        DLINES = np.flip(_log_interval(dlim[0], dlim[1], 10,[0,1,2,3,4,5,6,7,8,9]), 0)
-        #DLINES = np.flip(1/np.logspace(-3, 1, 10))
-        DLINES = np.flip(1 / _log_interval(0.001, 10, 10,[0,1,2,3,4,5,6,7,8,9]))
+        dlim = [dc / 1000., dc]
+        DLINES = np.flip(_log_interval(dlim[0], dlim[1], 10), 0)
     else:
         DLINES = np.asarray(dlines)
     
@@ -234,28 +299,24 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
     
     if Tlim is None:
         Tlim = mpobj.Tlim()
-    
+
+    plim = mpobj.plim()
+
     Tc,pc,dc = mpobj.critical(density=True)
     Tt,pt = mpobj.triple()
     
     if dlines is None:
-        dlim = [dc/1000., 2*dc]
-        DLINES = np.flip(_log_interval(dlim[0], dlim[1], 10), 0)
-        #DLINES = np.flip(1/np.logspace(-3,1,10))
+        DLINES = _dlines(mpobj)
     else:
         DLINES = np.asarray(dlines)
     
     if plines is None:
-        plim = mpobj.plim()
-        # Force plim to be greater than pt
-        plim[0] = max(pt, plim[0])
-        PLINES = _log_interval(plim[0], plim[1], 10)
+        PLINES = _plines(mpobj)
     else:
         PLINES = np.asarray(plines)
 
     if hlines is None:
-        hlim = [mpobj.h(T=1.05*Tlim[0],p=0.95*plim[1]),mpobj.h(T=0.95*Tlim[1],p=0.95*plim[1])]
-        HLINES = np.linspace(hlim[0],hlim[1],15)
+        HLINES = _hlines(mpobj)
     else:
         HLINES = np.asarray(hlines)
 
@@ -284,7 +345,6 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
     # Lines of constant enthalpy
     for h in HLINES[:]: #Copy HLINES for the iteration, so that we can remove ones that fail
         try:
-            #psp = np.logspace(-2, 3, 20)
             psp = np.logspace(np.log10(1e-5*plim[1]),np.log10(0.95*plim[1]),20)
             Th, xh = mpobj.T_h(p=psp, h=h, quality=True)
             sh = mpobj.s(T=Th, p=psp)
@@ -401,5 +461,179 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
     # Label the figure
     ax.set_title('%s T-S Diagram'%(mpobj.data['id']))
         
+    plt.show(block=False)
+    return ax
+
+
+def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=None, hlines=None):
+    """Temperature-enthalpy diagram
+    ax = TS(mpobj)
+
+"""
+    # Select a figure
+    if fig is None:
+        if ax is not None:
+            fig = ax.get_figure()
+        else:
+            fig = plt.figure()
+    elif isinstance(fig, matplotlib.figure.Figure):
+        pass
+    else:
+        fig = plt.figure(fig)
+
+    # Select an axes
+    if ax is None:
+        fig.clf()
+        ax = fig.add_subplot(111)
+
+    if Tlim is None:
+        Tlim = mpobj.Tlim()
+
+    plim = mpobj.plim()
+
+    Tc, pc, dc = mpobj.critical(density=True)
+    Tt, pt = mpobj.triple()
+
+    if slines is None:
+        SLINES = _slines(mpobj)
+    else:
+        SLINES = np.asarray(slines)
+
+    if plines is None:
+        PLINES = _plines(mpobj)
+    else:
+        PLINES = np.asarray(plines)
+
+    if hlines is None:
+        HLINES = _hlines(mpobj)
+    else:
+        HLINES = np.asarray(hlines)
+
+    Tn = (Tc - Tt) / 1000.
+
+    # Generate lines
+    T = np.linspace(Tlim[0] + Tn, Tlim[1] - Tn, 151)
+
+    # Lines of constant pressure
+    for p in PLINES:
+        d = mpobj.d(T=T, p=p)
+        ax.semilogx(1/d, T,
+                config['p_style'],
+                color=config['p_color'],
+                lw=config['p_width'])
+
+    # Lines of constant entropy
+    for s in SLINES[:]:
+        try:
+            psp = np.logspace(np.log10(1e-5 * plim[1]), np.log10(0.95 * plim[1]), 20)
+            T, xh = mpobj.T_s(p=psp, s=s, quality=True)
+            v = 1 / mpobj.d(T=T, p=psp)
+            if (max(xh) > 0):
+                v[xh > 0] = 1 / mpobj.d(T=T[xh > 0], x=xh[xh > 0])
+            ax.plot(v, T,
+                    config['d_style'],
+                    color=config['d_color'],
+                    lw=config['d_width'])
+        except pm.utility.PMAnalysisError:
+            #SLINES.remove(s)
+            print('s=', s, ' failed due to iter1_() guess error')
+
+    # Lines of constant enthalpy
+    for h in HLINES[:]:  # Copy HLINES for the iteration, so that we can remove ones that fail
+        try:
+            psp = np.logspace(np.log10(1e-5*plim[1]),np.log10(0.95*plim[1]),20)
+            Th, xh = mpobj.T_h(p=psp, h=h, quality=True)
+            vh = 1/mpobj.d(T=Th, p=psp)
+            if (max(xh) > 0):
+                vh[xh > 0] = 1/mpobj.d(T=Th[xh > 0], x=xh[xh > 0])
+            ax.plot(vh, Th,
+                    config['h_style'],
+                    color=config['h_color'],
+                    lw=config['h_width'])
+        except pm.utility.PMAnalysisError:
+            HLINES.remove(h)
+            print('h=',h,' failed due to iter1_() guess error')
+
+    # Generate the dome
+    T = np.linspace(Tt + Tn, Tc - Tn, 101)
+    dsL, dsV = mpobj.ds(T)
+
+    ax.semilogx(1/dsL, T,
+            ls=config['sat_style'],
+            color=config['sat_color'],
+            lw=config['sat_width'])
+    ax.semilogx(1/dsV, T,
+            ls=config['sat_style'],
+            color=config['sat_color'],
+            lw=config['sat_width'])
+
+    # Get the scaling ratio for slopes
+    r = _slope_ratio_logx(fig, ax)
+
+    # LABELS of constant pressure
+    for p in PLINES:
+        if p == PLINES[0] or p == PLINES[-1]:
+            unit = '%s' % (pm.config['unit_pressure'])
+        else:
+            unit = ''
+        T = Tlim[1]
+        v = 1/mpobj.d(T=T, p=p)
+        Tl = T - (Tlim[1] - Tlim[0]) / 4
+        vl = 1/mpobj.d(T=Tl, p=p)
+        dTdv = (T - Tl) / np.log10(v/vl)
+        ang = np.arctan(dTdv * r)  # *1/1.4*s/(Tlim[1]-Tlim[0]))
+        slope = np.degrees(ang)
+        label = '%s ' % (str(p)) + unit
+        ax.text(v, T, label,
+                color=config['p_color'],
+                ha='right',
+                va='top',
+                # backgroundcolor='w',
+                rotation=slope[0])
+
+        # LABELS of constant enthalpy
+        dT = 0.8 * (Tc - Tt) / len(HLINES)
+        for h in HLINES:
+            if h == HLINES[0] or h == HLINES[-1]:
+                unit = '%s/%s' % (pm.config['unit_energy'], pm.config['unit_matter'])
+            else:
+                unit = ''
+
+            p = psp[0]
+            pl = psp[2]
+            try:
+                T, x = mpobj.T_h(p=p, h=h, quality=True)
+                v = 1/mpobj.d(T=T, p=p)
+                if x > 0:
+                    v = 1/mpobj.d(T=T, x=x)
+                Tl, xl = mpobj.T_h(p=pl, h=h, quality=True)
+                vl = 1/mpobj.d(T=Tl, p=pl)
+                if xl > 0:
+                    vl = 1/mpobj.d(T=Tl, x=xl)
+                dTdv = (T - Tl) / np.log10(v/vl)
+                ang = np.arctan(dTdv * r)  # *1/1.4*s/(Tlim[1]-Tlim[0]))
+                slope = np.degrees(ang)
+                label = '%d ' % (h) + unit
+                ax.text(v, T, label,
+                        color=config['h_color'],
+                        ha='left',
+                        va='top',
+                        rotation=slope[0])
+            except:
+                print('h=', h, ' failed')
+
+        # Label the v-axis
+    ax.set_xlabel('v [%s/%s]' % (
+        pm.config['unit_volume'],
+        pm.config['unit_matter'],
+        ))
+
+    # Label the T-axis
+    ax.set_ylabel('T [%s]' % (
+        pm.config['unit_temperature']))
+
+    # Label the figure
+    ax.set_title('%s T-v Diagram' % (mpobj.data['id']))
+
     plt.show(block=False)
     return ax

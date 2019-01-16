@@ -6,5 +6,6 @@ R134 = pm.get('mp.C2H2F4')
 
 pm.config['unit_pressure'] = 'MPa'
 
-pyroplot.Ts(R134)
-pyroplot.Ts(water)
+#pyroplot.Ts(R134)
+#pyroplot.Ts(water)
+pyroplot.Tv(water)
