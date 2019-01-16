@@ -8,4 +8,6 @@ pm.config['unit_pressure'] = 'MPa'
 
 #pyroplot.Ts(R134)
 #pyroplot.Ts(water)
-pyroplot.Tv(water)
+#pyroplot.Tv(water)
+#pyroplot.Tv(R134)
+pyroplot.pv(water)
