@@ -30,7 +30,7 @@ config = {
     's_style': '-',
 }
 
-def _slope_ratio(figure,axis,scaling='linear'):
+def _slope_ratio(axis, scaling='linear'):
     """
     Get the ratio of the mathematical derivative to the geometric
     slope on any given figure axis.
@@ -42,6 +42,8 @@ def _slope_ratio(figure,axis,scaling='linear'):
     :param scaling: one of 'linear','logx','logy','loglog'
     :return: the ratio to be used in the formula
     """
+
+    figure = axis.get_figure()
 
     # Ratio of plot axes
     size = figure.get_size_inches() * figure.dpi
@@ -204,9 +206,19 @@ def _dlines(mpobj,n=10):
     """Returns the default density lines for a given mpobject"""
     Tc,pc,dc = mpobj.critical(density=True)
     dlim = [dc / 1000., 2 * dc]
-    DLINES = np.flip(_log_interval(dlim[0], dlim[1], n, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]), 0)
+    vlim = [1/dlim[1],1/dlim[0]]
+    #DLINES = np.flip(_log_interval(dlim[0], dlim[1], n, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]), 0)
     DLINES = np.flip(1/np.logspace(-3,1,n))
+    DLINES = np.flip(1/_log_interval(vlim[0], vlim[1], n, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),0)
     return DLINES
+
+def _vlines(mpobj,n=10):
+    Tc, pc, dc = mpobj.critical(density=True)
+    dlim = [dc / 1000., 2 * dc]
+    vlim = [1 / dlim[1], 1 / dlim[0]]
+    VLINES = _log_interval(vlim[0], vlim[1], n, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    VLINES = _log_interval(0.001, 10, n)
+    return VLINES
 
 def _plines(mpobj, n=10):
     """Returns the default pressure lines for a given mpobject"""
@@ -231,7 +243,8 @@ def _hlines(mpobj, n=15):
     plim[0] = max(pt, plim[0])
     Tlim = mpobj.Tlim()
     hlim = [mpobj.h(T=1.05 * Tlim[0], p=0.95 * plim[1]), mpobj.h(T=0.95 * Tlim[1], p=0.95 * plim[1])]
-    HLINES = np.linspace(hlim[0], hlim[1], n)
+    #HLINES = np.linspace(hlim[0], hlim[1], n)
+    HLINES = _interval(hlim[0], hlim[1], n)
     return HLINES
 
 def _slines(mpobj,n=15):
@@ -243,6 +256,7 @@ def _slines(mpobj,n=15):
     Tlim = mpobj.Tlim()
     slim = [mpobj.s(T=1.05 * Tlim[0], p= 0.99* plim[1]), mpobj.s(T=0.95 * Tlim[1], p=1.05 * plim[0])]
     SLINES = np.linspace(slim[0], slim[1], n)
+    #SLINES = _interval(slim[0], slim[1], n)
     return SLINES
 
 def _labellines(axis,LINES, LABELS,scalingratio,unitlabel,numformat,location,color):
@@ -348,7 +362,7 @@ def Tp(mpobj, fig=None, ax=None, Tlim=None, plim=None, dlines=None):
     return ax
 
 
-def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=None, hlines=None):
+def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, vlines=None, plines=None, hlines=None):
     """Temperature-enthalpy diagram
     ax = TS(mpobj)
     
@@ -358,7 +372,7 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
         if ax is not None:
             fig = ax.get_figure()
         else:
-            fig = plt.figure()
+            fig = plt.figure(1,(11,8))
     elif isinstance(fig, matplotlib.figure.Figure):
         pass
     else:
@@ -378,10 +392,11 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
     plim = mpobj.plim()
     plim[0] = max(pt, plim[0])
 
-    if dlines is None:
-        DLINES = _dlines(mpobj)
+    if vlines is None:
+        #DLINES = _dlines(mpobj)
+        VLINES = _vlines(mpobj)
     else:
-        DLINES = np.asarray(dlines)
+        VLINES = np.asarray(vlines)
     
     if plines is None:
         PLINES = _plines(mpobj)
@@ -409,14 +424,14 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
         PLABELS[p] = _get_slope(s, T, 1, 0.1, 'linear')
     
     # Lines of constant density
-    DLABELS = {}
-    for d in DLINES:
-        s = mpobj.s(T=T,d=d)
+    VLABELS = {}
+    for v in VLINES:
+        s = mpobj.s(T=T,d=1/v)
         ax.plot(s,T,
                 config['d_style'],
                 color=config['d_color'],
                 lw=config['d_width'])
-        DLABELS[d] = _get_slope(s, T, 0.7, 0.1, 'linear')
+        VLABELS[v] = _get_slope(s, T, 0.7, 0.1, 'linear')
 
 
     # Lines of constant enthalpy
@@ -451,7 +466,7 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
             lw=config['sat_width'])
 
     # Get the scaling ratio for slopes
-    r = _slope_ratio(fig,ax)
+    r = _slope_ratio(ax)
 
     # LABELS of constant pressure
     units = '%s' % (pm.config['unit_pressure'])
@@ -465,7 +480,7 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
     loc = ('right', 'top')
     color = config['d_color']
     numformat = '%0.3g '
-    _labellines(ax, DLINES, DLABELS, r, units, numformat, loc, color)
+    _labellines(ax, VLINES, VLABELS, r, units, numformat, loc, color)
         
     # LABELS of constant enthalpy
     units = '%s/%s' % (pm.config['unit_energy'], pm.config['unit_matter'])
@@ -486,7 +501,7 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, dlines=None, plines=N
         
     # Label the figure
     ax.set_title('%s T-S Diagram'%(mpobj.data['id']))
-        
+
     plt.show(block=False)
     return ax
 
@@ -618,7 +633,7 @@ def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=N
             lw=config['sat_width'])
 
     # Get the scaling ratio for slopes
-    r = _slope_ratio(fig, ax,scaling='logx')
+    r = _slope_ratio(ax, scaling='logx')
 
     # LABELS of constant pressure
     units = '%s' % (pm.config['unit_pressure'])
@@ -771,7 +786,7 @@ def pv(mpobj, fig=None, ax=None, satlines=True, plim=None, slines=None, Tlines=N
             lw=config['sat_width'])
 
     # Get the scaling ratio for slopes
-    r = _slope_ratio(fig, ax, scaling='loglog')
+    r = _slope_ratio(ax, scaling='loglog')
 
     # LABELS of constant temperature
     units = '%s' % (pm.config['unit_temperature'])
