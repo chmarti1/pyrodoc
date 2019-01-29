@@ -28,6 +28,7 @@ config = {
     's_color': [0.5, 0.5, 1.0],
     's_width': 1,
     's_style': '-',
+    'size': (8,6)
 }
 
 def _slope_ratio(axis, scaling='linear'):
@@ -362,7 +363,7 @@ def Tp(mpobj, fig=None, ax=None, Tlim=None, plim=None, dlines=None):
     return ax
 
 
-def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, vlines=None, plines=None, hlines=None):
+def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, vlines=None, plines=None, hlines=None, size=config['size']):
     """Temperature-enthalpy diagram
     ax = TS(mpobj)
     
@@ -372,7 +373,7 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, vlines=None, plines=N
         if ax is not None:
             fig = ax.get_figure()
         else:
-            fig = plt.figure(1,(11,8))
+            fig = plt.figure(figsize=size)
     elif isinstance(fig, matplotlib.figure.Figure):
         pass
     else:
@@ -506,7 +507,7 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, vlines=None, plines=N
     return ax
 
 
-def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=None, hlines=None):
+def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=None, hlines=None, size=config['size']):
     """Temperature-volume diagram
     ax = Tv(mpobj)
 
@@ -516,7 +517,7 @@ def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=N
         if ax is not None:
             fig = ax.get_figure()
         else:
-            fig = plt.figure()
+            fig = plt.figure(figsize=size)
     elif isinstance(fig, matplotlib.figure.Figure):
         pass
     else:
@@ -551,7 +552,7 @@ def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=N
         PLINES = np.asarray(plines)
 
     if hlines is None:
-        HLINES = _hlines(mpobj,n=10)
+        HLINES = _hlines(mpobj,n=5)
     else:
         HLINES = np.asarray(hlines)
 
@@ -605,7 +606,7 @@ def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=N
     HLABELS = {}
     for h in np.copy(HLINES):  # Copy HLINES for the iteration, so that we can remove ones that fail
         try:
-            psp = np.logspace(np.log10(1e-5*plim[1]),np.log10(0.95*plim[1]),20)
+            psp = np.logspace(np.log10(1e-5*plim[1]),np.log10(0.95*plim[1]),25)
             T, xh = mpobj.T_h(p=psp, h=h, quality=True)
             v = 1/mpobj.d(T=T, p=psp)
             if (max(xh) > 0):
@@ -614,7 +615,7 @@ def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=N
                     config['h_style'],
                     color=config['h_color'],
                     lw=config['h_width'])
-            HLABELS[h] = _get_slope(v, T, 0, 0.1, 'logx')
+            HLABELS[h] = _get_slope(v, T, 1, 0.05, 'logx')
         except pm.utility.PMAnalysisError:
             HLINES = np.setdiff1d(HLINES,h) #removes h
             print('h=',h,' failed due to iter1_() guess error')
@@ -644,7 +645,7 @@ def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=N
 
     # LABELS of constant enthalpy
     units = '%s/%s' % (pm.config['unit_energy'], pm.config['unit_matter'])
-    loc = ('left','top')
+    loc = ('right','top')
     color = config['h_color']
     numformat = '%d '
     _labellines(ax,HLINES,HLABELS,r,units,numformat,loc,color)
@@ -672,7 +673,7 @@ def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=N
     plt.show(block=False)
     return ax
 
-def pv(mpobj, fig=None, ax=None, satlines=True, plim=None, slines=None, Tlines=None, hlines=None):
+def pv(mpobj, fig=None, ax=None, satlines=True, plim=None, slines=None, Tlines=None, hlines=None, size=config['size']):
     """Pressure volume diagram
     ax = pv(mpobj)
 
@@ -682,7 +683,7 @@ def pv(mpobj, fig=None, ax=None, satlines=True, plim=None, slines=None, Tlines=N
         if ax is not None:
             fig = ax.get_figure()
         else:
-            fig = plt.figure()
+            fig = plt.figure(figsize=size)
     elif isinstance(fig, matplotlib.figure.Figure):
         pass
     else:
@@ -747,7 +748,7 @@ def pv(mpobj, fig=None, ax=None, satlines=True, plim=None, slines=None, Tlines=N
                     config['d_style'],
                     color=config['d_color'],
                     lw=config['d_width'])
-            SLABELS[s] = _get_slope(v, p, 0.1, 0.1, 'loglog')
+            SLABELS[s] = _get_slope(v, p, 0.01, 0.1, 'loglog')
         except pm.utility.PMAnalysisError:
             SLINES = np.setdiff1d(SLINES, s)  # removes s
             print('s=', s, ' failed due to iter1_() guess error')
