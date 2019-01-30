@@ -29,8 +29,8 @@ unitline = P.find_line('<!-- units -->')+4 #line where we begin the unit selecto
 resline = P.find_line('<!-- results -->')+1 #line where we begin the results
 errline = P.find_line('<!-- errors -->') +1 #line where we insert errors
 chartline = P.find_line('<!-- charts -->')+1 #line where we begin inserting a chart
-#coordsline = P.find_line('<!-- coordinates -->')+1 #line where we begin inserting chart coords
-coordsline = 112
+coordsline = P.find_line('<!-- coordinates -->')+42 #line where we begin inserting chart coords
+#coordsline = 112
 
 #Try to parse the user's inputs
 try:
