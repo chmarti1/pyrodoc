@@ -1,6 +1,9 @@
 import pmcgi
 import os
 import pyromat as pm
+import contextlib
+import io
+import sys
 import numpy as np
 import pyromat.solve as pmsolve
 
@@ -50,3 +53,13 @@ def setinputs(page,settings,columns,inputline):
     for setting,column in zip(settings,columns):
         page.insert(setting,(inputline+i,column),wait=True)
         i+=1
+
+
+#Silence STDOUT warnings
+#https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
+@contextlib.contextmanager
+def nostdout():
+    save_stdout = sys.stdout
+    sys.stdout = io.BytesIO()
+    yield
+    sys.stdout = save_stdout
