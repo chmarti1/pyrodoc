@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+    <title>Property Diagrams | PYroMat</title>
+    <link rel="stylesheet" type="text/css" href="/pyromat.css">
+    <meta name="description" content="getting python">
+    <meta name="keywords" content="python,thermo,thermodynamic,property,properties">
+    <meta name="author" content="J. Ranalli">
+    
+<script>
+function toggle_vis(target_id){
+    var target_obj = document.getElementById(target_id);
+    if (target_obj.style.visibility=='visible'){
+        target_obj.style.visibility = 'hidden';
+    } else {
+        target_obj.style.visibility = 'visible';
+    }
+}
+</script>
+</head>
+<body>
+
+<iframe name="menu" id="menu" src="/menu.html"></iframe>
+
+<div id="content">
+<div class="title">
+<h1>Saturation Properties</h1>
+</div>
+
+
+<form action="../../cgi-bin/live/propdiags.py" method="POST">
+    <fieldset>
+        <legend><b>Substance Property Diagrams</b></legend>
+<!-- inputs -->
+        <div class="lcol">
+        <table id="values">
+            <tr><td>Fluid    </td><td><select name="id"></select></td></tr>
+            <tr><td>Pressure Lines?</td><td><input name="plines" type="checkbox" value="true" ></td></tr>
+            <tr><td>Temperature Lines?</td><td><input name="Tlines" type="checkbox" value="true" ></td></tr>
+            <tr><td>Specific Volume Lines?</td><td><input name="vlines" type="checkbox" value="true" ></td></tr>
+            <tr><td>Enthalpy Lines?</td><td><input name="hlines" type="checkbox" value="true" ></td></tr>
+            <tr><td>Entropy Lines?</td><td><input name="slines" type="checkbox" value="true" ></td></tr>
+
+        </table>
+        <input type="submit" value="Update">
+        </div>
+        
+<!-- units -->
+        <div class="rcol">
+        <a href="#" onClick="javascript:toggle_vis('units')">Units (Show/Hide)</a><br>
+        <table id="units" style="visibility:hidden;">
+            <tr><td>Pressure</td><td><select name="up"></select></td></tr>
+            <tr><td>Temperature</td><td><select name="uT"></select></td></tr>
+            <tr><td>Energy</td><td><select name="uE"></select></td></tr>
+            <tr><td>Matter</td><td><select name="uM"></select></td></tr>
+            <tr><td>Volume</td><td><select name="uV"></select></td></tr>
+
+
+        </table>
+        </div>
+        
+    </fieldset>
+</form>
+
+<!-- errors -->
+<!-- results -->
+<!-- charts -->
+<div class="section">
+
+
+</div>
+
+</body>
+</html>
