@@ -22,7 +22,7 @@ inpline = P.find_line('<!-- inputs -->')+4
 unitline = P.find_line('<!-- units -->')+4
 resline = P.find_line('<!-- results -->')+1
 errline = P.find_line('<!-- errors -->') +1
-chartline = P.find_line('<!-- charts -->') +1
+chartline = P.find_line('<!-- charts -->') +2
 
 # Build the substance menu
 # Include all multiphase collection members
@@ -79,10 +79,17 @@ except Exception as e:  # This means that one of the typical pyromat errors wasn
 
 # Insert the cgi call to build the image
 P.insert(
-    '<img class="figure" src="/cgi-bin/live/propdiags_plotTs.py?id={:s}&plin={:s}&Tlin={:s}&vlin={:s}&hlin={:s}&slin={:s}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
-        species, plin, Tlin, vlin, hlin, slin, up, uT, uE, uM, uV),
+    '<img class="figure" src="/cgi-bin/live/propdiags_plot.py?id={:s}&type={:s}&plin={:s}&Tlin={:s}&vlin={:s}&hlin={:s}&slin={:s}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
+        species, 'Ts', plin, Tlin, vlin, hlin, slin, up, uT, uE, uM, uV),
     (chartline, 0))
-
+P.insert(
+    '<img class="figure" src="/cgi-bin/live/propdiags_plot.py?id={:s}&type={:s}&plin={:s}&Tlin={:s}&vlin={:s}&hlin={:s}&slin={:s}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
+        species, 'Tv', plin, Tlin, vlin, hlin, slin, up, uT, uE, uM, uV),
+    (chartline+2, 0))
+P.insert(
+    '<img class="figure" src="/cgi-bin/live/propdiags_plot.py?id={:s}&type={:s}&plin={:s}&Tlin={:s}&vlin={:s}&hlin={:s}&slin={:s}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
+        species, 'pv', plin, Tlin, vlin, hlin, slin, up, uT, uE, uM, uV),
+    (chartline+4, 0))
 # Put the input values back into the input boxes
 plin = 'checked="true"' if plin=='true' else ''
 Tlin = 'checked="true"' if Tlin=='true' else ''

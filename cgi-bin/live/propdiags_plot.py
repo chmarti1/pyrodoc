@@ -26,8 +26,9 @@ def nostdout():
     sys.stdout = save_stdout
 
 
-species, plin, Tlin, vlin, hlin, slin, up, uT, uE, uM, uV = pmcgi.argparse([
+species, type, plin, Tlin, vlin, hlin, slin, up, uT, uE, uM, uV = pmcgi.argparse([
         ('id'),
+        ('type',str,'Ts'),
         ('plin',str,'false'),
         ('Tlin',str,'false'),
         ('vlin',str,'false'),
@@ -79,8 +80,14 @@ else:
 
 # We don't know where the state will be exactly
 sz = (11,8.25)
+
 with nostdout():
-    ax = pmplot.Ts(F, plines=plines, vlines=vlines, hlines=hlines, size=sz, display=False)
+    if type=='Ts':
+        ax = pmplot.Ts(F, plines=plines, vlines=vlines, hlines=hlines, size=sz, display=False)
+    elif type=='Tv':
+        ax = pmplot.Tv(F, plines=plines, slines=slines, hlines=hlines, size=sz, display=False)
+    elif type=='pv':
+        ax = pmplot.pv(F, Tlines=Tlines, slines=slines, hlines=hlines, size=sz, display=False)
 f = ax.get_figure()
 
 # Instead of saving to a file, write directly to stdout!
