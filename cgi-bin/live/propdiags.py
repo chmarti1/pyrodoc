@@ -77,6 +77,12 @@ except (pm.utility.PMParamError,pm.utility.PMAnalysisError) as e:  # This means 
 except Exception as e:  # This means that one of the typical pyromat errors wasn't encountered
     lu.perror(P, 'Python error: ' + str(e), errline)
 
+# Insert the cgi call to build the image
+P.insert(
+    '<img class="figure" src="/cgi-bin/live/propdiags_plotTs.py?id={:s}&plin={:s}&Tlin={:s}&vlin={:s}&hlin={:s}&slin={:s}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
+        species, plin, Tlin, vlin, hlin, slin, up, uT, uE, uM, uV),
+    (chartline, 0))
+
 # Put the input values back into the input boxes
 plin = 'checked="true"' if plin=='true' else ''
 Tlin = 'checked="true"' if Tlin=='true' else ''
@@ -91,11 +97,7 @@ lu.setinputs(P,vals,cols,inpline)
 labels = ['Phase', 'T', 'p', 'v', 'u', 'h', 's']
 units = ['', uT, up, uV + '/' + uM, uE + '/' + uM, uE + '/' + uM, uE + '/' + uM + uT]
 
-# Insert the cgi call to build the image
-P.insert(
-    '<img class="figure" src="/cgi-bin/live/propdiags_plotTs.py?id={:s}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
-        species, up, uT, uE, uM, uV),
-    (chartline, 0))
+
 
 
 #Perform the write operation

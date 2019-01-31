@@ -26,8 +26,13 @@ def nostdout():
     sys.stdout = save_stdout
 
 
-species, up, uT, uE, uM, uV = pmcgi.argparse([
+species, plin, Tlin, vlin, hlin, slin, up, uT, uE, uM, uV = pmcgi.argparse([
         ('id'),
+        ('plin',str,'false'),
+        ('Tlin',str,'false'),
+        ('vlin',str,'false'),
+        ('hlin',str,'false'),
+        ('slin',str,'false'),
         ('up'),
         ('uT'),
         ('uE'),
@@ -47,10 +52,35 @@ this = pm.get(species)
 # Calculate the states
 F = pm.get(species)
 
+if plin == 'true':
+    plines = None
+else:
+    plines = []
+
+if Tlin == 'true':
+    Tlines = None
+else:
+    Tlines = []
+
+if vlin == 'true':
+    vlines = None
+else:
+    vlines = []
+
+if hlin == 'true':
+    hlines = None
+else:
+    hlines = []
+
+if slin == 'true':
+    slines = None
+else:
+    slines = []
+
 # We don't know where the state will be exactly
 sz = (11,8.25)
 with nostdout():
-    ax = pmplot.Ts(F,size=sz,display=False)
+    ax = pmplot.Ts(F, plines=plines, vlines=vlines, hlines=hlines, size=sz, display=False)
 f = ax.get_figure()
 
 # Instead of saving to a file, write directly to stdout!
