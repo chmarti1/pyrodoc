@@ -1,4 +1,4 @@
-import pyroplot
+import pyroplot_local as pyroplot
 import pyromat as pm
 
 water = pm.get('mp.H2O')
