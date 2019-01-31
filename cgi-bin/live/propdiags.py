@@ -78,6 +78,10 @@ except Exception as e:  # This means that one of the typical pyromat errors wasn
     lu.perror(P, 'Python error: ' + str(e), errline)
 
 # Insert the cgi call to build the image
+#P.insert(
+#    '<a href="/cgi-bin/live/propdiags_plot_pdf.py?id={:s}&type={:s}&plin={:s}&Tlin={:s}&vlin={:s}&hlin={:s}&slin={:s}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">Download PDF</a>'.format(
+#        species, 'Ts', plin, Tlin, vlin, hlin, slin, up, uT, uE, uM, uV),
+#    (chartline-1, 0))
 P.insert(
     '<img class="figure" src="/cgi-bin/live/propdiags_plot.py?id={:s}&type={:s}&plin={:s}&Tlin={:s}&vlin={:s}&hlin={:s}&slin={:s}&up={:s}&uT={:s}&uE={:s}&uM={:s}&uV={:s}">'.format(
         species, 'Ts', plin, Tlin, vlin, hlin, slin, up, uT, uE, uM, uV),
