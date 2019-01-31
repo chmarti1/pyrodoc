@@ -363,7 +363,7 @@ def Tp(mpobj, fig=None, ax=None, Tlim=None, plim=None, dlines=None):
     return ax
 
 
-def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, vlines=None, plines=None, hlines=None, size=config['size']):
+def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, vlines=None, plines=None, hlines=None, size=config['size'], display = True):
     """Temperature-enthalpy diagram
     ax = TS(mpobj)
     
@@ -503,11 +503,12 @@ def Ts(mpobj, fig=None, ax=None, satlines=True, Tlim=None, vlines=None, plines=N
     # Label the figure
     ax.set_title('%s T-S Diagram'%(mpobj.data['id']))
 
-    plt.show(block=False)
+    if display:
+        plt.show(block=False)
     return ax
 
 
-def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=None, hlines=None, size=config['size']):
+def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=None, hlines=None, size=config['size'], display=True):
     """Temperature-volume diagram
     ax = Tv(mpobj)
 
@@ -670,10 +671,11 @@ def Tv(mpobj, fig=None, ax=None, satlines=True, Tlim=None, slines=None, plines=N
     # Label the figure
     ax.set_title('%s T-v Diagram' % (mpobj.data['id']))
 
-    plt.show(block=False)
+    if display:
+        plt.show(block=False)
     return ax
 
-def pv(mpobj, fig=None, ax=None, satlines=True, plim=None, slines=None, Tlines=None, hlines=None, size=config['size']):
+def pv(mpobj, fig=None, ax=None, satlines=True, plim=None, slines=None, Tlines=None, hlines=None, size=config['size'],display=True):
     """Pressure volume diagram
     ax = pv(mpobj)
 
@@ -823,5 +825,6 @@ def pv(mpobj, fig=None, ax=None, satlines=True, plim=None, slines=None, Tlines=N
     # Label the figure
     ax.set_title('%s p-v Diagram' % (mpobj.data['id']))
 
-    plt.show(block=False)
+    if display:
+        plt.show(block=False)
     return ax
