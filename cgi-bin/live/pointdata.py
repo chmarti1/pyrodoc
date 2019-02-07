@@ -98,6 +98,7 @@ try:
             d1 = F.d(T=T1, p=p1)
             h1 = F.h(T=T1, p=p1)
         v1 = 1 / d1
+        e1 = F.e(d=d1, p=p1)
     elif T1 >= -9000 and s1 >= -9000: #T&s
         # Set the input box labels
         Tval = T1
@@ -113,6 +114,7 @@ try:
             h1, s1, d1 = F.hsd(p=p1, T=T1)
         v1 = 1 / d1
         p1 = F.p(T=T1, d=d1)
+        e1 = F.e(d=d1, p=p1)
     elif T1 >= -9000 and p1 >= -9000: #T&p
         #set the input box labels
         Tval = T1
@@ -121,6 +123,7 @@ try:
         h1, s1, d1 = F.hsd(p=p1, T=T1)
         v1 = 1 / d1
         p1 = F.p(T=T1, d=d1)
+        e1 = F.e(d=d1, p=p1)
         x1 = -1 #P&T will always fall outside the dome
     elif T1 >= -9000 and h1 >= -9000: #T&h
         #set the input box labels
@@ -137,6 +140,7 @@ try:
             h1, s1, d1 = F.hsd(p=p1, T=T1)
         v1 = 1 / d1
         p1 = F.p(T=T1, d=d1)
+        e1 = F.e(d=d1, p=p1)
     elif p1 >= -9000 and h1 >= -9000: #P&h
         #set the input box labels
         hval = h1
@@ -149,6 +153,7 @@ try:
             h1, s1, d1 = F.hsd(p=p1, T=T1)
         v1 = 1 / d1
         p1 = F.p(T=T1, d=d1)
+        e1 = F.e(d=d1, p=p1)
     elif p1 >= -9000 and v1 >= -9000: #P&v
         #set the input box labels
         pval = p1
@@ -163,6 +168,7 @@ try:
             h1, s1, d1 = F.hsd(p=p1, T=T1)
         v1 = 1 / d1
         p1 = F.p(T=T1, d=d1)
+        e1 = F.e(d=d1, p=p1)
     elif T1 >= -9000 and v1 >= -9000: #T&v
         #Set the input box labels
         Tval = T1
@@ -183,6 +189,7 @@ try:
             h1, s1, d1, x1 = F.hsd(p=p1, T=T1, quality=True)
         v1 = 1 / d1
         p1 = F.p(T=T1, d=d1)
+        e1 = F.e(d=d1, p=p1)
     elif h1 >= -9000 and v1 >= -9000: #h&v
         #set the input box labels
         hval = h1
@@ -199,6 +206,7 @@ try:
             h1, s1, d1 = F.hsd(p=p1, T=T1)
         v1 = 1 / d1
         p1 = F.p(T=T1, d=d1)
+        e1 = F.e(d=d1, p=p1)
     elif s1 >= -9000 and v1 >= -9000: #s&v
         #set the input box labels
         sval = s1
@@ -215,6 +223,7 @@ try:
             h1, s1, d1 = F.hsd(p=p1, T=T1)
         v1 = 1 / d1
         p1 = F.p(T=T1, d=d1)
+        e1 = F.e(d=d1, p=p1)
     elif x1 >=-9000 and T1 >= -9000: #T&x
         #set the input box labels
         Tval = T1
@@ -222,6 +231,7 @@ try:
 
         p1 = F.ps(T=T1)
         h1, s1, d1 = F.hsd(T=T1, x=x1)
+        e1 = F.e(d=d1, p=p1)
         v1 = 1/d1
     elif x1 >=-9000 and p1 >= -9000: #P&x
         #set the input box labels
@@ -230,6 +240,7 @@ try:
 
         T1 = F.Ts(p=p1)
         h1, s1, d1 = F.hsd(T=T1, x=x1)
+        e1 = F.e(d=d1,p=p1)
         v1 = 1/d1
     else:  #not supported
         lu.perror(P,'Specifying this pair of properties is not supported by pyromat. ', errline)
@@ -256,6 +267,7 @@ T = [float(T1)]
 p = [float(p1)]
 v = [float(v1)]
 h = [float(h1)]
+e = [float(e1)]
 s = [float(s1)]
 if x1 >= 0:
     x = [float(x1)]
@@ -270,11 +282,11 @@ else:
         x=['liquid']
 
 # build label and unit lists
-labels = ['T', 'p', 'v', 'h', 's', 'x']
-units = [uT, up, uV + '/' + uM, uE + '/' + uM, uE + '/' + uM + uT, '-']
+labels = ['T', 'p', 'v', 'u', 'h', 's', 'x']
+units = [uT, up, uV + '/' + uM, uE + '/' + uM, uE + '/' + uM, uE + '/' + uM + uT, '-']
 
 P.insert('<h3>State Properties</h3><center>' +
-         pmcgi.html_column_table(labels, units, (T, p, v, h, s, x), thousands=',')
+         pmcgi.html_column_table(labels, units, (T, p, v, e, h, s, x), thousands=',')
          + '</center>', (resline, 0), wait=True)
 
 # Insert the cgi call to build the image
