@@ -705,7 +705,7 @@ def pv(mpobj, fig=None, ax=None, satlines=True, plim=None, slines=None, Tlines=N
     if plim is None:
         plim = mpobj.plim()
         plim[0] = max(pt, plim[0])
-        plim[0] = pc/20
+        plim[0] = pc/2000
         plim[1] = 3*pc
 
     if slines is None:
@@ -726,7 +726,8 @@ def pv(mpobj, fig=None, ax=None, satlines=True, plim=None, slines=None, Tlines=N
     pn = (pc - pt) / 1000.
 
     # Generate lines
-    p = np.linspace(plim[0]+pn, plim[1]-pn, 151)
+    #p = np.linspace(plim[0]+pn, plim[1]-pn, 151)
+    p = np.logspace(np.log10(plim[0] + pn), np.log10(plim[1] - pn), 151)
 
     # Lines of constant temperature
     TLABELS = {}
