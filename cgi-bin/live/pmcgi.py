@@ -732,7 +732,10 @@ thousands, thousdandths
                     # How many fractional digits are left?
                     pp = sf[jj] - pp - 1
                     temp = int(np.round((this-temp)*10**pp))
-                    if temp>0:
+                    if temp==10**pp: #rounding overflowed, so increment the whole
+                        whol = '{:d}'.format(int(this)+1)
+                        frac = ('{:0' + str(pp) + '}').format(0)
+                    elif temp>0:
                         frac = ('{:0' + str(pp) + '}').format(temp)
                     else:
                         frac = ''
