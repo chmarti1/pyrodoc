@@ -29,7 +29,7 @@ function toggle_vis(target_id){
 </div>
 
 
-<form action="rankine.py" method="POST">
+<form action="rankine.py" method="GET">
     <fieldset>
         <legend><b>Rankine Cycle Parameters</b></legend>
 <!-- inputs -->
@@ -38,7 +38,9 @@ function toggle_vis(target_id){
             <tr><td>Fluid    </td><td><select name="id"></select></td></tr>
             <tr><td>Condenser Pressure</td><td><input name="p1" type="text" value=""></td></tr>
             <tr><td>Boiler Pressure</td><td><input name="p2" type="text" value=""></td></tr>
-
+            <tr><td>Pump &eta;</td><td><input name="eta12" type="text" value=""></td></tr>
+            <tr><td>Boiler &eta;</td><td><input name="eta23" type="text" value=""></td></tr>
+            <tr><td>Turbine &eta;</td><td><input name="eta34" type="text" value=""></td></tr>
         </table>
         <input type="submit" value="Update">
         </div>

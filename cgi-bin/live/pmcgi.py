@@ -648,6 +648,7 @@ thousands, thousdandths
         out += '<tr class=trE>'
         for jj in range(Ncol):
             # Grab the value to be converted to text
+<<<<<<< HEAD
             try:
                 this = float(columns[jj][ii])
             except ValueError: #Assume it's a string?
@@ -662,6 +663,9 @@ thousands, thousdandths
                 elif align[jj] == 'r':
                     out += '<td class=tdR>' + this + '</td>'
                 continue #move on
+=======
+            this = float(columns[jj][ii])
+>>>>>>> 77dc48089048fbba24e0a1ce849c0f4adfd45e53
             
             # Extract the sign and detect the place of the most
             # significant digit
