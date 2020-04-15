@@ -48,6 +48,18 @@ def setspeciesselect(page,species,inputline,column):
         (inputline,column),
         wait=True)
 
+def setspeciesselect_ig(page,species,inputline,column,allowed=['ig.air','ig.O2','ig.N2','ig.CH4','ig.CO2','ig.H2O']):
+    # Build the substance menu
+    # Include all multiphase collection members
+    values = []
+    for name in pm.dat.data:
+        if name in allowed:
+            values.append(name)
+    page.insert(
+        pmcgi.html_select(values, select=False, selected=species),
+        (inputline,column),
+        wait=True)
+        
 def setinputs(page,settings,columns,inputline):
     i=0
     for setting,column in zip(settings,columns):
