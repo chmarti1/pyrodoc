@@ -22,29 +22,20 @@ def error_response(message):
 
 def argparse(args):
     """Pull arguments from cgi form interface and convert them to requested type
-
     arg1, arg2, ... = argparse([('arg1', float), ('arg2', int, 3), ...])
-
 The ARGS list names the arguments to find from the cgi form.  The 
 simplest way to request an argument value is by simply specifying its
 name as a string.  The values will be returned as strings.
-
     arg1, arg2 = argparse(['arg1', 'arg2'])
-
 If the elements are tuples, then the first value is the argument name 
 and the second is the type to which the value should be converted.  
-
     arg1, arg2 = argparse([('arg1', float), ('arg2', int)])
-
 If there is a third element in the argument tuples, it is treated as a 
 default value to be applied if the argument is not found.  Arguments 
 with no default values that are omitted are treated as mandatory.
-
     arg1, ... = argparse([('arg1', float, 3.5), ... ])
-
 These modes may be intermixed.  Each element of the argument list is
 treated individually.
-
 If a mandatory argument is not found or if type conversion fails, then 
 the function will print an error page to stdout and evoke the exit() 
 funciton.
@@ -97,7 +88,6 @@ def buildget():
 def idgen(length=32, charset=None):
     """Generate a random series of characters
     id = idgen(length=32, charset=None)
-
 A series of quasi-random ascii characters are returned in a string.  The
 characters are selected from the CHARSET list or string of valid 
 characters.  Unless CHARSET is defined, the alpha characters will be 
@@ -117,41 +107,30 @@ The PMPage class loads text from a template html file and exposes
 methods to edit it on the fly.  The intention is that a CGI script 
 constructed in Python should use the PMPage class to load and modify a
 template html file.
-
 This example looks for a div element and replaces its contents with the
 text "This is working!".
-
 >>> P = PMPage('path/to/template.html')
 >>> newtext = 'This is working!'
 >>> P.replace(newtext, start='<div id="test">', stop='</div>')
-
 Alternately, if the starting and ending tags are to also be replaced, 
 set the optional KEEP keyword to False.
-
 >>> P = PMPage('path/to/template.html')
 >>> newtext = '<div id="test" class="pretty">This is working!</div>'
 >>> P.replace(newtext, start='<div id="test">', stop='</div>', keep=False)
-
 To simply explicitly replace a piece of text, leave the stop parameter
 out.  In this case, the keep parameter is ignored, and the entire text
 will always be replaced.
-
 >>> P = PMPage('path/to/template.html')
 >>> P.replace('<div id="test" class="pretty">', start='<div id="test">')
-
 Once modifications are complete, write the output with the write() 
 method.
-
 >>> P.write()
-
 For debugging, it may be useful to redirect the output away from stdout
 to a file.
-
 >>> P.write(dest='path/to/destination.html')
     OR
 >>> with open('path/to/destination.html','w') as ff:
 ...     P.write(dest=ff)
-
 """
     def __init__(self, fromfile):
         self.fromfile = fromfile
@@ -179,7 +158,6 @@ from the original file to identify the start and stop for the insert.
 If there is no stop, then text will be inserted at line, column without
 replacing any text.  If a stop location is specified, then all the text
 between start and stop will be replaced with the new text.
-
 For example, consider a file with the text:
 ---
 I do not smirk, but if I did, this 
@@ -190,13 +168,10 @@ Commander, why keep score?
 ---
 The original file is 5 lines, and the longest has 35 characters 
 (including a trailing space).  
-
 To insert without deleting, one might call
 >>> Page.insert( "Today \nis a good day to die.  ", (1, 30))
-
 To replace the word "smirk" with "dance", one might call
 >>> Page.insert( "dance", (0, 9), (0,14))
-
 The total result of which would be
 ---
 I do not dance, but if I did, this 
@@ -206,7 +181,6 @@ I protest.  I am not a merry man!
 If winning is not important, then
 Commander, why keep score?
 ---
-
 *** WAIT ***
 Because the order in which successive insertions are performed is 
 essential, they should always be executed end-to-beginning.  To make 
@@ -215,12 +189,10 @@ entire document looking for newlines and counting columns.  For greater
 efficiency, the insertion can be scheduled but not executed in the Page
 object.  In this way, many insertions can be scheduled then executed all
 at once.
-
 >>> Page.insert(..., wait=True)
 >>> Page.insert(..., wait=True)
 >>> Page.insert(..., wait=True)
 >>> Page.insert_exec()
-
 Calling insert() without a wait=True directive will not only execute the
 current insertion, but all other pending insertions as well.
 """
@@ -274,10 +246,8 @@ use case is that comment tags "<!-- A -->" could be inserted in key
 locations so the line numbers used in the insert operations will be less
 brittle to changes made in the file.  The entire line must be identical
 to the text being tested.
-
 For example, if a comment tag were
 placed the line before an important segment:
-
 line = Page.find_line("<!-- A -->")
 Page.insert(new_text, (line+1, col))
 """
@@ -404,7 +374,6 @@ td.tdDR {
 #sec3 {
     width: 
 }
-
 </style>
 </head>
 <body>""" + segment + '</body></html>')
@@ -420,31 +389,23 @@ This function constructs the markup language for representing a dropdown
 menu in html.  The VALUES list is interpreted as a list of choices to
 include in the menu.  The SNAME, SID, and SCLASS keywords specify the
 name, id, and class assigned to the select.  For example,
-
 >>> html_select(['a','b'], name='letter')
-
 produces markup
 <select name="letter"><option value="a">a</option><option value="b">b</option></select>
-
 If the SELECT keyword is set to False, then the bracketing <select>
 </select> elements will be omitted.  This is useful for inserting 
 <option></option> elements in an existing select.
-
 Notice that by default the text displayed for each option will be the 
 same as the value.  To change this behavior, set the keyword, LABELS, to 
 a second list of strings with the corresponding strings to be displayed.
 For example
-
 >>> html_select(['a','b'], text=['A','B'], select=False)
-
 produces markup
 <option value="a">A</option><option value="b">B</option>
-
 The SELECTED keyword allows an option to be selected by default.  The
 specified value should correspond to the option's value and not its 
 text.
 >>> html_select(['a','b'], text=['A','B'], select=False, selected='a')
-
 produces markup
 <option value="a" selected>A</option><option value="b">B</option>
 """
@@ -475,11 +436,9 @@ def html_column_table(labels, units, columns,
         radix='.', thousands=' ', thousandths=' '):
     """HTML_COLUMN_TABLE - construct an html table from 1D data
     html_text = html_column_table(labels, units, columns)
-
 This funciton constructs the markup language for representing numerical
 data in an HTML table.  The table is assumed to be constructed form a 
 series of distinct columns; each of which has a label and a unit label.
-
 labels, units
     These are lists containing string labels for each column.  The 
     LABELS list may be a nested list if multiple rows are needed to 
@@ -488,7 +447,6 @@ labels, units
     
     The UNITS are treated separately so the SCALE parameter can be 
     applied automatically.  (see below)
-
 align
     The alignment mode determines how the data are aligned in their 
     columns.  The keyword accepts a single character to indicate the 
@@ -648,7 +606,6 @@ thousands, thousdandths
         out += '<tr class=trE>'
         for jj in range(Ncol):
             # Grab the value to be converted to text
-<<<<<<< HEAD
             try:
                 this = float(columns[jj][ii])
             except ValueError: #Assume it's a string?
@@ -663,9 +620,6 @@ thousands, thousdandths
                 elif align[jj] == 'r':
                     out += '<td class=tdR>' + this + '</td>'
                 continue #move on
-=======
-            this = float(columns[jj][ii])
->>>>>>> 77dc48089048fbba24e0a1ce849c0f4adfd45e53
             
             # Extract the sign and detect the place of the most
             # significant digit
