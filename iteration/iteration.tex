@@ -1,0 +1,46 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\def\pm{PYroMat}
+
+\title{The ITER1 and HYBRID1 iteration algorithms used in the PYroMat package}
+\author{Christopher R. Martin\\Assistant Professor of Mechanical Engineering\\Penn State University}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+In multi-phase substances, the general equation of state for the evaluation of thermodynamic properties of substances is almost always of the form, $A(T,\rho)$; the Helmholtz free energy expressed as a function of temperature and density.  Ideal gases are almost always defined in terms of $c_p(T)$; where $c_p$ is constant-pressure specific heat.  For an ideal gas, enthalpy and specific heats do not depend on pressure, but entropy's pressure dependency is straightforward, so ideal gas properties are usually evaluated in terms of temperature and pressure instead of temperature and density.
+
+In general, all of the substances modeled by \pm may be thought of as having properties that are a function of any two of $T$, $p$, and $\rho$.  As of version 2.1.0, virtually all property methods in \pm accept any two of these three as a constraint on the substance state.  For two-phase mixtures (which are possible in the multi-phase collection) ``quality'' or $x$ may be specified instead of one of these.
+
+The underlying models on which \pm is based permit relatively straightforward algorithms for calculating properties in terms of these definitions of a substances ``state.''  There are, however, a number of applications where it is essential to calculate the numerical invers of one of these properties.  As a simple example, the enthalpy of an ideal gas can be calculated directly from its temperature using the thermodynamic model for $h(T)$, but if enthalpy is known, an analytical expression for temperature is not available; numerical iteration is necessary.
+
+Multi-phase models have a similar algorithm for calculating pressure form temperature and density, $p(T,\rho)$, but no such algorithm exists for density, $\rho(T,p)$.  So, iteration is also necessary any time a multi-phase property is calculated in terms of temperature and pressure.
+
+In general, the problem of property inversion is a two-dimensional problem.  However, many of the available methods restrict these to a powerful subset of the generic problem where one of the two independent variables is known.  For example, $T_s()$ methods calculate temperature when entropy and either density or pressure is known.  In ideal gas models, entropy is calculated as a function of temperature and pressure, $s(T,p)$, and in multi-phase models, it is calculated as a function of temperature and density, $s(T,\rho)$. 
+
+\section{One-Dimensional Inversion}
+
+\subsection{ITER1: Modified Newton-Rhapson Iteration}
+
+The ITER1 algorithm is a modified Newton-Rhapson algorithm (often called Newton iteration).  Because PYroMat has support for efficiently evaluating $f(x)$ and its derivatives, Newton iteration is a natural first try for most numerical problems, and for ``well-behaved'' problems it is quite efficient.  
+
+Simple Newton-Rhapson iteration in one dimension goes something like this:
+\begin{enumerate}
+\item Form an initial guess, $x_0$.
+\item Evaluate $y=f(x_0)$ and $y' = f'(x_0)$.
+\end{enumerate}
+
+
+
+\section{HYBRID1}
+
+\section{Considerations for Array Support}
+
+\end{document}
