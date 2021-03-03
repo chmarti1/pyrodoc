@@ -26,14 +26,16 @@ In ideal gas models, inter-molecular forces are unimportant, so only the molecul
 
 \section{IG1: The Shomate Equation}
 
-\pm's \underline{ig1} class is built on the Shomate equation, which is the basis of NIST's gas phase thermophysical property database.  
+\pm's \underline{ig1} class is built on the Shomate equation for constant-pressure specific heat.  This is the formulation used by the NIST/JANAF thermophysical property database, and all other properties are derived 
 
 \begin{align}
 t &= \frac{T}{1000 \mathrm{K}}
 c_p(t) &= c_0 + c_1 t + c_2 t^2 + c_3 t^3 + \frac{c_4}{t}
 \end{align}
 
-It may be obvious from inspecting the equation that there is little attempt to formulate the 
+It may be obvious that there is little attempt to formulate the Shomate equation around fundamental physics.  Instead, it is a purely empirical formula.  
+
+Because of its simplicity, the Shomate equations lacks the degrees of freedom to express specific heat over wide ranges.  Data are usually given in piece-wise formulations.  For example, tungsten dioxide (WO$_2$), has a set of coefficients for $298\mathrm{K} \le T < 1100\mathrm{K}$ and $1100\mathrm{K} \le T \le 6000\mathrm{K}$.  Therefore, calculating a single 
 
 
 Given an explicit analytical formulation for $c_p(T)$, it is possible to express enthalpy
