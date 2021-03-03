@@ -1,0 +1,12 @@
+/**** GENERAL STRUCTURE ****/
+
+body{font-size:14px;width:100%;background-color:#ffffff;margin:0;}
+
+.grid-content{display:grid; grid-template-columns:20% 80%;}
+#nav{border-right:1px solid #333333;min-height:100vh; background-color:#333333;grid-column-start:1; text-align:right; color: #ffffff; padding:25px 8% 8% 8%;}
+#main-content{grid-column-start:2; padding:25px 2% 2% 2%;min-height:100vh;}
+
+/**** IMAGES ****/
+.logo {width:125px; height:auto;}
+
+

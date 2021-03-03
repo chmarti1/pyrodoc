@@ -4,47 +4,67 @@
 \usepackage{amssymb}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+
+\def\pm{PYroMat}
+\def\d{\mathrm{d}}
+
+\title{The Thermodynamic Models in PYroMat}
+\author{Christopher R. Martin}
+\date{\today}
+
 \begin{document}
 
-\section{Evaluation of functional groups}
-In the evaluation of empirical fits for thermodynamic properties, it is necessary to calculate complicated functions of many terms on one or two variables.  In simple cases like ideal gases, there are standard forms of these equations that can be applied across many species simply by adjusting coefficients (e.g. a polynomial).  However, especially when formulating precise relationships for multi-phase substances, whole new terms can appear to address the eccentricities of the specific substances.  
+\maketitle
 
-There are two pragmatic approaches to address the problem.  Classically, special algorithms have been encoded to evaluate each substance or sub-group of substances with similar irregularities.  Alternately, we can find a way to encode the functional form in the species data, and use a standard algorithm to evaluate all species.  The challenge of the latter is finding an encoding that can still be efficiently evaluated.  After all, flexibility in software often comes at the cost of performance.
+\section{Introduction}
 
-\subsection{Groups on one variable}
-PYroMat groups are divided in to functions of one or two variables.  Beginning with a function of one variable,
+As of \pm version 2.1.0, there are three general model formulations used to evaluate the thermodynamic properties of gases and multi-phase (liquid-vapor) substances.  Each pure substance is referred to as a ``species.''  For ideal gases, calculating the properties of mixtures is almost trivial, but when inter-molecular forces rise to relevance, this task becomes difficult enough to require special treatment with a unique mixture model.
+
+\subsection{Ideal Gases}
+In ideal gas models, inter-molecular forces are unimportant, so only the molecule's variable specific heat needs to be resolved in order to construct an entire thermodynamic model.  There are two classes in \pm for the two commonly used standards: the IG1 class manages the Shomate equation of state, and IG2 manages the so-called NASA polynomials equation of state.  In either case, constant-pressure specific heat, $c_p$, is constructed purely as a function of temperature.  These are addressed in the first two sections below.
+
+
+\section{IG1: The Shomate Equation}
+
+\pm's \underline{ig1} class is built on the Shomate equation, which is the basis of NIST's gas phase thermophysical property database.  
+
 \begin{align}
-g_1(x) = \sum_k \prod_m a_4\,f_{k,m}{^{a_5}}(a_1 x^{a_2} + a_3) + a_6, \label{eqn:g1}
+t &= \frac{T}{1000 \mathrm{K}}
+c_p(t) &= c_0 + c_1 t + c_2 t^2 + c_3 t^3 + \frac{c_4}{t}
 \end{align}
-when $f$ is one of a set of known functions: \verb|exp()|, \verb|log()|, \verb|p()| (a polynomial), or \verb|x| (the identity function).  How many terms are included, which functions are used, and the $a$ coefficient values are specific to the property and the species.
 
-At first glance, this looks quite contrived, so it bears some discussion.  Let us start with the case that $a_1=a_2=a_4=a_5=1$ and $a_3=a_6=0$.  Then,
+It may be obvious from inspecting the equation that there is little attempt to formulate the 
+
+
+Given an explicit analytical formulation for $c_p(T)$, it is possible to express enthalpy
 \begin{align}
-g_1(x) = \sum_k \prod_m f_{k,m}(x),\label{eqn:g1:simple}
+h(T) &= \int_{T_0}^T c_p(\tau) \d \tau \nonumber\\
+ &= \int c_p(T) \d T + h_0,
 \end{align}
-which is just a collection of functions of $x$.  It might appear $g(x) = f_1(x)f_2(x) + f_3(x) \ldots$
+which is not a function of pressure for an ideal gas.
 
-The group is comprised of a sum of \emph{terms}, each of which is a multiplication of individual functions.  The functions could be any of the four available functions.  A single $f()$ could even be a polynomial, for which we develop an efficient evaluation algorithm below.
+There are many ways one could select a value for the reference temperature, $T_0$, and the enthalpic integration constant, $h_0$, would seem to be arbitrary.  That is not so, however, when one is dealing with chemical reactions.  These values must account for the energy released or absorbed in chemical reactions by being defined appropriately relative to the species that can react to make the one in question.  As a result, $h_0$, must be explicitly provided with the model, and the models must be constructed with the same conventions.
 
-However, Equation \ref{eqn:g1:simple} is not sufficiently tunable to allow us to construct the wide varieties of terms that appear in many of the property formulations.  For that, we resort to pre- and post-modifiers, the $a$ coefficients.  Pre-modifiers $a_1, a_2, a_3$ affect $x$ \emph{before} it is passed as an argument to $f$.  The post-modifiers $a_4,a_5,a_6$ are used to modify the function's result.  These represent an exponent, multiplier, and offset.
+Entropy is calculated from its definition with the benefit of the ideal gas equation of state,
+\begin{align} 
+\d s &= \frac{\d h}{T} - \frac{v \d p}{T}\nonumber\\
+s(T,p) &= s_0 + \int \frac{c_p(T)}{T} \d T - R \ln\left(\frac{p}{p_0}\right)
+\end{align}
+Here, $s_0$ appears in the same way as $h_0$, and must be explicitly defined to account for changes in entropy due to chemical reactions.
 
-The following is a group that can be constructed this way
+To the irritation of some, \pm uses $e$ (rather than the traditional $u$) for internal energy.  This is motivated by a (perhaps hopeless) attempt to resolve some of the many collisions between notations in thermodynamics and fluid mechanics (wherein $u$ is usually used for velocity) and $v$ is used in both to represent a volume.  
+
+Internal energy is readily calculated from the definition of enthalpy,
 \begin{align}
-g(x) &= \exp\left(-x^2\right) (0.5 x^2 - .012 x + .1)\ldots\nonumber\\
-    & \hspace{2em} + \frac{x^4 - 2}{1.5 + 2\sqrt{x^3 - 2}}\ldots\nonumber\\
-    & \hspace{2em} + x^{-0.5} (1 + 0.1x + 0.225x^2)
+e(T) &= h(T) - \frac{p}{\rho}\nonumber\\
+ &= h(T) - R T.
 \end{align}
-These may look strange, but all of these are terms that can be found in property models.
-
-\subsection{Groups on two variables}
-An equivalent is needed for properties of two variables.
-\begin{subequations}
+There is a similarly simple relationship to determine constant-volume specific heat and specific heat ratio,
 \begin{align}
-X &= a_1 x^{a_2} + a_3\\
-Y &= a_4 y^{a_5} + a_6\\
-g_2(x,y) &= \sum_k \prod_m a_7 f_{m,k}{^{a_8}} (X,Y) + a_9
+c_v(T) &= c_p(T) - R\\
+\gamma(T) &= \frac{c_p(T)}{c_p(T)-R}
 \end{align}
-\end{subequations}
+
 
 
 \section{Polynomials of two variables}
