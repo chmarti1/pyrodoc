@@ -1,0 +1,730 @@
+\chapter{Units}\label{ch:units}
+
+\PM\ handles a wide variety of units automatically, but interested users are also welcome to use the back-end algorithms for their own purposes.  All of the core substance methods deal in their own native units, but the \verb|pyromat.units| module contains the tools that are responsible for converting to and from the units specified in the \verb|pyromat.config| system (see Chapter \ref{ch:config}).
+
+A list of all currently available units is available by typing
+\begin{lstlisting}[language=Python]
+>>> import pyromat as pm
+>>> help(pm.units)
+\end{lstlisting}
+To obtain information specific to one of the unit classes (length, for example), type
+\begin{lstlisting}[language=Python]
+>>> help(pm.units.length)
+\end{lstlisting}
+
+The unit systems used by the property methods and their corresponding configuration entries are listed in Tables \ref{tab:properties} and \ref{tab:units}.  
+
+\section{Setup}\label{sec:units:setup}
+
+The Bureau International des Poids et Mesures (BIPM) International Committee for Weights and Measures (CIPM) is the entity responsible for the definition of the fundamental units on which the metric system is based.  The second (time), meter (length), kilogram (mass), ampere (electrical current), kelvin (temperature), mole (quantity), and candela (luminous intensity) are the fundamental units in terms of which all other measures may be derived.  Contemporary definitions for these units are derived so that certain important physical constants (like Plank's or Boltzmann's constants) may be represented exactly with finite precision, so the conversion factors used in \PM\ are, in fact, by definition, exact.
+
+Before the turn of the twentieth century, the United States and the British governments had adopted the international yard and avoirdupois pound.  These re-defined those measures (and all those based on them) in terms of the meter and kilogram using an exact relationship with finite precision.  The contemporary definitions for the fundamental units are derived from highly stable natural phenomena may be independently reproduced in a laboratory, but this idea is quite recent.  Abandoning the tradition of defining units from a standard bar or mass did not happen until the latter half of the twentieth century. \cite{nbs:sp447}
+
+This establishes a web of precise definitions of units for US customary, imperial, and SI systems.  However, there are still popular measures (like the inch water column for pressure or scf for quantity of a gas) that depend on establishing so-called ``standard'' conditions whose definitions are far less precise (and are far from standard).  
+
+For example, water and mercury column measures for pressure depend on the density of a fluid and the local strength of gravity, both of which are subject to change.  So-called ``standard'' pressure is often 1atm (1.01325bar), but is precisely 1bar for the NIST-JANAF data.  Worse still, standard temperature usually refers to 273.15K (0$^\circ$C), but the NIST-JANAF tables use 298.15K (25$^\circ$C), and there are some engineering applications that still use 70$^\circ$F.  These inconsistencies are far too severe to ignore, so great care is required when pulling data from multiple sources into a single database.
+
+To maintain transparency in this regard, the \PM\ units system includes a \verb|setup| function that is responsible for constructing all of the unit conversion routines when \PM\ is first imported.  Users can inspect the constants it defines, and users may change them at any time by re-calling the \verb|setup| function with new arguments.  Its behavior is fully documented and can be found by evoking \verb|help| as below.
+
+\begin{lstlisting}[language=Python]
+>>> import pyromat as pm
+>>> pm.units.setup(Tstd=273.15, pstd=1.01325, \
+...     g=9.80665, dh2o = 999.972, dhg=13595.1)
+>>> help(pm.units.setup)
+\end{lstlisting}
+
+It should be emphasized that there is a difference between the standard parameters used to construct the \PM\ unit system and the default parameters determined by \verb|pm.config|.  The standard conditions are \emph{only} used to construct the unit conversion system, they are \emph{always} given in the units documented below, and they are ignored outside of the \verb|units| module.  On the other hand, the default parameters are used in property methods when arguments are omitted, and they are interpreted in whatever units are currently configured.  See the configuration chapter (Chapter \ref{ch:config}) for more information.
+
+Standard temperature and pressure, \verb|Tstd| and \verb|pstd|, \emph{must} be entered in units of Kelvin and bar respectively (regardless of the units configured in \verb|pm.config|).  The standard atmosphere was set to precisely 1.013 25 bar by the BIPM General Conference on Weights and Measures (CGPM) in 1901 \cite{cgpm:3:2}, and has been almost universally adopted.  The default standard temperature is less universal, but is usually 273.15 K, the freezing point of water at one atmosphere of pressure.
+
+The CGPM did not establish a standard acceleration due to gravity for the purpose of weights and measures until 1954.  It is set to be precisely 9.80665 m s$^{-2}$ \cite{cgpm:10:4}.  This is a mean of gravitational forces experienced at sea level at a latitude of 45 degrees.  This value can be found to agree precisely with the official conversions for pounds mass, pounds force, kilogram, and newton. 
+
+The densities of water and mercury, \verb|dh2o| and \verb|dhg|, must be entered in units of kg m$^{-3}$.  The default for water is its density at atmospheric pressure and 4$^\circ$C.  The default for mercury is its density at atmospheric pressure and 0$^\circ$C.
+
+\section{Constants}\label{sec:units:constants}
+
+The \verb|setup| function is called when the \verb|units| module is first imported to initialize the \PM\ unit constants listed in Table \ref{tab:constants} and declare all the unit conversion routines.  These constants are used widely throughout the \PM\ system, so altering them is only recommended for advanced users who can anticipate the effects they will have.  
+
+Regardless of experience, constants should never be changed manually.  They should only ever be changed be re-calling the \verb|setup| function since the unit conversion routines will need to be updated to reflect the new value.
+
+The values in this table are, by the definitions of units, exact (unless noted with $\approx$).  Similarly, the conversions in the following sections are also exact unless they are otherwise noted.
+
+\begin{landscape}
+\begin{table}[p]
+\centering
+\caption{\PM\ constants and their default values.  Values with a * are affected by calls to \texttt{setup}.}\label{tab:constants}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{ccrll}
+\hline
+Sym. & Name & \multicolumn{2}{c}{Value} & Description \\
+\hline
+$g^*$ & \verb|const_g| & 9.806 65 & m s$^{-2}$ & Gravity at 45$^\circ$ lat.\\
+$h$ & \verb|const_h| & 6.626 070 15$\times 10^{-34}$ & J s & Plank constant\\
+$k$ & \verb|const_k| & 1.380 649 $\times 10^{-23}$ & J K$^{-1}$ & Boltzmann constant\\
+$N_a$ & \verb|const_Na| & 6.022 140 857$\times 10^{23}$ & mol$^{-1}$ & Avagadro number\\
+$N_c$ & \verb|const_Nc| & 6.241 509 34$\times 10^{18}$ & C$^{-1}$ & Electrons per Coulumb\\
+$\overline{\rho}_{std}{^*}$ & \verb|const_nstd| & 44.615 048 197 83 & mol m$^{-3}$ & Standard molar density\\
+$p_{std}{^*}$ & \verb|const_pstd| & 1.013 25 & bar & Standard pressure\\
+$q$ & \verb|const_q| & 1.602 176 634 $\times 10^{-19}$ & C & Fundamental charge\\
+$R_u$ & \verb|const_Ru| & $\approx$ 8.314 462 618 & J mol$^{-1}$ K$^{-1}$ & Universal gas constant\\
+$T_{std}{^*}$ & \verb|const_Tstd| & $273.15$ & K & Standard temperature\\
+$\rho_\mathrm{H_2O}{^*}$ & \verb|const_dh2o| & 999.972 & kg m$^{-3}$ & Std. density of water\\
+$\rho_\mathrm{Hg}{^*}$ & \verb|const_dhg| & 13595.1 & kg m$^{-3}$ & Std. density of mercury\\
+\hline
+\end{tabular}
+\renewcommand{\arraystretch}{1}
+\end{table}
+\end{landscape}
+
+\section{\texttt{Conversion} Class}
+
+Unit conversions are performed by a callable \verb|Conversion| class.  With the exception of the \verb|matter| and \verb|temperature_scale| functions (described below), each of the conversions is performed by a callable \verb|Conversion| class instance defined by the \verb|setup| function at import.
+
+As a callable, \verb|Conversion| instances mimic a function that accepts up to five argument,
+\begin{lstlisting}[language=Python]
+>>> conversion_instance(value=1., from_units=None, \
+...     to_units=None, exponent=None, inplace=None)
+\end{lstlisting}
+
+The value may be a scalar or a numpy array of values to be converted.  By default, it is 1, so that if no value is specified, the result will automatically be a conversion factor between the given units.
+
+The \verb|from_units| and \verb|to_units| keywords accept strings identifying the units in the conversion.  In the event that one of them is omitted, each \verb|Conversion| instance is initialized to check for an entry establishing an default unit in the \verb|pm.config| system.  In the sections that follow, each of the unit classes is listed with the name of its instance, the configuration entry that identifies its default unit, and the default that is configured in PYroMat at installation.
+
+The \verb|exponent| keyword allows for powers of units that are not unity.  For example, units of velocity are not explicitly included, but it is still easy to convert from meters per second to miles per hour by
+\begin{lstlisting}[language=Python]
+>>> import pyromat as pm
+>>> speed_ms = 10.
+>>> temp = pm.units.length(speed_ms, 'm', 'mile')
+>>> speed_mph = pm.units.time(temp, 's', 'hr', \
+...     exponent=-1)
+>>> print(speed_mph)
+22.369362920544024
+\end{lstlisting}
+
+Most users will never need the \verb|inplace| keyword, but when it is set to \verb|True| and the \verb|value| is a numpy array, the original values will be overwritten with the result of the conversion.  
+
+\verb|Conversion| instances also support item recall, so that the conversion factor for any unit may be obtained simply
+\begin{lstlisting}[language=Python]
+>>> print(pm.units.volume['m3'] / pm.units.volume['L'])
+1000.
+\end{lstlisting}
+This indicates that there are 1000 cubic meters per liter.  Most users will not need to use this capability, but for those that do, it is important to always use ratios of units of the same class.  Each item recall returns a scalar value indicating the \emph{relative} size of the respective unit, but relative to what?  In the case of volume, each value indicates the unit's value in cubic meters, but that is an arbitrary choice.
+
+For a complete list of the supported units in a unit class, use the \verb|get()| method.
+\begin{lstlisting}[language=Python]
+>>> pm.units.energy.get()
+dict_keys(['J', 'kJ', 'cal', 'kcal', 'BTU_ISO', ...
+    'eV', 'BTU'])
+\end{lstlisting}
+
+
+\section{Fundamental Units}
+
+Fundamental units are those that have precise definitions based on observable phenomena in nature.  
+
+%
+%   TIME
+%
+
+\subsection{Time}\label{sec:units:time}
+
+\begin{tabular}{rl}
+\hline
+\verb|Conversion| instance: & \verb|pm.units.time|\\
+\verb|pyromat.config| entry: & \verb|'unit_time'|\\
+Default: & \verb|'s'|\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+To alter the \PM\ unit for time,
+\begin{lstlisting}[language=Python]
+>>> import pyormat as pm
+>>> pm.config['unit_time'] = 'min'
+\end{lstlisting}
+
+Time is the most fundamental measure defined by the BIPM.  ``[The second] is defined by taking the fixed numerical value of the caesium frequency $\Delta \nu_\mathrm{Cs}$, the unperturbed ground-state hyperfine transition frequency of the caesium-133 atom, to be 9,192,631,770 when expressed in the unit Hz, which is equal to s$^{-1}$.''\cite{bipm}  Most of the other fundamental units are constructed in terms of it.
+
+The other units of time recognized by the \PM\ system are well known, and have simple definitions in terms of the second.  It is worth emphasizing that the year and the day recommended by NIST \cite{nist:sp811} presume precisely 24 hours to a day and 365 days to a year.  This ignores the 0.25 year annual error accounted for by leap years.
+
+Their configuration strings, their values in terms of the second, and their names are listed in Table \ref{tab:time}.
+
+\begin{table}
+\centering
+\caption{Time units recognized by \PM}\label{tab:time}
+\begin{tabular}{crl}
+\hline
+Setting & Value & Description\\
+\hline
+\verb|year| & 31,536,000 s & year\\
+\verb|day| & 86,400 s & day\\
+\verb|hr| & 3,600 s & hour\\
+\verb|min| & 60 s & minute\\
+\verb|s| & 1 s & second\\
+\verb|ms| & 0.001 s & millisecond\\
+\verb|us| & $10^{-6}$ s & microsecond\\
+\verb|ns| & $10^{-9}$ s & nanosecond\\
+\hline
+\end{tabular}
+\end{table}
+
+Time is implemented in the unit conversion system for completeness, but as of \PM\ version 2.1.0, it is not used directly by any of the property methods.
+
+\begin{lstlisting}[language=Python, caption=Time Conversion Example]
+>>> pm.units.time(30, 's', 'min')
+0.5
+\end{lstlisting}
+
+%
+%   LENGTH
+%
+
+\subsection{Length}\label{sec:units:length}
+
+\begin{tabular}{rl}
+\hline
+\verb|Conversion| instance: & \verb|pm.units.length|\\
+\verb|pyromat.config| entry: & \verb|unit_length|\\
+Default: & \verb|'m'|\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+To alter the \PM\ unit for length,
+\begin{lstlisting}[language=Python]
+>>> import pyormat as pm
+>>> pm.config['unit_length'] = 'in'
+\end{lstlisting}
+
+``[The meter] is defined by taking the fixed numerical value of the speed of light in vacuum, $c$, to be 299,792,458 when expressed in the unit m s$^{-1}$ [...].''\cite{bipm} All other metric length units are trivial to derive from the meter.
+
+The international yard (and by extension, the inch, foot, and mile) were defined exactly in terms of the meter before the end of the nineteenth century, but their contemporary values were not adopted until the middle of the twentieth century.\cite{nbs:sp477}  Now one yard is defined to be precisely 0.914 4 meters, which results in the better known relationship, one inch is precisely 25.4 millimeters.
+
+The meter was once defined to be a fixed ratio of a great circle around the Earth.  This made it of great use for navigation, and for the same reason, the nautical mile is still in common use.  The meter was one ten millionth of one quarter of a meridian, making the circumference of the Earth precisely 40,000 km by definition \cite{nbs:sp447}.  The nautical mile was was also primarily used for navigation, but it was set to the distance covered by one arc minute of latitude (of which there are 21,600 in a circle).  Therefore, the nautical mile was exactly 40,000,000 m / 21,600 or approximately 1,851.851 85 m.  In the middle of the twentieth century, the United States Departments of Commerce and Defense jointly declared the nautical mile to be redefined as precisely 1,852m \cite{nbs:59:1959}.
+
+The length scales supported by \PM\ and their values in terms of the meter are listed in table \ref{tab:length}.
+
+\begin{table}
+\centering
+\caption{Length units recognized by \PM}\label{tab:length}
+\begin{tabular}{crl}
+\hline
+Setting & Value & Description\\
+\hline
+\verb|km| & 1,000 m & kilometer\\
+\verb|m| & 1 m & meter\\
+\verb|cm| & 0.01 m & centimeter\\
+\verb|mm| & 0.001 m & millimeter\\
+\verb|um| & $1\times 10^{-6}$ m & micrometer\\
+\verb|nm| & $1\times 10^{-9}$ m & nanometer\\
+\verb|A| &  $1\times 10^{-10}$ m & Angstrom\\
+\verb|in| & 0.025 4 m & inch\\
+\verb|ft| & 0.304 8 m & foot\\
+\verb|yd| & 0.914 4 m & yard\\
+\verb|mile| & 1,609.344 m & statute mile\\
+\verb|mi| & \multicolumn{2}{c}{Alternate of \texttt{mile}}\\
+\verb|nmi| & 1,852 m & nautical mile\\
+\hline
+\end{tabular}
+\end{table}
+
+Example:
+\begin{lstlisting}[language=Python]
+>>> pm.units.length(12, 'in', 'm')
+.127
+\end{lstlisting}
+
+
+%
+%   MASS
+%
+
+\subsection{Mass and Weight}\label{sec:units:mass}
+
+\begin{tabular}{rl}
+\hline
+\verb|Conversion| instance: & \verb|pm.units.mass|\\
+\verb|pyromat.config| entry: & \verb|unit_mass|\\
+Default: & \verb|'kg'|\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+To alter the \PM\ unit for mass,
+\begin{lstlisting}[language=Python]
+>>> import pyormat as pm
+>>> pm.config['unit_mass'] = 'lb'
+\end{lstlisting}
+
+``[The kilogram] is defined by taking the fixed numerical value of the Planck constant h to be $6.62607015\times 10^{-34}$ when expressed in the unit J s, which is equal to kg m$^2$ s$^{-1}$''\cite{bipm}.  Like many of the remaining fundamental units, the kilogram is defined in terms of length and time, making it dependent on their definitions as well.
+
+The atomic mass unit (u or amu) is defined as precisely 1/12 the mass of a carbon 12 atom at rest.  However, in \PM\ the value of one u is calculated in kilograms by enforcing that 1000 moles of a substance with 1u of mass will have 1kg of mass.  These two definitions of the atomic mass unit are equivalent to the precision of their definition\cite[p.209]{bipm}.
+
+Definitions for the pound and units derived from it are often confused by conflicting definitions of the term ``weight.''  For example, in NIST special publications it is possible to find ``[...] the  weight  of  a  body  in  a  particular  reference  frame  is  defined  as  the  force that gives the body an acceleration equal to the local acceleration of free fall in that reference frame''\cite[p.23]{nist:sp811} and ``In general usage, the term `weight' nearly always means mass, and this is the meaning given the term in U.S. laws and regulations.'' \cite[p.10]{nist:sp1038}
+
+However, at the end of the nineteenth century, the definition of the avoirdupois pound was set to a fixed fraction of the kilogram, formalizing the definition of the pound as a measure of mass and not force.  The distinction became important as the precision of measuring instruments exceeded the consistency of the strength of gravity over the Earth's surface.  The contemporary value for the avoirdupois pound was established in the middle of the twentieth century, and is precisely 0.453 592 37 kg of mass.\cite{nbs:59:1959}
+
+The troy pound and the troy ounce predate the avoirdupois pound as a measure primarily used for quantities of precious metal in coinage \cite[p.6]{nbs:sp477}, but today they are rarely used outside of these specialized applications.  They are omitted from \PM\ to avoid confusion and because they are not often used in scientific or engineering applications.
+
+Table \ref{tab:mass} shows the mass units recognized by \PM\ and their values in kilograms.  Note that only the atomic mass unit and the slug have been rounded.  The rest of the relationships are precise by definition.
+
+\begin{table}
+\centering
+\caption{Mass units recognized by \PM}\label{tab:mass}
+\begin{tabular}{crl}
+\hline
+Setting & Value & Description\\
+\hline
+\verb|kg| & 1 kg & kilogram\\
+\verb|g| & 0.001 kg & gram\\
+\verb|mg| & $1\times 10^{-6}$ kg & milligram\\
+\verb|lbm| & 0.453 592 37 kg & pound-mass\\
+\verb|lb| & \multicolumn{2}{c}{Alternate form of \texttt{lbm}}\\
+\verb|oz| & 0.028 349 523 125 kg & ounce\\
+\verb|slug| & $\approx$ 14.593 902 9 kg & slug\\
+\verb|u| & $\approx$ 1.660 539 06 $\times 10^{-27}$ kg & atomic mass unit\\
+\verb|amu| & \multicolumn{2}{c}{Alternate form of \texttt{u}}\\
+\hline
+\end{tabular}
+\end{table}
+
+Example:
+\begin{lstlisting}[language=Python]
+>>> pm.units.mass(2, 'lb', 'kg')
+0.90718474
+\end{lstlisting}
+
+
+%
+% Molar
+%
+
+\subsection{Molar}\label{sec:units:molar}
+
+\begin{tabular}{rl}
+\hline
+\verb|Conversion| instance: & \verb|pm.units.molar|\\
+\verb|pyromat.config| entry: & \verb|unit_molar|\\
+Default: & \verb|'kmol'|\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+To alter the \PM\ unit for molar quantities,
+\begin{lstlisting}[language=Python]
+>>> import pyormat as pm
+>>> pm.config['unit_molar'] = 'lbmol'
+\end{lstlisting}
+
+``One mole contains exactly 6.022 140 76 $\times 10^{23}$ elementary entities. This number is the fixed numerical value of the Avogadro constant, $N_a$, when expressed in the unit mol$^{-1}$ and is called the Avogadro number.''\cite{bipm}.  Because a mole is a unit of counting, it is equally valid to refer to a mole of planets (about right for our observable universe) as it is to refer to a mole of gas.
+
+The mole is the quantity of a substance with a total mass in grams numerically equal to the mass of the elementary entities expressed in atomic mass units (see Section \ref{sec:units:mass}).  This relationship is mirrored by more recently invented alternatives such as the kilogram-mole (kmol) or the pound-mole (lbmol), which enjoy the same relationships with their mass-based namesakes.
+
+If the mass of a single molecule is $m_0$, a mass, $m$, of many such molecules must contain
+\begin{align}
+N = \frac{m}{m_0}
+\end{align}
+molecules.
+
+By definition, when $N = N_a$, the mass of the group expressed in grams will equal the mass of the molecule expressed in atomic mass units.  Therefore, the gram-mole is
+\begin{align}
+N_\mathrm{g} = N_a = \frac{1\mathrm{g}}{1\mathrm{u}}.
+\end{align}
+
+The same process may be applied for any other unit of mass, so the quantity required for $m$ to be expressed in kilograms is
+\begin{align}
+N_\mathrm{kg} = \frac{1\mathrm{kg}}{1\mathrm{u}}.
+\end{align}
+Therefore,
+\begin{align}
+\frac{N_\mathrm{kg}}{N_\mathrm{g}} = \frac{1 \mathrm{kg}}{1 \mathrm{g}} = 1000.
+\end{align}
+The moles are converted by the same conversion factors as their mass equivalents, so a kilogram-mole is precisely 1000 times the gram-mole.  To express a quantity, $N$, in molar units, its quantity only needs to be divided by the quantity of the corresponding mole type.
+
+For describing quantities of a gas, standard (or normal) volumetric units are used so widely that the problematic aspects of their definitions are worth tolerating.  A standard (or normal) volume is the quantity of an ideal gas that would occupy that volume at standard conditions.  US Customary and imperial units use the word ``standard'' and metric units use the word ``normal,'' but the meaning is the same.  
+
+Regardless of the mass of the elementary particles, an ideal gas has a consistent number density at given conditions,
+\begin{align}
+n_{std} = \frac{p_{std}}{k T_{std}},
+\end{align}
+given in total number of molecules per unit volume.  Obviously, precise and consistent definitions for standard conditions are essential here.  By default \PM\ uses $p_{std} = 1.01325$ bar and $T_{std} = 273.15$ K.  When $n_{std}$ is expressed in gram-moles, it is approximately 44.615 033 4 moles per cubic meter.
+
+To calculate the number of moles in a standard volume, one need only multiply by the volume in question.  So, a normal liter contains .044 615 033 4 moles (when standard temperature and pressure are as above).
+
+Table \ref{tab:molar} shows the molar units and their values expressed in kilogram-moles.  The values marked with $^*$ are dependent on the standard conditions provided when \verb|setup()| was last called.
+
+\begin{table}
+\centering
+\caption{Molar units recognized by \PM}\label{tab:molar}
+\begin{tabular}{crl}
+\hline
+Setting & Value & Description\\
+\hline
+\verb|kmol| & 1 kmol & kilogram-mole\\
+\verb|mol| & 0.001 kmol & gram-mole\\
+\verb|lbmol| & 0.453 592 37 kmol & pound-mole\\
+\verb|n| & $\approx$ 1.660 539 06 $\times 10^{-27}$ kmol & count \\
+\verb|Nm3|$^*$ & $\approx$ 0.044 615 033 4 kmol & normal cubic meters\\
+\verb|Ncum|$^*$ & \multicolumn{2}{c}{Alternate form of \texttt{Nm3}}\\
+\verb|NL|$^*$ & $\approx$ 44.615 033 4$\times 10^{-6}$ kmol & normal liters\\
+\verb|Ncc|$^*$ & $\approx$ 44.615 033 4$\times 10^{-9}$ kmol & normal cubic centimeters\\
+\verb|scf|$^*$ & $\approx$ 0.001 263 357 06 kmol & standard cubic feet\\
+\verb|sci|$^*$ & $\approx$ 0.731 109 408 $\times 10^{-6}$ kmol & standard cubic inches\\
+\hline
+\end{tabular}
+\end{table}
+
+Even though the mole is the BIPM standard for quantity of a substance, \PM\ uses the kmol or kilogram-mole as the default molar unit for self consistency.  For example, the molecular weight property methods return mass per molar units.  If the units were set to 
+
+
+Example:
+\begin{lstlisting}[language=Python]
+>>> pm.units.molar(1.5, 'scf', 'kmol')
+0.0018950355849594869
+\end{lstlisting}
+
+
+%
+% Matter
+%
+
+\subsection{Matter}\label{sec:units:matter}
+
+\begin{tabular}{rl}
+\hline
+Function: & \verb|pm.units.matter|\\
+\verb|pyromat.config| entry: & \verb|unit_matter|\\
+Default: & \verb|'kg'|\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+To alter the \PM\ unit for matter quantities,
+\begin{lstlisting}[language=Python]
+>>> import pyormat as pm
+>>> pm.config['unit_matter'] = 'lbm'
+\end{lstlisting}
+
+Molar and mass units provide parallel methods for quantifying amounts of matter.  Thermodynamic properties can be expressed in either, so \PM\ uses a third class of units, \emph{matter}, which is an amalgamation of all molar and mass units.  A unit matter may be any of the units listed in Tables \ref{tab:mass} and \ref{tab:molar}.  Since every molar unit can be related to the kilogram-mole and every mass unit can be related to the kilogram, it is only important that we establish how the kilogram is related to the kilogram-mole.
+
+The ratio between kilograms and kilogram moles is a property of the molecule, and is called its molar or molecular mass, $m_0$.  It is typically expressed in terms of atomic mass units per molecule, but it is the same in kilograms per kilogram moles.  The mass, $m$ of a molar quantity, $N$, then, is
+\begin{align}
+m = N m_0.
+\end{align}
+
+Unlike any of the other unit conversions, this one depends on the properties of the substance itself.  As a result, it is implemented in a custom function that adds a mandatory molecular weight (in u per molecule), \verb|mw|, argument to the other standard \verb|Conversion| instance arguments.
+
+\begin{lstlisting}
+>>> matter(value, mw, from_units=None, \
+... to_units=None, exponent=None, inplace=False)
+\end{lstlisting}
+
+If the to- and from-units are in the same molar or mass class, then the function merely calls the appropriate \verb|Conversion| instance.
+
+These examples consider a molecule with molecular weight exactly 2.0 u (H$_2$):
+\begin{lstlisting}
+>>> import pyromat as pm
+>>> pm.units.matter(1, 2, 'kg', 'kmol')
+0.5
+>>> pm.units.matter(1, 2, 'kg, 'lbmol')
+1.1023113109243878
+>>> pm.units.matter(1,2,'kg','lb')
+2.2046226218487757
+>>> pm.units.mass(1, 'kg', 'lb')
+2.2046226218487757
+\end{lstlisting}
+
+%
+% Temperature
+%
+
+\subsection{Temperature}\label{sec:units:temperature}
+
+\begin{tabular}{rl}
+\hline
+\verb|Conversion| instance: & \verb|pm.units.temperature|\\
+Scale function: & \verb|pm.units.temperature_scale|\\
+\verb|pyromat.config| entry: & \verb|unit_temperature|\\
+Default: & \verb|'K'|\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+To alter the \PM\ unit for temperature quantities,
+\begin{lstlisting}[language=Python]
+>>> import pyormat as pm
+>>> pm.config['unit_temperature'] = 'K'
+\end{lstlisting}
+
+This history of temperature as a measure of hot and cold extends back longer than thermodynamics as a rigorous theory.  Without knowing what underlying principles caused substances to be hot or cold, a Celsius scale could still be reliably be marked onto a thermometer by marking its readings in ice water and boiling water and by dividing the space between into one hundred equal increments. 
+
+With the discovery that temperature indicates the mean translational kinetic energy of the molecules of an ideal gas, the kinetic theory of gasses gives the relationship,
+\begin{align}
+\frac{1}{2} m_0 \overline{u^2} = \frac{3}{2} k T.
+\end{align}
+The coefficient, $k$, which is now known as Boltzmann's constant, establishes the proportionality between kinetic energy and temperature.  This also provides the idea of an \emph{absolute} temperature scale; one in which zero temperature corresponds to zero energy rather than an arbitrary choice (like the freezing point of water at standard pressure).  In this way, Boltzmann's constant completely determines an absolute temperature scale in terms of the other units.
+
+The BIPM stipulates that ``[the kelvin] is defined by taking the fixed numerical value of the Boltzmann constant k to be 1.380 649 x 10–23 when expressed in the unit J K$^{-1}$, which is equal to kg m$^2$ s$^{-2}$ K$^{-1}$ [...]''\cite{bipm}  This makes the value for the Boltzmann constant exact by definition.
+
+The rankine scale is the US customary and imperial equivalent, with one 1.8 R per 1 K.  The Celsius scale uses the same increments as the kelvin scale, but its zero is set 273.15 K, the freezing point of water at 1 atmosphere.  The Fahrenheit scale uses the same increment as the rankine, but its zero is set so that the freezing point of water at standard pressure occurs at precisely 32$^\circ$F.
+
+The realization that temperature is a measure of a system's mean energy is especially useful in plasma physics and related fields.  In these studies, it is useful to express temperature directly as an energy, or electron-volts (eV).  The electron-volt is proportional to the electrical potential that can be built up due to thermal motions of electrons, and is equal to $kT / q$ when $q$ is the fundamental charge.
+
+Scales with offsets defy the unit conversion rules implemented by the \verb|Conversion| instance; that all measurements can be converted between the units merely by multiplying by a factor.  Obviously, when converting values for a temperature, it is important to handle these offsets correctly, but when considering derivatives involving temperature or other changes in temperature, the offsets must be ignored.  As a result, there are two temperature-based unit conversion tools.
+
+The \verb|pm.units.temperature| is a \verb|Conversion| instance should only be used in cases where changes or derivatives in temperature are being considered (e.g. in specific heat or entropy).  In these cases, offsets can be ignored, and the conversion factor rules are observed.  
+
+When temperatures are being converted between scales so that the offsets between them must be respected, the \verb|pm.units.temperature_scale| function should be used instead.  It is a function that mimics the \verb|Conversion| call signature, but that is specially written to handle temperature scales. 
+
+\begin{lstlisting}
+>>> pm.units.temperature_scale(value, from_units=None,\
+...     to_units=None, inplace=False)
+\end{lstlisting}
+
+Just like the \verb|Conversion| instances, it respects the \verb|unit_temperature| configuration parameter for any unspecified units.  However, it makes no sense to refer to a temperature scale with any exponent other than 1, so the exponent parameter is absent.
+
+The temperature scales and their respective differential values in kelvin are listed in Table \ref{tab:temperature}.  Note that the offsets are not included in this table.
+
+\begin{table}
+\centering
+\caption{Temperature units recognized by \PM}\label{tab:temperature}
+\begin{tabular}{crl}
+\hline
+Setting & Value & Description\\
+\hline
+\verb|K| & 1 K & kelvin\\
+\verb|C| & 1 K & degree Celsius\\
+\verb|R| & 5/9 K & rankine\\
+\verb|F| & 5/9 K & degree Fahrenheit\\
+\verb|eV| & $\approx$ 86.173 332 6 $\times 10^{-6}$ K & electron-volt\\
+\hline
+\end{tabular}
+\end{table}
+
+Examples:
+\begin{lstlisting}
+>>> pm.units.temperature(2, 'C', 'F')
+3.6
+>>> pm.units.temperature_scale(2, 'C', 'F')
+array(35.6)
+\end{lstlisting}
+
+
+\section{Derived Units}
+
+Derived units are ones that are defined in terms of the fundamental units.  They have no fundamental definition in nature, but are instead calculated in terms of the fundamental units.
+
+%
+% Force
+%
+
+\subsection{Force}\label{sec:units:force}
+
+\begin{tabular}{rl}
+\hline
+\verb|Conversion| instance: & \verb|pm.units.force|\\
+\verb|pyromat.config| entry: & \verb|unit_force|\\
+Default: & \verb|'N'|\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+To alter the \PM\ unit for force quantities,
+\begin{lstlisting}[language=Python]
+>>> import pyormat as pm
+>>> pm.config['unit_force'] = 'kgf'
+\end{lstlisting}
+
+Force is a concept that originates with Newton's laws of motion, so it is fitting that the principle force unit be called the Newton.  It is equivalent to one kg m s$^{-2}$, corresponding to mass times acceleration.
+
+Force units that are derived from measures of mass (like kilogram-force and pound-force) can be calculated in terms of Newtons by calculating their weight (in Newtons) under Earth gravity.  These units depend on the value assigned to $g$ in the last call to \verb|setup()| (see Section \ref{sec:units:setup} of this chapter).
+
+Table \ref{tab:force} lists the supported force units and their values in Newtons.
+
+\begin{table}
+\centering
+\caption{Force units recognized by \PM}\label{tab:force}
+\begin{tabular}{crl}
+\hline
+Setting & Value & Description\\
+\hline
+\verb|N| & 1 N & newton\\
+\verb|kN| & 1,000 N & kilonewton\\
+\verb|lbf|$^*$ & $\approx$ 4.448 221 62 N & pound-force\\
+\verb|lb|$^*$ & \multicolumn{2}{c}{Alternate for \texttt{lbf}}\\
+\verb|oz|$^*$ & $\approx$ 0.278 013 851 N & ounce\\
+\hline
+\end{tabular}
+\end{table}
+
+%
+% Energy
+%
+
+\subsection{Energy}\label{sec:units:energy}
+
+\begin{tabular}{rl}
+\hline
+\verb|Conversion| instance: & \verb|pm.units.energy|\\
+\verb|pyromat.config| entry: & \verb|unit_energy|\\
+Default: & \verb|'kJ'|\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+To alter the \PM\ unit for energy quantities,
+\begin{lstlisting}[language=Python]
+>>> import pyormat as pm
+>>> pm.config['unit_energy'] = 'kcal'
+\end{lstlisting}
+
+The Joule is the SI measure of energy, and it is defined as one N m, or one kg m$^2$ s$^{-2}$.  The calorie is of historical importance to the scientific community, but its use has fallen out in favor of the Joule.  The British thermal unit (BTU) is still broadly used in some industries (especially heating and refrigeration), but few authoritative definitions for unit systems recognize either in their contemporary standards.
+
+The calorie has a number of alternate definitions that has made the unit somewhat problematic.  One set of definitions is the energy required to raise a gram of water one degree Celsius at different ``standard'' conditions.  Another is 1/100 of the energy required to raise a gram of water from its ice point to boiling at atmospheric pressure.  In 1956, the Fifth International Conference on the Properties of Steam set the ``international table calorie'' to be precisely 4.1868 J.  The calorie in broadest contemporary use is the thermochemical calorie, which seems to be universally understood to be precisely 4.184 J  \cite{nist:sp811}, though an original source for that definition is difficult to find.  Because it is the unit adopted by the International Unions of Pure and Applied Chemistry and Physics (IUPAC and IUPAP) \cite{crc} \PM\ also adopts the thermochemical calorie.
+
+Whatever definition is used for the calorie, the BTU may be derived from it by adjusting the quantity of water to be one pound and the temperature rise to be one degree Fahrenheit.  The BTU so derived from the thermochemical calorie is approximately 1,054.350 26 J.
+
+It is important to emphasize that it is difficult to find contemporary authorities that certify the BTU or calorie for commercial use.  The ISO standard that historically defined the calorie (ISO 31-4) was withdrawn and superseded by ISO 80000-5, which makes no mention of the calorie or the BTU.  NIST's special publication number 811 from which the conversion is lifted specifically lists the calorie as an ``unacceptable unit.''
+
+Finally, the electron-volt is the energy required to move a single electron through a one volt potential.  It is expressed in Joules as 1V $\times q$.
+
+\begin{table}
+\centering
+\caption{Energy units recognized by \PM}\label{tab:energy}
+\begin{tabular}{crl}
+\hline
+Setting & Value & Description\\
+\hline
+\verb|J| & 1 J & joule\\
+\verb|kJ| & 1,000 J & kilojoule\\
+\verb|cal| & 4.184 J & calorie\\
+\verb|kcal| & 4,184 J & kilocalorie\\
+\verb|BTU| & $\approx$ 1,054.350 26 J & British thermal unit\\
+\verb|eV| & 1.602 176 634 $\times 10^{-19}$ J & electron-volt\\
+\hline
+\end{tabular}
+\end{table}
+
+%
+% Pressure
+%
+
+\subsection{Pressure}\label{sec:units:pressure}
+
+\begin{tabular}{rl}
+\hline
+\verb|Conversion| instance: & \verb|pm.units.pressure|\\
+\verb|pyromat.config| entry: & \verb|unit_pressure|\\
+Default: & \verb|'bar'|\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+To alter the \PM\ unit for pressure quantities,
+\begin{lstlisting}[language=Python]
+>>> import pyormat as pm
+>>> pm.config['unit_pressure'] = 'Pa'
+\end{lstlisting}
+
+Pressure is a force exerted per unit area.  In addition to its typical use describing fluid forces on surfaces, pressure units are also used to describe stresses and surface loads in solids.  The SI unit for pressure is the pascal, which is defined as one N m$^{-2}$ \cite{bipm}.  The bar is precisely 100,000 Pa, and is in broad use thanks to its proximity to the atmosphere.  The \emph{standard} atmosphere is internationally accepted to be precisely 101,325 Pa \cite{CPC}.  
+
+Liquid column units for pressure are defined as the increase in pressure observed beneath a column of liquid of some height.  Provided sufficient measures are taken to avoid the impacts of meniscus, the liquid column pressure, $p$, may be calculated for a liquid with mass density, $\rho$, under a uniform gravitational acceleration, $g$, with a column height, $h$,
+\begin{align}
+p = \rho g h.
+\end{align}
+For measures of high precision, it is obviously necessary to define a standard gravity and standard densities for the column fluids.
+
+By default, \PM\ uses the acceleration of free fall in Earth gravity, $g$, to be precisely 9.8065 m s$^{-2}$.  This value was internationally adopted in 1901 by the third General Conference on Weights and Measures (CGPM)\cite{cgpm:3:2} and is still in broad use as a ``standard'' value \cite[p.45]{nist:sp1038} \cite[p.5]{nist:811}.  However, it should be emphasized that actual weights observed vary significantly with altitude, proximity to dense geological formations, and especially latitude.  
+
+The conventional mmH$_2$O is calculated with precisely 1,000 kg m$^{-3}$ water density, and the so-called 4$^\circ$C mmH$_2$O is based on a water density of 999.972 kg m$^{-3}$.  Actual water density in the ``ambient'' range 20$^\circ$C to 25$^\circ$C can be as low as 997 kg m$^{-3}$, so practical realizations of this unit in a laboratory setting are unlikely to ever be more precise than 0.3\%.  By default \PM\ uses the 4$^\circ$C mmH$_2$O, but users may change this convention by altering the \verb|dh2o| parameter in the \verb|setup| function (see Section \ref{sec:units:setup} of this chapter).
+
+There are also conventional and 0$^\circ$C mmHg units in broad use, but their distinctions are even less important.  By default, \PM\ uses a density of 13,595.1 kg $^{-3}$ for mercury, which results in a conversion consistent with the value adopted by NIST \cite[p.52]{nist:sp811} to the precision given.
+
+The ``standard atmosphere'' was adopted by the (CGPM) in 1954 to be precisely 101,325 newtons per square meter \cite{cgpm:10:4}.  It is intended to be indicative of a global mean adjusted to sea level.  This definition is in broad use both scientifically \cite{crc} and commercially \cite{nist:sp811} as value of one atm.  The standard atmosphere can be adjusted using the \verb|pstd| parameter of \verb|setup| (see Section \ref{sec:units:setup} of this chapter).
+
+Because they are identical to practical precision, the Torr and the mmHg are often treated as identical units, but, there is a difference in definition.  The Torr is defined so that 1 atm is precisely 760 Torr.
+
+\begin{table}
+\centering
+\caption{Pressure units recognized by \PM}\label{tab:pressure}
+\begin{tabular}{crl}
+\hline
+Setting & Value & Description\\
+\hline
+\verb|Pa| & 1 Pa & pascal\\
+\verb|kPa| & 1,000 Pa & kilopascal\\
+\verb|MPa| & 1,000,000 Pa & megapascal\\
+\verb|bar| & 100,000 Pa & bar\\
+\verb|atm|$^*$ & 101,325 Pa & atmosphere\\
+\verb|Torr|$^*$ & $\approx$ 133.322 368 Pa & Torr\\
+\verb|mmHg|$^*$ & $\approx$ 133.322 387 Pa & mm mercury column\\
+\verb|inHg|$^*$ & $\approx$ 3,386.388 64 Pa & inches mercury column\\
+\verb|mmH2O|$^*$ & $\approx$ 9.806 375 41 Pa & mm water column\\
+\verb|inH2O|$^*$ & $\approx$ 249.081 936 Pa & inches water column\\
+\verb|psi| & $\approx$ 6,894.757 29 Pa & pounds per square inch\\
+\verb|ksi| & $\approx$ 6,894,757.29 Pa & kips per square inch\\
+\verb|psf| & $\approx$ 47.880 259 0 Pa & pounds per square foot\\
+\hline
+\end{tabular}
+\end{table}
+
+%
+% Volume
+%
+
+\subsection{Volume}\label{sec:units:volume}
+
+\begin{tabular}{rl}
+\hline
+\verb|Conversion| instance: & \verb|pm.units.volume|\\
+\verb|pyromat.config| entry: & \verb|unit_volume|\\
+Default: & \verb|'m3'|\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+To alter the \PM\ unit for volumetric quantities,
+\begin{lstlisting}[language=Python]
+>>> import pyormat as pm
+>>> pm.config['unit_volume'] = 'gal'
+\end{lstlisting}
+
+Volume is the measure of the size of a region in space.  SI volumetric units are entirely derived from cubes of the linear units, with the liter being equivalent to 0.001 m$^3$.
+
+Historically the English units for fluid ounce, pint, quart, and gallon were based on the volume occupied by specific weights of water.  The English wine gallon was first implemented in 1707 as precisely 231 cubic inches, which was quite close to the gallon based on quantities of water.  Though the United Kingdom abandoned it in 1824, it was adopted as the official gallon by the United States Treasury Department in 1832 \cite{nbs:sp447}.  Today, the US gallon is still defined as precisely 231 cubic inches.
+
+The Imperial gallon, which the UK and Canada adopted in place of the wine gallon, was the volume occupied by 10 pounds of liquid water at atmospheric conditions.  Today, the imperial gallon is precisely 4.546 09 liters, which is consistent to the degree that the density of water is constant.
+
+The system of US liquid quart (1/4 gallon) and liquid pint (1/8 gallon) follow from the definition of the gallon, but it should be emphasized that there is a vast and nuanced system of specialized volumetric units that are not included in \PM (e.g. fluid ounce, dry quart, dry int, bushel, etc.).  This decision is primarily to avoid confusion, but also to keep the focus on units of relevance to the engineering and scientific community.
+
+Table \ref{tab:volume} shows the volumetric units recognized by \PM .
+
+\begin{table}
+\centering
+\caption{Volumetric units recognized by \PM}\label{tab:volume}
+\begin{tabular}{crl}
+\hline
+Setting & Value & Description\\
+\hline
+\verb|cum| & 1 cum & cubic meter\\
+\verb|m3| & \multicolumn{2}{c}{Alternate for \texttt{cum}}\\
+\verb|cc| & $\times 10^{-6}$ cum & cubic centimeter\\
+\verb|cm3| & \multicolumn{2}{c}{Alternate for \texttt{cc}}\\
+\verb|cumm| & 1 $\times 10^{-9}$ cum & cubic millimeter\\
+\verb|mm3| & \multicolumn{2}{c}{Alternate for \texttt{cumm}}\\
+\verb|L| & .001 cum & liter\\
+\verb|mL| & 1 $\times 10^{-6}$ cum & milliliter\\
+\verb|uL| & 1 $\times 10^{-9}$ cum & microliter\\
+\verb|cuin| & 0.163 870 64 $\times 10^{-5}$ cum & cubic inch\\
+\verb|in3| & \multicolumn{2}{c}{Alternate for \texttt{cuin}}\\
+\verb|cuft| & 0.028 316 846 591 cum & cubic foot\\
+\verb|ft3| & \multicolumn{2}{c}{Alternate for \texttt{cuft}}\\
+\verb|USgal| & 0.003 785 411 783 cum & US gallon\\
+\verb|gal| & \multicolumn{2}{c}{Alternate for \texttt{USgal}}\\
+\verb|qt| & 0.946 352 946 $\times 10^{-3}$ cum & liquid quart\\
+\verb|pt| & 0.473 176 473 $\times 10^{-3}$ cum & liquid pint\\
+\verb|UKgal| & 0.004 546 09 cum & imperial gallon\\
+\hline
+\end{tabular}
+\end{table}

@@ -1,8 +1,8 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2021.3.3)  4 MAR 2021 21:22
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2021.3.3)  26 JUN 2021 14:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**properties
+**properties.tex
 (./properties.tex
 LaTeX2e <2017-04-15>
 Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
@@ -238,74 +238,84 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 18.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] [4] [5]
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
 
-LaTeX Warning: Reference `eqn:enthalpy' on page 6 undefined on input line 162.
+LaTeX Warning: Reference `tab:primary' on page 3 undefined on input line 87.
 
-[6]
+[3] [4]
 
-LaTeX Warning: Reference `eqn:enthalpy' on page 7 undefined on input line 190.
+LaTeX Warning: Reference `eqn:cv' on page 5 undefined on input line 165.
 
 
-Overfull \hbox (18.1978pt too wide) in paragraph at lines 202--202
+LaTeX Warning: Reference `eqn:cp' on page 5 undefined on input line 165.
+
+[5]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 177.
+
+ (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 177.
+ [6] [7] [8]
+[9] [10]
+
+LaTeX Warning: Reference `eqn:enthalpy' on page 11 undefined on input line 297.
+
+
+
+LaTeX Warning: Reference `eqn:enthalpy' on page 11 undefined on input line 325.
+
+
+[11]
+Overfull \hbox (18.1978pt too wide) in paragraph at lines 337--337
 []\OT1/cmr/bx/n/14.4 Efficiently eval-u-at-ing poly-no-mi-als and their deriva-
 
  []
 
-[7]
-<benchmark.png, id=38, 462.528pt x 346.896pt>
+<benchmark.png, id=55, 462.528pt x 346.896pt>
 File: benchmark.png Graphic file (type png)
 <use benchmark.png>
-Package pdftex.def Info: benchmark.png  used on input line 212.
+Package pdftex.def Info: benchmark.png  used on input line 347.
 (pdftex.def)             Requested size: 349.20044pt x 261.91281pt.
- [8 <./benchmark.png>]
-Overfull \hbox (1.85974pt too wide) in paragraph at lines 255--255
-[]\OT1/cmr/bx/n/12 Modifying poly-no-mi-als for non-integer and neg-a-tive pow-
-
- []
-
-[9]
-Overfull \hbox (4.51083pt too wide) in paragraph at lines 267--268
-[]\OT1/cmr/m/n/10.95 Similarly, neg-a-tive ex-po-nen-tials can be achieved by u
-s-ing post-exponential
- []
-
-[10] [11] [12]
-
-LaTeX Warning: Float too large for page by 6.3636pt on input line 448.
-
-[13] [14] [15] (./properties.aux)
+[12] [13 <./benchmark.png>] [14] [15] [16] [17] [18] [19] [20] [21]
+(./properties.aux)
 
 LaTeX Warning: There were undefined references.
 
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
  ) 
 Here is how much of TeX's memory you used:
- 2637 strings out of 492982
- 34456 string characters out of 6134897
- 104043 words of memory out of 5000000
- 6159 multiletter control sequences out of 15000+600000
- 12165 words of font info for 46 fonts, out of 8000000 for 9000
+ 2677 strings out of 492982
+ 34992 string characters out of 6134897
+ 108053 words of memory out of 5000000
+ 6190 multiletter control sequences out of 15000+600000
+ 14401 words of font info for 55 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 41i,10n,26p,629b,638s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,17n,26p,895b,626s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texl
 ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/te
 xmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dis
 t/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/
-public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
-s/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
-9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/s
-hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/t
-exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive
-/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on properties.pdf (15 pages, 219468 bytes).
+/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/sha
+re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/tex
+live/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/share/texlive/texmf-dist/font
+s/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on properties.pdf (21 pages, 272269 bytes).
 PDF statistics:
- 120 PDF objects out of 1000 (max. 8388607)
- 84 compressed objects within 1 object stream
+ 148 PDF objects out of 1000 (max. 8388607)
+ 103 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  6 words of extra memory for PDF output out of 10000 (max. 10000000)
 

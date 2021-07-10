@@ -1,0 +1,250 @@
+\chapter{Introduction}
+
+\PM\ is a Python-based package for calculating the thermodynamic properties of fluids.  That includes liquids, gases, and plasmas.  It is written in pure Python, and the core algorithms only depend on the Numpy package for back-end numerical and array support.  This document is intended to serve as a reference manual for interpreting, using, or even writing your own \PM\ data sets.  
+
+To that end, we begin with a brief review of the thermodynamic properties \PM\ calculates.  For a detailed development of these properties, the reader should consult an introductory text on thermodynamics\footnote{For example, Cengel and Boles, \emph{Thermodynamics}, McGraw Hill.  Any edition will do.}.  
+
+In the author's opinion, contemporary undergraduate texts on thermodynamics do the reader a disservice by ignoring the deeply intuitive (and terribly important) underpinnings provided by the kinetic theory of gases.  Kinetic theory and thermodynamics have a complicated relationship because they were developed in parallel (often in tragic contention with one another), but the limits imposed by many of the common assumptions (such as idea or perfect gas) cannot be deeply understood without kinetic theory.  To the interested reader, the author would recommend Jeans's 1949 introductory text\footnote{James Jeans, \emph{Introduction to the Kinetic Theory of Gases}, Cambridge University Press, 1949.}.  It is old, but it is brief, accessible, inexpensive, and approaches the subject only requiring that the reader have a grasp of calculus, geometry, and introductory mechanics.  
+
+%
+% The Properties
+%
+\section{The Properties}
+
+\PM\ is primarily concerned with the \emph{thermodynamic} properties listed in Table \ref{tab:properties}.  There is no single set of units used to express these properties since \PM\ uses a unit-configurable unit system.  The unit systems given in Table \ref{tab:properties} are itemized in Table \ref{tab:units}.  \PM\ 's system of units is discussed in detail in Chapter \ref{ch:units}.
+
+\begin{table}
+\centering
+\caption{Thermodynamic properties, their symbols, and their unit systems}\label{tab:properties}
+\begin{tabular}{cccl}
+\hline
+Symbol & In-Code & Units & Description\\
+\hline
+$T$ & \verb|T| & T & Temperature\\
+$p$ & \verb|p| & P & Pressure\\
+$\rho$ & \verb|d| & M / V & Density\\
+$x$ & \verb|x| & - & Quality\\
+\hline
+$R$ & \verb|R| & E / M / T & Ideal gas constant\\
+$W$ & \verb|mw| & Ma / Mo & Molecular weight\\
+\hline
+$e$ & \verb|e| & E / M & Internal energy\\
+$h$ & \verb|h| & E / M & Enthalpy\\
+$s$ & \verb|s| & E / M / T & Entropy\\
+\hline
+$c_p$ & \verb|cp| & E / M / T & Constant-pressure specific heat\\
+$c_v$ & \verb|cv| & E / M / T & Constant-volume specific heat\\
+$\gamma$ & \verb|gam| & - & Specific heat ratio\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}
+\centering
+\caption{Classes of units, their entry in \texttt{pm.config}, and their defaults.}\label{tab:units}
+\begin{tabular}{|cccl|}
+\hline
+Unit & \verb|config| entry & Default & Description\\
+\hline
+E & \verb|unit_energy| & kJ & Energy\\
+L & \verb|unit_length| & m & Length\\
+M & \verb|unit_matter| & kg & Matter (molar or mass)\\
+Ma & \verb|unit_mass| & kg & Mass\\
+Mo & \verb|unit_molar| & kmol & Molar\\
+P & \verb|unit_pressure| & bar & Pressure\\
+t & \verb|unit_time| & s & Time\\
+T & \verb|unit_temperature| & K & Temperature\\
+V & \verb|unit_volume| & m$^3$ & Volume\\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Primary Properties}
+
+When studying a substance, the theory of thermodynamics can make equal use of any set of properties to discover the others, but in a practical sense, it is almost always prudent to define a pair or more of core properties that are standard for defining the thermodynamic state.  
+
+For most problems of engineering relevance, temperature and pressure $(T,p)$ are the favorite, since both are readily measured, and both are of immediate importance to fluid machinery design.  Fortunately, all of the common properties of ideal gases can be conveniently constructed directly from these two properties.  Unfortunately, that is not the case with non-ideal fluids.
+
+It is intuitive that when gases are compressed into tighter and tighter spaces, the distance between the molecules becomes a vitally important parameter for predicting the substance's properties.  Pressure is not a convenient metric of that distance, but density is.  For this reason, nearly all non-ideal gas properties are modeled in terms of $(T,\rho)$, and pressure has to be calculated indirectly.  This creates a substantial amount of work for the design engineer who may not wish to delve into the details of how properties are calculated.
+
+To address the issue, \PM\ designates four \emph{primary properties} that may be used interchangeably in pairs to specify the thermodynamic state.  When more than two are included, the state is over-specified, and \PM\ assumes that the values specify a consistent state.  Which two are used to calculations are selected in order of precedence shown in Table \ref{tab:primary}.
+
+\begin{table}
+\centering
+\caption{Primary properties and their order of precedence}\label{tab:primary}
+\begin{tabular}{|ccc|}
+\hline
+Order & Symb. & Description\\
+\hline
+1 & $T$ & Temperature\\
+2 & $p$ & Pressure\\
+3 & $\rho$ & Density\\
+4 & $x$ & Quality\\
+\hline
+\end{tabular}
+\end{table}
+
+For example, let's say I needed to calculate the specific heat of oxygen.  
+
+\begin{lstlisting}[language=Python]
+>>> import pyromat as pm
+>>> o2 = pm.get('ig.O2')
+>>> o2.cp(300,2)
+\end{lstlisting}
+
+How should the two numbers (300,2) be interpreted?  Using the order of precedence, those refer to a state $T=300$ K and $p=2$ bar using \PM 's default units.  To deliberately specify density, a keyword syntax should be used instead.
+\begin{lstlisting}[language=Python]
+>>> o2.cp(d=1.2, p=2)
+\end{lstlisting}
+
+\subsection{Density, $\rho$}
+
+It is convenient to begin our discussion of properties with density since it is the easiest to define.
+
+Density is the quantity of a substance per unit volume it occupies in space.  It can be described as a number of molecules or mass per unit space.  When described with molar units, it is usually called concentration, but \PM\ does not make that distinction.
+
+When the unit volume is very tiny, this is a poorly defined quantity.  For example, as the volume shrinks to be about the same size as the distance between molecules, the density one might measure would vary hugely as individual molecules entered and left the region of space.  However, as the volume grows within a thermodynamically homogeneous region, the ratio of matter to volume converges to a consistent well-defined value.
+
+This introduces the idea that the study of thermodynamics is essentially a careful study of averages over a large population of mechanical bodies.  It is important that we study a quantity of a substance large enough that the extremes of individual molecules do not weigh heavily in our measurements.  On the other hand, our measurements must consider a region of space small enough that the properties that interest us do not vary significantly.  We may consider a region to be thermodynamically homogeneous if it can be divided into two equal smaller regions that exhibit identical thermodynamic properties.
+
+The density, in molar units, is
+\begin{align}
+\langle \rho \rangle = \frac{N}{V},
+\end{align}
+where $V$ is the volume of the region, and $N$ is the number of molecules.  The number of molecules may be expressed either in a literal count or in molar units (See Section \ref{sec:molar}).  In mass units, the density is merely multiplied by the molecular weight of the species,
+\begin{align}
+\rho = W \frac{N}{V}.
+\end{align}
+
+Since $\rho$ is not available in the ASCII character set, \PM\ uses \verb|d| to represent density.
+
+\subsection{Specific volume, $v$}
+
+Specific volume is the volume occupied by a unit of matter, and is calculated as the inverse of density.
+\begin{align}
+v \equiv \frac{1}{\rho}.
+\end{align}
+Even though density is the property with the clearer fundamental definition, specific volume is mathematically identical to other intensive properties because it is formulated per unit matter.
+
+\PM\ does not calculate specific volume directly, but deals in density instead.  The user is called on to calculate \verb|v=1/d| when specific volume is needed.
+
+\subsection{Temperature, $T$}
+
+Temperature scales were originally developed as quantitative means for describing hot and cold, but they were developed before we had more physical descriptions for their meaning.  After all, the existence of molecules and atoms was still being hotly debated while temperature scales were already in wide scientific and engineering use.
+
+We now understand temperature to be an observable measure of the molecular translational kinetic energy of a substance.  In a gas, the molecules are free to translate through space, and temperature is proportional to their kinetic energy.  In a liquid or solid, the same energy manifests as molecular vibration within the confines of the intermolecular forces.
+
+For a gas,
+\begin{align}
+\langle \frac{1}{2} m u^2 \rangle = \frac{3}{2} k T,
+\end{align}
+Here, $m$ is the mass of an individual molecule, $\langle u^2 \rangle$ is the mean square of velocity, $k$ is the Boltzmann constant, and $T$ is the temperature in absolute units.
+
+The ITS-90 temperature scale establishes an international standard for the definition of temperature in terms of the triple points of various pure substances.  Many of the property models included in \PM\ were formulated when the previous ITPS-68 was the international temperature scale, but the changes were so minute that the uncertainties in the properties dominate\footnote{Page 10 of Part I of Malcom Chase, \emph{NIST-JANAF Thermochemical Tables}, Journal of Physical and Chemical Reference Data, Monograph 9, 1998.}.  As a result, they are treated as interchangeable for the purposes of this handbook.
+
+\subsection{Pressure, $p$}\label{sec:intro:p}
+
+Pressure is the static force exerted by a fluid on a surface.  It is quantified in force per unit area of the surface, and it always acts normal to the surface facing into the surface (away from the fluid).  
+
+In a gas, pressure is due to the impact of molecules on the surface.  Pressure may be increased by increasing either their velocity (temperature) or their quantity (density).  Because these effects are linear in a gas, this leads to the famous ideal gas relationship between density, temperature, and pressure.  
+
+In a liquid or solid, intermolecular forces that cause pressure are persistent instead of momentary (due to collisions in a gas).  Under these conditions, even slight changes in intermolecular spacing causes huge changes in pressure, making the substance quite stiff in comparison to gases.  In this case as well, increasing temperature makes molecules vibrate more violently in their equilibrium with each other, so at a consistent average density, the force applied to a neighboring surface will increase.  This is why substances appear to expand as they are heated.
+
+The standard atmosphere is defined as the global mean pressure at sea level, and is defined to be 101,325Pa.  
+
+\subsection{Internal Energy, $e$}\label{sec:intro:e}
+
+Energy can be stored in a fluid in many ways.  In gases, for example, the molecules translate with great speed (see temperature), the molecules vibrate and rotate, and there is incredible energy stored in the chemical bonds of molecules.  However, all of these are dwarfed by the energy contained in the forces binding the nucleus of each atom.
+
+We account for \emph{all} of these energies simultaneously with the internal energy, $e$, which has units energy per matter (e.g. J/kg).  It is neither practical nor necessary to tally all of these energies in an absolute fashion.  Especially since most applications will have no release of nuclear energy, it is practical, instead, to describe how the substance's energy changes relative to some reference state.  This is not unlike defining a reference height for gravitational potential energy calculations in classical mechanics.  The choice is arbitrary and has no bearing on the result, but it can drastically simplify the calculations.
+
+Therefore, we say that the internal energy, $e$ is the sum of vibrational, rotational, translational, chemical, and nuclear energies contained in a thermodynamically homogeneous unit matter, subtracted by the same sum at some reference state.
+
+\subsection{Enthalpy, $h$}\label{sec:intro:h}
+
+When a fluid of any kind is flowing, it caries its internal energy with it, but it also does mechanical work as it flows.  The mechanical work done by a moving fluid is $p \d V$, where $p$ is the pressure exerted and $\d V$ is a differential volume displaced by the fluid.  If we were to imagine that the volume were displaced while the fluid is expanding or contracting, the same idea applies to a fluid whether it is flowing or not.  Per unit mass, this can be expressed as $p \d v$.  Integrated over an isobaric (constant-pressure) process, this becomes simply $p v$.
+
+It is a matter of convenience for engineers and physicists that deal with fluid power, that we define enthalpy as the sum of internal energy and fluid power,
+\begin{align}
+h \equiv e + pv = e + \frac{p}{\rho}.
+\end{align}
+This term appears naturally when energy balances are applied to open systems (ones where flow is moving through the system).  Internal energy accounts for all of the energy stored by the molecules in a fluid, and enthalpy additionally includes the fluid's capacity to do mechanical work as it flows.
+
+Enthalpy is a most commonly used in the analysis of any flowing fluid such as in heat exchangers, combustors and burners, chemical reactors, compressors, turbines, valves, etc...  Even though it is derived from a property that might be argued to be more ``fundamental,'' enthalpy is usually tabulated as a primary property because it is so useful.
+
+Just like internal energy, a substance's enthalpy is defined relative to an arbitrary reference state.  However, since internal energy and enthalpy share a common definition, their reference states \emph{must} be consistent with one another.  Furthermore, for any data set intended for the analysis of chemical reactions, the enthalpies of chemically related species (such as H$_2$, O$_2$, and H$_2$O) \emph{must} be defined consistently so that the changes in molecule internal energy due to chemical reaction can be properly accounted for.  As a result, there are certain \emph{reference species} for which arbitrary reference state enthalpies are selected.  
+
+Since the \PM\ multi-phase models permit only pure substances, they do not need rigorously defined reference states.  However, the ideal gas models are defined with this in mind to permit chemical action.  See the ideal gas chapter (Chapter \ref{ch:ig}) for a detailed discussion on the enthalpy of formation.
+
+\subsection{Entropy, $s$}\label{sec:intro:s}
+
+The idea of entropy is born with the Clausius statement of the Second Law of Thermodynamics, which says that a reversible cyclic series of processes that include heat transfer must obey
+\begin{align}
+\oint \frac{\delta q}{T} \equals_{rev.} 0,
+\end{align}
+where $T$ is the temperature of the substance and $\delta q$ is the addition of heat.  It is important to emphasize that this is only true of processes that result in a continuous cycle where the fluid ends at the same thermodynamic state from which it began (like in an engine or refrigeration cycle).
+
+The first law would be satisfied by any cycle where the work and heat transfer merely summed to zero, but the Clausius equality implies something deeper.  Heat is not a property of the substance, but heat added reversibly in ratio with the temperature consistently returns to zero when the substance returns to its original thermodynamic state.  That implies the existence of a new (and terribly important) property.  Clausius termed that property entropy,
+\begin{align}
+\d s \defas_\mathrm{rev.} \frac{\delta q}{T}\label{eqn:s}
+\end{align}
+
+From the first law of thermodynamics, $\delta q = \d e + p \d v$, and we have a way to calculate entropy from the other properties
+\begin{align}
+T \d s &= \d e + p\d v\\
+ &= \d h - v \d p
+\end{align}
+
+Just like with temperature, there is a parallel (mathematically consistent) definition of entropy from statistical mechanics.  Entropy can also be understood as the probability of the substance obtaining a thermodynamically equivalent state.  The probability of gas molecules spontaneously exhibiting a specific set of positions and velocities is astronomically low, but there is an infinity of similar positions and velocities that would give the gas precisely the same temperature (for example).  The probability of gas molecules marching orderly in a lattice like a crystal is also astronomically low, but this condition has very few alternatives, making it truly unlikely.
+
+Just like internal energy, it is theoretically possible to tally all of the possible states and calculate the probability of each, but that task is neither practical nor necessary.  Instead, it is convenient to define the entropy as zero at some reference state and then deal merely in changes in entropy as defined by (\ref{eqn:s}).
+
+\subsection{Specific Heats, $c_p$ $c_v$}\label{sec:intro:c}
+
+Of the properties so far defined, only temperature, pressure, and density can be directly measured.  The specific heats are vitally important to the study of a substance, because they can be conveniently directly measured and the other properties calculated from them.
+
+Specific heat, $c$, is the amount of heat per mass of a substance, $\delta q$, required to obtain a small increase in temperature, $\delta T$,
+\begin{align}
+c \equiv \frac{\delta q}{\delta T}.
+\end{align}
+
+Especially when dealing with gases, we have to be more specific because substances have a tendency to expand when they are heated.  One measures a different value for specific heat depending on whether or not expansion is allowed. 
+
+For any process, energy will be conserved, so
+\begin{align}
+\delta q = \d e + p\d v.
+\end{align}
+Here, $\delta q$ is heat added per mass of the substance, $\d e$ is the change in internal energy, $p$ is the pressure, and $\d v$ is the change in volume per unit mass.
+
+When heat is applied in such a manner that the substance's volume is constant, $\d v = 0$, the mechanical work is zero, and all of the heat is stored as internal energy.
+\begin{align}
+\delta q |_v &= \d e\nonumber\\
+ &= \left(\frac{\partial e}{\partial T}\right)_v \d T
+\end{align}
+Thus, the constant-volume specific heat is, by definition, 
+\begin{align}
+c_v \equiv \left(\frac{\delta q}{\delta T}\right)_v = \left(\frac{\partial e}{\partial T}\right)_v.\label{eqn:cv}
+\end{align}
+In this process, the substance's pressure will rise (sometimes sharply) as it is heated in a rigid container.
+
+When one considers addition of heat under constant pressure, a trick application of the chain rule for the term, $pv$, lets us transition the differential on volume into a differential on pressure.  The definition for enthalpy (\ref{eqn:h}) appears naturally.
+\begin{align}
+\delta q &= \d e + p \d v + v\d p - v \d p\nonumber\\
+ &= \d(e + pv) - v\d p
+\end{align}
+
+When heat is added while pressure is constant (like in an atmospheric gas), $\d p=0$, and 
+\begin{align}
+\delta q |_p &= \d h\nonumber\\
+ &= \left( \frac{\partial h}{\partial T}\right)_p \d T
+\end{align}
+Thus, constant-pressure specific heat is, by definition,
+\begin{align}
+c_p &\equiv \left(\frac{\delta q}{\delta T}\right)_p = \left( \frac{\partial h}{\partial T}\right)_p.\label{eqn:cp}
+\end{align}
+
+
+
+%
+% 
+%

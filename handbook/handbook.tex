@@ -1,0 +1,50 @@
+\documentclass[11pt]{report}
+
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue]{hyperref}
+%\usepackage[a-1b]{pdfx}
+\usepackage{pdfx}
+% A5 is 148mm x 210mm
+\usepackage[a5paper,left=15mm,textwidth=118mm,top=15mm,bottom=20mm]{geometry}
+%\usepackage{lscape}    %For use on non-pdf builds
+\usepackage{pdflscape}
+
+% Set up the code style
+\definecolor{codebg}{rgb}{0.92,0.95,0.92}
+\lstdefinestyle{codestyle}{
+    backgroundcolor=\color{codebg},
+    basicstyle=\sffamily,
+}
+\lstset{style=codestyle}
+
+% Delcare the equiv operator so "rev" will appear nicely beneath it in
+% the definition for entropy
+\DeclareMathOperator*{\defas}{\equiv}
+\DeclareMathOperator*{\equals}{=}
+
+\newcommand{\PM}{PYroMat}
+\def\d{\mathrm{d}}
+
+\title{The PYroMat User and Developer Handbook}
+\author{Christopher R. Martin}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\include{nomenclature}
+\include{intro}
+\include{units}
+\include{ig}
+
+\end{document}
