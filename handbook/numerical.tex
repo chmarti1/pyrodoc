@@ -1,0 +1,27 @@
+\chapter{Numerical routines}\label{ch:num}
+
+\PM\ is designed with a number of custom back-end numerical routines.  Even though low-level custom numerical routines composed in plain Python are unlikely to ever compete well with compiled numerical binaries that have been developed over decades, there are distinct advantages to this approach.
+\begin{itemize}
+\item Reducing the number of dependencies makes the installation simpler and less likely to exhibit mysterious problems on other systems,
+\item The installation footprint is minimal,
+\item Algorithms can be designed to provide exactly the outputs required by the application,
+\item Algorithms can be designed to accept the data in precisely the format used by \PM,
+\item Numerical algorithms can be designed specifically to provide consistent convergence for the types of numerical problems encountered in thermodynamic property evaluation.
+\end{itemize}
+
+A package written in plain Python is unlikely to ever be used in numerically intense applications like computational fluid dynamics, so it is sensible to designed for reliability instead of speed.  Still, as we discuss in this chapter, extreme care must be taken to ensure that these algorithms do not become unnecessarily slow.  
+
+\PM\ property methods should be sufficiently fast so they can be used in user-written custom iterative design codes, but they should (above all) converge reliably.
+
+
+\section{Polynomials of one dimensions}
+
+\section{Polynomials of two dimensions}
+
+\section{Iteration with \texttt{iter1}}
+
+\section{Iteration with \texttt{hybrid1}}
+
+\section{Iterating on temperature and density}
+
+\section{Iterating on temperature and pressure}

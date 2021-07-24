@@ -14,17 +14,24 @@ To obtain information specific to one of the unit classes (length, for example),
 
 The unit systems used by the property methods and their corresponding configuration entries are listed in Tables \ref{tab:properties} and \ref{tab:units}.  
 
+This chapter infuses a little history along with the information \PM\ users are likely to find useful when interacting with the unit conversion system.
+
+\section{Unit definitions}\label{sec:units:def}
+
+The Bureau International des Poids et Mesures (BIPM) International Committee for Weights and Measures (CIPM) is the entity responsible for the definition of the fundamental units on which the SI system is based.  Nearly all other units in wide use are now derived from the SI units in some way, so rigorous treatment of their formal definition is worth some attention.  There are countless web-based unit conversion calculators, but few use sufficient care in the derivation of their conversion factors to be trusted for serious work.
+
+The second (time), meter (length), kilogram (mass), ampere (electrical current), kelvin (temperature), mole (quantity), and candela (luminous intensity) are the fundamental units in terms of which all other measures are derived.  Contemporary definitions for these units are constructed so that certain important physical constants (like Plank's or Boltzmann's constants) may be represented exactly with finite precision, so the conversion factors used in \PM\ are, by definition, exact.
+
+Before the turn of the twentieth century, the United States and the British governments had adopted the international yard and avoirdupois pound.  This move re-defined the pound and the yard (and all those based on them) in terms of the meter and kilogram using an exact relationship with finite precision.  The contemporary definitions for those fundamental units are constructed from highly stable natural phenomena may be independently reproduced in a laboratory, but this idea is quite recent.  Abandoning the tradition of defining units from a standard bar or mass did not happen until the latter half of the twentieth century. \cite{nbs:sp447}
+
+This establishes a web of precise definitions of units for US customary, imperial, and SI systems.  However, there are still popular measures (like the inch water column for pressure or scf for quantity of a gas) that depend on establishing so-called ``standard'' conditions whose precise definitions are often neglected (and are far from standard).  
+
+For example, water and mercury column measures for pressure depend on the density of a fluid and the local strength of gravity, both of which are subject to change.  So-called ``standard'' pressure is often 1atm (1.01325bar), but is precisely 1bar for the NIST-JANAF data.  Worse still, standard temperature usually refers to 273.15K (0$^\circ$C), but the NIST-JANAF tables use 298.15K (25$^\circ$C), and there are some engineering applications that still use 70$^\circ$F.  There are at least a half-dozen definitions for the calorie, which are construed from the specific heat of water at different conditions.  These inconsistencies are far too severe to ignore, so great care is required when pulling data from multiple sources into a single database.
+
+
 \section{Setup}\label{sec:units:setup}
 
-The Bureau International des Poids et Mesures (BIPM) International Committee for Weights and Measures (CIPM) is the entity responsible for the definition of the fundamental units on which the metric system is based.  The second (time), meter (length), kilogram (mass), ampere (electrical current), kelvin (temperature), mole (quantity), and candela (luminous intensity) are the fundamental units in terms of which all other measures may be derived.  Contemporary definitions for these units are derived so that certain important physical constants (like Plank's or Boltzmann's constants) may be represented exactly with finite precision, so the conversion factors used in \PM\ are, in fact, by definition, exact.
-
-Before the turn of the twentieth century, the United States and the British governments had adopted the international yard and avoirdupois pound.  These re-defined those measures (and all those based on them) in terms of the meter and kilogram using an exact relationship with finite precision.  The contemporary definitions for the fundamental units are derived from highly stable natural phenomena may be independently reproduced in a laboratory, but this idea is quite recent.  Abandoning the tradition of defining units from a standard bar or mass did not happen until the latter half of the twentieth century. \cite{nbs:sp447}
-
-This establishes a web of precise definitions of units for US customary, imperial, and SI systems.  However, there are still popular measures (like the inch water column for pressure or scf for quantity of a gas) that depend on establishing so-called ``standard'' conditions whose definitions are far less precise (and are far from standard).  
-
-For example, water and mercury column measures for pressure depend on the density of a fluid and the local strength of gravity, both of which are subject to change.  So-called ``standard'' pressure is often 1atm (1.01325bar), but is precisely 1bar for the NIST-JANAF data.  Worse still, standard temperature usually refers to 273.15K (0$^\circ$C), but the NIST-JANAF tables use 298.15K (25$^\circ$C), and there are some engineering applications that still use 70$^\circ$F.  These inconsistencies are far too severe to ignore, so great care is required when pulling data from multiple sources into a single database.
-
-To maintain transparency in this regard, the \PM\ units system includes a \verb|setup| function that is responsible for constructing all of the unit conversion routines when \PM\ is first imported.  Users can inspect the constants it defines, and users may change them at any time by re-calling the \verb|setup| function with new arguments.  Its behavior is fully documented and can be found by evoking \verb|help| as below.
+To maintain transparency in regard to the standards used to derive unit conversions, the \PM\ units system includes a \verb|setup| function that is responsible for constructing all of the unit conversion routines.  Users can inspect the constants it defines, and users may change them at any time by re-calling the \verb|setup| function with new arguments.  Its behavior is fully documented and can be found by evoking \verb|help| as below.
 
 \begin{lstlisting}[language=Python]
 >>> import pyromat as pm
@@ -33,7 +40,7 @@ To maintain transparency in this regard, the \PM\ units system includes a \verb|
 >>> help(pm.units.setup)
 \end{lstlisting}
 
-It should be emphasized that there is a difference between the standard parameters used to construct the \PM\ unit system and the default parameters determined by \verb|pm.config|.  The standard conditions are \emph{only} used to construct the unit conversion system, they are \emph{always} given in the units documented below, and they are ignored outside of the \verb|units| module.  On the other hand, the default parameters are used in property methods when arguments are omitted, and they are interpreted in whatever units are currently configured.  See the configuration chapter (Chapter \ref{ch:config}) for more information.
+It should be emphasized that there is a difference between the standard parameters used to construct the \PM\ unit system and the default parameters determined by \verb|pm.config|.  The standard conditions are only used to construct the unit conversion system, they are always given in the units documented below, and they are ignored outside of the \verb|units| module.  On the other hand, the default parameters are used in property methods when arguments are omitted, and they are interpreted in whatever units are currently configured.  See the configuration chapter (Chapter \ref{ch:config}) for more information.
 
 Standard temperature and pressure, \verb|Tstd| and \verb|pstd|, \emph{must} be entered in units of Kelvin and bar respectively (regardless of the units configured in \verb|pm.config|).  The standard atmosphere was set to precisely 1.013 25 bar by the BIPM General Conference on Weights and Measures (CGPM) in 1901 \cite{cgpm:3:2}, and has been almost universally adopted.  The default standard temperature is less universal, but is usually 273.15 K, the freezing point of water at one atmosphere of pressure.
 
@@ -83,8 +90,9 @@ Unit conversions are performed by a callable \verb|Conversion| class.  With the 
 
 As a callable, \verb|Conversion| instances mimic a function that accepts up to five argument,
 \begin{lstlisting}[language=Python]
->>> conversion_instance(value=1., from_units=None, \
-...     to_units=None, exponent=None, inplace=None)
+>>> conversion_instance(value=1., \
+...     from_units=None, to_units=None,\
+...     exponent=None, inplace=None)
 \end{lstlisting}
 
 The value may be a scalar or a numpy array of values to be converted.  By default, it is 1, so that if no value is specified, the result will automatically be a conversion factor between the given units.
@@ -106,7 +114,8 @@ Most users will never need the \verb|inplace| keyword, but when it is set to \ve
 
 \verb|Conversion| instances also support item recall, so that the conversion factor for any unit may be obtained simply
 \begin{lstlisting}[language=Python]
->>> print(pm.units.volume['m3'] / pm.units.volume['L'])
+>>> print(pm.units.volume['m3'] / \
+...     pm.units.volume['L'])
 1000.
 \end{lstlisting}
 This indicates that there are 1000 cubic meters per liter.  Most users will not need to use this capability, but for those that do, it is important to always use ratios of units of the same class.  Each item recall returns a scalar value indicating the \emph{relative} size of the respective unit, but relative to what?  In the case of volume, each value indicates the unit's value in cubic meters, but that is an arbitrary choice.
@@ -114,7 +123,7 @@ This indicates that there are 1000 cubic meters per liter.  Most users will not 
 For a complete list of the supported units in a unit class, use the \verb|get()| method.
 \begin{lstlisting}[language=Python]
 >>> pm.units.energy.get()
-dict_keys(['J', 'kJ', 'cal', 'kcal', 'BTU_ISO', ...
+dict_keys(['J', 'kJ', 'cal', 'kcal', 'BTU_ISO', 
     'eV', 'BTU'])
 \end{lstlisting}
 
@@ -408,9 +417,9 @@ To alter the \PM\ unit for matter quantities,
 
 Molar and mass units provide parallel methods for quantifying amounts of matter.  Thermodynamic properties can be expressed in either, so \PM\ uses a third class of units, \emph{matter}, which is an amalgamation of all molar and mass units.  A unit matter may be any of the units listed in Tables \ref{tab:mass} and \ref{tab:molar}.  Since every molar unit can be related to the kilogram-mole and every mass unit can be related to the kilogram, it is only important that we establish how the kilogram is related to the kilogram-mole.
 
-The ratio between kilograms and kilogram moles is a property of the molecule, and is called its molar or molecular mass, $m_0$.  It is typically expressed in terms of atomic mass units per molecule, but it is the same in kilograms per kilogram moles.  The mass, $m$ of a molar quantity, $N$, then, is
+The ratio between kilograms and kilogram moles is a property of the molecule, and is called its molar or molecular weight, $W$.  It is typically expressed in terms of atomic mass units per molecule, but it is the same in kilograms per kilogram moles.  The mass, $m$ of a molar quantity, $N$, then, is
 \begin{align}
-m = N m_0.
+m = N W.
 \end{align}
 
 Unlike any of the other unit conversions, this one depends on the properties of the substance itself.  As a result, it is implemented in a custom function that adds a mandatory molecular weight (in u per molecule), \verb|mw|, argument to the other standard \verb|Conversion| instance arguments.
@@ -461,15 +470,15 @@ This history of temperature as a measure of hot and cold extends back longer tha
 
 With the discovery that temperature indicates the mean translational kinetic energy of the molecules of an ideal gas, the kinetic theory of gasses gives the relationship,
 \begin{align}
-\frac{1}{2} m_0 \overline{u^2} = \frac{3}{2} k T.
+\frac{1}{2} m_0 \left< u^2 \right> = \frac{3}{2} k T.
 \end{align}
 The coefficient, $k$, which is now known as Boltzmann's constant, establishes the proportionality between kinetic energy and temperature.  This also provides the idea of an \emph{absolute} temperature scale; one in which zero temperature corresponds to zero energy rather than an arbitrary choice (like the freezing point of water at standard pressure).  In this way, Boltzmann's constant completely determines an absolute temperature scale in terms of the other units.
 
-The BIPM stipulates that ``[the kelvin] is defined by taking the fixed numerical value of the Boltzmann constant k to be 1.380 649 x 10–23 when expressed in the unit J K$^{-1}$, which is equal to kg m$^2$ s$^{-2}$ K$^{-1}$ [...]''\cite{bipm}  This makes the value for the Boltzmann constant exact by definition.
+The BIPM stipulates that ``[the kelvin] is defined by taking the fixed numerical value of the Boltzmann constant k to be $1.380 649 \times 10^{-23}$ when expressed in the unit J K$^{-1}$, which is equal to kg m$^2$ s$^{-2}$ K$^{-1}$ [...]''\cite{bipm}  This makes the value for the Boltzmann constant exact by definition.
 
-The rankine scale is the US customary and imperial equivalent, with one 1.8 R per 1 K.  The Celsius scale uses the same increments as the kelvin scale, but its zero is set 273.15 K, the freezing point of water at 1 atmosphere.  The Fahrenheit scale uses the same increment as the rankine, but its zero is set so that the freezing point of water at standard pressure occurs at precisely 32$^\circ$F.
+The realization that temperature is a measure of certain portions of a system's energy is especially useful in plasma physics and related fields.  In these studies, it is useful to express temperature directly as an energy, or electron-volts (eV).  The temperature of a substance expressed in electron-volts is the electrical potential that can be built up due to thermal motions of electrons, and is equal to $kT / q$, when $q$ is the fundamental charge.
 
-The realization that temperature is a measure of a system's mean energy is especially useful in plasma physics and related fields.  In these studies, it is useful to express temperature directly as an energy, or electron-volts (eV).  The electron-volt is proportional to the electrical potential that can be built up due to thermal motions of electrons, and is equal to $kT / q$ when $q$ is the fundamental charge.
+The rankine scale is the US customary and imperial equivalent to the kelvin, with one 1.8 R per 1 K.  The Celsius scale uses the same increments as the kelvin scale, but its zero is set 273.15 K, the freezing point of water at 1 atmosphere.  The Fahrenheit scale uses the same increment as the rankine, but its zero is set so that the freezing point of water at standard pressure occurs at precisely 32$^\circ$F.
 
 Scales with offsets defy the unit conversion rules implemented by the \verb|Conversion| instance; that all measurements can be converted between the units merely by multiplying by a factor.  Obviously, when converting values for a temperature, it is important to handle these offsets correctly, but when considering derivatives involving temperature or other changes in temperature, the offsets must be ignored.  As a result, there are two temperature-based unit conversion tools.
 
@@ -478,8 +487,9 @@ The \verb|pm.units.temperature| is a \verb|Conversion| instance should only be u
 When temperatures are being converted between scales so that the offsets between them must be respected, the \verb|pm.units.temperature_scale| function should be used instead.  It is a function that mimics the \verb|Conversion| call signature, but that is specially written to handle temperature scales. 
 
 \begin{lstlisting}
->>> pm.units.temperature_scale(value, from_units=None,\
-...     to_units=None, inplace=False)
+>>> pm.units.temperature_scale(value, \
+...     from_units=None, to_units=None,\
+...     inplace=False)
 \end{lstlisting}
 
 Just like the \verb|Conversion| instances, it respects the \verb|unit_temperature| configuration parameter for any unspecified units.  However, it makes no sense to refer to a temperature scale with any exponent other than 1, so the exponent parameter is absent.
