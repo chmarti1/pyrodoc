@@ -20,17 +20,17 @@ Here, $p$ and $T$ are the pressure and temperature of the gas.  The densities ar
 \begin{align}
 k N_a = R W = R_u.
 \end{align}
-The Boltzmann constant is integral to the fundamental definition of the units of temperature (see Section \ref{sec:units:temperature}), so this relationship makes it possible to calculate the universal gas constant in molar units and the ideal gas constant in mass units.
+The Boltzmann constant is exact by definition thanks to the contemporary definition of temperature (see Section \ref{sec:units:temperature}), so this relationship provides the authoritative definitions for the gas constants, $R$, and $R_u$.
 
-This law is empirical in its origins.  It was originally formulated as an amalgamation of the independent laws of Gay-Lussac, Charles, and Boyle.  The kinetic theory of gases eventually provided an independent formulation based entirely in Newton's laws.  Given its importance to the study of matter and its deeply intuitive nature, it is surprising that virtually no introductory text on thermodynamic gives the subject any treatment.  It is worth a brief summary here.
+The ideal gas law is empirical in its origins.  It was originally formulated as an amalgamation of the independent laws of Gay-Lussac, Charles, and Boyle.  The kinetic theory of gases eventually provided an independent formulation based entirely in Newton's laws.  Given its importance to the study of matter and its deeply intuitive nature, it is surprising that virtually no introductory text on thermodynamics gives the subject any treatment.  It is worth a brief summary here.
 
 First, let us take that a gas is comprised of molecules that translate freely in space.  They may be imagined to follow straight paths of constant velocity unless they collide with a containing wall or another molecule.  
 
-Pressure, then, is due to a near continuous stream of impacts on a surface.  It only has meaning when the density of molecules is sufficiently high that their individual impacts are imperceptible.  Pressure, then, is a kind of average force determined by a series of may individual random impacts.  It is possible to quantify its magnitude by describing the individual imapcts through Newtonian mechanics.  If the forces due to a series of impacts in time is $F(t)$, a surface with area, $A$, will experience a pressure, $p$, based on the rate of increase of total impulse,
+Pressure, then, is due to a series of impacts on a surface so rapid that they appear to be continuous.  Pressure only has meaning as a property when the density of molecules is sufficiently high that their individual impacts are imperceptible.  That means that pressure is a kind of average force determined by a series of may individual random impacts.  It is possible to quantify its magnitude by describing the individual impacts through Newtonian mechanics.  If the forces due to a series of impacts in time is $F(t)$, a surface with area, $A$, will experience a pressure, $p$, based on the rate of increase of total impulse,
 \begin{align}
 p \equiv \frac{1}{A t} \int_0^t F(\tau) \d \tau.
 \end{align}
-This definition should have a well defined value in the limit where $t$ is larger than period between individual impacts.
+This formulation should have a well defined limit when $t$ is larger than period between individual impacts and shorter than the period over which the local properties change.
 
 In a Cartesian coordinate system with $z$ normal to a surface and positive \emph{into} the surface, the velocity of any single molecule will have three components, $\vec{u}_1 = u_x \hat{i} + u_y \hat{j} + u_z \hat{k}$.  After an elastic collision with the surface, the velocity will be $\vec{u}_2 = u_x \hat{i} + u_y \hat{j} - u_z \hat{k}$.
 
@@ -361,12 +361,11 @@ s(T,p) &= \sum y_i s_i(T,p)
 and
 \begin{subequations}
 \begin{align}
-\overline{e}(T,p) &= \sum \chi_i \overline{e}_i(T,p)\\
-\overline{h}(T,p) &= \sum \chi_i \overline{h}_i(T,p)\\
+\overline{e}(T) &= \sum \chi_i \overline{e}_i(T)\\
+\overline{h}(T) &= \sum \chi_i \overline{h}_i(T)\\
 \overline{s}(T,p) &= \sum \chi_i \overline{s}_i(T,p).
 \end{align}
 \end{subequations}
-
 
 
 \section{The ideal gas collection}
@@ -375,9 +374,9 @@ There are several classes that implement various data models for ideal gas prope
 
 All property methods accept any two of temperature, density, or pressure to specify the state.
 
-\subsection{The Shomate equation: \texttt{ig}}
+\subsection{The Shomate equation: \texttt{ig}}\label{sec:ig:ig}
 
-\PM's \texttt{ig1} class is built on the Shomate equation for constant-pressure specific heat $c_p$.  This is the formulation used by the NIST webbook \cite{nist:webbook}.  Despite the wise range of substances represented, it has the advantage of using a simple standard piecewise formulation for specific heat.  However, it does suffer from certain limitations.
+\PM's \texttt{ig1} class is built on the Shomate equation for constant-pressure specific heat $c_p$.  This is the formulation used by the NIST webbook \cite{nist:webbook}.  Despite the wise range of substances represented, it has the advantage of using a simple standard piece-wise formulation for specific heat.  However, it does suffer from certain limitations.
 
 The Shomate equation takes the form
 \begin{align}
@@ -391,28 +390,40 @@ Because of its simplicity, the Shomate equations lack the degrees of freedom to 
 The enthalpy can be explicitly calculated from (\ref{eqn:ig:enthalpy}),
 \begin{align}
 h(T) &= h_0 + \int c_p(T) \d T \nonumber\\
- &= h_0 + T_s \int c_p(t) \d t \nonumber\\
- &= T_s \left(c_0 t + \frac{c_1}{2} t^2 + \frac{c_2}{3} t^3 + \frac{c_3}{4} t^4 - \frac{c_4}{t} + c_5 \right).
+ &= h_0 + T_s \int c_p(\theta) \d \theta \nonumber\\
+ &= T_s \left(c_0 \theta + \frac{c_1}{2} \theta^2 + \frac{c_2}{3} \theta^3 + \frac{c_3}{4} \theta^4 - \frac{c_4}{\theta} + c_5 \right).
 \end{align}
 It is important to emphasize that $h_0$ is not the same as the enthalpy of formation, $\Delta h^\circ_f$.  Instead, it is merely an integration constant, which can be alternately expressed as a new coefficient, $c_5$.
 
-Because of the temperature term in the denominator, no multiple of $T_s$ appears in entropy when the integration is changed to $t$,
+Because of the temperature term in the denominator, no multiple of $T_s$ appears in entropy when the integration is changed to $\theta$,
 \begin{align}
-s(T,p) &= s^\circ(T_{ref}) + \int_{T_{ref}}^T \frac{c_p(\tau)}{\tau}\d \tau - R \ln \left( \frac{p}{p_{ref}} \right)\nonumber\\
- &= s^\circ(T_{ref}) + \int_{T_{ref}}^T \frac{c_p(\tau)}{\tau}\d \tau - R \ln \left( \frac{p}{p_{ref}} \right)\nonumber\\
-s(T,p) &= c_0 \ln t + c_1 t + \frac{c_2}{2} t^2 + \frac{c_3}{3} t^3 -\frac{c_4}{2t^2} + c_6.
+s^\circ(T) &= s_0 + \int \frac{c_p(T)}{T}\d T\nonumber\\
+ &= s_0 + \int \frac{c_p(\theta)}{\theta}\d \tau\nonumber\\
+ &= c_0 \ln \theta + c_1 \theta + \frac{c_2}{2} \theta^2 + \frac{c_3}{3} \theta^3 -\frac{c_4}{2\theta^2} + c_6\\
+s(T,p) &= s^\circ(T) - R \ln \left( \frac{p}{p^\circ} \right)\nonumber
 \end{align}
 Just like in the enthalpy integral, a new coefficient, $c_6$, has been introduced to represent the integration constant.
 
 Internal energy is readily calculated from the definition of enthalpy in (\ref{eqn:enthalpy}),
 \begin{align}
-e(T) &= h(T) - RT\nonumber\\
+e(T) &= h(T) - RT
 \end{align}
 There is a similarly simple relationship to determine constant-volume specific heat and specific heat ratio,
 \begin{align}
 c_v(T) &= c_p(T) - R\\
 \gamma(T) &= \frac{c_p(T)}{c_p(T)-R}
 \end{align}
+
+Table \ref{tab:class:ig} lists the data elements that define the \texttt{ig} class.  For more information on how \texttt{.hpd} files are stored, see Section \ref{sec:data}.  Most of the essential data elements are self explanatory, but the coefficients and temperature limits must have compatible sizes.  Even though the \texttt{ig} class only uses seven coefficients, there are eight provided in the NIST data sets.  If there are $N$ sets of coefficients defined over $N$ temperature ranges, there must be $N$ arrays of eight coefficients and $N+1$ temperature limit values.
+5
+For example, in a data set with two temperature ranges, the following would define a data set valid between \texttt{<T0>} and \texttt{<T2>}, and the transition between the two piece-wise data sets is at \texttt{<T1>}.
+\begin{lstlisting}[language=Python]
+"Tlim":[<T0>, <T1>, <T2>]
+"C":[
+  [ <c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6>, <c7> ],
+  [ <c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6>, <c7> ],
+]
+\end{lstlisting}
 
 \begin{table}
 \centering
@@ -436,7 +447,7 @@ Name & Type & Description\\
 \end{table}
 
 
-\subsection{The NASA polynomial: \texttt{ig2}}
+\subsection{The NASA polynomial: \texttt{ig2}}\label{sec:ig:ig2}
 
 The so-called ``NASA polynomials'' are a piece-wise empirical formulation to the specific heat of an ideal gas.  They predate the latest formulation of the NIST-JANAF tables, and are even used for reference.  Unlike the Shomate equation, there is no $1/t^2$ term, there is no attempt to scale temperature prior to evaluating the polynomial, and properties are scaled with respect to the ideal gas constant.
 
@@ -471,6 +482,17 @@ There is some overlap in the species offered by the two classes.  A mild prefere
 \end{itemize}
 Otherwise, the two have been found to be sufficiently equivalent that most users will not find a reason to wonder.
 
+Table \ref{tab:class:ig2} lists the data elements that define the \texttt{ig2} class.  For more information on how \texttt{.hpd} files are stored, see Section \ref{sec:data}.  Most of the essential data elements are self explanatory, but the coefficients and temperature limits must have compatible sizes.  Even though the \texttt{ig2} class only uses seven coefficients, there are eight provided in the NIST data sets.  If there are $N$ sets of coefficients defined over $N$ temperature ranges, there must be $N$ arrays of eight coefficients and $N+1$ temperature limit values.
+
+For example, in a data set with two temperature ranges, the following would define a data set valid between \texttt{<T0>} and \texttt{<T2>}, and the transition between the two piece-wise data sets is at \texttt{<T1>}.
+\begin{lstlisting}[language=Python]
+"Tlim":[<T0>, <T1>, <T2>]
+"C":[
+  [<c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6>, <c7>],
+  [<c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6>, <c7>],
+]
+\end{lstlisting}
+
 \begin{table}
 \centering
 \caption{HPD data file elements for the \texttt{ig2} class}\label{tab:class:ig2}
@@ -479,7 +501,7 @@ Otherwise, the two have been found to be sufficiently equivalent that most users
 Name & Type & Description\\
 \hline
 \texttt{id} & \texttt{str} & Unique substance identifier string\\
-\texttt{class} & \texttt{='ig'} & Class identifier string\\
+\texttt{class} & \texttt{='ig2'} & Class identifier string\\
 \texttt{doc} & \texttt{str} & Documentation string\\
 \hline
 \texttt{atoms} & \texttt{dict} & Keys are elemental atoms, and values are their integer quantities in the substance.\\
@@ -513,7 +535,7 @@ p^\circ_{mix} = \exp\left(\sum \chi_i \ln p^\circ_i \right).
 \end{align}
 This is a log-weighted average of the constituent reference pressures.  In the event that they are all the same, the mixture reference pressure is also the same.
 
-It can be shown that a comparable result is achieved in mass units, so
+It is less direct, but the same equivalent reference pressure can be derived from the mass-unit properties as well.  So,
 \begin{subequations}
 \begin{align}
 s(T,p) &= \sum \chi_i \overline{s}^\circ_i(T) - R \ln\left(\frac{p}{p^\circ_{mix}}\right)\\

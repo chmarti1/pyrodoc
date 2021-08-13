@@ -4,10 +4,12 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
-\usepackage{listings}
+\usepackage{listings} % For code examples
+\usepackage{wasysym} % For check box characters
 \usepackage{xcolor}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{longtable} % For tables that split across pages
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue]{hyperref}
 %\usepackage[a-1b]{pdfx}
 \usepackage{pdfx}
@@ -17,10 +19,18 @@
 \usepackage{pdflscape}
 
 % Set up the code style
-\definecolor{codebg}{rgb}{0.92,0.95,0.92}
+\definecolor{colorbg}{rgb}{0.92,0.95,0.92}
+\definecolor{colorcomment}{rgb}{0.5,0.5,0.5}
 \lstdefinestyle{codestyle}{
-    backgroundcolor=\color{codebg},
-    basicstyle=\ttfamily,
+    backgroundcolor=\color{colorbg},
+    basicstyle={\ttfamily\small},
+    commentstyle=\color{colorcomment},
+    breaklines=true,
+}
+\lstdefinestyle{tinystyle}{
+    backgroundcolor=\color{colorbg},
+    basicstyle={\ttfamily\tiny},
+    commentstyle=\color{colorcomment},
 }
 \lstset{style=codestyle}
 
@@ -52,5 +62,6 @@ Penn State University}
 \include{regdat}
 \include{ig}
 \include{multiphase}
+\include{numerical}
 
 \end{document}

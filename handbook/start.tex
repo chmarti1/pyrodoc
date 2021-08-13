@@ -4,32 +4,301 @@ In this chapter, we discuss everything you should need to get your own installat
 
 \section{Installation}
 
-\PM\ is distributed primarily through the Python package index (\url{https://pypi.org/}), but it can also be downloaded and installed ``manually.''  \PM\ is written in plain Python, so there is no need to compile to binaries.
+\PM\ is distributed primarily through the Python package index (\url{https://pypi.org/}), but it can also be downloaded and installed ``manually.''  \PM\ is written in plain Python, so there is no need to compile to binaries.  All data are encoded in \texttt{json} format (\url{https://docs.python.org/3/library/json.html}), and the configuration files are executable python code.  The result is that all of the code, data, and configuration files are in human readable text.
 
 \subsection{Prerequisites}
 
-\PM\ requires NumPy (\url{https://numpy.org/}) version 1.7 or later for numerical and array support.  There are no other prerequisites.  For documentation on the custom back-end numerical routines implemented in \PM, see chapter \ref{ch:num}.
+Python needs to be installed and working on your system.  \PM\ was originally developed in Python 2, but support for Python 3 was designed in from the start.  As of January 2020, Python 2 was officially depreciated, and \PM\ testing on Python 2 halted.  On a number of popular Linux systems, Python 2 is still the system default, though, so \PM\ never officially stoped supporting Python 2.  However, new features are no longer tested on Python 2, so \emph{users should beware.}
 
-\subsection{\texttt{pip}}
+\PM\ requires NumPy (\url{https://numpy.org/}) version 1.7 or later for numerical and array support.  There are no other prerequisites.  For documentation on the custom back-end numerical routines implemented in \PM, see chapter \ref{ch:num}. 
 
-\subsection{\texttt{setuptools}}
+\subsection{Installing globally with \texttt{pip}}
 
+This section is for system administrators who want to install \PM\ globally for all users on a system to access.  This method is going out of favor on Linux systems with their own package managers with their own opinions about what belongs in the Python installation.  Because the \PM\ dependencies are so slim, though, I have never had a problem with this kind of installation.
 
-\section{\PM\ from the command line}
+Before installing, always check to make sure that the Python package manager is updated to its latest version.  A Python installation without \texttt{pip} is extremely ususual, but they do still appear from time to time.  If you do not have \texttt{pip} on your system, follow the directions from the Python packaging authority to get it up and working: \url{https://pip.pypa.io/en/stable/installation/}.
+
+On just about all systems, entering the following commands in a terminal will update \texttt{pip} and install \PM.
+\begin{lstlisting}[language=bash]
+$ python -m pip install --upgrade pip
+$ python -m pip install --upgrade pyromat
+\end{lstlisting}
+Note that you don't need to enter the \texttt{\$}.  It represents the command line prompt. On a Windows system, it might appear \texttt{C:\\>}, on most Linux terminals, it may appear \texttt{user@machine:~\$}.  Your prompt may look a little different, and that's OK.  If Python is already correctly installed these commands should get you going.
+
+On a Linux, Mac, or Unix system, you may need to run as a super user.  You should use
+\begin{lstlisting}[language=bash]
+$ sudo -H python -m pip install --upgrade pip
+$ sudo -H python -m pip install --upgrade pyromat
+\end{lstlisting}
+The \texttt{-H} switch is recommended by the Python package index to be certain that the \texttt{root} user's home directory is used during install.
+
+On a Windows system, you may simply need to execute the command line as an administrator.  
+
+\subsection{Installing in a virtual environment}
+
+Python virtual environments are widely recommended to avoid installation conflicts between users on a system.  They are often an especially good idea for shared machines.  To learn more and to set up your own virtual environment, follow the instructions here: \url{https://docs.python.org/3/tutorial/venv.html}.  
+
+Once you are in your virtual environment and you have activated it, evoke \texttt{pip} from the command line.  If the name of your virtual environment were \texttt{my-env}, then
+\begin{lstlisting}[language=bash]
+(my-env) $ pip -m install --upgrade pip
+(my-env) $ pip -m install --upgrade pyromat
+\end{lstlisting}
+
+\section{Using \PM }
+
+Most users will interact with \PM\ from the command line first, but the same tools all work within scripts as well.
 
 \subsection{Importing}
 
-\subsection{Finding substances}
+Import \PM\ like any other package.  
+\begin{lstlisting}[language=Python]
+>>> import pyromat as pm
+\end{lstlisting}
+It automatically loads its modules, and automatically seeks out and loads data.
+
+In \PM, instances of specialized classes expose methods that are responsible for calculating all of the substance properties.  So, there are only two functions in the \PM\ package that most users will ever need: \texttt{info} and \texttt{get}.  These retrieve information about he \PM\ substance data and retrieves the various substance class instances.  
+
+\subsection{Finding substances with \texttt{info()}}
+
+When called without any arguments, the \texttt{info()} function lists all of the substances available, and it lists all of the property methods available for each.
+\begin{lstlisting}[language=Python,style=tinystyle]
+>>> pm.info()
+  PYroMat
+Thermodynamic computational tools for Python
+version: 2.1.0
+---------------------------------------------------------------------
+ ID        : class : properties
+---------------------------------------------------------------------
+ ig.Al     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Al+    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Al-    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Al2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Al2Br6 :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Al2Cl6 :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Al2F6  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Al2I6  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Al2O   :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Al2O+  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Al2O2  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Al2O2+ :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.AlBO2  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.AlBr   :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.AlBr3  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s      
+    ...
+\end{lstlisting}
+
+The {\bf substance id string} is split into two parts by a decimal, \texttt{'.'}.  The first part is the collection to which the substance model belongs.  All of these belong to the ideal gas collection.  There is also a multi-phase collection, which uses a \texttt{mp} id prefix.  Then, the last portion of the id string represents the substance's chemical formula.  It is important to specify a collection because most substances have both ideal gas and multi-phase models (e.g. \texttt{ig.O2} and \texttt{mp.O2}, \texttt{ig.H2O} and \texttt{mp.H2O}, etc.)
+
+The {\bf class string} is the name of the class that is used to implement the data model for each substance.  There can be multiple classes included in the same collection (e.g. \texttt{ig}, \texttt{ig2}, and \texttt{igmix} instances are all members of the \texttt{ig} collection).
+
+The {\bf properties} list is a space-separated list of property methods that is offered by each of the substance.  
+
+Listing all \PM\ substances at once probably won't be useful to most users.  In \PM\ version 2.1.0, there were 1,192 substances, and that number is likely to grow with later releases.  In order to narrow down the selection, users can pass optional keyword arguments into the \texttt{info} function. 
+
+The {\bf name} keyword allows users to specify all or part of a substance id string.  If there is an exact match in the database, its documentation will be displayed.  If it matches part of multiple id strings, they will all be listed.
+
+The {\bf collection} keyword allows users to specify the collection to which species must belong.
+
+The {\bf contains} keyword allows users to specify the atomic contents of the substance.  Values may be the string name of an element, or lists of elements.
+
+The {\bf pmclass} keyword allows users to specify which of the class specifier strings should be listed.  As of version 2.1.0, there were four classes: \texttt{ig}, \texttt{ig2}, \texttt{igmix}, and \texttt{mp1}.  These are described in detail in sections \ref{sec:ig:ig}, \ref{sec:ig:ig2}, \ref{sec:ig:igmix}, and \ref{sec:mp:mp}.
+
+These can be combined to further narrow down the selection.  Only substances that match all of the criteria will be printed.  In this example, the display shows only members of the multi-phase collection that also contain hydrogen.
+\begin{lstlisting}[language=Python,style=tinystyle]
+>>> pm.info(collection='mp', contains='H')
+  PYroMat
+Thermodynamic computational tools for Python
+version: 2.1.0
+---------------------------------------------------------------------
+ ID        : class : properties
+---------------------------------------------------------------------
+ mp.C2H2F4 :  mp1  : T p d cp cv gam e h s      s T_h T_s     d_s    
+ mp.H2O    :  mp1  : T p d cp cv gam e h s      s T_h T_s     d_s    
+\end{lstlisting}
+
+In this example, only ideal gases that contain the string \texttt{'N2'} in their name are displayed.
+\begin{lstlisting}[language=Python,style=tinystyle]
+>>> pm.info(name='N2', collection='ig')
+  PYroMat
+Thermodynamic computational tools for Python
+version: 2.1.0
+----------------------------------------------------------------------
+ ID         : class : properties
+----------------------------------------------------------------------
+ ig.C2H6N2  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.C2K2N2  :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.C2N2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.C2N2Na2 :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.C4N2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.CN2     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.D2N2    :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.F2N2    :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.F4N2    :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.H2N2    :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.H4N2    :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.K2C2N2  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2      :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2+     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2-     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+----------------------------------------------------------------------
+ ID         : class : properties
+----------------------------------------------------------------------
+ ig.N2C     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2D2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2F2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2F4    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2H2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2H2O2  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2H4    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2O     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2O+    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2O3    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2O4    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.N2O5    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
+ ig.Na2C2N2 :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s   
+\end{lstlisting}
+
+When the {\bf verbose} keyword is set to \texttt{False}, the \texttt{info} function returns a list of the substance id strings that match the criteria.  This is intended for use in scripts where users may want to search for substances with certain attributes.
 
 \subsection{Retrieving substance data}
 
+Once a user or a script has the substance id string of a desired substance, the \texttt{get} function returns the corresponding class instance.  This instance provides all of the property methods.  This example calculates the ideal gas enthalpy of nitrogen at 492 K.
+\begin{lstlisting}[language=Python]
+>>> n2 = pm.get('ig.N2')
+>>> n2.h(T=492)
+array([202.68455864])
+\end{lstlisting}
+
+In this example, the variable, \texttt{n2}, is an ideal gas class instance with all the methods (like \texttt{h()}) needed to calculate its properties.
+
+\subsection{In-line documentation}
+
+While it is also designed to run efficiently in scripts, all aspects of \PM\ were designed with ease of use from the command line in mind.  Most users will first learn \PM\ through the command line and then go on to write scripts that automate their calculations.  
+
+With that in mind, every class instance, every method, and every module has in-line documentation that can be accessed using Python's built-in \texttt{help()} function.  For example, try typing:
+\begin{lstlisting}[language=Python]
+>>> help(n2)
+>>> help(n2.h)
+>>> help(pm)
+\end{lstlisting}
 
 \section{Property interface}
 
+The property methods that belong to the many substance class instances use flexible arguments that are as standardized as is practical.  Details about the individual properties and the theory behind them is included in chapters \ref{ch:ig} and \ref{ch:mp}, but there are some general rules that apply to all substances in \PM.
+
 \subsection{Property method arguments}
+
+With a few special exceptions, a thermodynamic state can be specified with any two properties.  It is numerically expedient, however, to restrict users to only a few properties as arguments.  
+
+For example, specifying pressure and entropy of an ideal gas is enough information to calculate the gas temperature, but it requires an iterative inversion of the polynomials shown in sections \ref{sec:ig:ig} and \ref{sec:ig:ig2}.  In turn, temperature is an essential parameter in the property model used to calculate other properties.  If a user needed to calculate temperature, density, enthalpy, and specific heat given entropy and pressure, it would be numerically wasteful to re-calculate temperature in each property method.  Instead, it is far more efficient to force the user to calculate temperature explicitly with the \verb|T_s()| method.  See section \ref{sec:start:inverse} for more information.
+
+All property methods in both the ideal gas and multi-phase collections accept any two of temperature, $T$, pressure, $p$, or density, $rho$.  Multi-phase properties also offer quality, $x$, to specify a mixture of liquid and gas.  These four properties form the \emph{primary} properties, any two of which may be passed to a method.
+
+For example,
+\begin{lstlisting}[language=Python]
+>>> n2 = pm.get('ig.N2')
+>>> T = 452.
+>>> p = 14.
+>>> n2.s(T=T, p=p)
+array([6.49072181])
+>>> n2.s(T=T, d=n2.d(T=T, p=p))
+array([6.49072181])
+\end{lstlisting}
+
+Or, with multi-phase data,
+\begin{lstlisting}[language=Python]
+>>> n2 = pm.get('mp.N2')
+>>> n2.s(T=T, p=p)
+array([6.48696146])
+>>> n2.s(T=T, d=n2.d(T=T, p=p))
+array([6.48696146])
+>>> n2.s(T=100, x=0.5)
+array([4.18094321])
+\end{lstlisting}
+The last line uses quality to specify a 50/50 mixture of liquid and vapor nitrogen at 100 K.
+
+When only two arguments are given without keywords, they are assumed to be temperature and pressure, so \texttt{n2.s(T,p)} is equivalent to \texttt{n2.s(T=T, p=p)}.
+
+\subsection{Inverse methods}
+
+Since \PM\ requires users to specify most properties in terms of temperature, pressure, density and quality, users will often need to go backwards.  In the previous section, we introduce the idea that one might know entropy and pressure and require temperature.  The classes have methods for dealing with this problem.
+\begin{lstlisting}[language=Python]
+>>> n2 = pm.get('ig.N2')
+>>> n2.s(T=200, d=1)
+array([6.5796721])
+>>> n2.T_s(s=_, d=1)
+array([200.0007351])
+\end{lstlisting}
+
+Read aloud ``temperature from entropy,'' the \verb|T_s()| method calculates temperature given entropy and one other primary property (density or pressure).  Table \ref{tab:start:inverse} shows the other inverse property methods that are available on other classes.
+
+\begin{table}\label{tab:start:inverse}
+\centering
+\caption{Inverse property methods and their availability by class}
+\begin{tabular}{|c|ccc|}
+\hline
+ & \texttt{ig} & \texttt{ig2} & \texttt{mp1}\\
+\hline
+\verb|T_h| & \CheckedBox & \CheckedBox & \CheckedBox\\
+\verb|T_s| & \CheckedBox & \CheckedBox & \CheckedBox\\
+\verb|d_s| & \Square & \Square & \CheckedBox\\
+\verb|p_s| & \CheckedBox & \CheckedBox & \Square\\
+\hline
+\end{tabular}
+\end{table}
+
+Note that pressure and density methods are only available from entropy.  Ideal gas classes provide an inverse pressure method while the multi-phase class provides an inverse density method.  The choice is for efficiency since the ideal gas entropy is modeled in terms of temperature and pressure, while all multi-phase properties are modeled in terms of temperature and density.  Once two of the fundamental properties are available, the third is easily obtained by the appropriate method.
+
+It should be emphasized that the inverse property methods are relatively computationally expensive because they are iterative.  For example, \verb|T_h| repeatedly calculates the substance's enthalpy with successively better estimates for the temperature until the enthalpy agrees with the value specified.  Inverse property methods should be used sparingly to obtain temperature, density, and/or pressure.  Then, any other properties that are desired should be calculated from them.
 
 \subsection{Default values}
 
-\subsection{Working with arrays}
+It is not unusual that users may want vaguely defined properties.  For example, "what is the specific heat of water?"  That question has an infinite number of answers depending on the state of the water, so a property method really can't answer it.  On the other hand, when users want properties without specifying a state, they usually mean "\ldots at standard conditions."
 
+All property methods apply default primary property values when properties are unspecified.  For example,
+\begin{lstlisting}[language=Python]
+>>> h2o = pm.get('mp.H2O')
+>>> h2o.cp()
+array([4.18131499])
+\end{lstlisting}
+tells the user that the specific heat of liquid water is about 4.18 kJ/kg/K at 273.15 K and 1.01325 bar.  That default temperature and pressure can be changed by setting the \verb|def_T| and \verb|def_p| parameters in \texttt{pm.config}.  See chapter \ref{ch:config} for more information on configuring \PM.
 
+When only one property is specified, the second property will revert to a default value.  If temperature is specified, then pressure reverts to its default.  If any other property is specified, then temperature reverts to its default and pressure is unspecified.  For example,
+\begin{lstlisting}[language=Python]
+>>> h2o.cp(T=540)  # T=540K, p=1.01325bar
+array([1.99666454])
+>>> h2o.cp(p=0.01) # T=273.15K, p=0.01bar
+array([1.87429701])
+>>> h2o.cp(d=.01)  # T=273.15K, d=.01kg/m3
+array([1.87870465])
+\end{lstlisting}
+
+Note that the default values are specified in whatever units \PM\ has been configured to use.  By default, \PM\ uses K, kJ, kg, bar, m$^3$.  If the unit system is changed, the default values should also be changed to reflect the intended values in the new unit system.  See chapter \ref{ch:units} for more information on units and chapter \ref{ch:config} for more information on configuring \PM.
+
+\subsection{Notes on numerical efficiency}
+
+There are some guidelines that users can use to obtain dramatically better performance out of \PM.
+
+{\bf Never evaluate property values in a for loop.}  Instead, construct property values as arrays, lists, tuples, or other iterables and pass them to a single property method call.  For example,
+\begin{lstlisting}[language=Python]
+>>> import numpy as np
+>>> import pyromat as pm
+>>> h2o = pm.get('mp.h2o')
+>>> h = []
+>>> ###### DON'T DO THIS ######
+>>> for T in np.linspace(300,1000,101):
+...     h.append(h2o.h(T))
+... 
+>>> ###### Do this instead ######
+>>> T = np.linspace(300,1000,101)
+>>> h = h2o.h(T)
+\end{lstlisting}
+On many systems, the first code segment can take four or five seconds to run!  The second code segment consistently takes a small fraction of a second to run and makes for much cleaner code.
+
+\PM\ is written to assume that all inputs and outputs are multi-dimensional arrays.  Simple floating point scalars are taken to be special cases.  Programming numerical codes like property evaluation in plain Python has a steep numerical penalty, but much of that can be regained by leaning on NumPy's (\url{https://numpy.org}) compiled back-end for efficient numerical methods on arrays.
+
+{\bf Ideal gases are faster than the \texttt{mp1} model.}  Ideal gases only have to evaluate a polynomial.  The multi-phase \texttt{mp1} model requires multiple parallel polynomials with computationally expensive exponential terms.  Single equation-of-state multi-phase models sacrifice computational speed in favor of a single model that works well in liquid, gas, near critical, and super-critical states.
+
+{\bf Prefer temperature and density when working with multi-phase substances.}  The \texttt{mp1} class calculates all properties (including pressure) in terms of temperature and density.  When another combination of properties is specified (e.g. temperature and pressure) an iterative routine has to run first to isolate temperature and density.  That is why the example above takes so long to run; it requires two iterative algorithms run in series.  When a series of properties are needed at a given state, it is much faster to calculate the density first and pass temperature and density to all of the successive property methods.
+
+{\bf Using the \texttt{mp1.hsd()} method is faster than separate calls to density, enthalpy, and entropy.}  Multi-phase properties require the calculation of a number of intermediate parameters that can be re-used in successive property evaluations.  The \texttt{hsd()} method calculates all three properties at once without needing to repeat these intermediate steps.

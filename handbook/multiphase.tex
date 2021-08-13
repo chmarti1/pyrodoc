@@ -1,0 +1,138 @@
+\chapter{Multi-phase substance models}\label{ch:multiphase}
+
+The multi-phase models are based on the Helmholtz free energy (or simply free energy), which is defined in terms of internal energy, temperature and entropy,
+\begin{align}
+a(T,\rho) &\equiv e(T,\rho) - T s(T,\rho)\\
+ &= h - \frac{p}{\rho} - T s
+\end{align}
+Unlike ideal gas properties, it is sensible to formulate multi-phase properties in terms of temperature and density instead of temperature and pressure.  
+
+Modeling phase changes with temperature and pressure as independent variables requires a discontinuity at the phase change.  On the other hand, using density requires no such discontinuity.  Using $T,\rho$ also opens the possibility of extending the model to govern meta-stable states, which would require two values from $T,p$ formulations.  Finally, calculating pressure and the other properties from a substance's density and temperature is also naturally motivated by the molecular view of substances.
+
+\section{General formulation for \texttt{mp1}}
+
+In the ``general formulation'' for the first multi-phase class, there is a single equation of state for free energy to derive all properties from temperature and density regardless of the phase.  By constructing the formulation from a bank of terms inspired by theoretical formulae for the intermolecular forces, there is greater hope of reducing the number of terms needed. 
+
+The formulation that we describe in this chapter is sometimes referred to as a Span and Wagner fit for Helmholtz free energy.  An expansive body of papers by Span, Wagner, Lemon, Jacobsen, and others provides a library of formulations for substances that use a standard bank of terms to construct the free energy equation.
+
+\subsection{Nondimensionalization}
+
+It is generally sound practice to nondimensionalize formulae in all but the most trivial numerical problems.  Ensuring that parameters vary on the order of unity helps reduce the severity of numerical errors, and if the nondimensionalization is performed with special attention to the underlying physics, then it is highly likely that the complexity of the formulae required will be reduced.
+
+It is now common practice to use
+\begin{subequations}
+\begin{align}
+\alpha(\tau,\delta) &= \frac{a(T,\rho)}{R T}\\
+\tau &= \frac{T_c}{T}\\
+\delta &= \frac{\rho}{\rho_c}.
+\end{align}
+\end{subequations}
+
+The free energy is normalized by the quantity $R T$, which is motivated by (\ref{eqn:efromt}).  Normalizing temperature and density by the critical point values acknowledges that the critical point is a natural scale for the important phenomena in this substance.  The choice to make $\tau$ scale like the inverse of temperature is motivated by the Boltzmann and Maxwell distributions for molecular velocity, in which, temperature appears in a denominator.
+
+The formulation for dimensionless free energy, $\alpha$, is split into two parts: the ideal gas part, $\alpha^o$, and the residual part, $\alpha^r$.  So, the total free energy is
+\begin{align}
+\alpha(\tau, \delta) = \alpha^o(\tau, \delta) + \alpha^r(\tau, \delta)
+\end{align}
+This approach separates the problem of needing the model the energy contained in molecular vibration ($\alpha^o$) from the problem of modeling the effects of intermolecular forces with increasing density ($\alpha^r$).
+
+\subsection{Ideal gas portion of free energy}
+The ideal gas portion of the free energy can be constructed from a specific heat model, just as other properties were for the ideal gas substances in Chapter \ref{ch:ig}.  The ideal gas enthalpy is merely the integral of specific heat, and ideal gas entropy can be similarly constructed in terms of specific heat, temperature, and density,
+\begin{subequations}
+\begin{align}
+h &= h_0 + \int_{T_0}^T c_p \d T\\
+s &= s_0 + \int_{T_0}^T \frac{c_p}{T} \d T - R \ln\left(\frac{\rho}{\rho_0}\right) - R\ln\left(\frac{T}{T_0}\right).
+\end{align}
+\end{subequations}
+When these are transposed into the dimensionless parameters, $\tau$ and $\delta$,
+\begin{align*}
+h &= h_0 - \int_{\tau_0}^\tau \frac{c_p}{\tau^2} \d \tau\\
+s &= s_0 - \frac{1}{T_c}\int_{\tau_0}^\tau \frac{c_p}{\tau} \d \tau - R \ln\left(\frac{\delta \tau_0}{\delta_0 \tau}\right).
+\end{align*}
+When these are used to calculate the dimensionless free energy,
+\begin{align}
+\alpha^o &= \frac{h - RT - Ts}{RT} = \frac{h \tau}{R T_c} - 1 - \frac{s}{R}\nonumber\\
+ &= \frac{h_0}{RT_c} \tau - \frac{s_0}{R} - 1 + \ln\left(\frac{\delta \tau_0}{\delta_0 \tau}\right) + \frac{1}{T_c}\left(-\tau\int_{\tau_0}^\tau \frac{c_p}{R \tau^2} \d \tau + \int_{\tau_0}^\tau \frac{c_p}{R \tau} \d \tau \right).
+\end{align}
+
+The difficulty involved in formulating the specific heat of even an ideal gas is explained in Section \ref{sec:intro:e}.  The portion of energy that goes into translation versus molecular vibration is temperature-dependent.  In the ideal gas models described in Chapter \ref{ch:ig}, this dependency is dealt with using empirical polynomials.  However, the Span and Wagner models use so-called \emph{partition} functions to describe the activation of new degrees of freedom with increasing temperature,
+\begin{align}
+\frac{c_p}{R} = \ldots + b m^2 \frac{\tau^2 \exp(m\tau)}{\left(\exp(m\tau) - 1\right)^2} + \ldots\nonumber,
+\end{align}
+and any remaining effects are still addressed with additional polynomial terms.  The polynomial terms may be integrated directly, and pose no challenge for efficient implementation.  However, this partition function requires some attention.
+
+The integrals can be collectively simplified by applying the inverting the integration-by-parts procedure and a series of substitutions, so that
+\begin{align}
+-\tau \int \frac{c_p}{\tau^2} \d \tau + \int \frac{c_p}{\tau} \d \tau & = - \iint \frac{c_p}{\tau^2} \d \tau^2 \nonumber\\
+ &= \dots + \iint \frac{b m^2 \exp(m \tau)}{\left(\exp(m\tau) - 1\right)^2} \d \tau^2 + \ldots \nonumber\\
+ &= \ldots + b \ln\left(1 - \exp(-m\tau)\right) + \ldots
+\end{align}
+
+This analysis motivates the form that is now commonplace in contemporary free energy-based substance models,
+\begin{subequations}
+\begin{align}
+\alpha^o(\tau,\delta) = \ln \delta + a \ln \tau + \alpha^o_0(\tau) + \alpha^o_1(\tau),\label{eqn:mp:ao}.
+\end{align}
+Here, the natural logarithm of $\tau$ is given an empirical coefficient, which allows it to include aspects of the $c_p$ integrals that resemble $1/\tau$, and the remaining terms are organized into groups of terms, $\alpha^o_0$ and $\alpha^o_1$, which are only functions of temperature.  The $\alpha^o_1$ term includes a sum of all of the partition functions,
+\begin{align}
+\alpha^o_1(\tau) = \sum_j b_j \ln\left(1 - \exp( -m_j \tau ) \right)\label{eqn:mp:ao:q},
+\end{align}
+\end{subequations}
+and the $\alpha^o_0(\tau)$ term is merely a polynomial.
+
+Because much of the complexity of the specific heat is captured by the $\alpha^o_1$ terms, the polynomial, $\alpha^o_0$, may only contain a constant and a linear term.  Still, exponentials and logarithms are numerically expensive, so this model is usually substantially slower than the polynomial ideal gas models.
+
+In the data files, the ideal gas terms are contained in a dictionary called the \texttt{"AOgroup"}.  An \texttt{"AOgroup"} entry in the file might appear like the example below.  For more information on data files, see Section \ref{sec:regdat:data}.  For more information on polynomial coefficient lists, see Section \ref{sec:num:poly1}.
+
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
+\begin{lstlisting}[language=Python]
+"AOgroup" : {
+    "Tscale" : <Tc>,
+    "dscale" : <dc>,
+    "logt" : <a>,
+    "coef0" : <p coefficients>,
+    "coef1" : [[<b0>, <m0>], [<b1>, <m1>], <...>]
+}
+\end{lstlisting}
+
+\subsection{Residual portion of free energy}
+The residual (or real-fluid) portion of free energy accounts for the intermolecular forces that defy the ideal gas assumption.  Many of these terms become especially important when the substance density is high.  The model is divided into three groups of terms,
+\begin{subequations}
+\begin{align}
+\alpha^r &= \alpha^r_0(\tau, \delta) + \alpha^r_1(\tau, \delta) + \alpha^r_2(\tau, \delta)
+\end{align}
+Many of these terms are physically motivated, but that discussion is not included here.
+
+The first group of terms is a series of polynomials multiplied by exponentials of powers of density,
+\begin{align}
+\alpha^r_0 &= \sum_{k=0}^K \exp\left(-\delta^k\right) p_k(\tau, \delta)\\
+& p_k = \sum_i c_i \tau^a_i \delta^b_i.
+\end{align}
+These terms deal with the steep slope that occurs at the phase change.  In most (if not all) models, there are no terms with the $\delta$ exponent as zero, and it is always positive.  As a result, $\alpha^r_0$ terms with exponential functions vanish near $\delta \rightarrow 0$ and $\delta \rightarrow \infty$.  These terms model the complicated behaviors that occur near the phase change (when $\delta$ is on the order 1).
+
+The first group usually constitutes the largest number of terms (usually dozens).  The exponents in the polynomial expansion are usually integers, but they are occasionally rationals for efficient numerical implementation.
+
+The second and third groups are gaussian functions multiplied by powers of $\tau$, $\delta$, or function, $\Delta$.  The second group, $\alpha^r_1$, centers the gaussian function around temperature and density, $\gamma$ and $\epsilon$.  These are usually set near the critical point.  The third group, $\alpha^r_2$, is a gaussian centered on exactly the critical point, but the $\Delta$ function is a scaled distance from the critical point.
+\begin{align}
+\alpha^r_1 &= \sum_{l=0}^L c_l \delta^{d_l} \tau^{t_l} \exp\left( -a_l(\delta-\epsilon_l)^2 - b_l(\tau-\gamma_l)^2 \right)\\
+\alpha^r_2 &= \sum_{m=0}^M c_m \Delta_m{^{b_m}} \delta \exp\left(-C_m(\delta-1)^2 - D_m(\tau-1)^2 \right)\\
+ &\Delta_m = \left[1-\tau + A_m\left((\delta-1)^2\right)^{1/2\beta_m} \right]^2 + B_m\left((\delta - 1)^2\right)^{a_m}.
+\end{align}
+\end{subequations}
+At first glance, these formulations appear to be an inefficient tangled mess of nested exponents.  However, quantities like $\tau-1$ and $\delta-1$ may be positive or negative, and the exponents are not integers.  It is numerically elegant to square these quantities (requiring just a multiplication operation) before raising them to decimal or fractional powers.
+
+In the data files, these terms are encoded in a format shown below.  The \texttt{coef0} member contains a list of 2D polynomial coefficients.  Each polynomial, $p_k$, corresponds to an exponential term, $\exp(-\delta^k)$.  The \texttt{coef1} and \texttt{coef2} members are nested lists with each containing the necessary coefficients and exponents to construct the terms of $\alpha^r_1$ and $\alpha^r_2$ respectively.  
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
+\begin{lstlisting}[language=Python]
+"ARgroup" : {
+    "Tscale" : <Tc>,
+    "dscale" : <dc>,
+    "coef0" : [<p0 coefficients>, <p1 coefficients>, <...>]
+    "coef1" : [[<t>, <d>, <b>, <a>, <gamma>, <epsilon>, <c>], <...>]
+    "coef2" : [[<a>, <b>, <beta>, <A>, <B>, <C>, <D>, <c>], <...>]
+}
+\end{lstlisting}

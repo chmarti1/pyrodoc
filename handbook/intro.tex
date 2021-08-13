@@ -107,14 +107,26 @@ When the unit volume is very tiny, this is a poorly defined quantity.  For examp
 
 This introduces the idea that the study of thermodynamics is essentially a careful study of averages over a large population of mechanical bodies.  It is important that we study a quantity of a substance large enough that the extremes of individual molecules do not weigh heavily in our measurements.  On the other hand, our measurements must consider a region of space small enough that the properties that interest us do not vary significantly.  We may consider a region to be thermodynamically homogeneous if it can be divided into two equal smaller regions that exhibit identical thermodynamic properties.
 
+The density of the gas in molecules per unit volume is
+\begin{align}
+n = \frac{N}{V}.
+\end{align}
+These numbers are extremely large, and early in the history of chemistry, there was no way to know the true number of molecules in a sample anyway.  So, the use of molar quantities was of great utility.
+
 The density, in molar units, is
 \begin{align}
-\langle \rho \rangle = \frac{N}{V},
+\overline{\rho} = \frac{\overline{N}}{N_a V},
 \end{align}
-where $V$ is the volume of the region, and $N$ is the number of molecules.  The number of molecules may be expressed either in a literal count or in molar units (See Section \ref{sec:molar}).  In mass units, the density is merely multiplied by the molecular weight of the species,
+where $V$ is the volume of the region, and $N$ is the number of molecules, and $N_a$ is Avagadro's number.  
+
+In this way, the density of molecules may be expressed either in a literal count per unit volume, $n$, or in a number of moles per unit volume, $\overline{\rho}$ (See Section \ref{sec:molar}).  
+
+In mass units, the density is merely multiplied by the molecular weight of the species,
 \begin{align}
-\rho = W \frac{N}{V}.
+\rho &= m_0 \frac{N}{V}\\
+ &= \frac{N W}{N_a V}\nonumber
 \end{align}
+when $m_0$ is the mass of a single molecule, and $W$ is the more commonly used molecular weight in atomic mass units.
 
 Since $\rho$ is not available in the ASCII character set, \PM\ uses \verb|d| to represent density.
 

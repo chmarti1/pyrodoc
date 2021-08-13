@@ -3,60 +3,73 @@
 \contentsline {subsection}{\numberline {1.1.1}Primary Properties}{7}{subsection.1.1.1}
 \contentsline {subsection}{\numberline {1.1.2}Density, $\rho $}{9}{subsection.1.1.2}
 \contentsline {subsection}{\numberline {1.1.3}Specific volume, $v$}{10}{subsection.1.1.3}
-\contentsline {subsection}{\numberline {1.1.4}Temperature, $T$}{10}{subsection.1.1.4}
-\contentsline {subsection}{\numberline {1.1.5}Pressure, $p$}{11}{subsection.1.1.5}
+\contentsline {subsection}{\numberline {1.1.4}Temperature, $T$}{11}{subsection.1.1.4}
+\contentsline {subsection}{\numberline {1.1.5}Pressure, $p$}{12}{subsection.1.1.5}
 \contentsline {subsection}{\numberline {1.1.6}Internal Energy, $e$}{12}{subsection.1.1.6}
-\contentsline {subsection}{\numberline {1.1.7}Enthalpy, $h$}{12}{subsection.1.1.7}
+\contentsline {subsection}{\numberline {1.1.7}Enthalpy, $h$}{13}{subsection.1.1.7}
 \contentsline {subsection}{\numberline {1.1.8}Entropy, $s$}{14}{subsection.1.1.8}
 \contentsline {subsection}{\numberline {1.1.9}Specific Heats, $c_p$ $c_v$}{15}{subsection.1.1.9}
 \contentsline {chapter}{\numberline {2}Getting started}{17}{chapter.2}
 \contentsline {section}{\numberline {2.1}Installation}{17}{section.2.1}
 \contentsline {subsection}{\numberline {2.1.1}Prerequisites}{17}{subsection.2.1.1}
-\contentsline {subsection}{\numberline {2.1.2}\texttt {pip}}{18}{subsection.2.1.2}
-\contentsline {subsection}{\numberline {2.1.3}\texttt {setuptools}}{18}{subsection.2.1.3}
-\contentsline {section}{\numberline {2.2}PYroMat\ from the command line}{18}{section.2.2}
-\contentsline {subsection}{\numberline {2.2.1}Importing}{18}{subsection.2.2.1}
-\contentsline {subsection}{\numberline {2.2.2}Finding substances}{18}{subsection.2.2.2}
-\contentsline {subsection}{\numberline {2.2.3}Retrieving substance data}{18}{subsection.2.2.3}
-\contentsline {section}{\numberline {2.3}Property interface}{18}{section.2.3}
-\contentsline {subsection}{\numberline {2.3.1}Property method arguments}{18}{subsection.2.3.1}
-\contentsline {subsection}{\numberline {2.3.2}Default values}{18}{subsection.2.3.2}
-\contentsline {subsection}{\numberline {2.3.3}Working with arrays}{18}{subsection.2.3.3}
-\contentsline {chapter}{\numberline {3}Configuration}{19}{chapter.3}
-\contentsline {section}{\numberline {3.1}The \texttt {pm.config} instance}{19}{section.3.1}
-\contentsline {section}{\numberline {3.2}Configuration files}{19}{section.3.2}
-\contentsline {chapter}{\numberline {4}Units}{20}{chapter.4}
-\contentsline {section}{\numberline {4.1}Unit definitions}{20}{section.4.1}
-\contentsline {section}{\numberline {4.2}Setup}{22}{section.4.2}
-\contentsline {section}{\numberline {4.3}Constants}{23}{section.4.3}
-\contentsline {section}{\numberline {4.4}\texttt {Conversion} Class}{25}{section.4.4}
-\contentsline {section}{\numberline {4.5}Fundamental Units}{26}{section.4.5}
-\contentsline {subsection}{\numberline {4.5.1}Time}{26}{subsection.4.5.1}
-\contentsline {subsection}{\numberline {4.5.2}Length}{27}{subsection.4.5.2}
-\contentsline {subsection}{\numberline {4.5.3}Mass and Weight}{28}{subsection.4.5.3}
-\contentsline {subsection}{\numberline {4.5.4}Molar}{31}{subsection.4.5.4}
-\contentsline {subsection}{\numberline {4.5.5}Matter}{33}{subsection.4.5.5}
-\contentsline {subsection}{\numberline {4.5.6}Temperature}{34}{subsection.4.5.6}
-\contentsline {section}{\numberline {4.6}Derived Units}{37}{section.4.6}
-\contentsline {subsection}{\numberline {4.6.1}Force}{37}{subsection.4.6.1}
-\contentsline {subsection}{\numberline {4.6.2}Energy}{38}{subsection.4.6.2}
-\contentsline {subsection}{\numberline {4.6.3}Pressure}{39}{subsection.4.6.3}
-\contentsline {subsection}{\numberline {4.6.4}Volume}{41}{subsection.4.6.4}
-\contentsline {chapter}{\numberline {5}The PYroMat\ load process}{44}{chapter.5}
-\contentsline {section}{\numberline {5.1}The class registry module, \texttt {reg}}{44}{section.5.1}
-\contentsline {section}{\numberline {5.2}The data module, \texttt {dat}}{44}{section.5.2}
-\contentsline {section}{\numberline {5.3}Tools}{44}{section.5.3}
-\contentsline {chapter}{\numberline {6}Ideal Gases}{45}{chapter.6}
-\contentsline {section}{\numberline {6.1}Properties of ideal gases}{46}{section.6.1}
-\contentsline {subsection}{\numberline {6.1.1}Ideal gas law}{46}{subsection.6.1.1}
-\contentsline {subsection}{\numberline {6.1.2}Internal energy}{49}{subsection.6.1.2}
-\contentsline {subsection}{\numberline {6.1.3}Enthalpy}{51}{subsection.6.1.3}
-\contentsline {subsection}{\numberline {6.1.4}Specific heats}{51}{subsection.6.1.4}
-\contentsline {subsection}{\numberline {6.1.5}Entropy and enthalpy revisited}{53}{subsection.6.1.5}
-\contentsline {subsection}{\numberline {6.1.6}Other properties}{54}{subsection.6.1.6}
-\contentsline {subsection}{\numberline {6.1.7}Enthalpy of formation}{55}{subsection.6.1.7}
-\contentsline {subsection}{\numberline {6.1.8}Properties of mixtures}{57}{subsection.6.1.8}
-\contentsline {section}{\numberline {6.2}The ideal gas collection}{62}{section.6.2}
-\contentsline {subsection}{\numberline {6.2.1}The Shomate equation: \texttt {ig}}{62}{subsection.6.2.1}
-\contentsline {subsection}{\numberline {6.2.2}The NASA polynomial: \texttt {ig2}}{64}{subsection.6.2.2}
-\contentsline {subsection}{\numberline {6.2.3}The ideal gas mixture: \texttt {igmix}}{67}{subsection.6.2.3}
+\contentsline {subsection}{\numberline {2.1.2}Installing globally with \texttt {pip}}{18}{subsection.2.1.2}
+\contentsline {subsection}{\numberline {2.1.3}Installing in a virtual environment}{19}{subsection.2.1.3}
+\contentsline {section}{\numberline {2.2}Using PYroMat}{19}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Importing}{19}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Finding substances with \texttt {info()}}{19}{subsection.2.2.2}
+\contentsline {subsection}{\numberline {2.2.3}Retrieving substance data}{22}{subsection.2.2.3}
+\contentsline {subsection}{\numberline {2.2.4}In-line documentation}{22}{subsection.2.2.4}
+\contentsline {section}{\numberline {2.3}Property interface}{22}{section.2.3}
+\contentsline {subsection}{\numberline {2.3.1}Property method arguments}{23}{subsection.2.3.1}
+\contentsline {subsection}{\numberline {2.3.2}Inverse methods}{24}{subsection.2.3.2}
+\contentsline {subsection}{\numberline {2.3.3}Default values}{25}{subsection.2.3.3}
+\contentsline {subsection}{\numberline {2.3.4}Notes on numerical efficiency}{26}{subsection.2.3.4}
+\contentsline {chapter}{\numberline {3}Configuration}{28}{chapter.3}
+\contentsline {section}{\numberline {3.1}The \texttt {pm.config} instance}{28}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}Making temporary changes to \texttt {config}}{30}{subsection.3.1.1}
+\contentsline {section}{\numberline {3.2}Configuration files}{31}{section.3.2}
+\contentsline {chapter}{\numberline {4}Units}{34}{chapter.4}
+\contentsline {section}{\numberline {4.1}Unit definitions}{34}{section.4.1}
+\contentsline {section}{\numberline {4.2}Setup}{36}{section.4.2}
+\contentsline {section}{\numberline {4.3}Constants}{37}{section.4.3}
+\contentsline {section}{\numberline {4.4}\texttt {Conversion} Class}{39}{section.4.4}
+\contentsline {section}{\numberline {4.5}Fundamental Units}{40}{section.4.5}
+\contentsline {subsection}{\numberline {4.5.1}Time}{40}{subsection.4.5.1}
+\contentsline {subsection}{\numberline {4.5.2}Length}{41}{subsection.4.5.2}
+\contentsline {subsection}{\numberline {4.5.3}Mass and Weight}{42}{subsection.4.5.3}
+\contentsline {subsection}{\numberline {4.5.4}Molar}{45}{subsection.4.5.4}
+\contentsline {subsection}{\numberline {4.5.5}Matter}{47}{subsection.4.5.5}
+\contentsline {subsection}{\numberline {4.5.6}Temperature}{48}{subsection.4.5.6}
+\contentsline {section}{\numberline {4.6}Derived Units}{51}{section.4.6}
+\contentsline {subsection}{\numberline {4.6.1}Force}{51}{subsection.4.6.1}
+\contentsline {subsection}{\numberline {4.6.2}Energy}{52}{subsection.4.6.2}
+\contentsline {subsection}{\numberline {4.6.3}Pressure}{53}{subsection.4.6.3}
+\contentsline {subsection}{\numberline {4.6.4}Volume}{55}{subsection.4.6.4}
+\contentsline {chapter}{\numberline {5}The PYroMat\ load process}{58}{chapter.5}
+\contentsline {section}{\numberline {5.1}The class registry module, \texttt {reg}}{58}{section.5.1}
+\contentsline {section}{\numberline {5.2}The data module, \texttt {dat}}{58}{section.5.2}
+\contentsline {section}{\numberline {5.3}Tools}{58}{section.5.3}
+\contentsline {chapter}{\numberline {6}Ideal Gases}{59}{chapter.6}
+\contentsline {section}{\numberline {6.1}Properties of ideal gases}{60}{section.6.1}
+\contentsline {subsection}{\numberline {6.1.1}Ideal gas law}{60}{subsection.6.1.1}
+\contentsline {subsection}{\numberline {6.1.2}Internal energy}{63}{subsection.6.1.2}
+\contentsline {subsection}{\numberline {6.1.3}Enthalpy}{65}{subsection.6.1.3}
+\contentsline {subsection}{\numberline {6.1.4}Specific heats}{65}{subsection.6.1.4}
+\contentsline {subsection}{\numberline {6.1.5}Entropy and enthalpy revisited}{67}{subsection.6.1.5}
+\contentsline {subsection}{\numberline {6.1.6}Other properties}{68}{subsection.6.1.6}
+\contentsline {subsection}{\numberline {6.1.7}Enthalpy of formation}{69}{subsection.6.1.7}
+\contentsline {subsection}{\numberline {6.1.8}Properties of mixtures}{71}{subsection.6.1.8}
+\contentsline {section}{\numberline {6.2}The ideal gas collection}{76}{section.6.2}
+\contentsline {subsection}{\numberline {6.2.1}The Shomate equation: \texttt {ig}}{76}{subsection.6.2.1}
+\contentsline {subsection}{\numberline {6.2.2}The NASA polynomial: \texttt {ig2}}{78}{subsection.6.2.2}
+\contentsline {subsection}{\numberline {6.2.3}The ideal gas mixture: \texttt {igmix}}{81}{subsection.6.2.3}
+\contentsline {chapter}{\numberline {7}Multi-phase substance models}{84}{chapter.7}
+\contentsline {section}{\numberline {7.1}General formulation for \texttt {mp1}}{85}{section.7.1}
+\contentsline {subsection}{\numberline {7.1.1}Nondimensionalization}{85}{subsection.7.1.1}
+\contentsline {subsection}{\numberline {7.1.2}Ideal gas portion of free energy}{86}{subsection.7.1.2}
+\contentsline {subsection}{\numberline {7.1.3}Residual portion of free energy}{88}{subsection.7.1.3}
+\contentsline {chapter}{\numberline {8}Numerical routines}{91}{chapter.8}
+\contentsline {section}{\numberline {8.1}Polynomials of one dimensions}{92}{section.8.1}
+\contentsline {section}{\numberline {8.2}Polynomials of two dimensions}{92}{section.8.2}
+\contentsline {section}{\numberline {8.3}Iteration with \texttt {iter1}}{92}{section.8.3}
+\contentsline {section}{\numberline {8.4}Iteration with \texttt {hybrid1}}{92}{section.8.4}

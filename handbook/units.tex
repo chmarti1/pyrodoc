@@ -77,7 +77,7 @@ $q$ & \verb|const_q| & 1.602 176 634 $\times 10^{-19}$ & C & Fundamental charge\
 $R_u$ & \verb|const_Ru| & $\approx$ 8.314 462 618 & J mol$^{-1}$ K$^{-1}$ & Universal gas constant\\
 $T_{std}{^*}$ & \verb|const_Tstd| & $273.15$ & K & Standard temperature\\
 $\rho_\mathrm{H_2O}{^*}$ & \verb|const_dh2o| & 999.972 & kg m$^{-3}$ & Std. density of water\\
-$\rho_\mathrm{Hg}{^*}$ & \verb|const_dhg| & 13595.1 & kg m$^{-3}$ & Std. density of mercury\\
+$\rho_\mathrm{Hg}{^*}$ & \verb|const_dhg| & 1,3595.1 & kg m$^{-3}$ & Std. density of mercury\\
 \hline
 \end{tabular}
 \renewcommand{\arraystretch}{1}
@@ -88,11 +88,13 @@ $\rho_\mathrm{Hg}{^*}$ & \verb|const_dhg| & 13595.1 & kg m$^{-3}$ & Std. density
 
 Unit conversions are performed by a callable \verb|Conversion| class.  With the exception of the \verb|matter| and \verb|temperature_scale| functions (described below), each of the conversions is performed by a callable \verb|Conversion| class instance defined by the \verb|setup| function at import.
 
-As a callable, \verb|Conversion| instances mimic a function that accepts up to five argument,
+As a callable, \verb|Conversion| instances mimic a function that accepts up to five arguments,
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
 \begin{lstlisting}[language=Python]
->>> conversion_instance(value=1., \
-...     from_units=None, to_units=None,\
-...     exponent=None, inplace=None)
+>>> conversion_instance(value=1., from_units=None, \
+...     to_units=None, exponent=None, inplace=None)
 \end{lstlisting}
 
 The value may be a scalar or a numpy array of values to be converted.  By default, it is 1, so that if no value is specified, the result will automatically be a conversion factor between the given units.
@@ -100,12 +102,14 @@ The value may be a scalar or a numpy array of values to be converted.  By defaul
 The \verb|from_units| and \verb|to_units| keywords accept strings identifying the units in the conversion.  In the event that one of them is omitted, each \verb|Conversion| instance is initialized to check for an entry establishing an default unit in the \verb|pm.config| system.  In the sections that follow, each of the unit classes is listed with the name of its instance, the configuration entry that identifies its default unit, and the default that is configured in PYroMat at installation.
 
 The \verb|exponent| keyword allows for powers of units that are not unity.  For example, units of velocity are not explicitly included, but it is still easy to convert from meters per second to miles per hour by
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
 \begin{lstlisting}[language=Python]
 >>> import pyromat as pm
 >>> speed_ms = 10.
 >>> temp = pm.units.length(speed_ms, 'm', 'mile')
->>> speed_mph = pm.units.time(temp, 's', 'hr', \
-...     exponent=-1)
+>>> speed_mph = pm.units.time(temp, 's', 'hr', exponent=-1)
 >>> print(speed_mph)
 22.369362920544024
 \end{lstlisting}
@@ -113,24 +117,25 @@ The \verb|exponent| keyword allows for powers of units that are not unity.  For 
 Most users will never need the \verb|inplace| keyword, but when it is set to \verb|True| and the \verb|value| is a numpy array, the original values will be overwritten with the result of the conversion.  
 
 \verb|Conversion| instances also support item recall, so that the conversion factor for any unit may be obtained simply
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
 \begin{lstlisting}[language=Python]
->>> print(pm.units.volume['m3'] / \
-...     pm.units.volume['L'])
+>>> print(pm.units.volume['m3'] / pm.units.volume['L'])
 1000.
 \end{lstlisting}
-This indicates that there are 1000 cubic meters per liter.  Most users will not need to use this capability, but for those that do, it is important to always use ratios of units of the same class.  Each item recall returns a scalar value indicating the \emph{relative} size of the respective unit, but relative to what?  In the case of volume, each value indicates the unit's value in cubic meters, but that is an arbitrary choice.
+This indicates that there are 1000 liters per cubic meter.  Most users will not need to use this capability, but for those that do, it is important to always use ratios of units of the same class.  Each item recall returns a scalar value indicating the \emph{relative} size of the respective unit, but relative to what?  In the case of volume, each value indicates the unit's value in cubic meters, but that is an arbitrary choice.
 
 For a complete list of the supported units in a unit class, use the \verb|get()| method.
 \begin{lstlisting}[language=Python]
 >>> pm.units.energy.get()
-dict_keys(['J', 'kJ', 'cal', 'kcal', 'BTU_ISO', 
-    'eV', 'BTU'])
+dict_keys(['J', 'kJ', 'cal', 'kcal', 'BTU_ISO', 'eV', 'BTU'])
 \end{lstlisting}
 
 
 \section{Fundamental Units}
 
-Fundamental units are those that have precise definitions based on observable phenomena in nature.  
+Fundamental units are those that have precise definitions based on observable phenomena in nature.  They are defined by the BIPM.
 
 %
 %   TIME
@@ -155,7 +160,7 @@ To alter the \PM\ unit for time,
 
 Time is the most fundamental measure defined by the BIPM.  ``[The second] is defined by taking the fixed numerical value of the caesium frequency $\Delta \nu_\mathrm{Cs}$, the unperturbed ground-state hyperfine transition frequency of the caesium-133 atom, to be 9,192,631,770 when expressed in the unit Hz, which is equal to s$^{-1}$.''\cite{bipm}  Most of the other fundamental units are constructed in terms of it.
 
-The other units of time recognized by the \PM\ system are well known, and have simple definitions in terms of the second.  It is worth emphasizing that the year and the day recommended by NIST \cite{nist:sp811} presume precisely 24 hours to a day and 365 days to a year.  This ignores the 0.25 year annual error accounted for by leap years.
+The other units of time recognized by the \PM\ system are well known, and have simple definitions in terms of the second.  It is worth emphasizing that the year and the day recommended by NIST \cite{nist:sp811} presume precisely 24 hours to a day and 365 days to a year.  This ignores the roughly quarter-day annual disagreement between the year and the sidereal year (the time for the Earth to orbit the sun).
 
 Their configuration strings, their values in terms of the second, and their names are listed in Table \ref{tab:time}.
 
@@ -349,15 +354,18 @@ Therefore,
 \begin{align}
 \frac{N_\mathrm{kg}}{N_\mathrm{g}} = \frac{1 \mathrm{kg}}{1 \mathrm{g}} = 1000.
 \end{align}
-The moles are converted by the same conversion factors as their mass equivalents, so a kilogram-mole is precisely 1000 times the gram-mole.  To express a quantity, $N$, in molar units, its quantity only needs to be divided by the quantity of the corresponding mole type.
+The moles are converted by the same conversion factors as their mass equivalents, so a kilogram-mole contains precisely 1000 times as many elementary particles as the gram-mole.  To express a quantity, $N$, in molar units, its quantity only needs to be divided by the quantity of the corresponding mole type.  For example, in kilogram moles,
+\begin{align}
+\overline{N} = \frac{N}{N_{kg}}.
+\end{align}
 
 For describing quantities of a gas, standard (or normal) volumetric units are used so widely that the problematic aspects of their definitions are worth tolerating.  A standard (or normal) volume is the quantity of an ideal gas that would occupy that volume at standard conditions.  US Customary and imperial units use the word ``standard'' and metric units use the word ``normal,'' but the meaning is the same.  
 
-Regardless of the mass of the elementary particles, an ideal gas has a consistent number density at given conditions,
+Regardless of the mass of the elementary particles, an ideal gas has a consistent number density (concentration) at given conditions,
 \begin{align}
-n_{std} = \frac{p_{std}}{k T_{std}},
+\overline{\rho}_{std} = \frac{p_{std}}{R_u T_{std}},
 \end{align}
-given in total number of molecules per unit volume.  Obviously, precise and consistent definitions for standard conditions are essential here.  By default \PM\ uses $p_{std} = 1.01325$ bar and $T_{std} = 273.15$ K.  When $n_{std}$ is expressed in gram-moles, it is approximately 44.615 033 4 moles per cubic meter.
+given in mole count per unit volume.  Obviously, precise and consistent definitions for standard conditions are essential here.  By default \PM\ uses $p_{std} = 1.01325$ bar and $T_{std} = 273.15$ K.  When $\overline{\rho}_{std}$ is expressed in gram-moles per cubic meter, it is approximately 44.615 033 4.
 
 To calculate the number of moles in a standard volume, one need only multiply by the volume in question.  So, a normal liter contains .044 615 033 4 moles (when standard temperature and pressure are as above).
 
@@ -417,12 +425,12 @@ To alter the \PM\ unit for matter quantities,
 
 Molar and mass units provide parallel methods for quantifying amounts of matter.  Thermodynamic properties can be expressed in either, so \PM\ uses a third class of units, \emph{matter}, which is an amalgamation of all molar and mass units.  A unit matter may be any of the units listed in Tables \ref{tab:mass} and \ref{tab:molar}.  Since every molar unit can be related to the kilogram-mole and every mass unit can be related to the kilogram, it is only important that we establish how the kilogram is related to the kilogram-mole.
 
-The ratio between kilograms and kilogram moles is a property of the molecule, and is called its molar or molecular weight, $W$.  It is typically expressed in terms of atomic mass units per molecule, but it is the same in kilograms per kilogram moles.  The mass, $m$ of a molar quantity, $N$, then, is
+The ratio between kilograms and kilogram moles is a property of the molecule, and is called its molar or molecular weight, $W$.  It is typically expressed in terms of atomic mass units per molecule, but it is the same in kilograms per kilogram moles.  The mass, $m$ of a molar quantity, $\overline{N}$, in kilogram moles then, is
 \begin{align}
-m = N W.
+m = \overline{N} W.
 \end{align}
 
-Unlike any of the other unit conversions, this one depends on the properties of the substance itself.  As a result, it is implemented in a custom function that adds a mandatory molecular weight (in u per molecule), \verb|mw|, argument to the other standard \verb|Conversion| instance arguments.
+Unlike any of the other unit conversions, this one depends on the properties of the substance itself.  As a result, it is implemented in a custom function that adds molecular weight (in u per molecule), \verb|mw|, as a mandatory argument in addition to the other standard \verb|Conversion| arguments.
 
 \begin{lstlisting}
 >>> matter(value, mw, from_units=None, \
@@ -466,7 +474,7 @@ To alter the \PM\ unit for temperature quantities,
 >>> pm.config['unit_temperature'] = 'K'
 \end{lstlisting}
 
-This history of temperature as a measure of hot and cold extends back longer than thermodynamics as a rigorous theory.  Without knowing what underlying principles caused substances to be hot or cold, a Celsius scale could still be reliably be marked onto a thermometer by marking its readings in ice water and boiling water and by dividing the space between into one hundred equal increments. 
+This history of temperature as a measure of hot and cold extends back longer than thermodynamics as a rigorous theory.  Without knowing what underlying principles caused substances to be hot or cold, a Celsius scale could still be reliably constructed on a thermometer by marking its readings in ice water and boiling water and by dividing the space between into one hundred equal increments. 
 
 With the discovery that temperature indicates the mean translational kinetic energy of the molecules of an ideal gas, the kinetic theory of gasses gives the relationship,
 \begin{align}
