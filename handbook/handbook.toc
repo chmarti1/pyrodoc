@@ -21,7 +21,7 @@
 \contentsline {subsection}{\numberline {2.2.4}In-line documentation}{22}{subsection.2.2.4}
 \contentsline {section}{\numberline {2.3}Property interface}{22}{section.2.3}
 \contentsline {subsection}{\numberline {2.3.1}Property method arguments}{23}{subsection.2.3.1}
-\contentsline {subsection}{\numberline {2.3.2}Inverse methods}{24}{subsection.2.3.2}
+\contentsline {subsection}{\numberline {2.3.2}Inverse methods}{23}{subsection.2.3.2}
 \contentsline {subsection}{\numberline {2.3.3}Default values}{25}{subsection.2.3.3}
 \contentsline {subsection}{\numberline {2.3.4}Notes on numerical efficiency}{26}{subsection.2.3.4}
 \contentsline {chapter}{\numberline {3}Configuration}{28}{chapter.3}
@@ -64,12 +64,28 @@
 \contentsline {subsection}{\numberline {6.2.2}The NASA polynomial: \texttt {ig2}}{78}{subsection.6.2.2}
 \contentsline {subsection}{\numberline {6.2.3}The ideal gas mixture: \texttt {igmix}}{81}{subsection.6.2.3}
 \contentsline {chapter}{\numberline {7}Multi-phase substance models}{84}{chapter.7}
-\contentsline {section}{\numberline {7.1}General formulation for \texttt {mp1}}{85}{section.7.1}
+\contentsline {section}{\numberline {7.1}General formulation for \texttt {mp1}}{84}{section.7.1}
 \contentsline {subsection}{\numberline {7.1.1}Nondimensionalization}{85}{subsection.7.1.1}
 \contentsline {subsection}{\numberline {7.1.2}Ideal gas portion of free energy}{86}{subsection.7.1.2}
 \contentsline {subsection}{\numberline {7.1.3}Residual portion of free energy}{88}{subsection.7.1.3}
-\contentsline {chapter}{\numberline {8}Numerical routines}{91}{chapter.8}
-\contentsline {section}{\numberline {8.1}Polynomials of one dimensions}{92}{section.8.1}
-\contentsline {section}{\numberline {8.2}Polynomials of two dimensions}{92}{section.8.2}
-\contentsline {section}{\numberline {8.3}Iteration with \texttt {iter1}}{92}{section.8.3}
-\contentsline {section}{\numberline {8.4}Iteration with \texttt {hybrid1}}{92}{section.8.4}
+\contentsline {section}{\numberline {7.2}Calculation of properties}{91}{section.7.2}
+\contentsline {subsection}{\numberline {7.2.1}Pressure}{92}{subsection.7.2.1}
+\contentsline {subsection}{\numberline {7.2.2}Entropy}{92}{subsection.7.2.2}
+\contentsline {subsection}{\numberline {7.2.3}Internal energy}{92}{subsection.7.2.3}
+\contentsline {subsection}{\numberline {7.2.4}Enthalpy}{93}{subsection.7.2.4}
+\contentsline {subsection}{\numberline {7.2.5}Specific heats}{93}{subsection.7.2.5}
+\contentsline {subsection}{\numberline {7.2.6}Liquid-vapor line}{95}{subsection.7.2.6}
+\contentsline {chapter}{\numberline {8}Numerical routines}{98}{chapter.8}
+\contentsline {section}{\numberline {8.1}Polynomials of two variables}{99}{section.8.1}
+\contentsline {subsection}{\numberline {8.1.1}Modifying polynomials for non-integer and negative powers}{99}{subsection.8.1.1}
+\contentsline {subsection}{\numberline {8.1.2}Representation of polynomials in data}{102}{subsection.8.1.2}
+\contentsline {subsection}{\numberline {8.1.3}Efficient evaluation of the polynomial}{102}{subsection.8.1.3}
+\contentsline {subsection}{\numberline {8.1.4}Efficient evaluation of derivatives}{104}{subsection.8.1.4}
+\contentsline {subsection}{\numberline {8.1.5}Implementation of the algorithm}{105}{subsection.8.1.5}
+\contentsline {section}{\numberline {8.2}Polynomials in one dimension}{106}{section.8.2}
+\contentsline {section}{\numberline {8.3}Iteration with \texttt {iter1}}{108}{section.8.3}
+\contentsline {section}{\numberline {8.4}Iteration with \texttt {hybrid1}}{111}{section.8.4}
+\contentsline {subsection}{\numberline {8.4.1}Bisection iteration}{111}{subsection.8.4.1}
+\contentsline {subsection}{\numberline {8.4.2}The \texttt {hybrid1} candidates}{113}{subsection.8.4.2}
+\contentsline {subsection}{\numberline {8.4.3}Standard candidate selection}{114}{subsection.8.4.3}
+\contentsline {subsection}{\numberline {8.4.4}Paranoid candidate selection}{114}{subsection.8.4.4}

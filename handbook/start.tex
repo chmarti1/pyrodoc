@@ -40,8 +40,8 @@ Python virtual environments are widely recommended to avoid installation conflic
 
 Once you are in your virtual environment and you have activated it, evoke \texttt{pip} from the command line.  If the name of your virtual environment were \texttt{my-env}, then
 \begin{lstlisting}[language=bash]
-(my-env) $ pip -m install --upgrade pip
-(my-env) $ pip -m install --upgrade pyromat
+(my-env) $ python -m pip install --upgrade pip
+(my-env) $ python -m pip install --upgrade pyromat
 \end{lstlisting}
 
 \section{Using \PM }
@@ -188,13 +188,7 @@ The property methods that belong to the many substance class instances use flexi
 
 \subsection{Property method arguments}
 
-With a few special exceptions, a thermodynamic state can be specified with any two properties.  It is numerically expedient, however, to restrict users to only a few properties as arguments.  
-
-For example, specifying pressure and entropy of an ideal gas is enough information to calculate the gas temperature, but it requires an iterative inversion of the polynomials shown in sections \ref{sec:ig:ig} and \ref{sec:ig:ig2}.  In turn, temperature is an essential parameter in the property model used to calculate other properties.  If a user needed to calculate temperature, density, enthalpy, and specific heat given entropy and pressure, it would be numerically wasteful to re-calculate temperature in each property method.  Instead, it is far more efficient to force the user to calculate temperature explicitly with the \verb|T_s()| method.  See section \ref{sec:start:inverse} for more information.
-
-All property methods in both the ideal gas and multi-phase collections accept any two of temperature, $T$, pressure, $p$, or density, $rho$.  Multi-phase properties also offer quality, $x$, to specify a mixture of liquid and gas.  These four properties form the \emph{primary} properties, any two of which may be passed to a method.
-
-For example,
+With a few special exceptions, a thermodynamic state can be specified with any two primary properties.  For example,
 \begin{lstlisting}[language=Python]
 >>> n2 = pm.get('ig.N2')
 >>> T = 452.
@@ -204,7 +198,6 @@ array([6.49072181])
 >>> n2.s(T=T, d=n2.d(T=T, p=p))
 array([6.49072181])
 \end{lstlisting}
-
 Or, with multi-phase data,
 \begin{lstlisting}[language=Python]
 >>> n2 = pm.get('mp.N2')
@@ -217,11 +210,23 @@ array([4.18094321])
 \end{lstlisting}
 The last line uses quality to specify a 50/50 mixture of liquid and vapor nitrogen at 100 K.
 
-When only two arguments are given without keywords, they are assumed to be temperature and pressure, so \texttt{n2.s(T,p)} is equivalent to \texttt{n2.s(T=T, p=p)}.
-
 \subsection{Inverse methods}
 
-Since \PM\ requires users to specify most properties in terms of temperature, pressure, density and quality, users will often need to go backwards.  In the previous section, we introduce the idea that one might know entropy and pressure and require temperature.  The classes have methods for dealing with this problem.
+\PM\ only supports passing primary properties to most property methods.  For example, it is not possible to calculate density directly from entropy and pressure.  Instead, \PM\ forces the user to first calculate the the primary properties (tempreature, pressure, density, quality) using the \emph{inverse} property methods like \verb|T_s| and \verb|T_h|, which are pronounced ``temperature from entropy'' or ``temperature from enthalpy'' respectively.  There are also \verb|p_s| or \verb|d_s| methods available in the different collections.
+
+For example, consider the calculation of density and enthalpy from entropy and pressure,
+\begin{lstlisting}[language=Python]
+>>> n2 = pm.get('ig.N2')
+>>> s = 6.5 # kJ/kg/K
+>>> p = 2.5 # bar
+>>> T = n2.T_s(s=s, p=p)
+>>> h = n2.h(T=T,p=p)
+>>> d = n2.d(T=T,p=p)
+\end{lstlisting}
+
+Why not allow users to pass entropy directly to the enthalpy or density methods?  Why force the extra step of calculating temperature?  The back-end property calculations require $T,p$ pairs for ideal gases and $T,\rho$ pairs for multi-phase substances.  Calculating temperature (or density) from a property requires numerical inversion (see Chapter \ref{ch:num}), which is computationally expensive and causes a small amount of numerical error.  If users were allowed to pass entropy (or other non-primative properties) to all of the property methods, it would cause redundant iterative inversion each time a method was called.  Instead, in this code, the inversion is performed once with the \verb|T_s| call.  See section \ref{sec:start:inverse} for more information.
+
+The effect of numerical error is clear in this example:
 \begin{lstlisting}[language=Python]
 >>> n2 = pm.get('ig.N2')
 >>> n2.s(T=200, d=1)
@@ -229,8 +234,9 @@ array([6.5796721])
 >>> n2.T_s(s=_, d=1)
 array([200.0007351])
 \end{lstlisting}
+No inverse routine is \emph{exact}, but they are correct to better than the original precision of the model uncertainties.
 
-Read aloud ``temperature from entropy,'' the \verb|T_s()| method calculates temperature given entropy and one other primary property (density or pressure).  Table \ref{tab:start:inverse} shows the other inverse property methods that are available on other classes.
+Table \ref{tab:start:inverse} shows the other inverse property methods that are available on other classes.
 
 \begin{table}\label{tab:start:inverse}
 \centering
@@ -249,7 +255,17 @@ Read aloud ``temperature from entropy,'' the \verb|T_s()| method calculates temp
 
 Note that pressure and density methods are only available from entropy.  Ideal gas classes provide an inverse pressure method while the multi-phase class provides an inverse density method.  The choice is for efficiency since the ideal gas entropy is modeled in terms of temperature and pressure, while all multi-phase properties are modeled in terms of temperature and density.  Once two of the fundamental properties are available, the third is easily obtained by the appropriate method.
 
-It should be emphasized that the inverse property methods are relatively computationally expensive because they are iterative.  For example, \verb|T_h| repeatedly calculates the substance's enthalpy with successively better estimates for the temperature until the enthalpy agrees with the value specified.  Inverse property methods should be used sparingly to obtain temperature, density, and/or pressure.  Then, any other properties that are desired should be calculated from them.
+Multi-phase inverse methods also support returning quality when the optional \texttt{quality} keyword is set.
+\begin{lstlisting}[language=Python]
+>>> h2o = pm.get('mp.H2O')
+>>> s = [6.0, 6.5, 7.0, 7.5, 8.0]
+>>> T,x = h2o.T_s(s=s, p=1., quality=True)
+>>> print(T)
+[372.75591695 372.75591695 372.75591695 399.48028414 514.10384734]
+>>> print(x)
+[ 0.77560479  0.85816469  0.9407246  -1.         -1.        ]
+\end{lstlisting}
+In this example, by setting \texttt{quality=True}, the value for $x$ is returned in a tuple with $T$.  The inverse algorithms automatically detect if the properties are ``under the dome,'' or mixed saturated liquid-vapor.  Passing the quality further prevents the user from needing to repeat that calculation.  When the state is not saturated, quality reverts to -1.
 
 \subsection{Default values}
 

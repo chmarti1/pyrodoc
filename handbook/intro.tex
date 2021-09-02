@@ -111,20 +111,18 @@ The density of the gas in molecules per unit volume is
 \begin{align}
 n = \frac{N}{V}.
 \end{align}
-These numbers are extremely large, and early in the history of chemistry, there was no way to know the true number of molecules in a sample anyway.  So, the use of molar quantities was of great utility.
+where $V$ is the volume of the region, and $N$ is the number of molecules.  These numbers are extremely large, and early in the history of chemistry, there was no way to know the true number of molecules in a sample anyway.  So, the use of molar quantities was of great utility.
 
-The density, in molar units, is
+The density, in molar units, is a slight variation on $n$,
 \begin{align}
-\overline{\rho} = \frac{\overline{N}}{N_a V},
+\overline{\rho} = \frac{N}{N_a V} = \frac{\overline{N}}{V},
 \end{align}
-where $V$ is the volume of the region, and $N$ is the number of molecules, and $N_a$ is Avagadro's number.  
-
-In this way, the density of molecules may be expressed either in a literal count per unit volume, $n$, or in a number of moles per unit volume, $\overline{\rho}$ (See Section \ref{sec:molar}).  
+where $N_a$ is Avagadro's number, and $\overline{N}$ is the number of moles in the sample.  As we will see in Section \ref{sec:units:molar}, other molar units exist, but the same formula applies.  In this way, the density of molecules may be expressed either in a literal count per unit volume, $n$, or in a number of moles per unit volume, $\overline{\rho}$.
 
 In mass units, the density is merely multiplied by the molecular weight of the species,
 \begin{align}
 \rho &= m_0 \frac{N}{V}\\
- &= \frac{N W}{N_a V}\nonumber
+ &= \frac{\overline{N} W}{V} = \frac{N W}{N_a V}\nonumber
 \end{align}
 when $m_0$ is the mass of a single molecule, and $W$ is the more commonly used molecular weight in atomic mass units.
 
@@ -162,8 +160,6 @@ In a gas, pressure is due to the impact of molecules on the surface.  Pressure m
 
 In a liquid or solid, intermolecular forces that cause pressure are persistent instead of momentary (due to collisions in a gas).  Under these conditions, even slight changes in intermolecular spacing causes huge changes in pressure, making the substance quite stiff in comparison to gases.  In this case as well, increasing temperature makes molecules vibrate more violently in their equilibrium with each other, so at a consistent average density, the force applied to a neighboring surface will increase.  This is why substances appear to expand as they are heated.
 
-The standard atmosphere is defined as the global mean pressure at sea level, and is defined to be 101,325Pa.  
-
 \subsection{Internal Energy, $e$}\label{sec:intro:e}
 
 Energy can be stored in a fluid in many ways.  In gases, for example, the molecules translate with great speed (see temperature), the molecules vibrate and rotate, and there is incredible energy stored in the chemical bonds of molecules.  However, all of these are dwarfed by the energy contained in the forces binding the nucleus of each atom.
@@ -172,9 +168,11 @@ We account for \emph{all} of these energies simultaneously with the internal ene
 
 Therefore, we say that the internal energy, $e$ is the sum of vibrational, rotational, translational, chemical, and nuclear energies contained in a thermodynamically homogeneous unit matter, subtracted by the same sum at some reference state.
 
+Some readers will be scandalized that \PM\ uses $e$ in favor of the traditional $u$ for internal energy.  This is a genuine (if futile) attempt to untangle the web of contradictory variable use between thermodynamics and fluid mechanics.  $u$ is reserved for velocity, $v$ for volume, and $e$ for energy.
+
 \subsection{Enthalpy, $h$}\label{sec:intro:h}
 
-When a fluid of any kind is flowing, it caries its internal energy with it, but it also does mechanical work as it flows.  The mechanical work done by a moving fluid is $p \d V$, where $p$ is the pressure exerted and $\d V$ is a differential volume displaced by the fluid.  If we were to imagine that the volume were displaced while the fluid is expanding or contracting, the same idea applies to a fluid whether it is flowing or not.  Per unit mass, this can be expressed as $p \d v$.  Integrated over an isobaric (constant-pressure) process, this becomes simply $p v$.
+When a fluid of any kind is flowing, it caries its internal energy with it, but it also does mechanical work as it flows.  The mechanical work done by a moving fluid is $p \d V$, where $p$ is the pressure exerted and $\d V$ is a differential volume displaced by the fluid.  If we were to imagine that the volume were displaced while the fluid is expanding or contracting, the same idea applies to a fluid whether it is flowing or not.  Per unit mass, this can be expressed as $p \d v$ (when $v$ is specific volume).  Integrated over an isobaric (constant-pressure) process, this becomes simply $p v$.
 
 It is a matter of convenience for engineers and physicists that deal with fluid power, that we define enthalpy as the sum of internal energy and fluid power,
 \begin{align}
@@ -182,7 +180,9 @@ h \equiv e + pv = e + \frac{p}{\rho}.
 \end{align}
 This term appears naturally when energy balances are applied to open systems (ones where flow is moving through the system).  Internal energy accounts for all of the energy stored by the molecules in a fluid, and enthalpy additionally includes the fluid's capacity to do mechanical work as it flows.
 
-Enthalpy is a most commonly used in the analysis of any flowing fluid such as in heat exchangers, combustors and burners, chemical reactors, compressors, turbines, valves, etc...  Even though it is derived from a property that might be argued to be more ``fundamental,'' enthalpy is usually tabulated as a primary property because it is so useful.
+Of course, most processes aren't \emph{actually} isobaric, so extra terms will tend to appear (like $\d h - v \d p$), but that is a discussion for later.
+
+Enthalpy is most commonly used in the analysis of any flowing fluid such as in heat exchangers, combustors and burners, chemical reactors, compressors, turbines, valves, etc...  Even though it is derived from a property that might be argued to be more ``fundamental,'' enthalpy is usually tabulated as a primary property because it is so useful.
 
 Just like internal energy, a substance's enthalpy is defined relative to an arbitrary reference state.  However, since internal energy and enthalpy share a common definition, their reference states \emph{must} be consistent with one another.  Furthermore, for any data set intended for the analysis of chemical reactions, the enthalpies of chemically related species (such as H$_2$, O$_2$, and H$_2$O) \emph{must} be defined consistently so that the changes in molecule internal energy due to chemical reaction can be properly accounted for.  As a result, there are certain \emph{reference species} for which arbitrary reference state enthalpies are selected.  
 
@@ -203,8 +203,8 @@ The first law would be satisfied by any cycle where the work and heat transfer m
 
 From the first law of thermodynamics, $\delta q = \d e + p \d v$, and we have a way to calculate entropy from the other properties
 \begin{align}
-T \d s &= \d e + p\d v\\
- &= \d h - v \d p
+T \d s &= \d e + p\d v\label{eqn:intro:ds1}\\
+ &= \d h - v \d p\label{eqn:intro:ds2}
 \end{align}
 
 Just like with temperature, there is a parallel (mathematically consistent) definition of entropy from statistical mechanics.  Entropy can also be understood as the probability of the substance obtaining a thermodynamically equivalent state.  The probability of gas molecules spontaneously exhibiting a specific set of positions and velocities is astronomically low, but there is an infinity of similar positions and velocities that would give the gas precisely the same temperature (for example).  The probability of gas molecules marching orderly in a lattice like a crystal is also astronomically low, but this condition has very few alternatives, making it truly unlikely.
@@ -224,7 +224,7 @@ Especially when dealing with gases, we have to be more specific because substanc
 
 For any process, energy will be conserved, so
 \begin{align}
-\delta q = \d e + p\d v.
+\delta q = \d e + p\d v.\label{eqn:intro:1stlaw}
 \end{align}
 Here, $\delta q$ is heat added per mass of the substance, $\d e$ is the change in internal energy, $p$ is the pressure, and $\d v$ is the change in volume per unit mass.
 

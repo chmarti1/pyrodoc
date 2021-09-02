@@ -1,25 +1,25 @@
 \chapter{Multi-phase substance models}\label{ch:multiphase}
 
-The multi-phase models are based on the Helmholtz free energy (or simply free energy), which is defined in terms of internal energy, temperature and entropy,
-\begin{align}
-a(T,\rho) &\equiv e(T,\rho) - T s(T,\rho)\\
- &= h - \frac{p}{\rho} - T s
-\end{align}
 Unlike ideal gas properties, it is sensible to formulate multi-phase properties in terms of temperature and density instead of temperature and pressure.  
 
-Modeling phase changes with temperature and pressure as independent variables requires a discontinuity at the phase change.  On the other hand, using density requires no such discontinuity.  Using $T,\rho$ also opens the possibility of extending the model to govern meta-stable states, which would require two values from $T,p$ formulations.  Finally, calculating pressure and the other properties from a substance's density and temperature is also naturally motivated by the molecular view of substances.
+Modeling phase changes with temperature and pressure as independent variables requires a discontinuity at the phase change.  On the other hand, using density requires no such discontinuity.  Using $T,\rho$ also opens the possibility of extending the model to govern meta-stable states, which would require two values from a single $T,p$ pair.  Finally, in the molecular view of substances, density and temperature are descriptive of a fluid's local properties, while pressure is somewhat more contrived.
 
-\section{General formulation for \texttt{mp1}}
+\section{General formulation for \texttt{mp1}}\label{sec:mp1}
 
-In the ``general formulation'' for the first multi-phase class, there is a single equation of state for free energy to derive all properties from temperature and density regardless of the phase.  By constructing the formulation from a bank of terms inspired by theoretical formulae for the intermolecular forces, there is greater hope of reducing the number of terms needed. 
+The models supported by the \texttt{mp1} class have explicit formulations for the Holmholtz free energy (or simply free energy) in terms of temperature and density, and all other properties are calculated from that formulation.  Free energy is defined as
+\begin{align}
+a(T,\rho) &\equiv e(T,\rho) - T s(T,\rho)\\
+ &= h - \frac{p}{\rho} - T s.
+\end{align}
+By constructing the formulation from a bank of terms inspired by theoretical formulae for the intermolecular forces, there is greater hope of reducing the number of terms needed. 
 
-The formulation that we describe in this chapter is sometimes referred to as a Span and Wagner fit for Helmholtz free energy.  An expansive body of papers by Span, Wagner, Lemon, Jacobsen, and others provides a library of formulations for substances that use a standard bank of terms to construct the free energy equation.
+The formulation that we describe in this chapter is sometimes referred to as a ``Span and Wagner'' fit for Helmholtz free energy.  An expansive body of papers by Span, Wagner, Lemon, Jacobsen, and others provides a library of formulations for substances that use a standard bank of terms to construct the free energy equation.
 
 \subsection{Nondimensionalization}
 
 It is generally sound practice to nondimensionalize formulae in all but the most trivial numerical problems.  Ensuring that parameters vary on the order of unity helps reduce the severity of numerical errors, and if the nondimensionalization is performed with special attention to the underlying physics, then it is highly likely that the complexity of the formulae required will be reduced.
 
-It is now common practice to use
+All of the substance models in the first multi-phase class use
 \begin{subequations}
 \begin{align}
 \alpha(\tau,\delta) &= \frac{a(T,\rho)}{R T}\\
@@ -28,13 +28,13 @@ It is now common practice to use
 \end{align}
 \end{subequations}
 
-The free energy is normalized by the quantity $R T$, which is motivated by (\ref{eqn:efromt}).  Normalizing temperature and density by the critical point values acknowledges that the critical point is a natural scale for the important phenomena in this substance.  The choice to make $\tau$ scale like the inverse of temperature is motivated by the Boltzmann and Maxwell distributions for molecular velocity, in which, temperature appears in a denominator.
+The free energy is normalized by the quantity $R T$, which is motivated by (\ref{eqn:efromt}).  Normalizing temperature and density by the critical point values acknowledges that the critical point is a natural scale for the important phenomena in this substance.  The choice to make $\tau$ scale like the inverse of temperature is motivated by the Boltzmann and Maxwell distributions for molecular velocity, in which temperature appears in a denominator.
 
 The formulation for dimensionless free energy, $\alpha$, is split into two parts: the ideal gas part, $\alpha^o$, and the residual part, $\alpha^r$.  So, the total free energy is
 \begin{align}
 \alpha(\tau, \delta) = \alpha^o(\tau, \delta) + \alpha^r(\tau, \delta)
 \end{align}
-This approach separates the problem of needing the model the energy contained in molecular vibration ($\alpha^o$) from the problem of modeling the effects of intermolecular forces with increasing density ($\alpha^r$).
+This approach separates the problem of needing to model the energy contained in molecular vibration ($\alpha^o$) from the problem of modeling the effects of intermolecular forces with increasing density ($\alpha^r$).
 
 \subsection{Ideal gas portion of free energy}
 The ideal gas portion of the free energy can be constructed from a specific heat model, just as other properties were for the ideal gas substances in Chapter \ref{ch:ig}.  The ideal gas enthalpy is merely the integral of specific heat, and ideal gas entropy can be similarly constructed in terms of specific heat, temperature, and density,
@@ -46,13 +46,13 @@ s &= s_0 + \int_{T_0}^T \frac{c_p}{T} \d T - R \ln\left(\frac{\rho}{\rho_0}\righ
 \end{subequations}
 When these are transposed into the dimensionless parameters, $\tau$ and $\delta$,
 \begin{align*}
-h &= h_0 - \int_{\tau_0}^\tau \frac{c_p}{\tau^2} \d \tau\\
-s &= s_0 - \frac{1}{T_c}\int_{\tau_0}^\tau \frac{c_p}{\tau} \d \tau - R \ln\left(\frac{\delta \tau_0}{\delta_0 \tau}\right).
+h &= h_0 - T_c \int_{\tau_0}^\tau \frac{c_p}{\tau^2} \d \tau\\
+s &= s_0 - \int_{\tau_0}^\tau \frac{c_p}{\tau} \d \tau - R \ln\left(\frac{\delta \tau_0}{\delta_0 \tau}\right).
 \end{align*}
 When these are used to calculate the dimensionless free energy,
 \begin{align}
 \alpha^o &= \frac{h - RT - Ts}{RT} = \frac{h \tau}{R T_c} - 1 - \frac{s}{R}\nonumber\\
- &= \frac{h_0}{RT_c} \tau - \frac{s_0}{R} - 1 + \ln\left(\frac{\delta \tau_0}{\delta_0 \tau}\right) + \frac{1}{T_c}\left(-\tau\int_{\tau_0}^\tau \frac{c_p}{R \tau^2} \d \tau + \int_{\tau_0}^\tau \frac{c_p}{R \tau} \d \tau \right).
+ &= \frac{h_0}{RT_c} \tau - \frac{s_0}{R} - 1 + \ln\left(\frac{\delta \tau_0}{\delta_0 \tau}\right) + \left(-\tau\int_{\tau_0}^\tau \frac{c_p}{R \tau^2} \d \tau + \int_{\tau_0}^\tau \frac{c_p}{R \tau} \d \tau \right)\label{eqn:mp1:aodef}
 \end{align}
 
 The difficulty involved in formulating the specific heat of even an ideal gas is explained in Section \ref{sec:intro:e}.  The portion of energy that goes into translation versus molecular vibration is temperature-dependent.  In the ideal gas models described in Chapter \ref{ch:ig}, this dependency is dealt with using empirical polynomials.  However, the Span and Wagner models use so-called \emph{partition} functions to describe the activation of new degrees of freedom with increasing temperature,
@@ -61,7 +61,7 @@ The difficulty involved in formulating the specific heat of even an ideal gas is
 \end{align}
 and any remaining effects are still addressed with additional polynomial terms.  The polynomial terms may be integrated directly, and pose no challenge for efficient implementation.  However, this partition function requires some attention.
 
-The integrals can be collectively simplified by applying the inverting the integration-by-parts procedure and a series of substitutions, so that
+The integrals can be collectively simplified by inverting the integration-by-parts procedure with a series of substitutions, so that
 \begin{align}
 -\tau \int \frac{c_p}{\tau^2} \d \tau + \int \frac{c_p}{\tau} \d \tau & = - \iint \frac{c_p}{\tau^2} \d \tau^2 \nonumber\\
  &= \dots + \iint \frac{b m^2 \exp(m \tau)}{\left(\exp(m\tau) - 1\right)^2} \d \tau^2 + \ldots \nonumber\\
@@ -71,14 +71,14 @@ The integrals can be collectively simplified by applying the inverting the integ
 This analysis motivates the form that is now commonplace in contemporary free energy-based substance models,
 \begin{subequations}
 \begin{align}
-\alpha^o(\tau,\delta) = \ln \delta + a \ln \tau + \alpha^o_0(\tau) + \alpha^o_1(\tau),\label{eqn:mp:ao}.
+\alpha^o(\tau,\delta) = \ln \delta + a \ln \tau + \alpha^o_0(\tau) + \alpha^o_1(\tau),\label{eqn:mp1:ao}.
 \end{align}
 Here, the natural logarithm of $\tau$ is given an empirical coefficient, which allows it to include aspects of the $c_p$ integrals that resemble $1/\tau$, and the remaining terms are organized into groups of terms, $\alpha^o_0$ and $\alpha^o_1$, which are only functions of temperature.  The $\alpha^o_1$ term includes a sum of all of the partition functions,
 \begin{align}
-\alpha^o_1(\tau) = \sum_j b_j \ln\left(1 - \exp( -m_j \tau ) \right)\label{eqn:mp:ao:q},
+\alpha^o_1(\tau) = \sum_j b_j \ln\left(1 - \exp( -m_j \tau ) \right)\label{eqn:mp1:ao:q},
 \end{align}
 \end{subequations}
-and the $\alpha^o_0(\tau)$ term is merely a polynomial.
+and the $\alpha^o_0(\tau)$ term is merely a polynomial.  In many models, it is a constant and a linear term only, representing the terms that appear in (\label{eqn:mp1:aodef}).
 
 Because much of the complexity of the specific heat is captured by the $\alpha^o_1$ terms, the polynomial, $\alpha^o_0$, may only contain a constant and a linear term.  Still, exponentials and logarithms are numerically expensive, so this model is usually substantially slower than the polynomial ideal gas models.
 
@@ -136,3 +136,203 @@ In the data files, these terms are encoded in a format shown below.  The \texttt
     "coef2" : [[<a>, <b>, <beta>, <A>, <B>, <C>, <D>, <c>], <...>]
 }
 \end{lstlisting}
+
+For more information on polynomial coefficients, see Section \ref{sec:num:poly2}.  It is worth emphasizing that \texttt{coef0} is a four-deep nested list.
+\begin{lstlisting}[language=Python]
+"coef" : [# This begins the list of polynomials
+             [# This begins the first polynomial
+                 [# First sub-polynomial
+                     [<a>, <b>],
+                     [<alpha>, <beta>],
+                     [<i0>, <j0>, <c0>],
+                     <...>
+                 ], <...more sub-polynomials?...>
+             ],
+             [# This begins the exp(-delta) term
+                 <...polynomial definition...>
+             ],
+             [# This begins the exp(-delta**2) term
+                 <...polynomial definition...>
+             ],
+             <...>
+         ]
+             
+\end{lstlisting}
+
+
+\section{Calculation of properties}\label{sec:mp1:properties}
+
+The \texttt{mp1} class calculates all substance properties from temperature, density, $\alpha$, and its derivatives.  In this section, the formulae that are used to calculate the various properties are developed from first principles.
+
+Validating a code to efficiently and reliably calculate derivatives of the above functinos is a substantial task.  Some discussion is afforded the problem of evaluating polynomials in Section \ref{sec:num:poly2}, but term-by-term details for how this is done in the \texttt{mp1} class is beyond the scope of this document.  For readers concerned with this question, in-line comments in the original code are intended to be instructional.
+
+In this development, it will be useful to have this form of the first law:
+\begin{align}
+T\d s &= \d e - \frac{p}{\rho^2} \d \rho\label{eqn:mp1:law1}.
+\end{align}
+
+By definition,
+\begin{align}
+a &= e - Ts \label{eqn:mp1:a}.
+\end{align}
+Its derivatives with respect to temperature and density may be simplified with some help from (\ref{eqn:mp1:law1}),
+\begin{align}
+\left(\frac{\partial a}{\partial T}\right)_\rho &= \left(\frac{\partial e}{\partial T}\right)_\rho - s - T \left(\frac{\partial s}{\partial T}\right)_\rho &=& \ -s\label{eqn:mp1:at}\\
+\left(\frac{\partial a}{\partial \rho}\right)_T &= \left(\frac{\partial e}{\partial \rho}\right)_T - T \left(\frac{\partial s}{\partial \rho}\right)_T &=& \ \frac{p}{\rho^2} \label{eqn:mp1:ad}.
+\end{align}
+
+The properties below are calculated in a dimensionless form.  In this way, this document is relieved from needing to be sensitive to units -- including molar versus mass. 
+ 
+\subsection{Pressure}\label{sec:mp1:p}
+
+The pressure (and compressibility factor) can be calculated explicitly from (\ref{eqn:mp1:ad}),
+\begin{align}
+\frac{p}{\rho R T} &=  \frac{\rho}{R T}\left(\frac{\partial a}{\partial \rho}\right)_T\nonumber\\
+&= \delta \alpha_\delta\label{eqn:mp1:p}.
+\end{align}
+
+\subsection{Entropy}\label{sec:mp1:s}
+
+Entropy appears explicitly in (\ref{eqn:mp1:at}), so it only needs to be transformed into terms of $\alpha$.  First, it is helpful to observe that derivatives with respect to temperature may be transposed into derivatives with respect to $\tau$ 
+\begin{align}
+\frac{\partial}{\partial T} = -\frac{\tau}{T} \frac{\partial}{\partial \tau}.\nonumber
+\end{align}
+Therefore, 
+\begin{align}
+s &= -\left(\frac{\partial a}{\partial T}\right)_\rho \nonumber\\
+&= -\frac{\partial}{\partial T} R T \alpha\nonumber\\
+&= -R \alpha + R \tau \alpha_\tau
+\end{align}
+So, normalized by $R$, entropy is
+\begin{align}
+\frac{s}{R} = \tau \alpha_\tau - \alpha\label{eqn:mp1:s}
+\end{align}
+
+\subsection{Internal energy}\label{sec:mp1:e}
+
+Internal energy can be calculated in terms of $a$ and $s$ from (\ref{eqn:mp1:a}) and (\ref{eqn:mp1:s}),
+\begin{align}
+\frac{e}{R T} &= \frac{a}{RT} + \frac{s}{R} \vspace{2em} =\ \tau \alpha_\tau\label{eqn:mp1:e}.
+\end{align}
+
+\subsection{Enthalpy}\label{sec:mp1:h}
+
+Enthalpy is trivial to construct from (\ref{eqn:mp1:p}) and (\ref{eqn:mp1:e}).  By definition, 
+\begin{align}
+\frac{h}{R T} &= \frac{e}{RT} + \frac{p}{\rho R T}\nonumber\\
+ &= \tau \alpha_\tau + \delta \alpha_\delta.\label{eqn:mp1:h}
+\end{align}
+
+\subsection{Specific heats}\label{sec:mp1:c}
+
+Constant-volume specific heat is obtained by differentiating internal energy by temperature.
+\begin{align*}
+c_v &= \frac{\partial e}{\partial T} = e_\tau \frac{\d \tau}{\d T}\\
+ &= -e_\tau \frac{\tau}{T}
+\end{align*}
+From (\ref{eqn:mp1:e}), $e$ is simply $R T_c \, \alpha_\tau$, so
+\begin{align}
+\frac{c_v}{R} = - \tau^2 \alpha_{\tau\tau}\label{eqn:mp1:cv}.
+\end{align}
+
+Constant-pressure specific heat is not so simply obtained since pressure is not one of the independent variables of the formulation.  Derivations for $c_p$ usually begin with enthalpy, but it will become aparent that the calculation benefits from the prior derivation for $c_v$.  Therefore, from (\ref{eqn:intro:1stlaw}) we may write
+\begin{align*}
+c_p &= \left(\frac{\partial e}{\partial T}\right)_p - \frac{p}{\rho^2} \left(\frac{\partial \rho}{\partial T}\right)_p.
+\end{align*}
+
+However, because the \texttt{mp1} formulation is always interms of temperature and density, derivatives with constant pressure must be transposed to derivatives on $T$ and $\rho$, 
+\begin{align*}
+\left(\frac{\partial e}{\partial T}\right)_p &=  \left(\frac{\partial e}{\partial T}\right)_\rho +  \left(\frac{\partial e}{\partial \rho}\right)_T  \left(\frac{\partial \rho}{\partial T}\right)_p.
+\end{align*}
+Of course, the same must be done for the derivative of density,
+\begin{align*}
+\left(\frac{\partial \rho}{\partial T}\right)_p &= -\frac{ \left(\frac{\partial p}{\partial T}\right)_\rho }{ \left(\frac{\partial p}{\partial \rho}\right)_T }.
+\end{align*}
+Substituting,
+\begin{align*}
+c_p &= \left(\frac{\partial e}{\partial T}\right)_\rho - \left(\left(\frac{\partial e}{\partial \rho}\right)_T - \frac{p}{\rho^2}\right) \frac{ \left(\frac{\partial p}{\partial T}\right)_\rho }{ \left(\frac{\partial p}{\partial \rho}\right)_T }.
+\end{align*}
+The first term (the derivative of interneral energy with respect to temperature) is merely $c_v$.  The second term may be simplified using (\ref{eqn:mp1:law1}), so
+\begin{align*}
+c_p &= c_v - T\left(\frac{\partial s}{\partial \rho}\right)_T \frac{ \left(\frac{\partial p}{\partial T}\right)_\rho }{ \left(\frac{\partial p}{\partial \rho}\right)_T }.
+\end{align*}
+
+Finally, this is in a form that can be conveniently substituted for free energy.  Using (\ref{eqn:mp1:at}) and (\ref{eqn:mp1:ad}),
+\begin{align*}
+\left(\frac{\partial s}{\partial \rho}\right)_T &= - \frac{\partial^2 a}{\partial T \partial \rho} = - \frac{R}{\rho}\left( \delta \alpha_\delta - \tau \delta \alpha_{\tau\delta} \right)\\
+\left(\frac{\partial p}{\partial T}\right)_\rho &= \rho^2 \frac{\partial^2 a}{\partial T \partial \rho} = R \rho \left( \delta \alpha_\delta - \tau \delta \alpha_{\tau\delta} \right)\\
+\left(\frac{\partial p}{\partial \rho}\right)_T &= 2 \rho \left(\frac{\partial a}{\partial \rho}\right)_T + \rho^2 \left(\frac{\partial^2 a}{\partial \rho^2}\right)_T \ldots\\
+ &= RT \left( 2\delta \alpha_\delta + \delta^2 \alpha_{\delta\delta} \right)
+\end{align*}
+So, 
+\begin{align}
+\frac{c_p}{R} = \frac{c_v}{R} + \frac{\left(\delta \alpha_\delta - \tau \delta \alpha_{\tau\delta} \right)^2}{2\delta \alpha_\delta + \delta^2\alpha_{\delta\delta}}
+\end{align}
+
+\subsection{Liquid-vapor line}
+
+Technically, the Maxwell conditions for phase equilibrium provide enough information for an algorithm to iteratively calculate the temperature and densities (and all other properties) from these properties.  However, the process is sufficiently numerically expensive to demand the use of additional empirical curves so the saturation line can be efficiently calculated.  This means that there are tiny numerical discrepancies between the saturation properties and the \emph{actual} saturation properties that one would predict using the Maxwell criteria.  
+
+Formulae are provided for
+\begin{itemize}
+\item liquid saturation density given temperature,
+\item vapor saturation density given temperature,
+\item saturation pressure given temperature.
+\end{itemize}
+From them, all other properties can be obtained along the saturation line.  The \texttt{mp1} class exposes these properties through methods: \texttt{ds}, \texttt{ps}, \texttt{Ts} (not to be confused with \verb|T_s|), \texttt{es}, \texttt{hs}, and \texttt{ss}.  All of these depend on the three basic empirical formulae.
+
+These formulae are calculated from dimensionless temperature, 
+\begin{align}
+\theta = \frac{T}{T_c},
+\end{align}
+which is the inverse of $\tau$.  Each of the formulae for a saturation property, $p$, take one of four types:
+
+{\bf 0. A polynomial on $\theta$} 
+\begin{align}
+p(\theta) = \sum_k c_k \theta^{a_k}
+\end{align}
+This form is commonly used for liquid-solid saturation lines (not yet implemented in version 2.1.0).
+
+{\bf 1. A polynomial on $1-\theta$}
+\begin{align}
+p(\theta) = \sum_k c_k (1-\theta)^{a_k}
+\end{align}
+This form is usually used for the saturation pressure.
+
+{\bf 2. An exponential of a polynomial on $1-\theta$}
+\begin{align}
+p(\theta) = \exp \left( \sum_k c_k (1-\theta)^{a_k} \right)
+\end{align}
+This form is usually used for the liquid saturation density.
+
+{\bf 3. An exponential of a polynomial on $1-\theta$ with a $1/\theta$ multiplier}
+\begin{align}
+p(\theta) = \exp \left( \frac{1}{\theta} \sum_k c_k (1-\theta)^{a_k} \right)
+\end{align}
+This form is usually used for the vapor saturation density.
+
+In data, there are three groups that are used to define the saturation pressure and densities.
+\begin{lstlisting}[language=Python]
+"PSgroup" : {
+    "fn" : <fn index>,
+    "pscale" : <p scale>,
+    "Tscale" : <T scale>,
+    "coef" : <polynomial coefficients>
+}
+
+"DSLgroup" : {
+    "fn" : <fn index>,
+    "dscale" : <d scale>,
+    "Tscale" : <T scale>,
+    "coef" : <polynomial coefficients>
+}
+
+"DSVgroup" : {
+    "fn" : <fn index>,
+    "dscale" : <d scale>,
+    "Tscale" : <T scale>,
+    "coef" : <polynomial coefficients>
+}
+\end{lstlisting}
+
+The \texttt{fn} parameter is an index (0-3) that selects the form of the formula to use.  The \texttt{pscale} and \texttt{dscale} parameters are used to re-scale the dimensionless property calculated by the selected formula.  The \texttt{Tscale} parameter is used to normalize temperature to calculate $\theta$.  Finally, \texttt{coef} is a polynomial coefficient list described in Section \ref{sec:num:poly1}.

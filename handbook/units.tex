@@ -28,7 +28,6 @@ This establishes a web of precise definitions of units for US customary, imperia
 
 For example, water and mercury column measures for pressure depend on the density of a fluid and the local strength of gravity, both of which are subject to change.  So-called ``standard'' pressure is often 1atm (1.01325bar), but is precisely 1bar for the NIST-JANAF data.  Worse still, standard temperature usually refers to 273.15K (0$^\circ$C), but the NIST-JANAF tables use 298.15K (25$^\circ$C), and there are some engineering applications that still use 70$^\circ$F.  There are at least a half-dozen definitions for the calorie, which are construed from the specific heat of water at different conditions.  These inconsistencies are far too severe to ignore, so great care is required when pulling data from multiple sources into a single database.
 
-
 \section{Setup}\label{sec:units:setup}
 
 To maintain transparency in regard to the standards used to derive unit conversions, the \PM\ units system includes a \verb|setup| function that is responsible for constructing all of the unit conversion routines.  Users can inspect the constants it defines, and users may change them at any time by re-calling the \verb|setup| function with new arguments.  Its behavior is fully documented and can be found by evoking \verb|help| as below.
@@ -657,7 +656,7 @@ By default, \PM\ uses the acceleration of free fall in Earth gravity, $g$, to be
 
 The conventional mmH$_2$O is calculated with precisely 1,000 kg m$^{-3}$ water density, and the so-called 4$^\circ$C mmH$_2$O is based on a water density of 999.972 kg m$^{-3}$.  Actual water density in the ``ambient'' range 20$^\circ$C to 25$^\circ$C can be as low as 997 kg m$^{-3}$, so practical realizations of this unit in a laboratory setting are unlikely to ever be more precise than 0.3\%.  By default \PM\ uses the 4$^\circ$C mmH$_2$O, but users may change this convention by altering the \verb|dh2o| parameter in the \verb|setup| function (see Section \ref{sec:units:setup} of this chapter).
 
-There are also conventional and 0$^\circ$C mmHg units in broad use, but their distinctions are even less important.  By default, \PM\ uses a density of 13,595.1 kg $^{-3}$ for mercury, which results in a conversion consistent with the value adopted by NIST \cite[p.52]{nist:sp811} to the precision given.
+There are also conventional and 0$^\circ$C mmHg units in broad use, but their distinctions are even less important.  By default, \PM\ uses a density of 13,595.1 kg m$^{-3}$ for mercury, which results in a conversion consistent with the value adopted by NIST \cite[p.52]{nist:sp811} to the precision given.
 
 The ``standard atmosphere'' was adopted by the (CGPM) in 1954 to be precisely 101,325 newtons per square meter \cite{cgpm:10:4}.  It is intended to be indicative of a global mean adjusted to sea level.  This definition is in broad use both scientifically \cite{crc} and commercially \cite{nist:sp811} as value of one atm.  The standard atmosphere can be adjusted using the \verb|pstd| parameter of \verb|setup| (see Section \ref{sec:units:setup} of this chapter).
 
