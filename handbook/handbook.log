@@ -1,8 +1,8 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2021.3.3)  2 SEP 2021 10:57
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2021.3.3)  3 SEP 2021 11:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**handbook.tex
+**handbook
 (./handbook.tex
 LaTeX2e <2017-04-15>
 Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
@@ -2058,15 +2058,9 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 67.
 (./ig.aux) (./multiphase.aux) (./numerical.aux))
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 67.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 67.
+Package rerunfilecheck Info: File `handbook.out' has not changed.
+(rerunfilecheck)             Checksum: 1DCDCE95CBDE195BE19F6E02988D6C5B;6789.
 
-
-Package rerunfilecheck Warning: File `handbook.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `handbook.out':
-(rerunfilecheck)             Before: 719F21FF61C1BC3BA4057DDDEE9D678F;6786
-(rerunfilecheck)             After:  1DCDCE95CBDE195BE19F6E02988D6C5B;6789.
 
 LaTeX Warning: There were undefined references.
 
@@ -2078,11 +2072,11 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 67.
 Here is how much of TeX's memory you used:
  17140 strings out of 492982
  233016 string characters out of 6134897
- 621779 words of memory out of 5000000
+ 621782 words of memory out of 5000000
  19571 multiletter control sequences out of 15000+600000
  19659 words of font info for 78 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 36i,11n,49p,934b,3477s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 36i,11n,49p,930b,3477s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/share/tex
@@ -2107,7 +2101,7 @@ cmti9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.
 pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></
 usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/sha
 re/texlive/texmf-dist/fonts/type1/public/wasy2-ps/wasy10.pfb>
-Output written on handbook.pdf (119 pages, 925898 bytes).
+Output written on handbook.pdf (119 pages, 926109 bytes).
 PDF statistics:
  2009 PDF objects out of 2073 (max. 8388607)
  848 named destinations out of 1000 (max. 500000)
