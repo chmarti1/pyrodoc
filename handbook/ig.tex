@@ -4,9 +4,9 @@ The ideal gas is one in which bombarding molecules do not exert significant forc
 
 There are two classes in \PM\ that implement the two most widely used models: the \verb|ig| class manages the Shomate equation of state, and \verb|ig2| manages the so-called NASA polynomials equation of state.  In either case, constant-pressure specific heat, $c_p$, is constructed purely as a function of temperature.  Here, we re-develop the thermodynamic properties from first principles to demonstrate how $c_p$ is sufficient to calculate them.
 
-\section{Properties of ideal gases}
+\section{Properties of ideal gases}\label{sec:ig:properties}
 
-\subsection{Ideal gas law}\label{sec:iglaw}
+\subsection{Ideal gas law}\label{sec:ig:iglaw}
 
 When they are spread so sparsely that forces between molecules are small, ideal gases are well described by the relations
 \begin{subequations}
@@ -75,7 +75,7 @@ Temperature is a measure of the average \emph{thermal} energy of the gas.  Highe
 
 This development was quick and it neglects to address mixtures of molecules of different masses.  However, the same approach may be used quite intuitively to show that Dalton's law for partial pressures also follows from these basic assumptions.
 
-\subsection{Internal energy}
+\subsection{Internal energy}\label{sec:ig:e}
 
 What happens to heat and work as they are added to an ideal gas depends on the structure of the gas molecule.  If there are chemical, atomic, or phase changes, the species can be modeled as vanishing and being replaced by a new substance with its own properties.  The ideal property models are, therefore, concerned with how energy is stored in a molecule that is neither changing its fundamental structure nor changing phase.  This remaining energy will be exhibited entirely as the thermal energy in (\ref{eqn:thremal:k}) and internal vibration, rotation, or electrical motions inside the molecule, for which we have not yet accounted.
 
@@ -106,7 +106,7 @@ e(T) - e_0 = \frac{f(T)}{2} R T \label{eqn:ig:efromt}
 
 Better insights into the behavior of $f$ will be seen when we examine specific heats below.
 
-\subsection{Enthalpy}
+\subsection{Enthalpy}\label{sec:ig:h}
 
 As established above, we will construct all of the properties of the ideal gas in terms of its specific heat, but in order to derive reliable relations for the specific heats, it is important to first re-examine enthalpy.
 
@@ -117,7 +117,7 @@ h(T) = e(T) + RT.\label{eqn:ig:hfrome}
 
 For all ideal gases, enthalpy and internal energy are only functions of temperature, and they are related by $RT$.
 
-\subsection{Specific heats}
+\subsection{Specific heats}\label{sec:ig:c}
 
 Recall from Section \ref{sec:intro:c} that the constant-volume and constant-pressure specific heats are
 \begin{align}
@@ -198,7 +198,7 @@ a(T) = \sqrt{\gamma(T) R T},\label{eqn:ig:a}
 \end{align}
 and others.
 
-\subsection{Enthalpy of formation}\label{sec:hf}
+\subsection{Enthalpy of formation}\label{sec:ig:hf}
 
 When a substance is formed either by nuclear, chemical or phase change, energy is nearly always released or consumed.  This energy is accounted for by a property called the \emph{enthalpy of formation}.  It is the energy required to form a substance, so exothermic reactions have negative enthalpies of formation.  The ideal gas data on which \PM's ideal gas classes do not consider nuclear reactions; only chemical reactions and phase changes.  
 
@@ -240,7 +240,7 @@ The \emph{enthalpy of formation}, $\Delta_f h$, is the energy consumed by the re
 
 Many of the reference substances are atomic gases or pure liquids and crystals (like argon and aluminum).  Others are selected to be diatomic gases because of their abundance (like hydrogen, oxygen, and nitrogen).
 
-\subsection{Properties of mixtures}
+\subsection{Properties of mixtures}\label{sec:ig:mix}
 
 The discussion so far has applied only to properties of pure ideal gases.  The composition of a gas mixture is conventionally defined in either mass or molar quantities of the constituent pure gases.  In this section, we establish methods by which properties can be calculated from the properties of the components.  
 
@@ -349,7 +349,7 @@ Therefore,
 \phi(T,p) &= \sum y_i \phi_i(T,p)\nonumber\\
 \overline{\phi}(T,p) &= \sum \chi_i(T,p) \overline{\phi}_i\nonumber
 \end{align}
-This is hardly a proof, but for it is sufficient for the scope of this document to assert that it is true for bulk properties.
+This is hardly a proof, but it is sufficient for the scope of this document to assert that it is true for bulk properties.
 
 This identity may be applied to internal energy, enthalpy, entropy, and all the properties derived from them, so
 \begin{subequations}
@@ -514,7 +514,7 @@ Name & Type & Description\\
 \end{tabular}
 \end{table}
 
-\subsection{The ideal gas mixture: \texttt{igmix}}
+\subsection{The ideal gas mixture: \texttt{igmix}}\label{sec:ig:igmix}
 
 The \PM\ ideal gas mixture class defines methods to calculate properties of a static mixture of ideal gases.  For improved computational efficiency, properties like the mixture molecular weight, mole fractions, and mass fractions, are calculated ahead of time and stored in class instances for later use.
 
