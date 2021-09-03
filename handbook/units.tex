@@ -365,7 +365,7 @@ Regardless of the mass of the elementary particles, an ideal gas has a consisten
 \begin{align}
 \overline{\rho}_{std} = \frac{p_{std}}{R_u T_{std}},
 \end{align}
-given in mole count per unit volume.  Obviously, precise and consistent definitions for standard conditions are essential here.  By default \PM\ uses $p_{std} = 1.01325$ bar and $T_{std} = 273.15$ K.  When $\overline{\rho}_{std}$ is expressed in gram-moles per cubic meter, it is approximately 44.615 033 4.
+given in mole count per unit volume.  Obviously, precise and consistent definitions for standard conditions are essential here.  By default \PM\ uses $p_{std} =$ 1.013 25 bar and $T_{std} = 273.15$ K.  When $\overline{\rho}_{std}$ is expressed in gram-moles per cubic meter, it is approximately 44.615 033 4.
 
 To calculate the number of moles in a standard volume, one need only multiply by the volume in question.  So, a normal liter contains .044 615 033 4 moles (when standard temperature and pressure are as above).
 
@@ -392,7 +392,7 @@ Setting & Value & Description\\
 \end{tabular}
 \end{table}
 
-Even though the mole is the BIPM standard for quantity of a substance, \PM\ uses the kmol or kilogram-mole as the default molar unit for self consistency.  For example, the molecular weight property methods return mass per molar units.  If the units were set to 
+Even though the mole is the BIPM standard for quantity of a substance, \PM\ uses the kmol or kilogram-mole as the default molar unit for self consistency.  For example, the molecular weight property methods return mass per molar units.  If the mass units were set to kg and the molar units were set to mol, then the molar mass of diatomic nitrogen would be reported as something near 28,000.  Setting the two consistently prevents this unusual result.
 
 
 Example:
@@ -645,23 +645,23 @@ To alter the \PM\ unit for pressure quantities,
 >>> pm.config['unit_pressure'] = 'Pa'
 \end{lstlisting}
 
-Pressure is a force exerted per unit area.  In addition to its typical use describing fluid forces on surfaces, pressure units are also used to describe stresses and surface loads in solids.  The SI unit for pressure is the pascal, which is defined as one N m$^{-2}$ \cite{bipm}.  The bar is precisely 100,000 Pa, and is in broad use thanks to its proximity to the atmosphere.  The \emph{standard} atmosphere is internationally accepted to be precisely 101,325 Pa \cite{CPC}.  
+Pressure is a force exerted per unit area.  In addition to its typical use describing fluid forces on surfaces, pressure units are also used to describe stresses and surface loads in solids.  The SI unit for pressure is the pascal, which is defined as one N m$^{-2}$ \cite{bipm}.  The bar is precisely 100,000 Pa, and is in broad use thanks to its proximity to atmospheric pressure. 
 
-Liquid column units for pressure are defined as the increase in pressure observed beneath a column of liquid of some height.  Provided sufficient measures are taken to avoid the impacts of meniscus, the liquid column pressure, $p$, may be calculated for a liquid with mass density, $\rho$, under a uniform gravitational acceleration, $g$, with a column height, $h$,
+The ``standard atmosphere'' was adopted by the (CGPM) in 1954 to be precisely 101,325 newtons per square meter \cite{cgpm:10:4}.  It is intended to be indicative of a global mean barometric pressure (adjusted to sea level).  This definition is in broad use both scientifically \cite{crc} and commercially \cite{nist:sp811} as value of one atm.  The standard atmosphere can be adjusted using the \verb|pstd| parameter of \verb|setup| (see Section \ref{sec:units:setup} of this chapter).
+
+Liquid column units for pressure are defined as the increase in pressure observed beneath a column of liquid of some height.  Like bourdon tube gauges, these pressures are measured relative to the ambient, and are also sometimes called gauge pressure.  Provided sufficient measures are taken to avoid the impacts of meniscus, the liquid column pressure, $p$, may be calculated for a liquid with mass density, $\rho$, under a uniform gravitational acceleration, $g$, with a column height, $h$,
 \begin{align}
 p = \rho g h.
 \end{align}
 For measures of high precision, it is obviously necessary to define a standard gravity and standard densities for the column fluids.
 
-By default, \PM\ uses the acceleration of free fall in Earth gravity, $g$, to be precisely 9.8065 m s$^{-2}$.  This value was internationally adopted in 1901 by the third General Conference on Weights and Measures (CGPM)\cite{cgpm:3:2} and is still in broad use as a ``standard'' value \cite[p.45]{nist:sp1038} \cite[p.5]{nist:811}.  However, it should be emphasized that actual weights observed vary significantly with altitude, proximity to dense geological formations, and especially latitude.  
+By default, \PM\ uses the acceleration of free fall in Earth gravity, $g$, to be precisely 9.8065 m s$^{-2}$.  This value was internationally adopted in 1901 by the third General Conference on Weights and Measures (CGPM)\cite{cgpm:3:2} and is still in broad use as a ``standard'' value \cite[p.45]{nist:sp1038} \cite[p.5]{nist:811}.  However, it should be emphasized that actual pressures produced by liquid columns will vary significantly with altitude, proximity to dense geological formations, and especially latitude.  
 
-The conventional mmH$_2$O is calculated with precisely 1,000 kg m$^{-3}$ water density, and the so-called 4$^\circ$C mmH$_2$O is based on a water density of 999.972 kg m$^{-3}$.  Actual water density in the ``ambient'' range 20$^\circ$C to 25$^\circ$C can be as low as 997 kg m$^{-3}$, so practical realizations of this unit in a laboratory setting are unlikely to ever be more precise than 0.3\%.  By default \PM\ uses the 4$^\circ$C mmH$_2$O, but users may change this convention by altering the \verb|dh2o| parameter in the \verb|setup| function (see Section \ref{sec:units:setup} of this chapter).
+It is common to calculate the mmH$_2$O with a convenient and easy-to-remember 1,000 kg m$^{-3}$ water density.  The so-called 4$^\circ$C mmH$_2$O is based on a water density of 999.972 kg m$^{-3}$, which is close enough to the convention for most purposes.  However, actual water density in the ``ambient'' range 20$^\circ$C to 25$^\circ$C can be as low as 997 kg m$^{-3}$, so practical realizations of this unit in a laboratory setting are unlikely to ever be more precise than 0.3\%.  By default \PM\ uses the 4$^\circ$C mmH$_2$O, but users may change this convention by altering the \verb|dh2o| parameter in the \verb|setup| function (see Section \ref{sec:units:setup} of this chapter).  When in doubt, users should calculate their own water column pressures in Pa or bar based on the known conditions in the lab.
 
-There are also conventional and 0$^\circ$C mmHg units in broad use, but their distinctions are even less important.  By default, \PM\ uses a density of 13,595.1 kg $^{-3}$ for mercury, which results in a conversion consistent with the value adopted by NIST \cite[p.52]{nist:sp811} to the precision given.
+There is also a variety of conventional values established around the mmHg column.  The definition most commonly used is the 0$^\circ$C mmHg, which is adopted by \PM\ by default.  A density of 13,595.1 kg $^{-3}$ for mercury with the above value for $g$ results in a conversion factor identical to the value officially adopted by NIST \cite[p.52]{nist:sp811} to the precision given.
 
-The ``standard atmosphere'' was adopted by the (CGPM) in 1954 to be precisely 101,325 newtons per square meter \cite{cgpm:10:4}.  It is intended to be indicative of a global mean adjusted to sea level.  This definition is in broad use both scientifically \cite{crc} and commercially \cite{nist:sp811} as value of one atm.  The standard atmosphere can be adjusted using the \verb|pstd| parameter of \verb|setup| (see Section \ref{sec:units:setup} of this chapter).
-
-Because they are identical to practical precision, the Torr and the mmHg are often treated as identical units, but, there is a difference in definition.  The Torr is defined so that 1 atm is precisely 760 Torr.
+Because they are identical to practical precision, the Torr and the mmHg are often treated as identical units, but, there is a difference in definition.  The Torr is defined so that 1 atm is precisely 760 Torr.  As seen in Table \ref{tab:pressure}, they are not quite identical, but they are so close, few practical measurements will ever mandate a distinction.  However, the distinction means that the Torr does not depend on the choice for the density of mercury or gravity.  Instead, it only depends on the definition of the standard atmosphere.
 
 \begin{table}
 \centering
@@ -686,6 +686,8 @@ Setting & Value & Description\\
 \hline
 \end{tabular}
 \end{table}
+
+As mentioned above in the discussion on water column, ``gauge'' measurements of pressure are often made relative to the ambient conditions.  These kinds of pressures should never be used in thermodynamic calculations, so to avoid confusion, \PM\ only works in ``absolute'' pressure, which is actual force per actual area.  To convert back-and-forth between absolute pressure and the gauge measurements that are easier in the laboratory, the \texttt{units} module includes the \verb|abs_to_gauge| and \verb|gauge_to_abs| functions.  See their in-line documentation for more information.
 
 %
 % Volume
@@ -712,9 +714,9 @@ Volume is the measure of the size of a region in space.  SI volumetric units are
 
 Historically the English units for fluid ounce, pint, quart, and gallon were based on the volume occupied by specific weights of water.  The English wine gallon was first implemented in 1707 as precisely 231 cubic inches, which was quite close to the gallon based on quantities of water.  Though the United Kingdom abandoned it in 1824, it was adopted as the official gallon by the United States Treasury Department in 1832 \cite{nbs:sp447}.  Today, the US gallon is still defined as precisely 231 cubic inches.
 
-The Imperial gallon, which the UK and Canada adopted in place of the wine gallon, was the volume occupied by 10 pounds of liquid water at atmospheric conditions.  Today, the imperial gallon is precisely 4.546 09 liters, which is consistent to the degree that the density of water is constant.
+The Imperial gallon, which the UK and Canada adopted in place of the wine gallon, was the volume occupied by 10 pounds of liquid water at atmospheric conditions.  Today, the imperial gallon is precisely 4.546 09 liters, which is roughly consistent with its original definition.
 
-The system of US liquid quart (1/4 gallon) and liquid pint (1/8 gallon) follow from the definition of the gallon, but it should be emphasized that there is a vast and nuanced system of specialized volumetric units that are not included in \PM (e.g. fluid ounce, dry quart, dry int, bushel, etc.).  This decision is primarily to avoid confusion, but also to keep the focus on units of relevance to the engineering and scientific community.
+The system of US liquid quart (1/4 gallon) and liquid pint (1/8 gallon) follow from the definition of the gallon, but it should be emphasized that there is a vast and nuanced system of specialized volumetric units that are not included in \PM\ (e.g. fluid ounce, dry quart, dry int, bushel, etc.).  This decision is primarily to avoid confusion, but also to keep the focus on units of relevance to the engineering and scientific community.
 
 Table \ref{tab:volume} shows the volumetric units recognized by \PM .
 

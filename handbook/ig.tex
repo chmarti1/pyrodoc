@@ -81,17 +81,18 @@ What happens to heat and work as they are added to an ideal gas depends on the s
 
 {\bf Perfect gases} are ideal gases, but not all ideal gases are perfect.  The molecules of an ideal gas collide elastically and have no further interactions with their surroundings.  However, the molecules of a perfect gas are further assumed to neither spin nor vibrate.  As a result, any molecule more complicated than a single atom does not form a perfect gas.
 
-When a gas composed of a monoatomic molecule like argon is heated (without atomic, chemical, or phase changes) the energy can only be stored in the thermal translational energy described in (\ref{eqn:thermal:k}).  A sample of $N$ molecules of such a gas would have thermal energy $N \frac{3}{2} k T$, so the energy per mole is
+When a gas composed of a monoatomic molecule like argon is heated (without atomic, chemical, or phase changes) the energy can only be stored in the thermal translational energy described in (\ref{eqn:thermal:k}).  A sample of $N$ molecules of such a gas would have thermal energy $N \frac{3}{2} k T$, so the energy of one kmol or one kg is
 \begin{align}
-e - e_0 &= \frac{N_a}{W} \frac{3}{2} k T = \frac{3}{2} R T \label{eqn:pg:e}
+\overline{e} - \overline{e}_0 &= N_{kg} \frac{3}{2} k T = \frac{3}{2} R_u T\\
+e - e_0 &= \frac{N_{kg}}{W} k T = \frac{3}{2} R T \label{eqn:pg:e}.
 \end{align}
-when $e_0$ is the internal energy due to the atomic, chemical or phase changes we have not yet considered.  Note that when this is expressed in molar units, $R$ becomes $R_u$, and when it is expressed in molecules, $R$ is replaced by the Boltzmann constant, $k$.
+See section \ref{sec:units:molar} for definitions of the molar mass, $W$, and kilogram-mole count, $N_{kg}$.  Here, $e_0$ is the internal energy due to the atomic, chemical or phase changes we have not yet considered.  Note that the gas constants, $R_u$ and $R$, appear naturally in terms of the Boltzmann constant, $k$.
 
-{\bf Non-perfect ideal gases} are made of more complicated molecules can store energy in more complicated ways; they vibrate, they rotate (spin), and they have means of storing energy electrically.  They do this because the can; they have more degrees of freedom.
+{\bf Non-perfect ideal gases} are made of more complicated molecules, and they can store energy in more complicated ways; they vibrate, they rotate (spin), and they have means of storing energy electrically.  They do this because the can; they have more degrees of freedom.
 
-The 3 in (\ref{eqn:pg:e}) first appeared in (\ref{eqn:ig:3dof}) because all ideal gases are free to translate in three directions.  These three thermal degrees of freedom are the only ones that contribute to measurements of temperature, but complex molecules have more degrees of freedom.  If these are included in the internal energy as well, a molecule that is free to vibrate, rotate, and translate in $f$ degrees of freedom will have an internal energy
+The 3 in (\ref{eqn:pg:e}) first appeared in (\ref{eqn:ig:3dof}) because all ideal gases are free to translate in three directions.  These three thermal degrees of freedom are the only ones that contribute to measurements of temperature, but complex molecules have more degrees of freedom that do not involve translation through space of the molecule's bulk.  If these are included in the internal energy as well, a molecule that is free to vibrate, rotate, and translate in $f$ degrees of freedom will have an internal energy
 \begin{align}
-e - e_0 &= \frac{N_a}{W} \frac{f}{2} k T = \frac{f}{2} R T.
+e - e_0 &= \frac{N_{kg}}{W} \frac{f}{2} k T = \frac{f}{2} R T.
 \end{align}
 
 The intuitive assumption might be that $f$ is constant and a property of each molecule.  This assumption implicitly asserts that all modes of vibration, rotation, and translation have an equal fraction of the total energy so it is called the \emph{equipartition} assumption.  It results in an elegant formulation, but it completely fails to predict the actual behavior of molecules in gases.
@@ -109,7 +110,7 @@ Better insights into the behavior of $f$ will be seen when we examine specific h
 
 As established above, we will construct all of the properties of the ideal gas in terms of its specific heat, but in order to derive reliable relations for the specific heats, it is important to first re-examine enthalpy.
 
-Recall from Section \ref{sec:intro:h} that the definition for enthalpy is $e + pv$.  For an ideal gas, $pv$ may be substituted for $R T$, so an ideal gas will have enthalpy
+Recall from Section \ref{sec:intro:h} that the definition for enthalpy is $e + pv$.  For an ideal gas, $pv$ may be substituted with $R T$, so an ideal gas will have enthalpy
 \begin{align}
 h(T) = e(T) + RT.\label{eqn:ig:hfrome}
 \end{align}
