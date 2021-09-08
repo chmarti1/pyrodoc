@@ -1,7 +1,43 @@
-\chapter{The \PM\ load process}
+\chapter{The \PM\ modules}
+
+The core of \PM's functionality is split across four modules; \texttt{reg}, \texttt{dat}, \texttt{utilty}, and \texttt{units}.  The \texttt{units} module is described in detail in Chapter \ref{ch:units}.  This chapter is devoted to a description of the back-end and how it retrieves the models and their data.
+
+When the \PM\ package is first imported, the load process is completed in three steps: (1) configuration, (2) registry, and (3) data.  In the configuration stage, \PM\ loads configuration files, which are described in detail in Chapter \ref{ch:config}.  In the registry stage, \PM\ searches for Python code that defines the classes that handle the substance models.  Finally, in the data stage \PM\ searches for the \texttt{*.hpd} files that define the substance data. 
 
 \section{The class registry module, \texttt{reg}}
 
+The \texttt{reg} module only has three members of interest to a user; the \texttt{registry} dictionary, the \texttt{regload} function, and the \verb|__basedata__| class.  As a module, \texttt{reg} is responsible for maintaining the \texttt{reg.registry} dictionary, which contains all of the classes that provide the substance models.  Each entry of this dictionary is a child class of the \verb|reg.__basedata__| class.  The key for each member of the dictionary is the same as its name and serves as the string used to identify the class.  For example, in the default installation, \texttt{reg.registry['ig2']}, recalls the \texttt{ig2} class, so \texttt{'ig2'} can be used as a value for the \texttt{class} entry of a data file.
+
+When \PM\ is first imported, it calls \texttt{reg.regload()} with no arguments, which causes it to discover a list of possible registry directories from the \textt{config['reg_dir']} entry.  If the \texttt{config['reg_recursive']} is set to \texttt{True}, the \texttt{reg.regload()} function will also descend into sub-directories.  Calling \texttt{reg.regload()} at any time causes it to repeat this process.  See the in-line documentation for how \texttt{reg.regload()} arguments can be used to override configuration entries when manually repeating the registry load process from the command line.
+
+Great care should be taken when specifying potential registry directories.  The \texttt{reg.regload()} function executes all Python codes in the registry directories to check for definition of \verb|reg.__basedata__| classes, so registry directories that define codes globally (for all users) should be protected just like system files, and users should be disallowed from loading each other's registries.
+
 \section{The data module, \texttt{dat}}
 
-\section{Tools}
+The \texttt{dat} module is responsible for maintaining the \texttt{dat.data} dictionary of all available substance models.  It includes tools to discover, load, and manipulate the model data.
+
+\subsection{The \texttt{load()} function}\label{sec:dat:load}
+
+The \texttt{dat.load()} function is the most important of \texttt{dat}'s functions.  It is responsible for loading all of the substance data and creating the class instances with which users will interact.  When \PM\ is first imported, \texttt{dat.load()} is called with no arguments, which prompts it to discover a list of possible data file directories from \texttt{config['dat_dir']}.  Every file with a \texttt{.hpd} file extension is loaded.
+
+\subsection{Data files}\label{sec:dat:hpd}
+
+Files are in the JavaScript Object Notation (JSON) data format, which only requires an ASCII character set, so any UTF-N extension will do.  The file should define a dictionary with keyword names the describe the essential data elements of the substance.  The sections in Chapters \ref{ch:ig} and \ref{ch:mp} describe the various substance classes and their required data elements, but there are also certain basic keywords required by \PM\ itself.
+
+\begin{tabe}
+\centering
+\caption{Required data keywords in all \PM\ files}\label{tab:dat:required}
+\begin{tabular}{|ccp{2in}|}
+\hline
+Keyword & Type & Description\\
+\hline
+\texttt{'id'} & \texttt{str} & The string used by the \texttt{get} function to recognize the species and its collection.  It should be in the format \texttt{<collection>.<formula>}\\
+\texttt{'class'} & \texttt{str} & \\
+\texttt{'doc'} & \texttt{str} & 
+\hline
+\end{tabular}
+\end{table}
+
+\section{The utility module, \texttt{utility}}
+
+
