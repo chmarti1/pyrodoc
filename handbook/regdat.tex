@@ -1,4 +1,4 @@
-\chapter{The \PM\ modules}
+\chapter{The \PM\ modules}\label{ch:regdat}
 
 The core of \PM's functionality is split across four modules; \texttt{reg}, \texttt{dat}, \texttt{utilty}, and \texttt{units}.  The \texttt{units} module already has its own chapter (Chapter \ref{ch:units}), so this chapter is devoted to a description of the back-end and how it retrieves the models and their data.
 
@@ -18,7 +18,7 @@ The \texttt{dat} module is responsible for maintaining the \texttt{dat.data} dic
 
 \subsection{The \texttt{load()} function}\label{sec:dat:load}
 
-The \texttt{dat.load()} function is the most important of \texttt{dat}'s functions.  It is responsible for loading all of the substance data and creating the class instances with which users will interact.  When \PM\ is first imported, \texttt{dat.load()} is called with no arguments, which prompts it to discover a list of possible data file directories from \verb|config['dat_dir']|.  Every file with a \texttt{.hpd} file extension is loaded and used to initialize an appropriate class instance.  Each instance is added to the \texttt{dat.data} dictionary with its ``id'' as the keyword string.  See section \ref{sec:sec:dat:hpd} for more information.
+The \texttt{dat.load()} function is the most important of \texttt{dat}'s functions.  It is responsible for loading all of the substance data and creating the class instances with which users will interact.  When \PM\ is first imported, \texttt{dat.load()} is called with no arguments, which prompts it to discover a list of possible data file directories from \verb|config['dat_dir']|.  Every file with a \texttt{.hpd} file extension is loaded and used to initialize an appropriate class instance.  Each instance is added to the \texttt{dat.data} dictionary with its ``id'' as the keyword string.  See section \ref{sec:dat:hpd} for more information.
 
 When it is called with a directory or a path to a specific file, \texttt{dat.load()} will only open the contents of that directory or that file.  This is useful for manually adding or re-loading files under development that are not yet in the data directories listed in \texttt{config}.
 
@@ -43,7 +43,7 @@ The \texttt{suppressed} dictionary member is a list of paths to files in the sea
 
 See section \ref{sec:dat:tools} for advanced tools for working with this information.
 
-\subsection{Data files}\label{sec:dat:hpd}
+\subsection{Data files}\label{sec:regdat:data}
 
 Files are in the JavaScript Object Notation (JSON) data format, which only requires an ASCII character set, so any UTF-N extension will do.  The file should define a dictionary with keyword names the describe the essential data elements of the substance.  The sections in Chapters \ref{ch:ig} and \ref{ch:mp} describe the various substance classes and their required data elements, but there are also certain basic keywords used by \PM\ itself.
 
@@ -94,8 +94,8 @@ Error Type & Description\\
 \end{tabular}
 \end{table}
 
-This is also where messaging and error handling helper functions, \texttt{print_lines}, \texttt{print_warning}, and \texttt{print_error} reside.
+This is also where messaging and error handling helper functions, \verb|print_lines|, \verb|print_warning|, and \verb|print_error| reside.
 
 \subsection{Redundancy tools}
 
-The \texttt{utility.revive_file()} and \texttt{utility.suppress_file()} automatically add or remove a `~' at the end of a file extension to add it to or remove it from the load process.  The \texttt{utility.red_repair()} is an automatic interactive file redundancy repair function that calls these if necessary.  Interested users can read their inline documentation for more information.
+The \verb|utility.revive_file()| and \verb|utility.suppress_file()| automatically add or remove a `~' at the end of a file extension to add it to or remove it from the load process.  The \verb|utility.red_repair()| is an automatic interactive file redundancy repair function that calls these if necessary.  Interested users can read their inline documentation for more information.

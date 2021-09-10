@@ -77,7 +77,7 @@ This development was quick and it neglects to address mixtures of molecules of d
 
 \subsection{Internal energy}\label{sec:ig:e}
 
-What happens to heat and work as they are added to an ideal gas depends on the structure of the gas molecule.  If there are chemical, atomic, or phase changes, the species can be modeled as vanishing and being replaced by a new substance with its own properties.  The ideal property models are, therefore, concerned with how energy is stored in a molecule that is neither changing its fundamental structure nor changing phase.  This remaining energy will be exhibited entirely as the thermal energy in (\ref{eqn:thremal:k}) and internal vibration, rotation, or electrical motions inside the molecule, for which we have not yet accounted.
+What happens to heat and work as they are added to an ideal gas depends on the structure of the gas molecule.  If there are chemical, atomic, or phase changes, the species can be modeled as vanishing and being replaced by a new substance with its own properties.  The ideal property models are, therefore, concerned with how energy is stored in a molecule that is neither changing its fundamental structure nor changing phase.  This remaining energy will be exhibited entirely as the thermal energy in (\ref{eqn:thermal:k}) and internal vibration, rotation, or electrical motions inside the molecule, for which we have not yet accounted.
 
 {\bf Perfect gases} are ideal gases, but not all ideal gases are perfect.  The molecules of an ideal gas collide elastically and have no further interactions with their surroundings.  However, the molecules of a perfect gas are further assumed to neither spin nor vibrate.  As a result, any molecule more complicated than a single atom does not form a perfect gas.
 
@@ -174,7 +174,7 @@ For a perfect gas,
 h - h_0 = c_p \left(T - T_0\right). \label{eqn:pg:h}
 \end{align}
 
-In the NIST-JANAF tables, the specific heat is calculated theoretically from the molecular and atomic structure of each atom, but specific heat is also readily validated by calorimetry.  Entropy's integration constant, $s_0$, is chosen so the values agree with absolute calculations for the species entropy from Boltzmann's statistical model for entropy.  Since no such model exists for enthalpy, $h_0$ is determined by a separate approach described in Section \ref{sec:hf}.
+In the NIST-JANAF tables, the specific heat is calculated theoretically from the molecular and atomic structure of each atom, but specific heat is also readily validated by calorimetry.  Entropy's integration constant, $s_0$, is chosen so the values agree with absolute calculations for the species entropy from Boltzmann's statistical model for entropy.  Since no such model exists for enthalpy, $h_0$ is determined by a separate approach described in Section \ref{sec:ig:hf}.
 
 The models in the \texttt{ig} and \texttt{ig2} classes use systems of coefficients to form piece-wise polynomials for $c_p(T)$ instead of using the detailed models recorded in the NIST-JANAF tables.  These are ideal for computational codes because they give good numerical performance, but they are not valid down to the low temperatures included by the original tables.
 
@@ -278,7 +278,7 @@ W &\equiv \frac{\sum m_i}{\sum N_j}\\
 \end{align}
 \end{subequations}
 
-{\bf Partial pressure}, $p_i$, is the pressure force exerted on a surface due only to collisions of a single constituent, $i$.  Section \ref{sec:iglaw} will help understand what is meant by this idea.  It is the pressure force that would be measured if all other constituent gases were removed.  
+{\bf Partial pressure}, $p_i$, is the pressure force exerted on a surface due only to collisions of a single constituent, $i$.  Section \ref{sec:ig:iglaw} will help understand what is meant by this idea.  It is the pressure force that would be measured if all other constituent gases were removed.  
 \begin{align}
 p_i &\equiv \frac{N_i}{V} R_u T \nonumber\\
  &= \chi_i \frac{N}{V} R_u T \nonumber\\
@@ -377,7 +377,7 @@ All property methods accept any two of temperature, density, or pressure to spec
 
 \subsection{The Shomate equation: \texttt{ig}}\label{sec:ig:ig}
 
-\PM's \texttt{ig1} class is built on the Shomate equation for constant-pressure specific heat $c_p$.  This is the formulation used by the NIST webbook \cite{nist:webbook}.  Despite the wise range of substances represented, it has the advantage of using a simple standard piece-wise formulation for specific heat.  However, it does suffer from certain limitations.
+\PM's \texttt{ig1} class is built on the Shomate equation for constant-pressure specific heat $c_p$.  This is the formulation used by the NIST webbook \cite{nist:web}.  Despite the wise range of substances represented, it has the advantage of using a simple standard piece-wise formulation for specific heat.  However, it does suffer from certain limitations.
 
 The Shomate equation takes the form
 \begin{align}
@@ -388,7 +388,7 @@ where the scaling temperature, $T_s$ is 1000K for all species.  The decision to 
 
 Because of its simplicity, the Shomate equations lack the degrees of freedom to express specific heat over wide ranges, so data are usually given in piece-wise formulations.  For example, tungsten dioxide (WO$_2$), has a set of coefficients for $298\mathrm{K} \le T < 1100\mathrm{K}$ and $1100\mathrm{K} \le T \le 6000\mathrm{K}$.
 
-The enthalpy can be explicitly calculated from (\ref{eqn:ig:enthalpy}),
+The enthalpy can be explicitly calculated from (\ref{eqn:ig:h}),
 \begin{align}
 h(T) &= h_0 + \int c_p(T) \d T \nonumber\\
  &= h_0 + T_s \int c_p(\theta) \d \theta \nonumber\\
@@ -405,7 +405,7 @@ s(T,p) &= s^\circ(T) - R \ln \left( \frac{p}{p^\circ} \right)\nonumber
 \end{align}
 Just like in the enthalpy integral, a new coefficient, $c_6$, has been introduced to represent the integration constant.
 
-Internal energy is readily calculated from the definition of enthalpy in (\ref{eqn:enthalpy}),
+Internal energy is readily calculated from the definition of enthalpy in (\ref{eqn:ig:h}),
 \begin{align}
 e(T) &= h(T) - RT
 \end{align}
@@ -415,7 +415,7 @@ c_v(T) &= c_p(T) - R\\
 \gamma(T) &= \frac{c_p(T)}{c_p(T)-R}
 \end{align}
 
-Table \ref{tab:class:ig} lists the data elements that define the \texttt{ig} class.  For more information on how \texttt{.hpd} files are stored, see Section \ref{sec:data}.  Most of the essential data elements are self explanatory, but the coefficients and temperature limits must have compatible sizes.  Even though the \texttt{ig} class only uses seven coefficients, there are eight provided in the NIST data sets.  If there are $N$ sets of coefficients defined over $N$ temperature ranges, there must be $N$ arrays of eight coefficients and $N+1$ temperature limit values.
+Table \ref{tab:class:ig} lists the data elements that define the \texttt{ig} class.  For more information on how \texttt{.hpd} files are stored, see Section \ref{sec:regdat:data}.  Most of the essential data elements are self explanatory, but the coefficients and temperature limits must have compatible sizes.  Even though the \texttt{ig} class only uses seven coefficients, there are eight provided in the NIST data sets.  If there are $N$ sets of coefficients defined over $N$ temperature ranges, there must be $N$ arrays of eight coefficients and $N+1$ temperature limit values.
 5
 For example, in a data set with two temperature ranges, the following would define a data set valid between \texttt{<T0>} and \texttt{<T2>}, and the transition between the two piece-wise data sets is at \texttt{<T1>}.
 \begin{lstlisting}[language=Python]

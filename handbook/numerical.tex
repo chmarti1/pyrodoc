@@ -383,6 +383,12 @@ x_3 = \frac{x_a + x_b}{2}
 
 These three parallel processes for calculating candidates are shown in Figure \ref{fig:hybrid}.  As the next sections will explore, the next step is to select one.  Once the function is evaluated there, the boundaries can be updated (just like in bisection) and convergence can be tested.
 
+\begin{figure}
+\centering
+\includegraphics[width=0.97\linewidth]{figures/hybrid1}
+\caption{A depiction of the bisection iteration algorithm on a hypothetical function.}\label{fig:hybrid}
+\end{figure}
+
 One could pose dozens of ideas for how information about these three candidates might be used to select a best guess, but only two are implemented in \PM.  They are discussed in the sections below.
 
 It may appear that each iteration requires two function evaluations, but that is not so.  The next guess will be used to replace either the upper or lower bound (and its candidate).  The function values and the candidate for the other bound can be retained.

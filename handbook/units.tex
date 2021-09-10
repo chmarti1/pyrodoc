@@ -157,7 +157,7 @@ To alter the \PM\ unit for time,
 >>> pm.config['unit_time'] = 'min'
 \end{lstlisting}
 
-Time is the most fundamental measure defined by the BIPM.  ``[The second] is defined by taking the fixed numerical value of the caesium frequency $\Delta \nu_\mathrm{Cs}$, the unperturbed ground-state hyperfine transition frequency of the caesium-133 atom, to be 9,192,631,770 when expressed in the unit Hz, which is equal to s$^{-1}$.''\cite{bipm}  Most of the other fundamental units are constructed in terms of it.
+Time is the most fundamental measure defined by the BIPM.  ``[The second] is defined by taking the fixed numerical value of the caesium frequency $\Delta \nu_\mathrm{Cs}$, the unperturbed ground-state hyperfine transition frequency of the caesium-133 atom, to be 9,192,631,770 when expressed in the unit Hz, which is equal to s$^{-1}$.''\cite[p.130]{si:2019}  Most of the other fundamental units are constructed in terms of it.
 
 The other units of time recognized by the \PM\ system are well known, and have simple definitions in terms of the second.  It is worth emphasizing that the year and the day recommended by NIST \cite{nist:sp811} presume precisely 24 hours to a day and 365 days to a year.  This ignores the roughly quarter-day annual disagreement between the year and the sidereal year (the time for the Earth to orbit the sun).
 
@@ -210,11 +210,11 @@ To alter the \PM\ unit for length,
 >>> pm.config['unit_length'] = 'in'
 \end{lstlisting}
 
-``[The meter] is defined by taking the fixed numerical value of the speed of light in vacuum, $c$, to be 299,792,458 when expressed in the unit m s$^{-1}$ [...].''\cite{bipm} All other metric length units are trivial to derive from the meter.
+``[The meter] is defined by taking the fixed numerical value of the speed of light in vacuum, $c$, to be 299,792,458 when expressed in the unit m s$^{-1}$ [...].''\cite[p.131]{si:2019} All other metric length units are trivial to derive from the meter.
 
-The international yard (and by extension, the inch, foot, and mile) were defined exactly in terms of the meter before the end of the nineteenth century, but their contemporary values were not adopted until the middle of the twentieth century.\cite{nbs:sp477}  Now one yard is defined to be precisely 0.914 4 meters, which results in the better known relationship, one inch is precisely 25.4 millimeters.
+The international yard (and by extension, the inch, foot, and mile) were defined exactly in terms of the meter before the end of the nineteenth century, but their contemporary values were not adopted until the middle of the twentieth century.\cite{nbs:sp447}  Now one yard is defined to be precisely 0.914 4 meters, which results in the better known relationship, one inch is precisely 25.4 millimeters.
 
-The meter was once defined to be a fixed ratio of a great circle around the Earth.  This made it of great use for navigation, and for the same reason, the nautical mile is still in common use.  The meter was one ten millionth of one quarter of a meridian, making the circumference of the Earth precisely 40,000 km by definition \cite{nbs:sp447}.  The nautical mile was was also primarily used for navigation, but it was set to the distance covered by one arc minute of latitude (of which there are 21,600 in a circle).  Therefore, the nautical mile was exactly 40,000,000 m / 21,600 or approximately 1,851.851 85 m.  In the middle of the twentieth century, the United States Departments of Commerce and Defense jointly declared the nautical mile to be redefined as precisely 1,852m \cite{nbs:59:1959}.
+The meter was once defined to be a fixed ratio of a great circle around the Earth.  This made it of great use for navigation, and for the same reason, the nautical mile is still in common use.  The meter was one ten millionth of one quarter of a meridian, making the circumference of the Earth precisely 40,000 km by definition \cite{nbs:sp447}.  The nautical mile was was also primarily used for navigation, but it was set to the distance covered by one arc minute of latitude (of which there are 21,600 in a circle).  Therefore, the nautical mile was exactly 40,000,000 m / 21,600 or approximately 1,851.851 85 m.  In the middle of the twentieth century, the United States Departments of Commerce and Defense jointly declared the nautical mile to be redefined as precisely 1,852m \cite{nbs:1959}.
 
 The length scales supported by \PM\ and their values in terms of the meter are listed in table \ref{tab:length}.
 
@@ -270,15 +270,15 @@ To alter the \PM\ unit for mass,
 >>> pm.config['unit_mass'] = 'lb'
 \end{lstlisting}
 
-``[The kilogram] is defined by taking the fixed numerical value of the Planck constant h to be $6.62607015\times 10^{-34}$ when expressed in the unit J s, which is equal to kg m$^2$ s$^{-1}$''\cite{bipm}.  Like many of the remaining fundamental units, the kilogram is defined in terms of length and time, making it dependent on their definitions as well.
+``[The kilogram] is defined by taking the fixed numerical value of the Planck constant h to be $6.62607015\times 10^{-34}$ when expressed in the unit J s, which is equal to kg m$^2$ s$^{-1}$''\cite[p.131]{si:2019}.  Like many of the remaining fundamental units, the kilogram is defined in terms of length and time, making it dependent on their definitions as well.
 
-The atomic mass unit (u or amu) is defined as precisely 1/12 the mass of a carbon 12 atom at rest.  However, in \PM\ the value of one u is calculated in kilograms by enforcing that 1000 moles of a substance with 1u of mass will have 1kg of mass.  These two definitions of the atomic mass unit are equivalent to the precision of their definition\cite[p.209]{bipm}.
+The atomic mass unit (u or amu) is defined as precisely 1/12 the mass of a carbon 12 atom at rest.  However, in \PM\ the value of one u is calculated in kilograms by enforcing that 1000 moles of a substance with 1u of mass will have 1kg of mass.  These two definitions of the atomic mass unit are equivalent to the precision of their definition\cite[p.146]{si:2019}.
 
 Definitions for the pound and units derived from it are often confused by conflicting definitions of the term ``weight.''  For example, in NIST special publications it is possible to find ``[...] the  weight  of  a  body  in  a  particular  reference  frame  is  defined  as  the  force that gives the body an acceleration equal to the local acceleration of free fall in that reference frame''\cite[p.23]{nist:sp811} and ``In general usage, the term `weight' nearly always means mass, and this is the meaning given the term in U.S. laws and regulations.'' \cite[p.10]{nist:sp1038}
 
-However, at the end of the nineteenth century, the definition of the avoirdupois pound was set to a fixed fraction of the kilogram, formalizing the definition of the pound as a measure of mass and not force.  The distinction became important as the precision of measuring instruments exceeded the consistency of the strength of gravity over the Earth's surface.  The contemporary value for the avoirdupois pound was established in the middle of the twentieth century, and is precisely 0.453 592 37 kg of mass.\cite{nbs:59:1959}
+However, at the end of the nineteenth century, the definition of the avoirdupois pound was set to a fixed fraction of the kilogram, formalizing the definition of the pound as a measure of mass and not force.  The distinction became important as the precision of measuring instruments exceeded the consistency of the strength of gravity over the Earth's surface.  The contemporary value for the avoirdupois pound was established in the middle of the twentieth century, and is precisely 0.453 592 37 kg of mass.\cite{nbs:1959}
 
-The troy pound and the troy ounce predate the avoirdupois pound as a measure primarily used for quantities of precious metal in coinage \cite[p.6]{nbs:sp477}, but today they are rarely used outside of these specialized applications.  They are omitted from \PM\ to avoid confusion and because they are not often used in scientific or engineering applications.
+The troy pound and the troy ounce predate the avoirdupois pound as a measure primarily used for quantities of precious metal in coinage \cite[p.6]{nbs:sp447}, but today they are rarely used outside of these specialized applications.  They are omitted from \PM\ to avoid confusion and because they are not often used in scientific or engineering applications.
 
 Table \ref{tab:mass} shows the mass units recognized by \PM\ and their values in kilograms.  Note that only the atomic mass unit and the slug have been rounded.  The rest of the relationships are precise by definition.
 
@@ -330,7 +330,7 @@ To alter the \PM\ unit for molar quantities,
 >>> pm.config['unit_molar'] = 'lbmol'
 \end{lstlisting}
 
-``One mole contains exactly 6.022 140 76 $\times 10^{23}$ elementary entities. This number is the fixed numerical value of the Avogadro constant, $N_a$, when expressed in the unit mol$^{-1}$ and is called the Avogadro number.''\cite{bipm}.  Because a mole is a unit of counting, it is equally valid to refer to a mole of planets (about right for our observable universe) as it is to refer to a mole of gas.
+``One mole contains exactly 6.022 140 76 $\times 10^{23}$ elementary entities. This number is the fixed numerical value of the Avogadro constant, $N_a$, when expressed in the unit mol$^{-1}$ and is called the Avogadro number.''\cite{si:2019}[p.134].  Because a mole is a unit of counting, it is equally valid to refer to a mole of planets (about right for our observable universe) as it is to refer to a mole of gas.
 
 The mole is the quantity of a substance with a total mass in grams numerically equal to the mass of the elementary entities expressed in atomic mass units (see Section \ref{sec:units:mass}).  This relationship is mirrored by more recently invented alternatives such as the kilogram-mole (kmol) or the pound-mole (lbmol), which enjoy the same relationships with their mass-based namesakes.
 
@@ -481,7 +481,7 @@ With the discovery that temperature indicates the mean translational kinetic ene
 \end{align}
 The coefficient, $k$, which is now known as Boltzmann's constant, establishes the proportionality between kinetic energy and temperature.  This also provides the idea of an \emph{absolute} temperature scale; one in which zero temperature corresponds to zero energy rather than an arbitrary choice (like the freezing point of water at standard pressure).  In this way, Boltzmann's constant completely determines an absolute temperature scale in terms of the other units.
 
-The BIPM stipulates that ``[the kelvin] is defined by taking the fixed numerical value of the Boltzmann constant k to be $1.380 649 \times 10^{-23}$ when expressed in the unit J K$^{-1}$, which is equal to kg m$^2$ s$^{-2}$ K$^{-1}$ [...]''\cite{bipm}  This makes the value for the Boltzmann constant exact by definition.
+The BIPM stipulates that ``[the kelvin] is defined by taking the fixed numerical value of the Boltzmann constant k to be $1.380 649 \times 10^{-23}$ when expressed in the unit J K$^{-1}$, which is equal to kg m$^2$ s$^{-2}$ K$^{-1}$ [...]''\cite[p.133]{si:2019}  This makes the value for the Boltzmann constant exact by definition.
 
 The realization that temperature is a measure of certain portions of a system's energy is especially useful in plasma physics and related fields.  In these studies, it is useful to express temperature directly as an energy, or electron-volts (eV).  The temperature of a substance expressed in electron-volts is the electrical potential that can be built up due to thermal motions of electrons, and is equal to $kT / q$, when $q$ is the fundamental charge.
 
@@ -553,7 +553,7 @@ To alter the \PM\ unit for force quantities,
 >>> pm.config['unit_force'] = 'kgf'
 \end{lstlisting}
 
-Force is a concept that originates with Newton's laws of motion, so it is fitting that the principle force unit be called the Newton.  It is equivalent to one kg m s$^{-2}$, corresponding to mass times acceleration.
+Force is a concept that originates with Newton's laws of motion, so it is fitting that the principle force unit be called the Newton.  It is equivalent to one kg m s$^{-2}$ \cite[p.137]{si:2019}, corresponding to mass times acceleration.
 
 Force units that are derived from measures of mass (like kilogram-force and pound-force) can be calculated in terms of Newtons by calculating their weight (in Newtons) under Earth gravity.  These units depend on the value assigned to $g$ in the last call to \verb|setup()| (see Section \ref{sec:units:setup} of this chapter).
 
@@ -596,7 +596,7 @@ To alter the \PM\ unit for energy quantities,
 >>> pm.config['unit_energy'] = 'kcal'
 \end{lstlisting}
 
-The Joule is the SI measure of energy, and it is defined as one N m, or one kg m$^2$ s$^{-2}$.  The calorie is of historical importance to the scientific community, but its use has fallen out in favor of the Joule.  The British thermal unit (BTU) is still broadly used in some industries (especially heating and refrigeration), but few authoritative definitions for unit systems recognize either in their contemporary standards.
+The Joule is the SI measure of energy, and it is defined as one N m, or one kg m$^2$ s$^{-2}$ \cite[p.137]{si:2019}.  The calorie is of historical importance to the scientific community, but its use has fallen out in favor of the Joule.  The British thermal unit (BTU) is still broadly used in some industries (especially heating and refrigeration), but few authoritative definitions for unit systems recognize either in their contemporary standards.
 
 The calorie has a number of alternate definitions that has made the unit somewhat problematic.  One set of definitions is the energy required to raise a gram of water one degree Celsius at different ``standard'' conditions.  Another is 1/100 of the energy required to raise a gram of water from its ice point to boiling at atmospheric pressure.  In 1956, the Fifth International Conference on the Properties of Steam set the ``international table calorie'' to be precisely 4.1868 J.  The calorie in broadest contemporary use is the thermochemical calorie, which seems to be universally understood to be precisely 4.184 J  \cite{nist:sp811}, though an original source for that definition is difficult to find.  Because it is the unit adopted by the International Unions of Pure and Applied Chemistry and Physics (IUPAC and IUPAP) \cite{crc} \PM\ also adopts the thermochemical calorie.
 
@@ -644,7 +644,7 @@ To alter the \PM\ unit for pressure quantities,
 >>> pm.config['unit_pressure'] = 'Pa'
 \end{lstlisting}
 
-Pressure is a force exerted per unit area.  In addition to its typical use describing fluid forces on surfaces, pressure units are also used to describe stresses and surface loads in solids.  The SI unit for pressure is the pascal, which is defined as one N m$^{-2}$ \cite{bipm}.  The bar is precisely 100,000 Pa, and is in broad use thanks to its proximity to atmospheric pressure. 
+Pressure is a force exerted per unit area.  In addition to its typical use describing fluid forces on surfaces, pressure units are also used to describe stresses and surface loads in solids.  The SI unit for pressure is the pascal, which is defined as one kg m$^{-1}$ s$^{-2}$ \cite[p.137]{si:2019}.  The bar is precisely 100,000 Pa, and is in broad use thanks to its proximity to atmospheric pressure. 
 
 The ``standard atmosphere'' was adopted by the (CGPM) in 1954 to be precisely 101,325 newtons per square meter \cite{cgpm:10:4}.  It is intended to be indicative of a global mean barometric pressure (adjusted to sea level).  This definition is in broad use both scientifically \cite{crc} and commercially \cite{nist:sp811} as value of one atm.  The standard atmosphere can be adjusted using the \verb|pstd| parameter of \verb|setup| (see Section \ref{sec:units:setup} of this chapter).
 
@@ -654,7 +654,7 @@ p = \rho g h.
 \end{align}
 For measures of high precision, it is obviously necessary to define a standard gravity and standard densities for the column fluids.
 
-By default, \PM\ uses the acceleration of free fall in Earth gravity, $g$, to be precisely 9.8065 m s$^{-2}$.  This value was internationally adopted in 1901 by the third General Conference on Weights and Measures (CGPM)\cite{cgpm:3:2} and is still in broad use as a ``standard'' value \cite[p.45]{nist:sp1038} \cite[p.5]{nist:811}.  However, it should be emphasized that actual pressures produced by liquid columns will vary significantly with altitude, proximity to dense geological formations, and especially latitude.  
+By default, \PM\ uses the acceleration of free fall in Earth gravity, $g$, to be precisely 9.8065 m s$^{-2}$.  This value was internationally adopted in 1901 by the third General Conference on Weights and Measures (CGPM)\cite{cgpm:3:2} and is still in broad use as a ``standard'' value \cite[p.45]{nist:sp1038} \cite[p.5]{nist:sp811}.  However, it should be emphasized that actual pressures produced by liquid columns will vary significantly with altitude, proximity to dense geological formations, and especially latitude.  
 
 It is common to calculate the mmH$_2$O with a convenient and easy-to-remember 1,000 kg m$^{-3}$ water density.  The so-called 4$^\circ$C mmH$_2$O is based on a water density of 999.972 kg m$^{-3}$, which is close enough to the convention for most purposes.  However, actual water density in the ``ambient'' range 20$^\circ$C to 25$^\circ$C can be as low as 997 kg m$^{-3}$, so practical realizations of this unit in a laboratory setting are unlikely to ever be more precise than 0.3\%.  By default \PM\ uses the 4$^\circ$C mmH$_2$O, but users may change this convention by altering the \verb|dh2o| parameter in the \verb|setup| function (see Section \ref{sec:units:setup} of this chapter).  When in doubt, users should calculate their own water column pressures in Pa or bar based on the known conditions in the lab.
 
@@ -711,7 +711,7 @@ To alter the \PM\ unit for volumetric quantities,
 
 Volume is the measure of the size of a region in space.  SI volumetric units are entirely derived from cubes of the linear units, with the liter being equivalent to 0.001 m$^3$.
 
-Historically the English units for fluid ounce, pint, quart, and gallon were based on the volume occupied by specific weights of water.  The English wine gallon was first implemented in 1707 as precisely 231 cubic inches, which was quite close to the gallon based on quantities of water.  Though the United Kingdom abandoned it in 1824, it was adopted as the official gallon by the United States Treasury Department in 1832 \cite{nbs:sp447}.  Today, the US gallon is still defined as precisely 231 cubic inches.
+Historically the English units for fluid ounce, pint, quart, and gallon were based on the volume occupied by specific weights of water.  The English wine gallon was first implemented in 1707 as precisely 231 cubic inches, which was quite close to the gallon based on quantities of water.  Though the United Kingdom abandoned it in 1824, it was adopted as the official gallon by the United States Treasury Department in 1832 \cite[p.]{nbs:sp447}.  Today, the US gallon is still defined as precisely 231 cubic inches.
 
 The Imperial gallon, which the UK and Canada adopted in place of the wine gallon, was the volume occupied by 10 pounds of liquid water at atmospheric conditions.  Today, the imperial gallon is precisely 4.546 09 liters, which is roughly consistent with its original definition.
 

@@ -210,7 +210,7 @@ array([4.18094321])
 \end{lstlisting}
 The last line uses quality to specify a 50/50 mixture of liquid and vapor nitrogen at 100 K.
 
-\subsection{Inverse methods}
+\subsection{Inverse methods}\label{sec:start:inverse}
 
 \PM\ only supports passing primary properties to most property methods.  For example, it is not possible to calculate density directly from entropy and pressure.  Instead, \PM\ forces the user to first calculate the the primary properties (tempreature, pressure, density, quality) using the \emph{inverse} property methods like \verb|T_s| and \verb|T_h|, which are pronounced ``temperature from entropy'' or ``temperature from enthalpy'' respectively.  There are also \verb|p_s| or \verb|d_s| methods available in the different collections.
 

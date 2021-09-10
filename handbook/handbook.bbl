@@ -1,0 +1,54 @@
+\begin{thebibliography}{1}
+
+\bibitem{nist:web}
+https://janaf.nist.gov/.
+\newblock accessed: Jun, 2021.
+
+\bibitem{nbs:1959}
+A.~V. Astin, H.~A. Karo, and F.~H. Mueller.
+\newblock Refinement of values for the yard and the pound.
+\newblock In {\em Federal Register}, Washington DC, Jul 1959. National Bureau
+  of Standards.
+
+\bibitem{nist:sp1038}
+Kenneth Butcher, Linda Crown, and Elizabeth~J. Gentry.
+\newblock The international system of units (si) - conversion factors for
+  general use.
+\newblock Technical Report SP1038, Weights and Measures Division, {NIST}, May
+  2006.
+
+\bibitem{cgpm:10:4}
+Maurice DeBroglie, R.~Vieweg, G.~Zickner, U.~Stille, E.~Padelt, and
+  E.~Blechschmidt.
+\newblock Resolution4: Definition of the standard atmosphere.
+\newblock In {\em Proceedings of the 10th CGPM}, Paris, 1954.
+
+\bibitem{cgpm:3:2}
+M.~B. D.~L. Grye, M.~W. Foerster, M.~R. Siegel, M.~V.~V. Lang, M.~W. Marek, and
+  M.~L. B.~D. Zagon.
+\newblock Resolution2: Declaration on the unit of mass and on the definition of
+  weight; conventional value of g$_n$.
+\newblock In {\em Proceedings of the 3rd CGPM}, Paris, 1901.
+
+\bibitem{si:2019}
+B.~Inglis, J.~Ulrich, and M.J.T. Milton.
+\newblock {\em The International System of Units}.
+\newblock BIPM, Creative Commons, 9th edition, 2019.
+
+\bibitem{nbs:sp447}
+Lewis~V. Judson.
+\newblock Weights and measures standards of the united states, a brief history.
+\newblock Technical Report SP447, National Bureau of Standards, Washington DC,
+  20402, Mar 1976.
+
+\bibitem{crc}
+John~R. Rumble.
+\newblock {\em CRC Handbook of Chemistry and Physics}.
+\newblock Taylor and Francis, Boca Raton, FL, 98th edition, 2018.
+
+\bibitem{nist:sp811}
+Ambler Thompson and Barry~N. Taylor.
+\newblock Guide for the use of the international system of units.
+\newblock Technical Report SP811, NIST, Gaithersburg, MD 20899, Mar 2008.
+
+\end{thebibliography}
