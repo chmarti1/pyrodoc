@@ -19,7 +19,7 @@ A package written in plain Python is unlikely to ever be used in numerically int
 \section{Polynomials of two variables}\label{sec:num:poly2}
 The evaluation of the multi-phase models requires efficient evaluations of polynomials of two variables.  These expansions are typically of the form
 \begin{align}
-p(X,Y) = \sum_{i,j} c_{i,j} X^i Y^j\label{eqn:general}
+P(X,Y) = \sum_{i,j} c_{i,j} X^i Y^j\label{eqn:num:PXY}
 \end{align}
 where $a$ and $b$ are real coefficients such that $i$ and $j$ are integer indices. 
 
@@ -29,19 +29,17 @@ Fractional and negative exponents are also possible within this framework if we 
 X &= x^a\\
 Y &= y^b.
 \end{align}
-Then, if the polynomial were also multiplied by post-exponential terms, $X^\alpha$, and $Y^\beta$, the new polynomial formed is
+Then, if the polynomial were also multiplied by post-exponential terms, $x^\alpha$, and $y^\beta$, the new polynomial formed is
 \begin{align}
-P(x,y) = x^\alpha y^\beta p(x,y).
+p(x,y) = x^\alpha y^\beta P(X,Y).
 \end{align}
 This results in a polynomial,
 \begin{align}
-p(x,y) = \sum_{i,j} c_{i,j} x^{ai+\alpha} y^{bj+\beta},\label{eqn:general}
+p(x,y) = \sum_{i,j} c_{i,j} x^{ai+\alpha} y^{bj+\beta},\label{eqn:num:pxy}
 \end{align}
-but in a form that can be efficiently evaluated using integer exponents.  
+but in a form that can be efficiently evaluated using integer exponents, $i$ and $j$.
 
-Non-integer exponents are problematic to polynomials, because they require the use of a \texttt{power} function, while integer exponents can be evaluated exclusively with multiplication.
-
-For example, consider a polynomial,
+Non-integer exponents are problematic to polynomials, because they require the use of a \texttt{power} function, while integer exponents can be evaluated exclusively with multiplication.  For example, consider a polynomial,
 \begin{align}
 p(x,y) &= 2x^{-2} + x^{0.1}y + xy^2.\nonumber\\
 X &= x^{0.1}\nonumber\\

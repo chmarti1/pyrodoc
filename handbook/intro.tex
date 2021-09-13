@@ -2,16 +2,22 @@
 
 \PM\ is a Python-based package for calculating the thermodynamic properties of fluids.  That includes liquids, gases, and plasmas.  It is written in pure Python, and the core algorithms only depend on the Numpy package for back-end numerical and array support.  This document is intended to serve as a reference manual for interpreting, using, or even writing your own \PM\ data sets.  
 
-To that end, we begin with a brief review of the thermodynamic properties \PM\ calculates.  For a detailed development of these properties, the reader should consult an introductory text on thermodynamics\footnote{For example, Cengel and Boles, \emph{Thermodynamics}, McGraw Hill.  Any edition will do.}.  
+Probably, no reader will need to digest this handbook in its entirity.  The goal is to include all the important information in a single portable document.  The Chatper \ref{ch:start} on Getting Started is probably the one that most users will need, since it describes installation and basic use of the software.
 
-In the author's opinion, contemporary undergraduate texts on thermodynamics do the reader a disservice by ignoring the deeply intuitive (and terribly important) underpinnings provided by the kinetic theory of gases.  Kinetic theory and thermodynamics have a complicated relationship because they were developed in parallel (often in tragic contention with one another), but the limits imposed by many of the common assumptions (such as idea or perfect gas) cannot be deeply understood without kinetic theory.  To the interested reader, the author would recommend Jeans's 1949 introductory text\footnote{James Jeans, \emph{Introduction to the Kinetic Theory of Gases}, Cambridge University Press, 1949.}.  It is old, but it is brief, accessible, inexpensive, and approaches the subject only requiring that the reader have a grasp of calculus, geometry, and introductory mechanics.  
+For users who want a review of the thermodynamic properties, this introduction goes into detail on the fundamental definitions for the properties used.  We will attempt to briefly give some intuitive motivation for the importance of each.
+
+For the curious or for developers who may want to add their own substance models, the inner workings of the package are described in some detail in Chapters \ref{ch:regdat}, \ref{ch:ig}, \ref{ch:mp}, and \ref{ch:num}.
 
 %
 % The Properties
 %
 \section{The Properties}
 
-\PM\ is primarily concerned with the \emph{thermodynamic} properties listed in Table \ref{tab:properties}.  There is no single set of units used to express these properties since \PM\ uses a unit-configurable unit system.  The unit systems given in Table \ref{tab:properties} are itemized in Table \ref{tab:units}.  \PM\ 's system of units is discussed in detail in Chapter \ref{ch:units}.
+Here, we begin with a brief review of the thermodynamic properties of liquids and gases that \PM\ calculates.  For a detailed development of these properties, the reader should consult an introductory text on thermodynamics\footnote{For example, Cengel and Boles, \emph{Thermodynamics}, McGraw Hill.  Any edition will do.}.  
+
+In the author's opinion, contemporary undergraduate texts on thermodynamics do the reader a disservice by ignoring the deeply intuitive (and terribly important) underpinnings provided by the kinetic theory of gases.  Kinetic theory and thermodynamics have a complicated relationship because they were developed in parallel (often in tragic contention with one another), but the limits imposed by many of the common assumptions (such as idea or perfect gas) cannot be deeply understood without kinetic theory.  To the interested reader, the author would recommend Jeans's 1949 introductory text\footnote{James Jeans, \emph{Introduction to the Kinetic Theory of Gases}, Cambridge University Press, 1949.}.  It is old, but it is brief, accessible, inexpensive, and approaches the subject only requiring that the reader have a grasp of calculus, geometry, and introductory mechanics.  
+
+\PM\ is primarily concerned with the \emph{thermodynamic} properties listed in Table \ref{tab:properties}.  There is no single set of units used to express these properties since \PM\ uses a user-configurable unit system.  The units systems given in Table \ref{tab:properties} are itemized in Table \ref{tab:units}.  All of Chapter \ref{ch:units} is devoted to describing \PM's treatment of units.
 
 \begin{table}
 \centering
@@ -176,7 +182,7 @@ When a fluid of any kind is flowing, it caries its internal energy with it, but 
 
 It is a matter of convenience for engineers and physicists that deal with fluid power, that we define enthalpy as the sum of internal energy and fluid power,
 \begin{align}
-h \equiv e + pv = e + \frac{p}{\rho}.
+h \equiv e + pv = e + \frac{p}{\rho}.\label{eqn:intro:h}
 \end{align}
 This term appears naturally when energy balances are applied to open systems (ones where flow is moving through the system).  Internal energy accounts for all of the energy stored by the molecules in a fluid, and enthalpy additionally includes the fluid's capacity to do mechanical work as it flows.
 
@@ -198,7 +204,7 @@ where $T$ is the temperature of the substance and $\delta q$ is the addition of 
 
 The first law would be satisfied by any cycle where the work and heat transfer merely summed to zero, but the Clausius equality implies something deeper.  Heat is not a property of the substance, but heat added reversibly in ratio with the temperature consistently returns to zero when the substance returns to its original thermodynamic state.  That implies the existence of a new (and terribly important) property.  Clausius termed that property entropy,
 \begin{align}
-\d s \defas_\mathrm{rev.} \frac{\delta q}{T}\label{eqn:s}
+\d s \defas_\mathrm{rev.} \frac{\delta q}{T}\label{eqn:intro:s}
 \end{align}
 
 From the first law of thermodynamics, $\delta q = \d e + p \d v$, and we have a way to calculate entropy from the other properties
@@ -209,7 +215,7 @@ T \d s &= \d e + p\d v\label{eqn:intro:ds1}\\
 
 Just like with temperature, there is a parallel (mathematically consistent) definition of entropy from statistical mechanics.  Entropy can also be understood as the probability of the substance obtaining a thermodynamically equivalent state.  The probability of gas molecules spontaneously exhibiting a specific set of positions and velocities is astronomically low, but there is an infinity of similar positions and velocities that would give the gas precisely the same temperature (for example).  The probability of gas molecules marching orderly in a lattice like a crystal is also astronomically low, but this condition has very few alternatives, making it truly unlikely.
 
-Just like internal energy, it is theoretically possible to tally all of the possible states and calculate the probability of each, but that task is neither practical nor necessary.  Instead, it is convenient to define the entropy as zero at some reference state and then deal merely in changes in entropy as defined by (\ref{eqn:s}).
+Just like internal energy, it is theoretically possible to tally all of the possible states and calculate the probability of each, but that task is neither practical nor necessary.  Instead, it is convenient to define the entropy as zero at some reference state and then deal merely in changes in entropy as defined by (\ref{eqn:intro:s}).
 
 \subsection{Specific Heats, $c_p$ $c_v$}\label{sec:intro:c}
 
@@ -235,11 +241,11 @@ When heat is applied in such a manner that the substance's volume is constant, $
 \end{align}
 Thus, the constant-volume specific heat is, by definition, 
 \begin{align}
-c_v \equiv \left(\frac{\delta q}{\delta T}\right)_v = \left(\frac{\partial e}{\partial T}\right)_v.\label{eqn:cv}
+c_v \equiv \left(\frac{\delta q}{\delta T}\right)_v = \left(\frac{\partial e}{\partial T}\right)_v.\label{eqn:intro:cv}
 \end{align}
 In this process, the substance's pressure will rise (sometimes sharply) as it is heated in a rigid container.
 
-When one considers addition of heat under constant pressure, a trick application of the chain rule for the term, $pv$, lets us transition the differential on volume into a differential on pressure.  The definition for enthalpy (\ref{eqn:h}) appears naturally.
+When one considers addition of heat under constant pressure, a trick application of the chain rule for the term, $pv$, lets us transition the differential on volume into a differential on pressure.  The definition for enthalpy (\ref{eqn:intro:h}) appears naturally.
 \begin{align}
 \delta q &= \d e + p \d v + v\d p - v \d p\nonumber\\
  &= \d(e + pv) - v\d p
@@ -252,7 +258,7 @@ When heat is added while pressure is constant (like in an atmospheric gas), $\d 
 \end{align}
 Thus, constant-pressure specific heat is, by definition,
 \begin{align}
-c_p &\equiv \left(\frac{\delta q}{\delta T}\right)_p = \left( \frac{\partial h}{\partial T}\right)_p.\label{eqn:cp}
+c_p &\equiv \left(\frac{\delta q}{\delta T}\right)_p = \left( \frac{\partial h}{\partial T}\right)_p.\label{eqn:intro:cp}
 \end{align}
 
 

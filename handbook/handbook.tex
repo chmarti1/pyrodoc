@@ -17,6 +17,11 @@
 \usepackage[a5paper,left=15mm,textwidth=118mm,top=15mm,bottom=20mm]{geometry}
 %\usepackage{lscape}    %For use on non-pdf builds
 \usepackage{pdflscape}
+% Set up the bibliography
+% This didn't quite work as expected.  Stick with "legacy" bibtex for now.
+%\usepackage[backend=bibtex,style=numeric]{biblatex}
+%\addbibresource{pyrodoc.bib}
+
 
 % Set up the code style
 \definecolor{colorbg}{rgb}{0.92,0.95,0.92}
@@ -64,7 +69,8 @@ Penn State University}
 \include{multiphase}
 \include{numerical}
 
-\bibliographystyle{plain}
-\bibliography{pyrodoc.bib}
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{ieeetr}
+\bibliography{pyrodoc}
 
 \end{document}

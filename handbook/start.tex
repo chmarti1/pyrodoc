@@ -4,49 +4,91 @@ In this chapter, we discuss everything you should need to get your own installat
 
 \section{Installation}
 
-\PM\ is distributed primarily through the Python package index (\url{https://pypi.org/}), but it can also be downloaded and installed ``manually.''  \PM\ is written in plain Python, so there is no need to compile to binaries.  All data are encoded in \texttt{json} format (\url{https://docs.python.org/3/library/json.html}), and the configuration files are executable python code.  The result is that all of the code, data, and configuration files are in human readable text.
+\PM\ is distributed primarily through the Python package index (\url{https://pypi.org/}), but it can also be downloaded and installed ``manually'' if you have Python's setuptools installed.  \PM\ is written in plain Python, so there is no need to compile to binaries.  All data are encoded in \texttt{json} format (\url{https://docs.python.org/3/library/json.html}), and the configuration files are executable python code.  The result is that all of the code, data, and configuration files are in human readable text using only the ASCII character set.
 
 \subsection{Prerequisites}
 
-Python needs to be installed and working on your system.  \PM\ was originally developed in Python 2, but support for Python 3 was designed in from the start.  As of January 2020, Python 2 was officially depreciated, and \PM\ testing on Python 2 halted.  On a number of popular Linux systems, Python 2 is still the system default, though, so \PM\ never officially stoped supporting Python 2.  However, new features are no longer tested on Python 2, so \emph{users should beware.}
+Obviously, a Python interpreter needs to be installed on your system, but \PM\ is deliberately designed to minimize the number of prerequisites.  Only Numpy version 1.7 or later is required.
 
-\PM\ requires NumPy (\url{https://numpy.org/}) version 1.7 or later for numerical and array support.  There are no other prerequisites.  For documentation on the custom back-end numerical routines implemented in \PM, see chapter \ref{ch:num}. 
+It is worth noting that \PM\ was originally developed in Python 2, but support for Python 3 was designed in from the start.  As of January 2020, Python 2 was officially depreciated, and \PM\ testing on Python 2 halted.  On a number of popular Linux systems, Python 2 is still the system default, though, so users should take note.  If your system has both Python 2 and Python 3 installed, it may be necessary to replace \texttt{python} in the instructions below with \texttt{python3} to specify the version.
 
-\subsection{Installing globally with \texttt{pip}}
+\subsection{Installation with \texttt{pip}}
 
-This section is for system administrators who want to install \PM\ globally for all users on a system to access.  This method is going out of favor on Linux systems with their own package managers with their own opinions about what belongs in the Python installation.  Because the \PM\ dependencies are so slim, though, I have never had a problem with this kind of installation.
+Python uses a package called \texttt{pip} (\url{https://pip.pypa.io}) to manage its own software.  You can use it to automatically download and install \PM\ and its dependencies with a single command.
 
-Before installing, always check to make sure that the Python package manager is updated to its latest version.  A Python installation without \texttt{pip} is extremely ususual, but they do still appear from time to time.  If you do not have \texttt{pip} on your system, follow the directions from the Python packaging authority to get it up and working: \url{https://pip.pypa.io/en/stable/installation/}.
+{\bf In an Anaconda installation} start the ``Anaconda Prompt'' to bring up a terminal.  See \url{https://www.anaconda.com/} for more information.
+
+{\bf In Windows} with a system-wide Python interpreter, bring up a command prompt or type \texttt{cmd} in the ``run'' field to bring up the prompt.  You may need to run the terminal as an administrator.  If so, right click on the icon and open using the ``run as administrator'' option in the menu.
+
+{\bf In Linux or MacOS} bring up a terminal any way you like.  In many popular installations \texttt{Ctrl+Alt+T} works by default.
+
+First, it is important to make sure your python package manager is installed and updated.  A Python installation without \texttt{pip} is ususual, but they do still appear from time to time.  If you do not have \texttt{pip} on your system, follow the directions from the Python packaging authority to get it up and working: \url{https://pip.pypa.io/en/stable/installation/}.
 
 On just about all systems, entering the following commands in a terminal will update \texttt{pip} and install \PM.
 \begin{lstlisting}[language=bash]
 $ python -m pip install --upgrade pip
 $ python -m pip install --upgrade pyromat
 \end{lstlisting}
-Note that you don't need to enter the \texttt{\$}.  It represents the command line prompt. On a Windows system, it might appear \texttt{C:\\>}, on most Linux terminals, it may appear \texttt{user@machine:~\$}.  Your prompt may look a little different, and that's OK.  If Python is already correctly installed these commands should get you going.
+Note that you don't need to type the \verb|$|; it represents the command line prompt. On a Windows system, it might appear \verb|C:\>|, on most Unix-like terminals, it may appear \verb|user@machine:~\$|.  Your prompt may look a little different, and that's OK.  If Python is already correctly installed these commands should get you going.
 
-On a Linux, Mac, or Unix system, you may need to run as a super user.  You should use
+What are these commands doing?  The first part, \verb|python -m pip|, is executing Python's \texttt{pip} module with the options you pass next.  Next, \verb|install --upgrade|, tells \verb|pip| that you want to install something over the internet from the python package index (\url{https://pypi.org/}), and that if there is a newer version of an existing package available, it should be upgraded.  Finally, the last argument tells \texttt{pip} what to install.  So, the first line is telling \verb|pip| to upgrade itself, and the second line is actually installing \verb|pyromat|.
+
+It should be noted that many Linux systems still use Python 2 by default, so you may want to specify Python 3 specifically.  In most systems, this will make certain that the installation is in the Python 3 interpreter and not Python 2.
+\begin{lstlisting}[language=bash]
+$ python3 -m pip install --upgrade pip
+$ python3 -m pip install --upgrade pyromat
+\end{lstlisting}
+
+Installing in system-wide Python installations has gone out of popularity in recent years, but if that's what you're doing, you may need to run \texttt{pip} as an administrator.  Most installations these days are in virtual environments or some other needlessly complicated setup that obfuscates the whole thing, so if you're doing this the old-school global way, you have my respect, and I want to support you.
+
+On a Windows system, you will need to restart the prompt as a priviledged user (administrator).  Usually, you can right-click and select ``run as administrator'' when you start the command prompt.
+
+On a Linux, Mac, or Unix system, you may need to run as a super user, so you should use
 \begin{lstlisting}[language=bash]
 $ sudo -H python -m pip install --upgrade pip
 $ sudo -H python -m pip install --upgrade pyromat
 \end{lstlisting}
 The \texttt{-H} switch is recommended by the Python package index to be certain that the \texttt{root} user's home directory is used during install.
 
-On a Windows system, you may simply need to execute the command line as an administrator.  
+\subsection{Manual installation with \texttt{git}}
 
-\subsection{Installing in a virtual environment}
+So-called manual installation is also quite easy using \texttt{git} if you already have Python's \texttt{setuptools} (\url{https://setuptools.readthedocs.io/en/latest/}) installed and udpated.
 
-Python virtual environments are widely recommended to avoid installation conflicts between users on a system.  They are often an especially good idea for shared machines.  To learn more and to set up your own virtual environment, follow the instructions here: \url{https://docs.python.org/3/tutorial/venv.html}.  
+Just clone the \texttt{git} repository, then navigate into the root directory and run the \texttt{setup.py} installation script.  This is the stage where an error will be generated if there is a problem with \texttt{setuptools}.
 
-Once you are in your virtual environment and you have activated it, evoke \texttt{pip} from the command line.  If the name of your virtual environment were \texttt{my-env}, then
 \begin{lstlisting}[language=bash]
-(my-env) $ python -m pip install --upgrade pip
-(my-env) $ python -m pip install --upgrade pyromat
+$ git clone https://github.com/chmarti1/pyromat.git
+$ cd pyromat
+$ python setup.py install
+\end{lstlisting}
+
+\subsection{Manual installation from Sourceforge}
+
+This method has largely fallen out of favor, but it is still a perfectly valid way to perform an installation.  Like the GitHub method, this method only works if you have \texttt{setuptools} (\url{https://setuptools.readthedocs.io/en/latest/}) installed and updated.
+
+Download the latest version of \PM\ from \url{https://sourceforge.net/projects/pyromat/}.  Select whichever compression type that suits you (e.g. zip, bz2, gzip).  Then, extract the package, creating a \texttt{pyromat} directory.
+
+Bring up a command prompt (see above for how to do that on your system), and navigate to the extracted directory using the appropriate \texttt{cd} commands (\url{https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cd}).
+
+Finally, execute the Python setup script.
+
+\begin{lstlisting}[language=bash]
+$ cd /path/to/your/dir
+$ python setup.py install
 \end{lstlisting}
 
 \section{Using \PM }
 
-Most users will interact with \PM\ from the command line first, but the same tools all work within scripts as well.
+This section assumes that users already have a basic familiarity with the Python command line.  For users that are just getting started, try sampling the official Python Tutorial (\url{https://docs.python.org/3/tutorial/index.html}).
+
+First, open a command prompt (terminal) and start Python in interactive mode.
+\begin{lstlisting}[language=Python]
+$ python3  # On my system, I need to specify 3
+Python 3.6.9 (default, Jan 26 2021, 15:33:00) 
+[GCC 8.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> 
+\end{lstlisting}
 
 \subsection{Importing}
 
@@ -56,11 +98,11 @@ Import \PM\ like any other package.
 \end{lstlisting}
 It automatically loads its modules, and automatically seeks out and loads data.
 
-In \PM, instances of specialized classes expose methods that are responsible for calculating all of the substance properties.  So, there are only two functions in the \PM\ package that most users will ever need: \texttt{info} and \texttt{get}.  These retrieve information about he \PM\ substance data and retrieves the various substance class instances.  
+There are only two functions in the \PM\ package that most users will ever need: \texttt{info()} and \texttt{get()}.  These retrieve information about the \PM\ substance data and retrieves the various substance class instances.  The properties will be calculated by the objects returned by \texttt{get}.
 
 \subsection{Finding substances with \texttt{info()}}
 
-When called without any arguments, the \texttt{info()} function lists all of the substances available, and it lists all of the property methods available for each.
+When called without any arguments, the \texttt{info()} function lists all of the substances available, and it lists all of the property methods available for each.  That's great, but it is difficult to manually scan over 1,000 substances for the one you want.
 \begin{lstlisting}[language=Python,style=tinystyle]
 >>> pm.info()
   PYroMat
@@ -87,19 +129,21 @@ version: 2.1.0
     ...
 \end{lstlisting}
 
-The {\bf substance id string} is split into two parts by a decimal, \texttt{'.'}.  The first part is the collection to which the substance model belongs.  All of these belong to the ideal gas collection.  There is also a multi-phase collection, which uses a \texttt{mp} id prefix.  Then, the last portion of the id string represents the substance's chemical formula.  It is important to specify a collection because most substances have both ideal gas and multi-phase models (e.g. \texttt{ig.O2} and \texttt{mp.O2}, \texttt{ig.H2O} and \texttt{mp.H2O}, etc.)
+To help figure out ways to look for the substances that interest you, we first need to learn how the data are organized.
+
+The {\bf substance id string} in the first column is split into two parts by a period, \verb|<collection>.<formula>|.  For example, \verb|ig.Al2O2|, is an aluminum oxide in the ideal gas (\verb|ig|) collection.  Collections are groupings of substance models based on the kinds of thermodynamic models they use.  There is also a multi-phase collection, which uses a \texttt{mp} id prefix.  Some substances have both ideal gas and multi-phase models (e.g. \texttt{ig.CO2} and \texttt{mp.CO2}, \texttt{ig.H2O} and \texttt{mp.H2O}, etc.)
 
 The {\bf class string} is the name of the class that is used to implement the data model for each substance.  There can be multiple classes included in the same collection (e.g. \texttt{ig}, \texttt{ig2}, and \texttt{igmix} instances are all members of the \texttt{ig} collection).
 
 The {\bf properties} list is a space-separated list of property methods that is offered by each of the substance.  
 
-Listing all \PM\ substances at once probably won't be useful to most users.  In \PM\ version 2.1.0, there were 1,192 substances, and that number is likely to grow with later releases.  In order to narrow down the selection, users can pass optional keyword arguments into the \texttt{info} function. 
+In order to narrow down the selection, users can pass optional keyword arguments into the \texttt{info} function.  These specify filters that will narrow down the substances listed.  If only one substance is left, its detailed documentation is displayed instead.
 
 The {\bf name} keyword allows users to specify all or part of a substance id string.  If there is an exact match in the database, its documentation will be displayed.  If it matches part of multiple id strings, they will all be listed.
 
-The {\bf collection} keyword allows users to specify the collection to which species must belong.
+The {\bf collection} keyword allows users to specify the collection to which species must belong.  This forces the substance id string to begin with ``\verb|collection.|''
 
-The {\bf contains} keyword allows users to specify the atomic contents of the substance.  Values may be the string name of an element, or lists of elements.
+The {\bf contains} keyword allows users to specify the atomic contents of the substance.  Values may be the string name of an element, or lists of elements. 
 
 The {\bf pmclass} keyword allows users to specify which of the class specifier strings should be listed.  As of version 2.1.0, there were four classes: \texttt{ig}, \texttt{ig2}, \texttt{igmix}, and \texttt{mp1}.  These are described in detail in sections \ref{sec:ig:ig}, \ref{sec:ig:ig2}, \ref{sec:ig:igmix}, and \ref{sec:mp:mp1}.
 
@@ -291,17 +335,17 @@ array([1.87870465])
 
 Note that the default values are specified in whatever units \PM\ has been configured to use.  By default, \PM\ uses K, kJ, kg, bar, m$^3$.  If the unit system is changed, the default values should also be changed to reflect the intended values in the new unit system.  See chapter \ref{ch:units} for more information on units and chapter \ref{ch:config} for more information on configuring \PM.
 
-\subsection{Notes on numerical efficiency}
+\subsection{Tips and tricks}
 
 There are some guidelines that users can use to obtain dramatically better performance out of \PM.
 
-{\bf Never evaluate property values in a for loop.}  Instead, construct property values as arrays, lists, tuples, or other iterables and pass them to a single property method call.  For example,
+{\bf Avoid calculating property values in a for loop.}  Instead, construct property values as arrays, lists, tuples, or other iterables and pass them to a single property method call.  For example,
 \begin{lstlisting}[language=Python]
 >>> import numpy as np
 >>> import pyromat as pm
 >>> h2o = pm.get('mp.h2o')
->>> h = []
 >>> ###### DON'T DO THIS ######
+>>> h = []
 >>> for T in np.linspace(300,1000,101):
 ...     h.append(h2o.h(T))
 ... 
@@ -311,10 +355,17 @@ There are some guidelines that users can use to obtain dramatically better perfo
 \end{lstlisting}
 On many systems, the first code segment can take four or five seconds to run!  The second code segment consistently takes a small fraction of a second to run and makes for much cleaner code.
 
-\PM\ is written to assume that all inputs and outputs are multi-dimensional arrays.  Simple floating point scalars are taken to be special cases.  Programming numerical codes like property evaluation in plain Python has a steep numerical penalty, but much of that can be regained by leaning on NumPy's (\url{https://numpy.org}) compiled back-end for efficient numerical methods on arrays.
+\PM\ is written to assume that all inputs and outputs are multi-dimensional arrays.  Simple floating point scalars are taken to be special cases.  Programming numerical codes like property evaluation in plain Python has a steep numerical penalty, but much of that can be regained by leaning on Numpy's (\url{https://numpy.org}) compiled back-end for efficient numerical methods on arrays.
 
 {\bf Ideal gases are faster than the \texttt{mp1} model.}  Ideal gases only have to evaluate a polynomial.  The multi-phase \texttt{mp1} model requires multiple parallel polynomials with computationally expensive exponential terms.  Single equation-of-state multi-phase models sacrifice computational speed in favor of a single model that works well in liquid, gas, near critical, and super-critical states.
 
 {\bf Prefer temperature and density when working with multi-phase substances.}  The \texttt{mp1} class calculates all properties (including pressure) in terms of temperature and density.  When another combination of properties is specified (e.g. temperature and pressure) an iterative routine has to run first to isolate temperature and density.  That is why the example above takes so long to run; it requires two iterative algorithms run in series.  When a series of properties are needed at a given state, it is much faster to calculate the density first and pass temperature and density to all of the successive property methods.
 
 {\bf Using the \texttt{mp1.hsd()} method is faster than separate calls to density, enthalpy, and entropy.}  Multi-phase properties require the calculation of a number of intermediate parameters that can be re-used in successive property evaluations.  The \texttt{hsd()} method calculates all three properties at once without needing to repeat these intermediate steps.
+
+{\bf The \texttt{mp1} inverse routines can return quality too.}  When running an inverse property routine like \verb|T_h|, \verb|T_s|, or \verb|d_s|, it is often a good idea to go ahead and calculate the quality by setting the optional keyword \verb|quality=True|.  All of these routines have to calculate the saturation properties anyway, so one might as well save the redudnant steps.
+\begin{lstlisting}[language=Python]
+>>> T,x = h2o.T_s(s=4.331, p=1.01325, quality=True)
+>>> print(T,x)
+[373.12429581] [0.50004124]
+\end{lstlisting}

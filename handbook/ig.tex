@@ -466,7 +466,7 @@ s^\circ(T) = R \left(c_0 \ln(T) + c_1 T + \frac{c_2}{2} T^2 + \frac{c_3}{3} T^3 
 \end{align}
 Here, just as in the Shomate equations, $c_5$ and $c_6$ are introduced as integration constants in enthalpy and entropy.
 
-Internal energy is readily calculated from the definition of enthalpy in (\ref{eqn:enthalpy}),
+Internal energy is readily calculated from the definition of enthalpy in (\ref{eqn:ig:h}),
 \begin{align}
 e(T) &= h(T) - RT\nonumber\\
 \end{align}
@@ -483,7 +483,7 @@ There is some overlap in the species offered by the two classes.  A mild prefere
 \end{itemize}
 Otherwise, the two have been found to be sufficiently equivalent that most users will not find a reason to wonder.
 
-Table \ref{tab:class:ig2} lists the data elements that define the \texttt{ig2} class.  For more information on how \texttt{.hpd} files are stored, see Section \ref{sec:data}.  Most of the essential data elements are self explanatory, but the coefficients and temperature limits must have compatible sizes.  Even though the \texttt{ig2} class only uses seven coefficients, there are eight provided in the NIST data sets.  If there are $N$ sets of coefficients defined over $N$ temperature ranges, there must be $N$ arrays of eight coefficients and $N+1$ temperature limit values.
+Table \ref{tab:class:ig2} lists the data elements that define the \texttt{ig2} class.  For more information on how \texttt{.hpd} files are stored, see Section \ref{sec:regdat:data}.  Most of the essential data elements are self explanatory, but the coefficients and temperature limits must have compatible sizes.  Even though the \texttt{ig2} class only uses seven coefficients, there are eight provided in the NIST data sets.  If there are $N$ sets of coefficients defined over $N$ temperature ranges, there must be $N$ arrays of eight coefficients and $N+1$ temperature limit values.
 
 For example, in a data set with two temperature ranges, the following would define a data set valid between \texttt{<T0>} and \texttt{<T2>}, and the transition between the two piece-wise data sets is at \texttt{<T1>}.
 \begin{lstlisting}[language=Python]
