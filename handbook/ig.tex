@@ -377,7 +377,7 @@ All property methods accept any two of temperature, density, or pressure to spec
 
 \subsection{The Shomate equation: \texttt{ig}}\label{sec:ig:ig}
 
-\PM's \texttt{ig1} class is built on the Shomate equation for constant-pressure specific heat $c_p$.  This is the formulation used by the NIST webbook \cite{nist:web}.  Despite the wise range of substances represented, it has the advantage of using a simple standard piece-wise formulation for specific heat.  However, it does suffer from certain limitations.
+\PM's \texttt{ig} class is built on the Shomate equation for constant-pressure specific heat $c_p$.  This is the formulation used by the NIST webbook \cite{nist:webbook}.  Despite the wise range of substances represented, it has the advantage of using a simple standard piece-wise formulation for specific heat.  However, it does suffer from certain limitations.
 
 The Shomate equation takes the form
 \begin{align}
@@ -450,7 +450,7 @@ Name & Type & Description\\
 
 \subsection{The NASA polynomial: \texttt{ig2}}\label{sec:ig:ig2}
 
-The so-called ``NASA polynomials'' are a piece-wise empirical formulation to the specific heat of an ideal gas.  They predate the latest formulation of the NIST-JANAF tables, and are even used for reference.  Unlike the Shomate equation, there is no $1/t^2$ term, there is no attempt to scale temperature prior to evaluating the polynomial, and properties are scaled with respect to the ideal gas constant.
+The so-called ``NASA polynomials'' are a piece-wise empirical formulation to the specific heat of an ideal gas.  They are taken from \cite{mcbride:1993} predate the latest formulation of the NIST-JANAF tables, and are even used for reference.  Unlike the Shomate equation, there is no $1/t^2$ term, there is no attempt to scale temperature prior to evaluating the polynomial, and properties are scaled with respect to the ideal gas constant.
 
 \begin{align}
 c_p(T) = R\left(c_0 + c_1 T + c_2 T^2 + c_3 T^3 + c_4 T^4\right)

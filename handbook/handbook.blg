@@ -12,44 +12,44 @@ A level-1 auxiliary file: multiphase.aux
 A level-1 auxiliary file: numerical.aux
 The style file: ieeetr.bst
 Database file #1: pyrodoc.bib
-You've used 10 entries,
+You've used 11 entries,
             1876 wiz_defined-function locations,
-            548 strings with 5106 characters,
-and the built_in function-call counts, 1696 in all, are:
-= -- 137
-> -- 94
-< -- 3
-+ -- 36
-- -- 26
-* -- 131
-:= -- 278
-add.period$ -- 14
-call.type$ -- 10
-change.case$ -- 8
+            554 strings with 5331 characters,
+and the built_in function-call counts, 1850 in all, are:
+= -- 150
+> -- 105
+< -- 4
++ -- 40
+- -- 29
+* -- 144
+:= -- 307
+add.period$ -- 15
+call.type$ -- 11
+change.case$ -- 9
 chr.to.int$ -- 0
-cite$ -- 10
-duplicate$ -- 91
-empty$ -- 184
-format.name$ -- 26
-if$ -- 392
+cite$ -- 11
+duplicate$ -- 98
+empty$ -- 196
+format.name$ -- 29
+if$ -- 425
 int.to.chr$ -- 0
-int.to.str$ -- 10
+int.to.str$ -- 11
 missing$ -- 9
-newline$ -- 37
-num.names$ -- 9
-pop$ -- 47
+newline$ -- 40
+num.names$ -- 10
+pop$ -- 49
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 15
+skip$ -- 16
 stack$ -- 0
 substring$ -- 0
-swap$ -- 9
-text.length$ -- 3
+swap$ -- 10
+text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 0
-while$ -- 9
-width$ -- 12
-write$ -- 95
+while$ -- 10
+width$ -- 13
+write$ -- 104

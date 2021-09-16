@@ -2,16 +2,23 @@
         "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-    <title>HowTo & FAQ | PYroMat</title>
-    <link rel="stylesheet" type="text/css" href="./pyromat.css">
-    <meta name="description" content="thermodynamic properties in python">
-    <meta name="keywords" content="python,thermo,thermodynamic,property,properties">
+    <title>Home | PYroMat</title>
+    <link rel="stylesheet" type="text/css" href="pyromat.css">
+    <meta name="description" content="Thermodynamic Properties in Python">
+    <meta name="keywords" content="python,thermodynamic,properties,cycle,engine,refrigeration">
     <meta name="author" content="C.R. Martin">
 </head>
 <body>
 
-<iframe name="menu" id="menu" src="menu.html"></iframe>
 
+<ul id='menulist'>
+    <li class='icon'><a href='index.html'><img src='fig/PYro_iBlack_Small.png' width=110px></img></a></li>
+    <li class="menuitem"><a href="./about.html">About</a></li>
+    <li class="menuitem"><a href="./features.html">Features</a></li>
+    <li class="menuitem"><a href="./download.html">Download</a></li>
+    <li class="menuitem"><a href="./documentation.html">Docs</a></li>
+    <li class="menuitem"><a href="./live/index.html">Live</a></li>
+</ul>
 
 <div id="content">
 <div class="title">
@@ -46,25 +53,17 @@
     There is a very good tutorial maintained by the Python Packaging Authority at <a href="https://packaging.python.org/tutorials/installing-packages/">https://packaging.python.org/tutorials/installing-packages/</a>.  Notice that <span class="code">pip</span> can be applied directly to downloaded zip files and tarballs.
     </p>
     <p>
-    Every pip installation problem I've seen so far has either been because pip wasn't installed or because it was an out-dated version.  If you have a version of pip that came with your operating system or that you installed automatically using a package manager, you may be surprised to find that it isn't working as expected.  Problems frequently arise when these installations don't keep pace with the latest releases of pip.  If this is the problem, typing <span class="code">apt upgrade pip</span> doesn't fix anything, and users are often driven to despair.
-    </p>
-    <p>
-    First, try upgrading <span class="code">pip</span> from within.
+    Every pip installation problem I've seen so far has either been because pip wasn't installed or because it was an out-dated version.  Don't trust a package manager to upgrade pip; let it upgrade itself.  From the command line
     <div class="code">
-    pip install --upgrade pip
+    $ python -m pip install --upgrade pip
     </div>
     </p>
+    Note that the "$" represents the command line prompt.  In windows, it might be "C:\>" and in Linux it might be "user@host:~ $".  Yours might look a little different, and that's fine.
     <p>
-    If that doesn't work, I have had excellent luck with a fresh installation of <span class="code">pip</span>.
+    If that doesn't work, I have had excellent luck with a fresh installation of <span class="code">pip</span>.  To install pip directly from the Python Packaging Authority, follow the instructions at <a href="https://pip.pypa.io/en/stable/installation/" target="blank">https://pip.pypa.io/en/stable/installing/</a>.  You only need to download and run <span class="code">get-pip.py</span>.  The Python Packaging Authority (PyPA) has a great how-to at <a href="https://packaging.python.org/tutorials/installing-packages/" target="blank">https://packaging.python.org/tutorials/installing-packages/</a>.
     </p>
     <p>
-    (Step 1) To install pip directly from the Python Packaging Authority, follow the instructions at <a href="https://pip.pypa.io/en/stable/installing/" target="blank">https://pip.pypa.io/en/stable/installing/</a>.  You only need to download and run <span class="code">get-pip.py</span>.
-    </p>
-    <p>
-    (Step 2) Once pip is installed, make sure to update it.  DO NOT USE ANOTHER PACKAGE MANAGER.  Instead, use pip to update itself.  Follow the instructions here <a href="https://pip.pypa.io/en/stable/installing/#upgrading-pip" target="blank">https://pip.pypa.io/en/stable/installing/#upgrading-pip</a>.
-    </p>
-    <p>
-    I have not yet run into a case where these steps did not address the problem.  If you STILL can't get pip to work, the Python Packaging Authority (PyPA) has a great how-to at <a href="https://packaging.python.org/tutorials/installing-packages/" target="blank">https://packaging.python.org/tutorials/installing-packages/</a>.  Alternatively, you might have success installing from either the <a href="download.html#github">github</a> or the <a href="download.html#sourceforge.html">sourceforge</a> repositories.
+    I have not yet run into a case where these steps did not address the problem, but if you STILL can't get pip to work, you might have success installing from the <a href="download.html#github">github</a> repository using the legacy method below.
     </p>
     
     <h3 id="install_setup">Legacy installation</h3>
@@ -72,7 +71,7 @@
     The Python Packaging Authority has moved away from recommending installation using direct calls to a <span class="code">setup.py</span> script, but they still work.  If you are having a hard time getting <span class="code">pip</span> to work, or if you are experimenting with a non-standard installation, this could be a useful option.
     </p>
     <p>
-    Make sure that you have administrative priviledges on your system, and that python is correctly installed.  If you are working inside an integrated development environment (IDE), make sure the python binary you are using to evoke <span class="code">setup.py</span> is the same one your IDE uses.  For example, a Windows installation of Spyder makes its own python system in your home directory, so global system calls won't make changes that are visible to your Spyder install.
+    If you are working inside an integrated development environment (IDE), make sure the python binary you are using to evoke <span class="code">setup.py</span> is the same one your IDE uses.  For example, many Python installations have moved towards virtual environments despite the complexity and obfuscation they bring with them.
     </p>
     <p>
     Obtain a source distribution of PYroMat either from <a href="download.html#github">github</a> or from <a href="download.html#sourceforge">sourceforge</a>.  Decompress the distribution file (either a .zip or .tar.gz or .tar.bz2) and navigate into the root directory.  There, you should find a <span class="code">setup.py</span> file.
@@ -163,7 +162,6 @@ array([  951.80502462,  1154.31670956,  1356.82839449,  1559.34007943,
     <p>
     PYroMat class methods natively support numpy arrays, which makes plotting easy.
     </p>
-    <div style="position:relative;height:300px;width:600px;">
     <pre class="code" style="width:350px;">
 >>> import matplotlib.pyplot as plt
 >>> import numpy as np
@@ -172,10 +170,7 @@ array([  951.80502462,  1154.31670956,  1356.82839449,  1559.34007943,
 >>> air = pm.get('mp.H2O')
 >>> plt.plot(T, air.cp(T))</pre>
 
-    <div style="position:absolute;top:-20px;left:270px;">
-        <img src="./fig/water_cp.png" width=400px;>
-    </div>
-    </div>
+    <img src="./fig/water_cp.png" width=400px;>
 
     <h3 id="plot_surf">Making surface plots</h3>
     <p>
@@ -192,7 +187,7 @@ array([  951.80502462,  1154.31670956,  1356.82839449,  1559.34007943,
 <div class="section">
     <h3 id="faq_redundant" style="text-align:left;">H2O is in the ideal gas collection and the multi-phase collection.  Why?</h3>
     <p>
-    Short answer: They are two different models created for two different applications.
+    Short answer: It isn't just water; there are several substances represented in both the multi-phase and ideal gas collections. They are two different models created for two different purposes.
     </p>
     <p>
     It would seem like you could get everything you needed from the multi-phase version right?  After all, the multi-phase collection water covers both liquid AND gas.  Look more carefully, though; the upper temperature limit on multiphase water is 2,273.15K (2,000<sup>o</sup>C).  Not bad, but the ideal gas data go all the way up to 6,000K.  On the other hand, ideal gas water only supports temperatures down to 500K.
@@ -236,12 +231,21 @@ array(2.2905867790156145)</pre>
     PYroMat defaults to kJ, kg, Kelvin, and bar.  But, all units are configurable using <a href="./doc_api.html#if_config">PYroMat's configuration system</a>.
     </p>
     <p>
-    To know how an individual property is being reported, each method comes with in-line documentation that tells you what units that method uses.  For example, densities use <span class="code">unit_matter/unit_volume</span>.  This step is important, because the unit matter need not be the same as the unit mass.  To check PYroMat's current settings, just type <span class="code">pm.config</span> to print a summary of the current settings.
+    To know how an individual property is being reported, each method comes with in-line documentation that tells you what units that method uses.  For example, densities use <span class="code">unit_matter/unit_volume</span>.  To check PYroMat's current settings, just type <span class="code">pm.config</span> to print a summary of the current settings.
     </p>
 </div>
 
+<div id="contact">
+<hr>
+Authored By:<br>
+Christopher R. Martin, Ph.D.<br>
+Associate Professor of Mechanical Engineering<br>
+The Pennsylvania State University, Altoona College<br>
+<a href="mailto:crm28@psu.edu">crm28@psu.edu</a><br>
+<br>
+&copy;2021 Released under the <a target="blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3 License</a>
+</div>
 
-<iframe id="contact" src="author.html"></iframe>
 
 </div>
 </body>

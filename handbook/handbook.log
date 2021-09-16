@@ -1,11 +1,11 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.1.13)  12 SEP 2021 20:44
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2021.9.8)  15 SEP 2021 14:04
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **handbook.tex
 (./handbook.tex
 LaTeX2e <2017-04-15>
-Babel <3.18> and hyphenation patterns for 7 language(s) loaded.
+Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
 (/usr/share/texlive/texmf-dist/tex/latex/base/report.cls
 Document Class: report 2014/09/29 v1.4h Standard LaTeX document class
 (/usr/share/texlive/texmf-dist/tex/latex/base/size11.clo
@@ -1499,23 +1499,35 @@ LaTeX Info: Redefining \nameref on input line 56.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Font Info:    Try loading font information for U+msa on input line 59.
+<figures/PYro_Black_Small.png, id=402, 55.6479pt x 50.1072pt>
+File: figures/PYro_Black_Small.png Graphic file (type png)
+<use figures/PYro_Black_Small.png>
+Package pdftex.def Info: figures/PYro_Black_Small.png  used on input line 62.
+(pdftex.def)             Requested size: 108.405pt x 97.62373pt.
+[1
+
+ <./figures/PYro_Black_Small.png>]
+LaTeX Font Info:    Try loading font information for U+msa on input line 68.
+
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 59.
+LaTeX Font Info:    Try loading font information for U+msb on input line 68.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for U+wasy on input line 59.
+LaTeX Font Info:    Try loading font information for U+wasy on input line 68.
 
 (/usr/share/texlive/texmf-dist/tex/latex/wasysym/uwasy.fd
 File: uwasy.fd 2003/10/30 v2.0 Wasy-2 symbol font definitions
-) [1
-
-] (./handbook.tocpdfTeX warning (ext4): destination with the same identifier (n
-ame{page.1}) has been already used, duplicate ignored
+)pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
+ been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.68 
+      [1] (./handbook.tocpdfTeX warning (ext4): destination with the same ident
+ifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.27 ...3.4}Tips and tricks}{30}{subsection.2.3.4}
@@ -1804,72 +1816,72 @@ Overfull \hbox (2.49344pt too wide) in paragraph at lines 73--74
 m/n/10.95 in check mode
  []
 
-) [66] [67]
+[66] [67]) [68]
 \openout2 = `ig.aux'.
 
  (./ig.tex
 Chapter 6.
-[68
+[69
 
 
 
-] [69] [70] [71] [72] [73]
+] [70] [71] [72] [73] [74]
 Overfull \hbox (6.93207pt too wide) in paragraph at lines 122--123
 \OT1/cmr/m/n/10.95 Recall from Sec-tion [][]1.1.9[][] that the constant-volume 
 and constant-pressure
  []
 
-[74]
-<figures/dof.png, id=1358, 578.16pt x 433.62pt>
+[75]
+<figures/dof.png, id=1374, 578.16pt x 433.62pt>
 File: figures/dof.png Graphic file (type png)
 <use figures/dof.png>
 Package pdftex.def Info: figures/dof.png  used on input line 140.
 (pdftex.def)             Requested size: 325.67064pt x 244.2481pt.
- [75 <./figures/dof.png>] [76]
+ [76 <./figures/dof.png>] [77]
 Overfull \hbox (1.57867pt too wide) in paragraph at lines 203--204
 \OT1/cmr/m/n/10.95 When a sub-stance is formed ei-ther by nu-clear, chem-i-cal 
 or phase change,
  []
 
-[77]
-<figures/hf.png, id=1386, 433.62pt x 289.08pt>
+[78]
+<figures/hf.png, id=1402, 433.62pt x 289.08pt>
 File: figures/hf.png Graphic file (type png)
 <use figures/hf.png>
 Package pdftex.def Info: figures/hf.png  used on input line 223.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
- [78] [79 <./figures/hf.png>] [80] [81] [82] [83] [84] [85] [86] [87]
-[88] [89]
+ [79] [80 <./figures/hf.png>] [81] [82] [83] [84] [85] [86] [87] [88]
+[89] [90]
 Underfull \hbox (badness 2478) in paragraph at lines 559--560
 []\OT1/cmr/m/n/10.95 Specifies the mix-ture com-po-si-tion:
  []
 
-) [90] [91]
+) [91] [92]
 \openout2 = `multiphase.aux'.
 
  (./multiphase.tex
 Chapter 7.
-[92
+[93
 
 
 
-] [93] [94]
+] [94] [95]
 Overfull \hbox (13.31664pt too wide) in paragraph at lines 64--65
 []\OT1/cmr/m/n/10.95 The in-te-grals can be col-lec-tively sim-pli-fied by in-v
 ert-ing the integration-
  []
 
-[95] [96] [97] [98] [99] [100] [101]
+[96] [97] [98] [99] [100] [101] [102]
 Overfull \hbox (7.50996pt too wide) in paragraph at lines 274--275
 \OT1/cmr/m/n/10.95 Technically, the Maxwell con-di-tions for phase equi-lib-riu
 m pro-vide enough
  []
 
-[102] [103]) [104] [105]
+[103] [104]) [105] [106]
 \openout2 = `numerical.aux'.
 
  (./numerical.tex
 Chapter 8.
-[106
+[107
 
 
 
@@ -1879,61 +1891,66 @@ Overfull \hbox (1.45416pt too wide) in paragraph at lines 42--43
 s, be-cause they
  []
 
-[107]
-<figures/benchmark.png, id=1715, 462.528pt x 346.896pt>
+[108]
+<figures/benchmark.png, id=1733, 462.528pt x 346.896pt>
 File: figures/benchmark.png Graphic file (type png)
 <use figures/benchmark.png>
-Package pdftex.def Info: figures/benchmark.png  used on input line 55.
+Package pdftex.def Info: figures/benchmark.png  used on input line 53.
 (pdftex.def)             Requested size: 325.67064pt x 244.26529pt.
- [108] [109 <./figures/benchmark.png>] [110] [111] [112] [113]
+ [109] [110 <./figures/benchmark.png>] [111] [112] [113] [114]
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 226.
+put line 224.
 
 
-LaTeX Warning: Float too large for page by 9.94191pt on input line 264.
+LaTeX Warning: Float too large for page by 9.94191pt on input line 262.
 
-[114] [115]
-<figures/iter1.png, id=1831, 433.62pt x 289.08pt>
+[115] [116]
+<figures/iter1.png, id=1848, 433.62pt x 289.08pt>
 File: figures/iter1.png Graphic file (type png)
 <use figures/iter1.png>
-Package pdftex.def Info: figures/iter1.png  used on input line 309.
+Package pdftex.def Info: figures/iter1.png  used on input line 307.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
- [116] [117 <./figures/iter1.png>] [118]
-<figures/bisection.png, id=1860, 433.62pt x 289.08pt>
+ [117] [118 <./figures/iter1.png>] [119]
+<figures/bisection.png, id=1878, 433.62pt x 289.08pt>
 File: figures/bisection.png Graphic file (type png)
 <use figures/bisection.png>
-Package pdftex.def Info: figures/bisection.png  used on input line 353.
+Package pdftex.def Info: figures/bisection.png  used on input line 351.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
- [119] [120 <./figures/bisection.png>]
-<figures/hybrid1.png, id=1874, 433.62pt x 289.08pt>
+ [120] [121 <./figures/bisection.png>]
+<figures/hybrid1.png, id=1891, 433.62pt x 289.08pt>
 File: figures/hybrid1.png Graphic file (type png)
 <use figures/hybrid1.png>
-Package pdftex.def Info: figures/hybrid1.png  used on input line 388.
+Package pdftex.def Info: figures/hybrid1.png  used on input line 386.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
- [121] [122 <./figures/hybrid1.png>]) [123] [124] [125] [126]
-[127] (./handbook.bbl [128
+ [122] [123 <./figures/hybrid1.png>]) [124] [125] [126] [127]
+[128] (./handbook.bbl [129
 
 
-])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 76.
- [129]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 76.
- (./handbook.aux (./nomenclature.aux)
-(./intro.aux) (./start.aux) (./config.aux) (./units.aux) (./regdat.aux)
-(./ig.aux) (./multiphase.aux) (./numerical.aux))
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 76.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 76.
+]
+Underfull \hbox (badness 10000) in paragraph at lines 49--51
+[]\OT1/cmr/m/n/10.95 National In-sti-tute for Stan-dards and Tech-nol-ogy,
+ []
+
+)
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 85.
+ [130]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 85.
+ (./handbook.aux (./nomenclature.aux) (./intro.aux) (./start.aux)
+(./config.aux) (./units.aux) (./regdat.aux) (./ig.aux) (./multiphase.aux)
+(./numerical.aux))
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 85.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 85.
 Package rerunfilecheck Info: File `handbook.out' has not changed.
-(rerunfilecheck)             Checksum: F123F10D8D37C9C528619D765AA6A381;7326.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 76.
+(rerunfilecheck)             Checksum: 392DB69409FC4C1A07016D2F6C672940;7394.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 85.
  ) 
 Here is how much of TeX's memory you used:
- 17232 strings out of 494847
- 234337 string characters out of 6179080
- 639667 words of memory out of 5000000
- 19360 multiletter control sequences out of 15000+600000
+ 17242 strings out of 492982
+ 234569 string characters out of 6134897
+ 644457 words of memory out of 5000000
+ 19607 multiletter control sequences out of 15000+600000
  19659 words of font info for 78 fonts, out of 8000000 for 9000
- 59 hyphenation exceptions out of 8191
+ 1141 hyphenation exceptions out of 8191
  36i,11n,49p,934b,3479s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
@@ -1959,9 +1976,9 @@ cmti9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.
 pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></
 usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/sha
 re/texlive/texmf-dist/fonts/type1/public/wasy2-ps/wasy10.pfb>
-Output written on handbook.pdf (130 pages, 999916 bytes).
+Output written on handbook.pdf (132 pages, 1008084 bytes).
 PDF statistics:
- 2217 PDF objects out of 2487 (max. 8388607)
- 906 named destinations out of 1000 (max. 500000)
- 827 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 2235 PDF objects out of 2487 (max. 8388607)
+ 909 named destinations out of 1000 (max. 500000)
+ 840 words of extra memory for PDF output out of 10000 (max. 10000000)
 

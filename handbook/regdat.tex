@@ -78,7 +78,7 @@ The \texttt{utility} module is a container for a number of back-end code to whic
 
 \subsection{\PM\ error types}
 
-There are special error types defined to be unique to \PM.  These are intended to help users write their own scripts with meaningful exceptions when things go wrong.
+There are special error types defined to be unique to \PM.  These are intended to help users write their own scripts with meaningful exceptions when things go wrong.  Table \ref{tab:errors} shows all of the error types and describes their use.
 
 \begin{table}
 \caption{\PM\ error types}\label{tab:errors}
@@ -94,8 +94,12 @@ Error Type & Description\\
 \end{tabular}
 \end{table}
 
-This is also where messaging and error handling helper functions, \verb|print_lines|, \verb|print_warning|, and \verb|print_error| reside.
-
 \subsection{Redundancy tools}
 
 The \verb|utility.revive_file()| and \verb|utility.suppress_file()| automatically add or remove a `~' at the end of a file extension to add it to or remove it from the load process.  The \verb|utility.red_repair()| is an automatic interactive file redundancy repair function that calls these if necessary.  Interested users can read their inline documentation for more information.
+
+\subsection{Other tools}
+
+The \verb|utility| module is also where messaging and error handling helper functions, \verb|print_lines()|, \verb|print_warning()|, and \verb|print_error()| reside.  These automatically add line breaks and headers in appropriate locations so all terminal communication will be in a standard format.
+
+Finally, \verb|load_file()| is a helper function that does back-end work for the \verb|dat.load()| function.  It is a wrapper function that loads and checks the \verb|json| code from data files, and it returns the dictionary they create.  The \verb|dat.load()| is responsible for passing them to the appropriate class initializer and adding them to the data dictionary.

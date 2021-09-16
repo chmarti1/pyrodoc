@@ -45,8 +45,13 @@ K.~Butcher, L.~Crown, and E.~J. Gentry, ``The international system of units
 J.~R. Rumble, {\em CRC Handbook of Chemistry and Physics}.
 \newblock Boca Raton, FL: Taylor and Francis, 98th~ed., 2018.
 
-\bibitem{nist:web}
-https://janaf.nist.gov/.
+\bibitem{nist:webbook}
+National Institute for Standards and Technology, https://webbook.nist.gov/.
 \newblock accessed: Jun, 2021.
+
+\bibitem{mcbride:1993}
+B.~J. {McBride}, S.~Gordon, and M.~A. Reno, ``Coefficients for calculating
+  thermodynamic and transport properties of individual species,'' Tech. Rep.
+  4513, NASA, 1993.
 
 \end{thebibliography}
