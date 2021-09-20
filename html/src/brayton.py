@@ -88,21 +88,22 @@ plt.xlabel('Entropy, s (kJ/kg/K)')
 plt.ylabel('Temperature, T (K)')
 plt.grid('on')
 # Add state labels
-plt.text(s1-.1,T1,'(1)\nT={:.1f}\np={:.3f}'.format(T1,p1),
+plt.text(s1-.1,T1,'(1)\nT={:.1f}\np={:.3f}'.format(float(T1),float(p1)),
     ha='right',backgroundcolor='white')
-plt.text(s1-.1,T2,'(2)\nT={:.1f}\np={:.3f}'.format(T2,p2),
+plt.text(s1-.1,T2,'(2)\nT={:.1f}\np={:.3f}'.format(float(T2),float(p2)),
     ha='right',backgroundcolor='white')
-plt.text(s3+.1,T3,'(3)\nT={:.1f}\np={:.3f}'.format(T3,p3),
+plt.text(s3+.1,T3,'(3)\nT={:.1f}\np={:.3f}'.format(float(T3),float(p3)),
     ha='left',backgroundcolor='white')
-plt.text(s3+.1,T4,'(4)\nT={:.1f}\np={:.3f}'.format(T4,p4),
+plt.text(s3+.1,T4,'(4)\nT={:.1f}\np={:.3f}'.format(float(T4),float(p4)),
     ha='left',backgroundcolor='white')
 # Add a summary
 plt.text(6.5,1200,
 """$\dot{{m}}$ = {:.3f}kg/s
 $p_r$={:.1f}
 $\eta$={:.3f}
-$\dot{{W}}_{{net}}$={:1}kW""".format(mdot,pr,n,Wnet),
+$\dot{{W}}_{{net}}$={:1}kW""".format(float(mdot),float(pr),float(n),float(Wnet)),
     backgroundcolor='white')
 plt.title('Brayton Cycle T-s Diagram')
 
-plt.show(block=False)
+plt.show()
+#plt.show(block=False)
