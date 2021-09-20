@@ -64,7 +64,7 @@
 <h3 class="subtitle" id="data">Retrieving data</h3>
 <div class="section">
     <p>
-    The objects expose all the methods we need to access their properties.  For example, to retrieve nitrogen's properties, we only need to ask for them by name.  Here, this example retrieves molecular weight, enthalpy in kJ/kg, and entropy in kJ/kg/K.  We'll talk more about <a href="#units">units</a> in just a moment.
+    The objects expose all the methods we need to access their properties.  For example, this code retrieves molecular weight, enthalpy in kJ/kg, and entropy in kJ/kg/K.  We'll talk more about <a href="#units">units</a> in just a moment.
     </p>
     <pre class="code">
 >>> N2.mw()
@@ -74,20 +74,28 @@ array(0.0009843252384197784)
 >>> N2.s()
 array(6.839762903237966)</pre>
     <p>
-    That's good and well for molecular weight, but enthalpy and entropy are functions of temperature and pressure!  All properties accept temperature and pressure (including molecular weight) with keywords, T and p.  In the case of molecular weight, they are ignored, but they are vital to most properties.  In the above example, those arguments were omitted, so PYroMat used default values of 298.15 Kelvin and 1 atm.  While those defaults are user <a href="./doc_api.html#if_config">configurable</a>, users that can't be bothered to specify a temperature and pressure are probably thinking of standard atmospheric conditions.
+    But wait!  Enthalpy and entropy are functions of temperature and pressure!
     </p>
     <p>
-    These command-line examples all return the enthalpy of diatomic nitrogen at 496.5K and 3bar, but using different approaches to calling the enthalpy function.  
+    All properties accept <a href="https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments">keyword arguments</a> that allow users to define the state in terms of a set of primary properties.  For ideal gases, that means temperature, <span class="code">T</span>, pressure, <span class="code">p</span>, or density, <span class="code">d</span>.  For a multi-phase mixture, users can also specify quality, <span class="code">x</span>.
+    </p>
+    <p>
+    The command-line examples below all return the enthalpy of diatomic nitrogen at 496.5K and 3bar, but using different approaches to calling the enthalpy function.
     </p>
     <pre class="code">
->>> N2.h(T=496.5, p=3.)     # T and p as explicit keywords
-array(207.30250236177193)
->>> N2.h(T=496.5)           # p is omitted; h is not a function of p
-array(207.30250236177193)
->>> N2.h(496.5, 3.)         # T and p as ordered arguments (T comes first)
-array(207.30250236177193)
->>> N2.h(496.5)             # p is omitted; h is not a function of p
-array(207.30250236177193)</pre>
+>>> N2.h(T=496.5, p=3.)     # keywords T and p **best**
+array([207.43528961])
+>>> N2.h(T=496.5)           # p reverts to its default
+array([207.43528961])
+>>> N2.h(496.5, 3.)         # T and p as ordered args
+array([207.43528961])
+>>> N2.h(496.5)             # p reverts to its default
+array([207.43528961])
+>>> N2.h(T=496.5, d=2.0358) # density instead of pressure
+array([207.43528961])</pre>
+    <p>
+In general, PYroMat is intended to be used with keywords and values specified, but it is also designed to do its best to interpret your meaning when you leave things out.  In the above examples, when the keywords are missing or when one of the properties is missing, the method reverted to defaults.  When no keywords are specified, PYroMat assumes you are working in temperature and pressure <span class="code">(T,p)</span> tuples.  When one (or both) is omitted, it reverts to a default values (see the Configuration chapter of the <a href="pdf/handbook.pdf">PYroMat Handbook</a> for more information).
+    </p>
     <p>
     This is a good point to note that the <span class="code">h()</span> method returns a Numpy array instead of an ordinary float.  All properties accept array-like arguments to temperature and pressure.  PYroMat uses Numpy's <a href="https://docs.scipy.org/doc/numpy-1.13.0/user/basics.broadcasting.html" target="blank">array broadcasting rules</a> for operating on bulk data.  This can come in handy for simulations where T and p might be big <a href=#arrays>multi-dimensional arrays</a> in time and space.
     </p>

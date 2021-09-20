@@ -1,0 +1,156 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+    <title>Thermodynamic Property Data | PYroMat</title>
+    <link rel="stylesheet" type="text/css" href="pyromat.css">
+    <meta name="description" content="getting python">
+    <meta name="keywords" content="python,thermo,thermodynamic,property,properties">
+    <meta name="author" content="J. Ranalli">
+    
+
+</head>
+<body>
+
+<iframe name="menu" id="menu" src="menu.html"></iframe>
+
+<div id="content">
+<div class="title">
+<h1>Thermodynamic Property Calculator</h1>
+</div>
+
+
+<div class="section">
+    <h2>The State Principle</h2>
+    <p>The state principle guarantees that any two independent, intensive properties are enough to fix the state.
+    Fixing the state allows any additional intensive property to be found. Try entering any pair of properties below.
+</div>
+
+<form id = "myForm" action="../../cgi-bin/live/pointdata2.py" method="POST">
+    <fieldset>
+        <legend><b>State Parameters</b></legend>
+<!-- inputs -->
+        <div class="lcol">
+        <table id="values">
+            <tr><td>Fluid</td><td><select name="id"></select></td></tr>
+            <tr><td>Pressure</td><td><input name="p1" type="text" value=""></td></tr>
+            <tr><td>Temperature</td><td><input name="T1" type="text" value=""></td></tr>
+            <tr><td>Specific Enthalpy</td><td><input name="h1" type="text" value=""></td></tr>
+            <tr><td>Specific Entropy</td><td><input name="s1" type="text" value=""></td></tr>
+            <tr><td>Specific Volume</td><td><input name="v1" type="text" value=""></td></tr>
+            <tr><td>Quality</td><td><input name="x1" type="text" value=""></td></tr>
+
+        </table>
+        <input type="submit" value="Update">
+        </div>
+        
+<!-- units -->
+        <div class="rcol">
+        <a href="#" onClick="javascript:toggle_vis('units')">Units (Show/Hide)</a><br>
+        <table id="units" style="visibility:hidden;">
+            <tr><td>Pressure</td><td><select name="up"></select></td></tr>
+            <tr><td>Temperature</td><td><select name="uT"></select></td></tr>
+            <tr><td>Energy</td><td><select name="uE"></select></td></tr>
+            <tr><td>Matter</td><td><select name="uM"></select></td></tr>
+            <tr><td>Volume</td><td><select name="uV"></select></td></tr>
+
+
+        </table>
+        </div>
+        
+    </fieldset>
+</form>
+<!-- errors -->
+<!-- results -->
+<!-- charts -->
+<canvas id="myChart"  style="cursor:crosshair;background: url('')" width="640" height="480"></canvas>
+<div class="section">
+
+
+</div>
+<!-- coordinates -->
+<script>
+function toggle_vis(target_id){
+    var target_obj = document.getElementById(target_id);
+    if (target_obj.style.visibility=='visible'){
+        target_obj.style.visibility = 'hidden';
+    } else {
+        target_obj.style.visibility = 'visible';
+    }
+}
+
+
+var x =0;
+var y = 0;
+function writeMessage(canvas, message) {
+   var context = canvas.getContext("2d");
+   context.clearRect(0, 0, canvas.width, canvas.height);
+   context.font = "18pt Calibri";
+   context.fillStyle = "black";
+   context.fillText(message, 10, 25);
+}
+function getMousePos(canvas, evt) {
+   var rect = canvas.getBoundingClientRect();
+   return {
+   x: evt.clientX - rect.left,
+   y: evt.clientY - rect.top
+   };
+}
+var canvas = document.getElementById("myChart");
+var context = canvas.getContext("2d");
+//canvas.addEventListener("click", function(submitForm){ document.getElementById("myForm").submit(); });
+canvas.addEventListener("click", function(evt) {
+    //The canvas size, maybe can retrieve directly from the canvas if we want to allow it to be variable
+    var width = 640
+    var height = 480
+    var mousePos = getMousePos(canvas, evt);
+    x = mousePos.x;
+    y = height-mousePos.y;
+    //These values refer to properties of the graph and correspond to values that can be retrieved from Python when the graph is generated
+    var originx_pct =   ; //Origin position on x axis as percent of window
+    var originy_pct =   ; //Origin position on y axis as percent of window
+    var maxx_pct =      ; //Position of right side of x axis as percent of window
+    var maxy_pct =      ; //Position of top of y axis as percent of window
+    var xlim_low =      ; //Graph axis lower xlimit
+    var xlim_hi =       ; //Graph axis upper xlimit
+    var ylim_low =      ; //Graph axis lower ylimit
+    var ylim_hi =       ; //Graph axis upper ylimit
+    //var originx_pct = {}; //Origin position on x axis as percent of window'.format(Aoriginx_pct))
+    //var originy_pct = {}; //Origin position on y axis as percent of window'.format(Aoriginy_pct))
+    //var maxx_pct = {}; //Position of right side of x axis as percent of window'.format(Amaxx_pct))
+    //var maxy_pct = {}; //Position of top of y axis as percent of window'.format(Amaxy_pct))
+    //var xlim_low = {}; //Graph axis lower xlimit'.format(Axlim_low))
+    //var xlim_hi = {}; //Graph axis upper xlimit'.format(Axlim_hi))
+    //var ylim_low = {}; //Graph axis lower ylimit'.format(Aylim_low))
+    //var ylim_hi = {}; //Graph axis upper ylimit'.format(Aylim_hi))
+    //Calculate the origin location in pixels instead of percent
+    var originx = originx_pct * width;
+    var originy = Math.floor(originy_pct * height);
+    //Calculate the mouse position relative to the origin of the chart
+    var xpos = mousePos.x - originx;
+    var ypos = (height-mousePos.y) - originy; //We subtract the position from the height because HTML5 canvas has origin in top left
+    //Calculate the actual height/width of the graph within the canvas in pixels
+    var sizex = (maxx_pct-originx_pct) * width;
+    var sizey = (maxy_pct-originy_pct) * height;
+    //Calcuolate the mouse position as a percentage of the inner graph window size
+    var xpos_scl = xpos/sizex;
+    var ypos_scl = ypos/sizey;
+    var message = "Mouse position: " + xpos_scl + "," + ypos_scl;
+    //Calculate the actual x/y axis values that the position corresponds to.
+    x = (xlim_hi-xlim_low)*xpos_scl + xlim_low;
+    y = (ylim_hi-ylim_low)*ypos_scl + ylim_low;
+    //Put the x/y axis values in the entry boxes
+    document.getElementById("myForm").reset();
+    //if ((xpos_scl <= 1) & (xpos_scl >= 0)) { document.getElementsByName("s1")[0].value = Math.round(x * 1000) / 1000; }
+    //if ((ypos_scl <= 1) & (ypos_scl >= 0)) { document.getElementsByName("T1")[0].value = Math.round(y * 1000) / 1000; }
+    if ((xpos_scl <= 1) & (xpos_scl >= 0) & (ypos_scl <= 1) & (ypos_scl >= 0)) {
+        document.getElementsByName("s1")[0].value = Math.round(x*1000)/1000;//5;
+        document.getElementsByName("T1")[0].value = Math.round(y*1000)/1000;//500
+        document.getElementsByName("p1")[0].value = '';
+    }
+    document.getElementById("myForm").submit();
+});
+
+</script>
+</body>
+</html>

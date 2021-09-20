@@ -173,6 +173,7 @@ body {
 #content {
     width:90%%;
     text-align:justify;
+    line-height: 1.5;
     position:static;
     padding:0 0 0 0;
     margin:10px 10px 0 10px;
