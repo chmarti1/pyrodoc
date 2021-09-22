@@ -5,3 +5,7 @@ To configure CGI in apache:
 3) Make sure www-data has priviledges to the html and cgi directories
 4) Make sure libapache2-mod-python package is installed
 5) Make sure the CGI response includes a "Content-type: text/html" header.
+6) Make sure SELinux allows access to the www folders
+$ chcon --user system_u --type httpd_sys_content_t -Rv /var/www
+7) Make sure SELinux allows access to the cgi-bin folders
+$ chcon --user system_u --type httpd_sys_script_exec_t -Rv cgi-bin/
