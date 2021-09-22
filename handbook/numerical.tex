@@ -295,8 +295,8 @@ Given a function on one variable, $f$, the \verb|_iter1| algorithm seeks a value
 
 Given a guess, $x_k$, traditional Newton-Rhapson iteration calculates a next guess, $x_{k+1}$ by extrapolating linearly,
 \begin{align}
-\Delta x = \frac{y-f(x_k)}{f'(x_k)}
-x_{k+1} = x_k + \Delta x.
+\Delta x &= \frac{y-f(x_k)}{f'(x_k)}\\
+x_{k+1} &= x_k + \Delta x.
 \end{align}
 This is simply repeated until $y-f(x_k)$ is sufficiently small.
 

@@ -55,11 +55,11 @@ When these are used to calculate the dimensionless free energy,
  &= \frac{h_0}{RT_c} \tau - \frac{s_0}{R} - 1 + \ln\left(\frac{\delta \tau_0}{\delta_0 \tau}\right) + \left(-\tau\int_{\tau_0}^\tau \frac{c_p}{R \tau^2} \d \tau + \int_{\tau_0}^\tau \frac{c_p}{R \tau} \d \tau \right)\label{eqn:mp1:aodef}
 \end{align}
 
-The difficulty involved in formulating the specific heat of even an ideal gas is explained in Section \ref{sec:intro:e}.  The portion of energy that goes into translation versus molecular vibration is temperature-dependent.  In the ideal gas models described in Chapter \ref{ch:ig}, this dependency is dealt with using empirical polynomials.  However, the Span and Wagner models use so-called \emph{partition} functions to describe the activation of new degrees of freedom with increasing temperature,
+The difficulty involved in formulating the specific heat of even an ideal gas is explained in Section \ref{sec:intro:e}.  The portion of energy that goes into translation versus molecular vibration is temperature-dependent.  In the ideal gas models described in Chapter \ref{ch:ig}, this dependency is dealt with using empirical polynomials.  However, the Span and Wagner models use exponential functions to describe the activation of new degrees of freedom with increasing temperature,
 \begin{align}
 \frac{c_p}{R} = \ldots + b m^2 \frac{\tau^2 \exp(m\tau)}{\left(\exp(m\tau) - 1\right)^2} + \ldots\nonumber,
 \end{align}
-and any remaining effects are still addressed with additional polynomial terms.  The polynomial terms may be integrated directly, and pose no challenge for efficient implementation.  However, this partition function requires some attention.
+and any remaining effects are still addressed with additional polynomial terms.  The polynomial terms may be integrated directly, and pose no challenge for efficient implementation.  However, these exponentials require some attention.
 
 The integrals can be collectively simplified by inverting the integration-by-parts procedure with a series of substitutions, so that
 \begin{align}
@@ -73,7 +73,7 @@ This analysis motivates the form that is now commonplace in contemporary free en
 \begin{align}
 \alpha^o(\tau,\delta) = \ln \delta + a \ln \tau + \alpha^o_0(\tau) + \alpha^o_1(\tau),\label{eqn:mp1:ao}.
 \end{align}
-Here, the natural logarithm of $\tau$ is given an empirical coefficient, which allows it to include aspects of the $c_p$ integrals that resemble $1/\tau$, and the remaining terms are organized into groups of terms, $\alpha^o_0$ and $\alpha^o_1$, which are only functions of temperature.  The $\alpha^o_1$ term includes a sum of all of the partition functions,
+Here, the natural logarithm of $\tau$ is given an empirical coefficient, which allows it to include aspects of the $c_p$ integrals that resemble $1/\tau$, and the remaining terms are organized into groups of terms, $\alpha^o_0$ and $\alpha^o_1$, which are only functions of temperature.  The $\alpha^o_1$ term includes a sum of all of the exponential functions,
 \begin{align}
 \alpha^o_1(\tau) = \sum_j b_j \ln\left(1 - \exp( -m_j \tau ) \right)\label{eqn:mp1:ao:q},
 \end{align}
