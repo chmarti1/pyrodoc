@@ -48,9 +48,9 @@ steam = pyro.get('mp.H2O')
 T1 = steam.Ts(p1)
 p5=p1   # Since it is spanning the done, (5) and (1) share T and p
 T5=T1
-h1,h5 = steam.hs(p=p1,T=T1) # these are faster with T and p
-s1,s5 = steam.ss(p=p1,T=T1)
-d1,d5 = steam.ds(p=p1,T=T1)
+h1,h5 = steam.hs(T=T1)
+s1,s5 = steam.ss(T=T1)
+d1,d5 = steam.ds(T=T1)
 
 # Isentropic compression of liquid water
 # It is common to assume that T1=T2 since liquid is very close 
@@ -66,9 +66,9 @@ T3 = steam.Ts(p=p2)
 p3 = p2
 p2s = p2
 T2s = T3
-s2s,s3 = steam.ss(T=T3,p=p3) # these are faster with T and p
-h2s,h3 = steam.hs(T=T3,p=p3) # specified
-d2s,d3 = steam.ds(T=T3,p=p3)
+s2s,s3 = steam.ss(T=T3) # these are faster with T and p
+h2s,h3 = steam.hs(T=T3) # specified
+d2s,d3 = steam.ds(T=T3)
 
 # The turbine is an isentropic expansion to the low pressure
 # The superheater will end with the same entropy as s5
@@ -133,8 +133,8 @@ Tt,pt = steam.triple()
 Tc,pc = steam.critical()
 T = np.arange(Tt,Tc,2.5)
 p = steam.ps(T)
-dL,dV = steam.ds(T=T,p=p)
-sL,sV = steam.ss(T=T,p=p)
+dL,dV = steam.ds(T=T)
+sL,sV = steam.ss(T=T)
 ax1.plot(sL,T,'k')
 ax1.plot(sV,T,'k')
 ax2.plot(1./dL,p,'k')
@@ -229,28 +229,29 @@ p={0:.2f}bar
 v={1:f}m$^3$/kg
 (4)
 p={2:.2f}bar
-v={3:f}m$^3$/kg""".format(float(p3),float(v),float(p4),1./d4))
+v={3:f}m$^3$/kg""".format(float(p3),float(v),float(p4),float(1./d4)))
     v = 1./d5
     ax2.text(v/5,p5/5,
     """(5) 
 p={0:.2f}bar
-v={1:f}m$^3$/kg""".format(p5,v))
+v={1:f}m$^3$/kg""".format(float(p5),float(v)))
     
     ax1.text(-.5,575,"""$\dot{{m}}$ = {0:.3f}kg/s
 $\eta$ = {1:.3f}
 $\dot{{W}}_{{NET}}$ = {2:.0f}kW
 $\dot{{Q}}_{{BOIL}}$ = {3:.1f}kW
-$\dot{{Q}}_{{SUPER}}$ = {4:.1f}kW""".format(mdot,n,Wnet,Qboil,Qsuper))
+$\dot{{Q}}_{{SUPER}}$ = {4:.1f}kW""".format(float(mdot),float(n),float(Wnet),float(Qboil),float(Qsuper)))
 
 ax1.grid('on')
 ax2.grid('on')
 ax2.set_xscale('log')
 ax2.set_yscale('log')
 
-
+ax1.set_xlim([-2,10])
 ax1.set_ylim([300,800])
 # adjust the volume scale
 ax2.set_xlim([5e-4, 10])
 ax2.set_ylim([.01,1000.])
 
-plt.show(block=False)
+plt.show()
+#plt.show(block=False)

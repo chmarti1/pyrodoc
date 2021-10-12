@@ -1,0 +1,105 @@
+\chapter{The \PM\ modules}\label{ch:regdat}
+
+The core of \PM's functionality is split across four modules; \texttt{reg}, \texttt{dat}, \texttt{utilty}, and \texttt{units}.  The \texttt{units} module already has its own chapter (Chapter \ref{ch:units}), so this chapter is devoted to a description of the back-end and how it retrieves the models and their data.
+
+When the \PM\ package is first imported, the load process is completed in three steps: (1) configuration, (2) registry, and (3) data.  In the configuration stage, \PM\ loads configuration files, which are described in detail in Chapter \ref{ch:config}.  In the registry stage, \PM\ searches for Python code that defines the classes that handle the substance models.  Finally, in the data stage \PM\ searches for the \texttt{*.hpd} files that define the substance data. 
+
+\section{The class registry module, \texttt{reg}}
+
+The \texttt{reg} module only has three members of interest to a user; the \texttt{registry} dictionary, the \texttt{regload} function, and the \verb|__basedata__| class.  As a module, \texttt{reg} is responsible for maintaining the \texttt{reg.registry} dictionary, which contains all of the classes that provide the substance models.  Each entry of this dictionary is a child class of the \verb|reg.__basedata__| class.  The key for each member of the dictionary is the same as its name and serves as the string used to identify the class.  For example, in the default installation, \texttt{reg.registry['ig2']}, recalls the \texttt{ig2} class, so \texttt{'ig2'} can be used as a value for the \texttt{class} entry of a data file.
+
+When \PM\ is first imported, it calls \texttt{reg.regload()} with no arguments, which causes it to discover a list of possible registry directories from the \verb|config['reg_dir']| entry.  If the \verb|config['reg_recursive']| is set to \texttt{True}, the \texttt{reg.regload()} function will also descend into sub-directories.  Calling \texttt{reg.regload()} at any time causes it to repeat this process.  See the in-line documentation for how \texttt{reg.regload()} arguments can be used to override configuration entries when manually repeating the registry load process from the command line.
+
+Great care should be taken when specifying potential registry directories.  The \texttt{reg.regload()} function executes all Python codes in the registry directories to check for definition of \verb|reg.__basedata__| classes, so registry directories that define codes globally (for all users) should be protected just like system files, and users should be disallowed from loading each other's registries.
+
+\section{The data module, \texttt{dat}}
+
+The \texttt{dat} module is responsible for maintaining the \texttt{dat.data} dictionary of all available substance models.  It includes tools to discover, load, and manipulate the model data.  The data dictionary is where \texttt{get()} finds the substance instances requested by the user.
+
+\subsection{The \texttt{load()} function}\label{sec:regdat:load}
+
+The \texttt{dat.load()} function is the most important of \texttt{dat}'s functions.  It is responsible for loading all of the substance data and creating the class instances with which users will interact.  When \PM\ is first imported, \texttt{dat.load()} is called with no arguments, which prompts it to discover a list of possible data file directories from \verb|config['dat_dir']|.  Every file with a \texttt{.hpd} file extension is loaded and used to initialize an appropriate class instance.  Each instance is added to the \texttt{dat.data} dictionary with its ``id'' as the keyword string.  See section \ref{sec:regdat:data} for more information.
+
+When it is called with a directory or a path to a specific file, \texttt{dat.load()} will only open the contents of that directory or that file.  This is useful for manually adding or re-loading files under development that are not yet in the data directories listed in \texttt{config}.
+
+The \texttt{dat.load()} function also has an optional keyword, \texttt{check}, that prompts a data file integrity check when set to \texttt{True}.  When run in check mode, \texttt{dat.load()} returns a dictionary with six entries describing the results of the load process.  If a user has changed the data contained in the \texttt{dat.data} dictionary, added a new element, or deleted an existing element, it will be discovered by comparing the current data dictionary against a repeated load process.
+\begin{lstlisting}[language=Python]
+>>> import pyromat as pm
+>>> # This does NOT affect pm.dat.data
+>>> result = pm.load(check=True)
+>>> result['changed']    # modified substances
+>>> result['added']      # new substances
+>>> result['removed']    # substances removed 
+>>> result['redundant']  # redundant files
+>>> result['suppressed'] # excluded files
+>>> result['data']       # new data dict
+\end{lstlisting}
+
+The \texttt{changed}, \texttt{added}, and \texttt{removed} elements of the \texttt{result} dict are lists of id strings for the species that are affected.  This lets developers carefully inspect the impermanent changes they have made to the data during a command line session.
+
+The \texttt{redundant} dictionary member is a dictionary of substance ids with more than one definition found in the bank of \texttt{*.hpd} files.  This happens often when multiple data sources have their own contradictory models for the same substances.  The keys to the \texttt{redundant} dictionary are the substance ids, and the values are lists of paths to the multiple files that specified the same substance id.
+
+The \texttt{suppressed} dictionary member is a list of paths to files in the search path with a \texttt{*.hpd~} file extension.  These files that have been removed from the load process (probably to resolve a redundancy), but that the user may want to be able to locate to re-activate them.
+
+See section \ref{sec:regdat:tools} for advanced tools for working with this information.
+
+\subsection{Data files}\label{sec:regdat:data}
+
+Files are in the JavaScript Object Notation (JSON) data format, which only requires an ASCII character set, so any UTF-N extension will do.  The file should define a dictionary with keyword names the describe the essential data elements of the substance.  The sections in Chapters \ref{ch:ig} and \ref{ch:mp} describe the various substance classes and their required data elements, but there are also certain basic keywords used by \PM\ itself.
+
+\begin{table}
+\centering
+\caption{Required data keywords in all \PM\ files}\label{tab:data:required}
+\begin{tabular}{|ccp{2.5in}|}
+\hline
+Keyword & Type & Description\\
+\hline
+\texttt{'id'} & \texttt{str} & The string used by the \texttt{get} function to recognize the species and its collection.  It should be in the format \texttt{<collection>.<formula>}\\
+\texttt{'class'} & \texttt{str} & The string name of the class from the \texttt{reg} module that will be used to interpret the data.\\
+\texttt{'doc'} & \texttt{str} & A long string that is used to describe the data and cite its original source.\\
+\texttt{'atom'} & \texttt{dict} & A dictionary with element symbols for keywords, and the numerical quantity per molecule of each for values.  This is used by \texttt{info} to search for species by contents.  It can also be useful for calculating the molecular weights of isotopes.\\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Tools for working with data files}\label{sec:regdat:tools}
+
+For users who want to develop their own models or change existing models, the \texttt{dat} module includes tools to make that easier.  
+
+{\bf The \texttt{dat.clear()} function} empties the current \texttt{dat.data} dictionary.  Since successive calls to \texttt{dat.load()} merely overwrite or add to the dictionary, if users really want to start from scratch, they should call \texttt{dat.clear()} before running \texttt{dat.load()}.
+
+{\bf The \texttt{dat.new()} function} creates a new entry in the \texttt{dat.data} dictionary from a dictionary like one that might be loaded directly from a \texttt{*.hpd} file.  The intent is to allow users to write scripts that build their own data dictionaries from scratch, test them in \PM\ and only save them permanently when they have been tested.
+
+{\bf The \texttt{dat.updatefiles()} function} runs \texttt{dat.load()} in check mode and allows the user to resolve differences between the current members of the \texttt{dat.data} dictionary and the currently available data files.  When run verbosely, the user will be prompted with a choice of actions for each file.  When run with the \texttt{verbose=False}, it will automatically operate on all findings.  See the inline documentation for more information.
+
+\section{The utility module, \texttt{utility}}
+
+The \texttt{utility} module is a container for a number of back-end code to which users should not need direct access.  For example, it is where all of the \PM\ error types are defined, and there are a number of back-end helper functions.
+
+\subsection{\PM\ error types}
+
+There are special error types defined to be unique to \PM.  These are intended to help users write their own scripts with meaningful exceptions when things go wrong.  Table \ref{tab:errors} shows all of the error types and describes their use.
+
+\begin{table}
+\caption{\PM\ error types}\label{tab:errors}
+\begin{tabular}{|cp{2.5in}|}
+\hline
+Error Type & Description\\
+\hline
+\texttt{PMAnalysisError} & A numerical routine has failed. This probably means that an iteration has not converged or a calculation gave an unexpected illegal result.  These are very unusual.\\
+\texttt{PMDataError} & A substance data set is corrupt. This usually appears when a required data element is not defined or the data are incorrect data types.  Not all of these errors are handled gracefully, so the property methods may simply crash with a basic Python exception.\\
+\texttt{PMFileError} & There was an error working with a file. This is probably because the user does not have permission to work one of the \texttt{*.hpd} files.\\
+\texttt{PMParamError} & There was a problem with an argument passed to a method or function. This is common when the user specifies a state out of the model's range or some otherwise invalid combination of properties.\\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Redundancy tools}
+
+The \verb|utility.revive_file()| and \verb|utility.suppress_file()| automatically add or remove a `~' at the end of a file extension to add it to or remove it from the load process.  The \verb|utility.red_repair()| is an automatic interactive file redundancy repair function that calls these if necessary.  Interested users can read their inline documentation for more information.
+
+\subsection{Other tools}
+
+The \verb|utility| module is also where messaging and error handling helper functions, \verb|print_lines()|, \verb|print_warning()|, and \verb|print_error()| reside.  These automatically add line breaks and headers in appropriate locations so all terminal communication will be in a standard format.
+
+Finally, \verb|load_file()| is a helper function that does back-end work for the \verb|dat.load()| function.  It is a wrapper function that loads and checks the \verb|json| code from data files, and it returns the dictionary they create.  The \verb|dat.load()| is responsible for passing them to the appropriate class initializer and adding them to the data dictionary.

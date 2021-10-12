@@ -2,35 +2,35 @@
 
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://chmarti1.github.io/PYroMat/</loc>
+        <loc>http://pyromat.org</loc>
         <priority>0.9</priority>        
     </url>
     <url>
-        <loc>https://chmarti1.github.io/PYroMat/documentation.html</loc>
+        <loc>http://pyromat.org/documentation.html</loc>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://chmarti1.github.io/PYroMat/doc_api.html</loc>
+        <loc>http://pyromat.org/pdf/handbook.pdf</loc>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://chmarti1.github.io/PYroMat/doc_intro.html</loc>
+        <loc>http://pyromat.org/doc_intro.html</loc>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://chmarti1.github.io/PYroMat/doc_howto.html</loc>
+        <loc>http://pyromat.org/doc_howto.html</loc>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://chmarti1.github.io/PYroMat/download.html</loc>
+        <loc>http://pyromat.org/download.html</loc>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://chmarti1.github.io/PYroMat/about.html</loc>
+        <loc>http://pyromat.org/about.html</loc>
         <priority>0.3</priority>
     </url>
     <url>
-        <loc>https://chmarti1.github.io/PYroMat/features.html</loc>
+        <loc>http://pyromat.org/features.html</loc>
         <priority>0.3</priority>
     </url>
 </urlset>

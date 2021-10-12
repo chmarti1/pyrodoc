@@ -1,0 +1,88 @@
+\documentclass[11pt]{report}
+
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{listings} % For code examples
+\usepackage{wasysym} % For check box characters
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{longtable} % For tables that split across pages
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue]{hyperref}
+%\usepackage[a-1b]{pdfx}
+\usepackage{pdfx}
+% A5 is 148mm x 210mm
+\usepackage[a5paper,left=15mm,textwidth=118mm,top=15mm,bottom=20mm]{geometry}
+%\usepackage{lscape}    %For use on non-pdf builds
+\usepackage{pdflscape}
+% Set up the bibliography
+% This didn't quite work as expected.  Stick with "legacy" bibtex for now.
+%\usepackage[backend=bibtex,style=numeric]{biblatex}
+%\addbibresource{pyrodoc.bib}
+
+
+% Set up the code style
+\definecolor{colorbg}{rgb}{0.92,0.95,0.92}
+\definecolor{colorcomment}{rgb}{0.5,0.5,0.5}
+\lstdefinestyle{codestyle}{
+    backgroundcolor=\color{colorbg},
+    basicstyle={\ttfamily\small},
+    commentstyle=\color{colorcomment},
+    breaklines=true,
+}
+\lstdefinestyle{tinystyle}{
+    backgroundcolor=\color{colorbg},
+    basicstyle={\ttfamily\tiny},
+    commentstyle=\color{colorcomment},
+}
+\lstset{style=codestyle}
+
+% Delcare the equiv operator so "rev" will appear nicely beneath it in
+% the definition for entropy
+\DeclareMathOperator*{\defas}{\equiv}
+\DeclareMathOperator*{\equals}{=}
+
+\newcommand{\PM}{PYroMat}
+\def\d{\mathrm{d}}
+
+\title{The PYroMat User and Developer Handbook}
+\author{Christopher R. Martin\\
+Associate Professor of Mechanical Engineering\\
+Penn State University}
+\date{\today}
+
+\begin{document}
+\pagestyle{empty}
+\ \\
+\vspace{2in}
+
+\begin{center}
+\includegraphics[width=1.5in]{figures/PYro_Black_Small}
+\end{center}
+% - no - page - number -
+\pagebreak
+
+\maketitle
+
+\pagebreak
+\pagestyle{plain}
+
+\tableofcontents
+
+\include{nomenclature}
+\include{intro}
+\include{start}
+\include{config}
+\include{units}
+\include{regdat}
+\include{ig}
+\include{multiphase}
+\include{numerical}
+
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{ieeetr}
+\bibliography{pyrodoc}
+
+\end{document}

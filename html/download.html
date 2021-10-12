@@ -3,15 +3,23 @@
 
 <html>
 <head>
-    <title>Downloads | PYroMat</title>
+    <title>Download | PYroMat</title>
     <link rel="stylesheet" type="text/css" href="pyromat.css">
-    <meta name="description" content="getting python">
-    <meta name="keywords" content="python,thermo,thermodynamic,property,properties">
+    <meta name="description" content="Thermodynamic Properties in Python">
+    <meta name="keywords" content="python,thermodynamic,properties,cycle,engine,refrigeration">
     <meta name="author" content="C.R. Martin">
 </head>
 <body>
 
-<iframe name="menu" id="menu" src="menu.html"></iframe>
+
+<ul id='menulist'>
+    <li class='icon'><a href='index.html'><img src='fig/PYro_iBlack_Small.png' width=110px></img></a></li>
+    <li class="menuitem"><a href="./about.html">About</a></li>
+    <li class="menuitem"><a href="./features.html">Features</a></li>
+    <li class="menuitem"><a href="./download.html">Download</a></li>
+    <li class="menuitem"><a href="./documentation.html">Docs</a></li>
+    <li class="menuitem"><a href="./live/index.html">Live</a></li>
+</ul>
 
 <div id="content">
 <div class="title">
@@ -44,24 +52,27 @@
     <p>
     To install PYroMat using pip, run the following command as an administrator:
     <div class="code">
-    pip install pyromat
+    $ python -m pip install pyromat
     </div>
     </p>
     <p>
     To upgrade from an older version
     <div class="code">
-    pip install pyromat --upgrade
+    $ python -m pip install --upgrade pyromat
     </div>
     </p>
     <p>
-    If you are not logged in as an administrator, but you want to be able to install PYroMat globally on your system, pip recommends
+    On Windows systems, users simply need to right click the command propt icon and select "run as administrator" for the commands to have global effect.  On a Linux or MacOS system, the Python Package Authority has historically recommended
     </p>
     <div class="code">
-    sudo -H pip install pyromat
+    $ sudo -H python -m pip install pyromat
     </div>
     <p>
-    On many systems, the <span class="code">pip</span> can be replaced by <span class="code">pip3</span> to specify a Python 3 installation over Python 2.
+    On many Linux systems, Python 2 is still the default interpreter, so some users may want to specify Python 3.  On the most popular Linux flavors, the following will work:
     </p>
+    <div class="code">
+    python3 -m pip install pyromat
+    </div>
     <p>
     If you are having difficulty with <span class="code">pip</span>, see <a href="doc_howto.html#install_pip">this FAQ</a> about making sure <span class="code">pip</span> is properly installed.
     </p>
@@ -71,16 +82,20 @@
 <h3 class="subtitle" id="github">Github</h3>
 <div class="section">
     <p>
-    The PYroMat package index can be found at <a href="https://github.com/chmarti1/PYroMat" target="blank">https://github.com/chmarti1/PYroMat</a>.  If you already have <a href="https://git-scm.com/" target="blank">GIT</a> installed, fire up your command line:
+    Instead of <span class="code">pip</span>, this method uses <span class="code">setuptools</span> (<href a="https://pypi.org/project/setuptools/">pypi.org/project/setuptools/</href>) to install the package from the GitHub repository.  
+    </p>
+    <p>
+    The most current official release of the PYroMat package can be found at <a href="https://github.com/chmarti1/PYroMat" target="blank">https://github.com/chmarti1/PYroMat</a>.  To download, click on the green "Code" button and select "Download ZIP."  If you already have <a href="https://git-scm.com/" target="blank">GIT</a> installed, fire up your command line:
     <p>
     <pre class="code">
-git clone https://github.com/chmarti1/PYroMat.git
-pip install PYroMat</pre>
+$ git clone https://github.com/chmarti1/pyromat.git
+$ cd pyromat
+$ python setup.py install</pre>
     <p>
     The last command might need to be executed by an administrator on your system.  In Linux, this is usually best done with the command
     </p>
     <div class="code">
-    sudo -H pip install PYroMat</pre>
+    sudo -H python setup.py install</pre>
     </div>
 </div>
 
@@ -114,7 +129,16 @@ pip install PYroMat</pre>
     </p>
 </div>
 
-<iframe src="author.html" id="contact"></iframe>
+<div id="contact">
+<hr>
+Authored By:<br>
+Christopher R. Martin, Ph.D.<br>
+Associate Professor of Mechanical Engineering<br>
+The Pennsylvania State University, Altoona College<br>
+<a href="mailto:crm28@psu.edu">crm28@psu.edu</a><br>
+<br>
+&copy;2021 Released under the <a target="blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3 License</a>
+</div>
 
 </body>
 </html>

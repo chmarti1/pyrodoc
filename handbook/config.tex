@@ -1,0 +1,146 @@
+\chapter{Configuration}\label{ch:config}
+
+There are parameters that most users will never need to change, but that some users may find irritating or even limiting.  For example, no unit system ever seems to make everyone happy.  There is a configuration system that allows users to alter settings that are honored by the \PM\ substance model classes.
+
+\section{The \texttt{pm.config} instance}
+
+The \PM\ configuration system is implemented by a custom class instance called \texttt{config}.  It mimics a dictionary in that it has a series of string parameters that have values associated with them.  Evoking the configuration object prints its contents in a table.
+\begin{lstlisting}[language=Python]
+>>> import pyromat as pm
+>>> pm.config
+     config_file : ['/home/chris/Documents/PYroMat/pyromat/defaults.py']
+  config_verbose : False
+         dat_dir : ['/home/chris/Documents/PYroMat/pyromat/data']
+ dat_exist_fatal : False
+   dat_overwrite : True
+   dat_recursive : True
+     dat_verbose : False
+    ...
+\end{lstlisting}
+
+Unlike a dictionary, the \texttt{PMConfig} instance enforces certain rules that are specific to each of the configuration entries.
+\begin{itemize}
+\item Configuration entries can be neither created nor deleted.
+\item The value of a read-only entry (marked ``R'' in Table \ref{tab:config}) cannot be changed.
+\item The values of an appendable entry (marked ``A'' in Table \ref{tab:config}) cannot be overwritten.  Instead, new values are appended to the end of a list of values.
+\item Entry values must be of an appropriate data type.
+\end{itemize}
+
+Table \ref{tab:config} lists the configuration parameters, their hard-coded initial values when the configuration instance is first created, and a brief description for each.  Entries to which special rules apply are marked with an (A) for appendable or (R) for read-only.
+
+\begingroup\small
+\begin{longtable}{|lcp{2in}|}
+\caption{Configuration parameters, their rules, and their descriptions.  Parameters that are appendable are marked with (A), and parameters that are read-only are marked with (R).  Paths are referenced relative to the \PM\ installation directory and not the user working directory.}\label{tab:config}\\
+\hline
+\bf Entry (Rule) & \bf Initial & \bf Description\\
+\hline 
+\endfirsthead
+\caption{continued\ldots}\\
+\hline
+\bf Entry (Rule) & \bf Initial & \bf Description \\
+\hline 
+\endhead
+\hline
+\endfoot
+\verb|config_file| (A) & \tiny\verb|['./config.py']| & String file paths to load for configuration values\\
+\verb|config_verbose| & \verb|False| & Print descriptions of the configuration load process?\\
+\verb|dat_dir| (A) & \tiny\verb|['./data']| & String paths to directories to scan for \texttt{.hpd} files\\
+\verb|dat_exist_fatal| & \verb|False| & Raise an exception if there are two definitions for the same substance id?\\
+\verb|dat_overwrite| & \verb|True| & Overwrite older substance ids with newer ones?\\
+\verb|dat_recursive| & \verb|True| & Recurse into sub-directories when looking for data files?\\
+\verb|dat_verbose| & \verb|False| & Print descriptions of the data load process?\\
+\verb|def_T| & \verb|298.15| & Default temperature in units, \verb|unit_temperature|\\
+\verb|def_p| & \verb|1.01325| & Default pressure in units, \verb|unit_pressure|\\
+\verb|install_dir| (R) & \verb|'./'| & Path to the \PM\ installation\\
+\verb|reg_dir| (A) & \tiny\verb|['./registry']| & A list of directories to scan for \texttt{.py} files containing \PM\ classes\\
+\verb|reg_exist_fatal| & \verb|False| & Raise an exception if there are two definitions for the same class?\\
+\verb|reg_overwrite| & \verb|True| & Overwrite older class definitions with new ones?\\
+\verb|reg_verbose| & \verb|False| & Print descriptions of the registry class discovery process?\\
+\verb|unit_energy| & \verb|'kJ'| & Unit string for energy\\
+\verb|unit_force| & \verb|'N'| & Unit string for force\\
+\verb|unit_length| & \verb|'m'| & Unit string for length\\
+\verb|unit_mass| & \verb|'kg'| & Unit string for mass\\
+\verb|unit_matter| & \verb|'kg'| & Unit string for matter\\
+\verb|unit_molar| & \verb|'kmol'| & Unit string for mole count\\
+\verb|unit_pressure| & \verb|'bar'| & Unit string for pressure\\
+\verb|unit_temperature| & \verb|'K'| & Unit string for temperature\\
+\verb|unit_time| & \verb|'s'| & Unit string for time\\
+\verb|unit_volume| & \verb|'m3'| & Unit string for volume\\
+\verb|version| (R) & \verb|<version>| & The \PM\ installation version string\\
+\hline
+\end{longtable}
+\endgroup
+
+\subsection{Making temporary changes to \texttt{config}}
+
+Configuration entry values can be retrieved and written like dictionary values.  In this example, we check the version string and change the temperature units to Farenheit.
+\begin{lstlisting}[language=Python]
+>>> import pyromat as pm
+>>> pm.config['version']
+'2.1.0'
+>>> pm.config['unit_temperature'] = 'F'
+\end{lstlisting}
+Parameters that are appendable do not behave the same way.  When they are written to, they accumulate new values.  For example,
+\begin{lstlisting}[language=Python]
+>>> pm.config['config_file'] = '/etc/pyromat.py'
+>>> pm.config['config_file']
+['/home/chris/Documents/PYroMat/pyromat/config.py', '/etc/pyromat.py']
+\end{lstlisting}
+Observe that instead of overwriting the previous configuration file, the new value was appended to the list.
+
+Undoing a configuration change can be done using the {\texttt{restore\_default()}} method.  When it is used as an entry method, it only applies to that entry.
+\begin{lstlisting}[language=Python]
+>>> pm.config['unit_temperature']
+'F'
+>>> pm.config.restore_default('unit_temperature')
+>>> pm.config['unit_temperature']
+'K'
+\end{lstlisting}
+The ``default'' values honored by the \texttt{restore\_default()} method are hard-coded, so if there is a flaw somewhere in the configuration process, the system can be restored to functional settings by calling \linebreak\texttt{restore\_default()} with no argument.  Then, all of the parameters will be reset to their defaults.
+
+In the next section, we will discuss how to write configuration files that override these defaults.  They will be automatically loaded when \PM\ is imported, but the \verb|config.load()| method will manually repeat the configuration load process.
+
+\section{Configuration files}
+
+To make changes to the configuration that persist when \PM\ is re-loaded, values should be written to configuration files.  \PM\ configuration files are Python scripts that are expected to define variables with the same names as the configuration parameters.  Any variables created that are recognized as valid \PM\ configuration parameters are read into the configuration.  Any variables that are unrecognized or that have values with invalid types result in a \texttt{PMParamError} exception.
+
+Loading all of its configuration files is the very first thing \PM\ does when it is loaded by the Python import system.  First, \texttt{pm.config} is initialized with hard-coded initial values listed in Table \ref{tab:config}.  Even if all other aspects of the configuration process fail, the system will still be able to function with these basic parameters. 
+
+Then, the configuration load process begins.  Configuration files are read one-by-one in the order they are listed in \verb|config_file| until they have all been loaded.  By default, the only path in \verb|config_file| is \texttt{./config.py}, located in the \PM\ installation directory, but each time a configuration file is read in, new configuration files can be added.  In this way, configuration files can add more configuration files.  The loading algorithm protects users are protected against infinite loads by checking for files that reference each other or themselves.
+
+The \texttt{config.py} file located in the base installation directory is heavily commented with instructions for administrators to make their own changes.  Many administrators may want to add a configuration file in \texttt{/etc/} or in users' home directory somewhere.  The example below shows a \texttt{config.py} file that admins might want to place in the \PM\ install directory to allow users to apply their own settings and write their own data models without a virtual environment.
+
+This is an example of a configuration script that might appear in \verb|config.py|.
+
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
+\begin{lstlisting}[language=Python]
+# This adds two new configuration files. 
+# The first is a global configuration file in /etc.
+# The second is in a hidden directory in the user's
+# home directory.  The order is important.  Placing
+# the user's settings last means that their options
+# will overwrite the global options.
+config = ['/etc/pyromat.py', '~/.pyromat/config.py']
+
+# These add registry and data directories in the 
+# user's home directories.
+reg_dir = '~/.pyromat/registry'
+dat_dir = '~/.pyromat/data'
+
+# These entries reconfigure PYroMat to use the 
+# imperial system of units.  These entries 
+# could appear anywhere in the configuration 
+# process.
+unit_temperature = 'F'
+unit_length = 'ft'
+unit_volume = 'ft3'
+unit_pressure = 'psi'
+unit_energy = 'BTU'
+unit_matter = 'lb'
+unit_force = 'lb'
+unit_molar = 'lbmol'
+\end{lstlisting}
+
+For more information on the units, see Chapter \ref{ch:units}.  For more information on the registry, data files, and the load process, see Chapter \ref{ch:regdat}.
