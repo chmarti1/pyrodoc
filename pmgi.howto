@@ -1,0 +1,29 @@
+# This is very helpful for getting Apache working with WSGI
+# https://modwsgi.readthedocs.io/en/master/user-guides/quick-configuration-guide.html
+
+
+#######
+# Install the Apache dependencies
+
+# Duh...
+sudo apt install apache2
+
+# Install the libapache python wsgi mod
+sudo apt install libapache2-mod-wsgi-py3
+
+# This seems to enable the wsgi mod within apache... not tested yet
+sudo a2enmod wsgi
+
+#######
+# Install the Python dependencies
+sudo -H python3 -m pip install --upgrade pip flask
+
+
+####
+# Create the wsgi package directory
+sudo mkdir -m 775 /var/www/pmgi
+sudo chmod g+w /var/www/pmgi
+
+cd /var/www/pmgi
+
+
