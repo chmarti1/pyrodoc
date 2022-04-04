@@ -9,86 +9,129 @@ import os,sys
 __version__ = '0.0'
 
 
-####################
-# Helper functions #
-####################
+###
+# Custom request processing classes
+#   These are designed to construct a JSON dictionary that will be used
+#   by the HTML/JS on the client side to construct tables and plots.
+#   
+# Still to do... extend the arguments/return values to tolerate arrays
+###
 
-# NOTE: I wrote this quickly to get something working.
-# I actually think the right solution is to write a class that handles
-# each type of request gracefully.  It should be initialized with the 
-# POST/GET argument dictionary, and it should construct its own return
-# message, error status, and it should carefully build the property 
-# lookup arguments.
-#
-# This approach will be much more readable than what I ended up here.
-# I immediately see irritation and pain trying to extend this to more 
-# sophisticated interfaces.
-
-def require(args, types={}, mandatory=[]):
-    """REQUIRE - enforce argument requirements
-    err,message = require(args, mandatory, optional)
+class PMGIRequest:
+    args = {}
+    out = {}
+    s = None
     
-ARGS        The dictionary of arguments and their values
-TYPES       A dictionary of all recognized arguments and their types
-MANDATORY   A list, set, or tuple of mandatory arguments
+    def __init__(self):
+        self.args = {}
+        self.s = None
+        self.out['error'] = False
+        self.out['message'] = ''
+    
+    def getid(self, idstr):
+        """GETID - Retrieve a PYroMat object and fail gracefully
+    getid(idstr)
+    
+Stores a PYroMat substance instance in the "s" member if successful.  If
+unsuccessful, error is set to True, and an appropriate message is 
+appended.
 
-The values in the dictionaries are treated as the type/class specifiers
-that will be used to convert/test the arguments.  Data conversion is 
-done in-place on the args dictionary.
-
-ERR         False unless an error occurs.
-MESSAGE     A string error message
+Returns False on success and True on failure.
 """
-    err = False
-    message = ''
-    mandatory = set(mandatory)
+        self.s = pm.dat.data.get(idstr)
+        if self.s is None:
+            self.out['error'] = True
+            self.out['message'] += f'Failed to find substance id {idstr}<br>\n'
+            return True
+        return False
+        
+    def require(self, types, mandatory):
+        """REQUIRE - enforce rules about the request arguments
+    require(types, mandatory)
     
-    for name,value in args.items():
-        proto = types.get(name)
-        # Is this argument recognized?
-        if proto is None:
-            err = True
-            message = f'Unrecognized argument: {name}'
-            return err,message
-        # Attempt to convert it to the correct value
-        try:
-            value = proto(value)
-        except:
-            err = True
-            message = f'Could not represent argument {name}={repr(value)} as type {repr(proto)}.'
-        # It looks like everything is in order.
-        # Time to overwrite the original value
-        args[name] = value
-        # If this is a mandatory argument, check it off the list
-        if name in mandatory:
-            mandatory.remove(name)
+TYPES       A dictionary of arguments and their types
+MANDATORY   A list, set, or tuple of required argument names
+
+Each keyword in TYPES corresponds to an argument that is allowed.  The
+corresponding value in the dictionary must be a class or callable that
+will be used to condition the argument's value.  For example, specifying
+    types = {'teamname': str, 'players': int, 'color': str}
+defines three optional arguments and their types.  More complicated 
+requirements or conditioning can be applied in the appropriate __init__
+definition.
+
+Once defined in TYPES, an argument can be made mandatory by including 
+its name in the MANDATORY list.
+
+Returns True if an error occurs and False otherwise.
+"""
+        mandatory = set(mandatory)
+        # Loop through the items
+        for name,value in self.args.items():
+            # Is this a recognized argument?
+            if name not in types:
+                self.out['error'] = True
+                self.out['message'] += f'Unrecognized argument: {name}<br>\n'
+                return True
+            # If the argument is known
+            try:
+                self.args[name] = types[name](value)
+            except:
+                self.out['error'] = True
+                self.out['message'] += f'Invalid argument: {name}={value}<br>\n'
+                return True
+            # If the argument is mandatory, check it off the list
+            if name in mandatory:
+                mandatory.remove(name)
+        # Are there missing arguments?
+        if mandatory:
+            self.out['error'] = True
+            self.out['message'] += f'Missing mandatory arguments:'
+            prefix = ' '
+            for name in mandatory:
+                self.out['message'] += prefix + name
+                prefix = ', '
+            return True
+        return False
+    
+    
+class PropertyRequest(PMGIRequest):
+    def __init__(self, args):
+        # Clean initialization
+        PMGIRequest.__init__(self)
+        
+        # Read in the arguments from raw
+        self.args = dict(args)
+        # Process the arguments
+        if self.require(
+                types = {'T':float, 'p':float, 'd':float, 'x':float, 'id':str},
+                mandatory = ['id']):
+            return
             
-    # If there are any mandatory arguments that were not discovered
-    if mandatory:
-        err = True
-        message = 'Missing mandatory arguments:'
-        for name in mandatory:
-            message += f' {name}'
-    return err,message
+        # Retrieve the PM entry
+        if self.getid(self.args['id']):
+            return
+        
+            
+    def process(self):
+        # If there was an error, abort the processing
+        if self.out['error']:
+            return
+        
+        args = self.args.copy()            
+        self.out['id'] = args.pop('id')
 
+        try:
+            self.out['T'] = float(self.s.T(**args))
+            self.out['p'] = float(self.s.p(**args))
+            self.out['d'] = float(self.s.d(**args))
+            self.out['h'] = float(self.s.h(**args))
+            self.out['s'] = float(self.s.s(**args))
+        except:
+            self.out['error'] = True
+            self.out['message'] += 'Failed while evaluating properties<br>\n'
+            self.out['message'] += str(sys.exc_info()[1]) + '<br>\n'
 
-def getid(idstr):
-    """GET - wrapper for pm.get with graceful error handling
-    
-    s,message = get(idstr)
-    
-S           PYroMat substance object instance - None if error
-MESSAGE     An error message string to pass to the application
-"""
-    try:
-        s = pm.get(idstr)
-        message = ''
-    except:
-        s = None
-        message = f'Failed while looking for substance ID: {idstr}\n'
-        message += str(sys.exc_info()[1])
-    
-    return s,message
 
 ############################
 # Define the URL interface #
@@ -109,33 +152,10 @@ def pmgi():
     elif request.method == 'GET':
         args = dict(request.args)
         
-    # parse arguments
-    err,message = require(args,
-        types={'id':str, 'call':str, 'T':float, 'p':float},
-        mandatory=['id', 'call', 'T', 'p'])
-    # Catch error
-    if err:
-        out['message'] = 'PMGI error: ' + message
-        return out
+    pr = PropertyRequest(args)
+    pr.process()
+    return pr.out
         
-    # Retrieve the substance
-    s,message = getid(args['id'])
-    if s is None:
-        out['message'] = message
-        return out
-    
-    # Retrieve the property method
-    if not hasattr(s, args['call']):
-        out['message'] = f'Substance {args["id"]} has no property {args["call"]}.'
-        return out
-        
-    prop = getattr(s, args['call'])
-    try:
-        out[args['call']] = float(prop(T=args['T'], p=args['p']))
-    except:
-        out['message'] = f'Failed while calling property {args["id"]}.{args["call"]}'
-    return out
-    
 # The get pmgi returns substance metadata
 @app.route('/get', methods=['POST', 'GET'])
 def get():
@@ -149,7 +169,7 @@ def get():
 # The info pmgi will return the results of queries (e.g. substance search)
 @app.route('/info', methods=['POST', 'GET'])
 def info():
-    pass
+    return {}
 
 # Version is responsible for returning basic system information 
 # This will be important if users want to diagnose differences between
