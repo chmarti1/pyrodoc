@@ -12,8 +12,16 @@ __version__ = '0.0'
 #### Helper functions
 def toarray(a):
     return np.asarray(a.split(','), dtype=float)
-    
 
+def clean(a):
+    for name, value in a.items():
+        if isinstance(value, dict):
+            clean(value)
+        elif isinstance(value, np.ndarray):
+            if value.size == 1:
+                a[name] = np.asscalar(value)
+            else:
+                a[name] = value.tolist()
 ###
 # Custom request processing classes
 #   These are designed to construct a JSON dictionary that will be used
@@ -34,14 +42,14 @@ class PMGIRequest:
     
     def getid(self, idstr):
         """GETID - Retrieve a PYroMat object and fail gracefully
-    getid(idstr)
-    
-Stores a PYroMat substance instance in the "s" member if successful.  If
-unsuccessful, error is set to True, and an appropriate message is 
-appended.
+            getid(idstr)
 
-Returns False on success and True on failure.
-"""
+        Stores a PYroMat substance instance in the "s" member if successful.
+        If unsuccessful, error is set to True, and an appropriate message is
+        appended.
+
+        Returns False on success and True on failure.
+        """
         self.substance = pm.dat.data.get(idstr)
         if self.substance is None:
             self.out['error'] = True
@@ -51,24 +59,25 @@ Returns False on success and True on failure.
         
     def require(self, types, mandatory):
         """REQUIRE - enforce rules about the request arguments
-    require(types, mandatory)
+        require(types, mandatory)
     
-TYPES       A dictionary of arguments and their types
-MANDATORY   A list, set, or tuple of required argument names
+        TYPES       A dictionary of arguments and their types
+        MANDATORY   A list, set, or tuple of required argument names
 
-Each keyword in TYPES corresponds to an argument that is allowed.  The
-corresponding value in the dictionary must be a class or callable that
-will be used to condition the argument's value.  For example, specifying
-    types = {'teamname': str, 'players': int, 'color': str}
-defines three optional arguments and their types.  More complicated 
-requirements or conditioning can be applied in the appropriate __init__
-definition.
+        Each keyword in TYPES corresponds to an argument that is allowed.  The
+        corresponding value in the dictionary must be a class or callable that
+        will be used to condition the argument's value.  For example,
+        specifying:
+            types = {'teamname': str, 'players': int, 'color': str}
+        defines three optional arguments and their types.  More complicated
+        requirements or conditioning can be applied in the appropriate __init__
+        definition.
 
-Once defined in TYPES, an argument can be made mandatory by including 
-its name in the MANDATORY list.
+        Once defined in TYPES, an argument can be made mandatory by including
+        its name in the MANDATORY list.
 
-Returns True if an error occurs and False otherwise.
-"""
+        Returns True if an error occurs and False otherwise.
+        """
         mandatory = set(mandatory)
         # Loop through the items
         for name,value in self.args.items():
@@ -95,50 +104,53 @@ Returns True if an error occurs and False otherwise.
             self.warn('\n')
             return True
         return False
-    
+
     def error(self, message):
         self.out['error'] = True
         self.out['message'] += message
-        
+
     def warn(self, message):
         self.out['message'] += message
-    
+
 class PropertyRequest(PMGIRequest):
     def __init__(self, args):
         # Clean initialization
         PMGIRequest.__init__(self)
-        
+
         # Read in the arguments from raw
         self.args = dict(args)
         # Process the arguments
-        if self.require( types = 
-                {   's':toarray, 
-                    'h':toarray, 
-                    'T':toarray, 
-                    'p':toarray, 
-                    'd':toarray, 
-                    'x':toarray, 
-                    'id':str},
-                mandatory = ['id']):
+        if self.require(
+                types=
+                {
+                    's': toarray,
+                    'h': toarray,
+                    'T': toarray,
+                    'p': toarray,
+                    'd': toarray,
+                    'x': toarray,
+                    'id': str
+                },
+                mandatory=['id']):
             return
-            
+
         # Retrieve the PM entry
         if self.getid(self.args['id']):
             return
-        
-        
+
+
     def process(self):
         """Process the request
-    This method is responsible for populating the "out" member dict with 
-correctly formatted data that can be returned as a JSON object.  
-"""
+        This method is responsible for populating the "out" member dict with
+        correctly formatted data that can be returned as a JSON object.
+        """
         # If there was an error, abort the processing
         if self.out['error']:
             return
         elif not isinstance(self.substance, pm.reg.__basedata__):
             self.error('Substance data seems to be corrupt!  Halting.\n')
             return
-        
+
         #
         # Case out whether to use ideal gas or multi-phase processing
         #
@@ -149,133 +161,38 @@ correctly formatted data that can be returned as a JSON object.
         else:
             self.error(f'Could not determine the collection for substance: {self.substance.data["id"]}\n')
             return
-            
+
         # Finally, clean up the return parameters
-        for name,value in self.out.items():
-            if isinstance(value,np.ndarray):
-                if value.size == 1:
-                    self.out[name] = np.asscalar(value)
-                else:
-                    self.out[name] = value.tolist()
-        
+        clean(self.out)
+
+
     def _ig_process(self):
         self.error('THE IG PROCESS IS NOT WRITTEN YET!\nSorry for shouting\n')
-        
-        
+
+
     def _mp_process(self):
         """_mp_process
-        
-The _mp_process and _ig_process methods are responsible for casing out
-the different valid property combinations to calculate all the rest.
-"""
+
+        The _mp_process and _ig_process methods are responsible for casing out
+        the different valid property combinations to calculate all the rest.
+        """
         args = self.args.copy()
-        self.out.update(args)
+        self.out['inputs'] = self.args
         # Leave only the property arguments
         args.pop('id')
-        
-        if len(args) != 2:
-            self.error('Two properties are required.  Found:')
+
+        try:
+            self.out['data'] = self.substance.state(**args)
+        except pm.utility.PMParamError as e:
+            self.error(e.args[0])
+            self.error(' Args found:')
             prefix = '  '
             for name in args:
                 self.warn(prefix + name)
                 prefix = ', '
             return
 
-        # We'll need to case out the inverse functions.  There are more
-        # pythonic ways to do this using PYroMat's flexible interface, but
-        # this way is more likely to fail gracefully or not at all.
-        # 
-        # In this first stage, we make sure we have Temperature and density
-        # regardless of the other arguments.  Enthalpy and entropy are the
-        # most nuanced, so we'll handle them first.
-        T = None
-        d = None
-        if 'h' in args:
-            if 'p' in args:
-                try:
-                    T,self.out['x'] = self.substance.T_h(args['h'], p=args['p'], quality=True)
-                    self.out['T'] = T
-                    self.out['d'] = d = self.substance.d(T=T,p=args['p'])
-                except:
-                    self.error('The state may not be valid. Returned with error:\n')
-                    self.warn(str(sys.exc_info()[1]) + '\n')
-                    return True
-            elif 'd' in args:
-                d = args['d']
-                try:
-                    T,self.out['x'] = self.substance.T_h(args['h'], d=args['d'], quality=True)
-                    self.out['T'] = T
-                except:
-                    self.error('The state may not be valid. Returned with error:\n')
-                    self.warn(str(sys.exc_info()[1]) + '\n')
-                    return True
-            else:
-                self.error('Enthalpy (h) requires pressure (p) or density (d) to be specified.\nFound:')
-                prefix = '  '
-                for name in args:
-                    self.warn(prefix + name)
-                    prefix = ', '
-                self.warn('\n')
-                return True
-            
-        elif 's' in args:
-            s = args['s']
-            if 'T' in args:
-                T = args['T']
-                try:
-                    d,self.out['x'] = self.substance.d_s(s=args['s'], T=T, quality=True)
-                    self.out['d'] = d
-                except:
-                    self.error('The state may not be valid. Returned with error:\n')
-                    self.warn(str(sys.exc_info()[1]) + '\n')
-                    return True
-            elif 'p' in args:
-                try:
-                    T,self.out['x'] = self.substance.T_s(s=args['s'], p=args['s'], quality=True)
-                    self.out['T'] = T
-                    self.out['d'] = d = self.substance.d(T=T, p=args['p'])
-                except:
-                    self.error('The state may not be valid. Returned with error:\n')
-                    self.warn(str(sys.exc_info()[1]) + '\n')
-                    return True
-            elif 'd' in args:
-                d = args['d']
-                try:
-                    T,self.out['x'] = self.substance.T_s(s=args['s'], d=args['d'], quality=True)
-                    self.out['T'] = T
-                except:
-                    self.error('The state may not be valid. Returned with error:\n')
-                    self.warn(str(sys.exc_info()[1]) + '\n')
-                    return True
-        # Now the simple cases - no inverse routines
-        else:
-            if 'T' in args:
-                T = args['T']
-            else:
-                self.out['T'] = T = self.substance.T(**args)
-            
-            if 'd' in args:
-                d = args['d']
-            else:
-                self.out['d'] = d = self.substance.d(**args)
-        # Add in the missing properties
-        try:
-            if 'p' not in self.out:
-                self.out['p'] = self.substance.p(T=T,d=d)
-            if 'h' not in self.out:
-                self.out['h'] = self.substance.h(T=T,d=d)
-            if 's' not in self.out:
-                self.out['s'] = self.substance.s(T=T,d=d)
-            # add properties that are never accepted as arguments
-            self.out['gam'] = self.substance.gam(T=T,d=d)
-            self.out['cp'] = self.substance.cp(T=T,d=d)
-            self.out['cv'] = self.substance.cv(T=T,d=d)
-            
-        except:
-            self.error('Failed while evaluating properties\n')
-            self.warn(str(sys.exc_info()[1]) + '\n')
-            return True
-            
+
 
 
 ############################
@@ -296,11 +213,14 @@ def pmgi():
         args = dict(request.form)
     elif request.method == 'GET':
         args = dict(request.args)
-        
+
     pr = PropertyRequest(args)
     pr.process()
-    return pr.out
-        
+    if pr.out['error']:
+        return pr.out, 500
+    else:
+        return pr.out, 200
+
 # The get pmgi returns substance metadata
 @app.route('/get', methods=['POST', 'GET'])
 def get():
@@ -310,21 +230,21 @@ def get():
     elif request.method == 'GET':
         pass
     return out
-        
+
 # The info pmgi will return the results of queries (e.g. substance search)
 @app.route('/info', methods=['POST', 'GET'])
 def info():
     return {}
 
-# Version is responsible for returning basic system information 
+# Version is responsible for returning basic system information
 # This will be important if users want to diagnose differences between
 # local pyromat behaviors and webserver responses.
 @app.route('/version')
 def meta():
     out = {
         'python': sys.version.split()[0],
-        'flask':flaskv, 
-        'pyromat':pm.config['version'], 
+        'flask':flaskv,
+        'pyromat':pm.config['version'],
         'pmgi':__version__,
         'numpy':np.version.full_version,
     }
