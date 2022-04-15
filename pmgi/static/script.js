@@ -77,6 +77,58 @@ class PointSubject extends Subject{
 }
 
 
+class Plot{
+    constructor(targetDiv) {
+        this.x_prop = 's';
+        this.y_prop = 'T';
+        this.container = targetDiv;
+        this.layout();
+      let traces = [{
+          x: [],
+          y: [],
+          mode: 'markers',
+          type: 'scatter'
+      }];
+        //data.push({x:0,y:0})
+        Plotly.newPlot(this.container, traces, this.layout);
+    }
+
+    layout(){
+        let x_scale;
+        let y_scale;
+        if (this.x_prop == 'v'){
+            x_scale = 'log';
+        } else {
+            x_scale = 'linear';
+            }
+        if (this.y_prop == 'p'){
+            y_scale = 'log';
+        } else {
+            y_scale = 'linear';
+        }
+
+        this.layout = {
+            xaxis: {
+                type: x_scale,
+                autorange: true
+            },
+            yaxis: {
+                type: y_scale,
+                autorange: true
+            },
+            margin: { t: 0 }
+        };
+
+    }
+    updatePoints(point) {
+        let data = {
+            x: [[point[this.x_prop]]],
+            y: [[point[this.y_prop]]]
+        }
+        Plotly.extendTraces(this.container, data, [0]);
+    }
+}
+
 
 // *********************************************
 // * PAGE SETUP
@@ -85,6 +137,7 @@ class PointSubject extends Subject{
 // Instantiate the classes
 var unitMaster;
 var pointMaster;
+var plotMaster;
 
 
 // Execute when the page loads
@@ -93,7 +146,10 @@ $(document).ready(function(){
     unitMaster.addListener(setup_units);
 
     pointMaster = new PointSubject();
-    pointMaster.addListener(buildTable)
+    pointMaster.addListener(buildTable);
+    pointMaster.addListener(drawPlot);
+
+    plotMaster = new Plot(document.getElementById("plot"));
 
     // This function extracts info from Pyromat
     getInfo();
@@ -147,6 +203,15 @@ function buildTable(data){
     row.insertCell(2).innerHTML = data["d"][lasti];
     row.insertCell(3).innerHTML = data["h"][lasti];
     row.insertCell(4).innerHTML = data["s"][lasti];
+}
+
+function drawPlot(data){
+    let lasti = data['T'].length-1;
+    let point = {};
+    for (const key in data) {
+        point[key] = data[key][lasti];
+    }
+    plotMaster.updatePoints(point);
 }
 
 
