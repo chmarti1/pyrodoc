@@ -1,7 +1,88 @@
+class Subject {
+    // https://webdevstudios.com/2019/02/19/observable-pattern-in-javascript/
+    constructor() {
+        this.listeners = [];
+    }
+
+    addListener(listener) {
+        this.listeners.push(listener);
+    }
+
+    removeListener(listener) {
+        const removeIndex = this.listeners.findIndex(obs => {
+            return listener === obs;
+        });
+
+        if (removeIndex !== -1) {
+            this.listeners = this.listeners.slice(removeIndex, 1);
+        }
+    }
+
+    notify(subObj) {
+        if (this.listeners.length > 0) {
+            this.listeners.forEach(listener => listener(subObj));
+        }
+    }
+}
+
+class UnitConfig extends Subject{
+    constructor() {
+        super();
+        this.units = {};
+        this.valid_units = {};
+    }
+
+    update_units(units, valid_units=null){
+        this.units = units;
+        if (valid_units !== null){
+            this.valid_units = valid_units;
+        }
+        this.notify(this)
+    }
+}
+
+var unitMaster;
+
 // Execute when the page loads
 $(document).ready(function(){
-
+    unitMaster = new UnitConfig();
+    unitMaster.addListener(setup_units);
+    get_info();
 });
+
+function setup_units(unitConfig){
+    // Get the unit JSON from the data
+    let units = unitConfig.units;
+    let valid_units = unitConfig.valid_units;
+
+    // Loop over all the configured unit types
+    Object.keys(valid_units).forEach(val => {
+        // The form will be a list of labelled select boxes
+        let $li = $("<li>")
+        let $label = $('<label>'+val.charAt(0).toUpperCase() + val.slice(1)+'</label>', {});
+        let $select = $('<select/>', {'name': val});
+
+        // Loop over each valid unit within the given unit category
+        valid_units[val].forEach(opt => {
+            // Add an option to the select that corresponds to it
+            $select.append($("<option>").val(opt).text(opt));
+        });
+        // Set the selected value
+        $select.val(units[val]);
+        // Add the objects to the form
+        $('#unitform').append($li.append($label).append($select));
+    });
+    unitMaster.removeListener(setup_units);
+}
+
+
+function get_info(){
+    $.get("/info", function (data){
+        unitMaster.update_units(data.units, data.valid_units);
+    },
+    dataType='json')
+    .fail(propResponseFail);
+}
 
 
 function popup() {
@@ -12,11 +93,11 @@ function popup() {
   } else {
         popwindow.style.display = "none";
     }
-};
-
+}
 
 /**
- * Convert a form object into JSON that is suitable for passing to PMGI.
+ * Convert the properties form object into JSON that is suitable for passing to
+ * PMGI.
  *
  * Form elements must have a "name" field. The keys of the JSON will be
  * shortened using only the first letter of the name. In order to be useful
@@ -102,6 +183,7 @@ function getProps(){
 }
 
 
+// Based on an example from stackoverflow
 function populate_list() {
     $.getJSON("/Admin/GetFolderList/", function(result) {
         var $dropdown = $("#dropdown");
