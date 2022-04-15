@@ -1,3 +1,9 @@
+// *********************************************
+// * CLASSES
+// *********************************************
+
+// A parent class for a observables that notify listeners when they get changed
+// In this case, listener is just a function object that will be called.
 class Subject {
     // https://webdevstudios.com/2019/02/19/observable-pattern-in-javascript/
     constructor() {
@@ -25,7 +31,9 @@ class Subject {
     }
 }
 
-class UnitConfig extends Subject{
+// An instance of observable that will hold the current unit configuration and
+// notify when it is changed
+class UnitConfigSubject extends Subject{
     constructor() {
         super();
         this.units = {};
@@ -39,55 +47,116 @@ class UnitConfig extends Subject{
         }
         this.notify(this)
     }
+
+    cfgAsJSON(){
+        return Object.fromEntries(new FormData(document.getElementById("unitform")));
+    }
 }
 
+// An instance of observable that will hold an array of individual thermodynamic
+// points that have been computed.
+class PointSubject extends Subject{
+    constructor() {
+        super();
+        this.points = undefined
+    }
+
+    add_point(point){
+        if (this.points === undefined){
+            this.points = {};
+            for (const key in point) {
+                this.points[key] = [point[key]];
+            }
+        } else {
+            for (const key in point) {
+                this.points[key].push(point[key]);
+            }
+        }
+        this.notify(this.points)
+    }
+}
+
+
+
+// *********************************************
+// * PAGE SETUP
+// *********************************************
+
+// Instantiate the classes
 var unitMaster;
+var pointMaster;
+
 
 // Execute when the page loads
 $(document).ready(function(){
-    unitMaster = new UnitConfig();
+    unitMaster = new UnitConfigSubject();
     unitMaster.addListener(setup_units);
-    get_info();
+
+    pointMaster = new PointSubject();
+    pointMaster.addListener(buildTable)
+
+    // This function extracts info from Pyromat
+    getInfo();
 });
 
+
 function setup_units(unitConfig){
+    //Program flow is -
+    // - Setup document
+    // - this function listens for when units are ready
+    // - get unit info from pyromat
+    // - get notified -> set up the form
+
     // Get the unit JSON from the data
     let units = unitConfig.units;
     let valid_units = unitConfig.valid_units;
 
     // Loop over all the configured unit types
-    Object.keys(valid_units).forEach(val => {
+    Object.keys(valid_units).forEach(unit_cat => {
         // The form will be a list of labelled select boxes
         let $li = $("<li>")
-        let $label = $('<label>'+val.charAt(0).toUpperCase() + val.slice(1)+'</label>', {});
-        let $select = $('<select/>', {'name': val});
+        let capital_name = unit_cat.charAt(0).toUpperCase() + unit_cat.slice(1);
+        let $label = $('<label>'+capital_name+'</label>', {});
+        let $select = $('<select/>', {'name': unit_cat});
 
         // Loop over each valid unit within the given unit category
-        valid_units[val].forEach(opt => {
+        valid_units[unit_cat].forEach(unit_opt => {
             // Add an option to the select that corresponds to it
-            $select.append($("<option>").val(opt).text(opt));
+            $select.append($("<option>").val(unit_opt).text(unit_opt));
         });
         // Set the selected value
-        $select.val(units[val]);
+        $select.val(units[unit_cat]);
         // Add the objects to the form
         $('#unitform').append($li.append($label).append($select));
     });
     unitMaster.removeListener(setup_units);
 }
 
+// *********************************************
+// * DATA DISPLAY
+// *********************************************
 
-function get_info(){
-    $.get("/info", function (data){
-        unitMaster.update_units(data.units, data.valid_units);
-    },
-    dataType='json')
-    .fail(propResponseFail);
+
+function buildTable(data){
+    // Respond to additional points being added
+    let table = document.getElementById("proptable");
+    let lasti = data['T'].length-1;
+    let row = table.insertRow(table.rows.length-1);
+    row.insertCell(0).innerHTML = data["T"][lasti];
+    row.insertCell(1).innerHTML = data["p"][lasti];
+    row.insertCell(2).innerHTML = data["d"][lasti];
+    row.insertCell(3).innerHTML = data["h"][lasti];
+    row.insertCell(4).innerHTML = data["s"][lasti];
 }
 
 
+// *********************************************
+// * INTERACTIVITY
+// *********************************************
+
 function popup() {
     // TODO - make this a units edit place
-   var popwindow = document.getElementById("checkBundle");
+   var popwindow = document.getElementById("hideablelist");
    if (popwindow.style.display === "none") {
        popwindow.style.display = "block";
   } else {
@@ -95,103 +164,6 @@ function popup() {
     }
 }
 
-/**
- * Convert the properties form object into JSON that is suitable for passing to
- * PMGI.
- *
- * Form elements must have a "name" field. The keys of the JSON will be
- * shortened using only the first letter of the name. In order to be useful
- * with PMGI, the form element names should all use their PMGI property
- * identifier as their first letter.
- *
- * @param formID the Element ID of the form
- * @returns Object, keyed by thermodynamic property, with values as floats.
- */
-function propFormToJSON(formID, append){
-
-    let outdata = {};
-    let data = Object.fromEntries(new FormData(document.getElementById(formID)));
-    for (const key in data) {
-        let shortkey = key[0];
-        let v = parseFloat(data[key]);
-        if (v){
-            outdata[shortkey] = v;
-        }
-    };
-
-    if (append !== undefined){
-        for (const key in append){
-            outdata[key] = append[key];
-        }
-    }
-    return outdata;
-}
-
-
-function buildTable(data){
-    var table = document.getElementById("proptable");
-    var row = table.insertRow(table.rows.length-1);
-    row.insertCell(0).innerHTML = data.T;
-    row.insertCell(1).innerHTML = data.p;
-    row.insertCell(2).innerHTML = data.d;
-    row.insertCell(3).innerHTML = data.h;
-    row.insertCell(4).innerHTML = data.s;
-}
-
-
-
-function propResponseSuccess(data){
-    // TODO generalize!!
-    buildTable(data.data);
-}
-
-function propResponseFail(data){
-    // TODO better error handling?
-    try {
-       let resp = JSON.parse(data.responseText);
-       alert(resp.message);
-    } catch (error) {
-       alert("An unhandled error occurred: " + data.responseText);
-    }
-}
-
-
-function postProps(){
-    let requestroute = "/";
-    let formData = propFormToJSON('propform', {'id': 'mp.H2O'});
-    let unitFormData = Object.fromEntries(new FormData(document.getElementById("unitform")));
-    let postData = {state_input: formData, units: unitFormData};
-    // Forced to operate as $.ajax because we need to specify that we're
-    // passing json.
-    $.ajax({
-        url: requestroute,
-        type: "POST",
-        data: JSON.stringify(postData),
-        dataType: "json",
-        contentType: 'application/json; charset=utf-8',
-        success: propResponseSuccess,
-        error: propResponseFail
-    });
-}
-
-
-function getProps(){
-    let requestroute = "/";
-    let formData = propFormToJSON('propform', {'id': 'mp.H2O'});
-   $.get(requestroute, formData, propResponseSuccess,dataType='json')
-    .fail(propResponseFail);
-}
-
-
-// Based on an example from stackoverflow
-function populate_list() {
-    $.getJSON("/Admin/GetFolderList/", function(result) {
-        var $dropdown = $("#dropdown");
-        $.each(result, function() {
-            $dropdown.append($("<option />").val(this.ImageFolderID).text(this.Name));
-        });
-    });
-}
 
 //
 // function updateinputs() {
@@ -221,3 +193,101 @@ function populate_list() {
 //
 //     // Then, grey out the entries that are zero (if appropriate)
 // }
+
+
+// *********************************************
+// * COMMUNICATION WITH SERVER
+// *********************************************
+
+
+
+
+function propResponseSuccess(data){
+    // TODO generalize!!
+    pointMaster.add_point(data.data);
+}
+
+function propResponseFail(data){
+    // TODO better error handling?
+    try {
+       let resp = JSON.parse(data.responseText);
+       alert(resp.message);
+    } catch (error) {
+       alert("An unhandled error occurred: " + data.responseText);
+    }
+}
+
+
+function postProps(){
+    let requestroute = "/";
+    let formData = propFormToJSON('propform', {'id': 'mp.H2O'});
+    let unitFormData = unitMaster.cfgAsJSON();
+    let postData = {state_input: formData, units: unitFormData};
+    // Forced to operate as $.ajax because we need to specify that we're
+    // passing json.
+    $.ajax({
+        url: requestroute,
+        type: "POST",
+        data: JSON.stringify(postData),
+        dataType: "json",
+        contentType: 'application/json; charset=utf-8',
+        success: propResponseSuccess,
+        error: propResponseFail
+    });
+}
+
+
+function getProps(){
+    let requestroute = "/";
+    let formData = propFormToJSON('propform', {'id': 'mp.H2O'});
+   $.get(requestroute, formData, propResponseSuccess,dataType='json')
+    .fail(propResponseFail);
+}
+
+
+function getInfo(){
+    // Get all the PM info.
+    // TODO - the list of substances
+    $.get("/info", function (data){
+        unitMaster.update_units(data.units, data.valid_units);
+    },
+    dataType='json')
+    .fail(propResponseFail);
+}
+
+
+
+/**
+ * Convert the properties form's data into JSON that is suitable for passing to
+ * PMGI.
+ *
+ * Form elements must have a "name" field. The keys of the JSON will be
+ * shortened using only the first letter of the name. In order to be useful
+ * with PMGI, the form element names should all use their PMGI property
+ * identifier as their first letter.
+ *
+ * @param formID the Element ID of the form
+ * @returns Object, keyed by thermodynamic property, with values as floats.
+ */
+function propFormToJSON(formID, append){
+    //TODO - probably make this more general
+    let outdata = {};
+    let data = Object.fromEntries(new FormData(document.getElementById(formID)));
+    for (const key in data) {
+        // The key we need for the JSON is just a single letter, not the full name
+        let shortkey = key[0];
+        let v = parseFloat(data[key]);
+        if (v){
+            outdata[shortkey] = v;
+        }
+    };
+
+    if (append !== undefined){
+        for (const key in append){
+            outdata[key] = append[key];
+        }
+    }
+    return outdata;
+}
+
+

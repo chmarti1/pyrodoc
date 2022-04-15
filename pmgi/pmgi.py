@@ -304,8 +304,18 @@ def get():
 # The info pmgi will return the results of queries (e.g. substance search)
 @app.route('/info', methods=['POST', 'GET'])
 def info():
-    return {'units': UnitHandler.get_units(),
-            'valid_units': UnitHandler.list_valid_units()}
+    substs = pm.info(verbose=False)
+    prefixes = [i.split('.')[0] for i in substs]
+    allsubs = {key: [] for key in prefixes}
+    for sub in substs:
+        prefix, subst = sub.split('.')
+        allsubs[prefix].append(subst)
+
+    return {
+        'substances': allsubs,
+        'units': UnitHandler.get_units(),
+        'valid_units': UnitHandler.list_valid_units()
+    }
 
 # Version is responsible for returning basic system information
 # This will be important if users want to diagnose differences between
