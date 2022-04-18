@@ -1,4 +1,27 @@
 // *********************************************
+// * PAGE CREATION OUTLINE
+// *********************************************
+// * * Create HTML Document
+// * * Get Info from Pyromat
+// * * * Create Units selector
+// * * * Create substance selector
+// * * Define Current Units
+// * * Define Current Substance
+// * * Initialize User-specified Data Model
+// * * Initialize Plot
+// * * * Compute steam dome/isolines
+// * * * Initialize Point Trace
+// * * * Create Plot Axis Selector
+// * * Initialize Table
+// * * Allow User Interaction
+// * * * Create Points
+// * * * Delete Points
+// * * * Change Units
+// * * * Change Substance
+// * * * Change display options?
+
+
+// *********************************************
 // * CLASSES
 // *********************************************
 
