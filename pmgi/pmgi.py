@@ -142,9 +142,11 @@ class PropertyRequest(PMGIRequest):
                 {
                     's': toarray,
                     'h': toarray,
+                    'e': toarray,
                     'T': toarray,
                     'p': toarray,
                     'd': toarray,
+                    'v': toarray,
                     'x': toarray,
                     'id': str
                 },
@@ -154,7 +156,7 @@ class PropertyRequest(PMGIRequest):
         # Config the units
         if units is not None:
             try:
-                UnitHandler.set_units(units)
+                InfoHandler.set_units(units)
             except pm.utility.PMParamError as e:
                 self.error(e.args[0])
 
@@ -216,16 +218,34 @@ class PropertyRequest(PMGIRequest):
             return
 
 
-class UnitHandler:
+class InfoHandler:
     _valid_unit_strs = ['energy', 'force', 'length', 'mass', 'molar', 'pressure', 'temperature', 'time', 'volume']
+
+    @staticmethod
+    def list_valid_substances(sub_cat=None):
+        substs = pm.info(verbose=False)
+        prefixes = [i.split('.')[0] for i in substs]
+        if sub_cat is not None:
+            if sub_cat in prefixes:
+                prefixes = [sub_cat]
+            else:
+                raise pm.utility.PMParamError("Invalid substance class:"
+                                              f"{sub_cat}")
+
+        # Initialize a dict, containing an empty list for each subst class/key.
+        allsubs = {key: [] for key in prefixes}
+        for sub in substs:
+            prefix, subst = sub.split('.')
+            allsubs[prefix].append(subst)
+        return allsubs
 
     @staticmethod
     def set_units(units):
         units = dict(units)
 
         for name, value in units.items():
-            if name in UnitHandler._valid_unit_strs and \
-                    value in UnitHandler.list_valid_units(name):
+            if name in InfoHandler._valid_unit_strs and \
+                    value in InfoHandler.list_valid_units(name):
                 pm.config['unit_'+name] = value
             else:
                 raise pm.utility.PMParamError("Invalid unit specification:"
@@ -246,7 +266,7 @@ class UnitHandler:
         out = {}
 
         if units is None:
-            units = UnitHandler._valid_unit_strs
+            units = InfoHandler._valid_unit_strs
 
         if type(units) is str:
             unitfun = getattr(pm.units, units)
@@ -304,17 +324,10 @@ def get():
 # The info pmgi will return the results of queries (e.g. substance search)
 @app.route('/info', methods=['POST', 'GET'])
 def info():
-    substs = pm.info(verbose=False)
-    prefixes = [i.split('.')[0] for i in substs]
-    allsubs = {key: [] for key in prefixes}
-    for sub in substs:
-        prefix, subst = sub.split('.')
-        allsubs[prefix].append(subst)
-
     return {
-        'substances': allsubs,
-        'units': UnitHandler.get_units(),
-        'valid_units': UnitHandler.list_valid_units()
+        'substances': InfoHandler.list_valid_substances(),
+        'units': InfoHandler.get_units(),
+        'valid_units': InfoHandler.list_valid_units()
     }
 
 # Version is responsible for returning basic system information

@@ -3,10 +3,9 @@
 // *********************************************
 // * * Create HTML Document
 // * * Get Info from Pyromat
-// * * * Create Units selector
-// * * * Create substance selector
-// * * Define Current Units
-// * * Define Current Substance
+// * * * Create Units selector +
+// * * * Create substance selector +
+// * * Define Current Units +
 // * * Initialize User-specified Data Model
 // * * Initialize Plot
 // * * * Compute steam dome/isolines
@@ -56,18 +55,26 @@ class Subject {
 
 // An instance of observable that will hold the current unit configuration and
 // notify when it is changed
-class UnitConfigSubject extends Subject{
+class InfoSubject extends Subject{
     constructor() {
         super();
         this.units = {};
         this.valid_units = {};
+        this.substances = {};
     }
 
-    update_units(units, valid_units=null){
-        this.units = units;
+    set_data(units, valid_units=null, substances=null){
         if (valid_units !== null){
             this.valid_units = valid_units;
         }
+        if (substances !== null){
+            this.substances = substances;
+        }
+        this.change_units(units)
+    }
+
+    change_units(units){
+        this.units = units;
         this.notify(this)
     }
 
@@ -81,11 +88,15 @@ class UnitConfigSubject extends Subject{
 class PointSubject extends Subject{
     constructor() {
         super();
-        this.points = undefined
+        this.points = []
+    }
+
+    recalculate(){
+        // Pass points back to Python
     }
 
     add_point(point){
-        if (this.points === undefined){
+        if (this.points.length === 0){
             this.points = {};
             for (const key in point) {
                 this.points[key] = [point[key]];
@@ -97,6 +108,18 @@ class PointSubject extends Subject{
         }
         this.notify(this.points)
     }
+
+    delete_point(id){
+        for (const key in this.points) {
+                this.points[key].splice(id, 1);
+        }
+        this.notify(this.points);
+    }
+
+    clearpoints(){
+        this.points = [];
+        this.notify(this.points);
+    }
 }
 
 
@@ -104,12 +127,19 @@ class Plot{
     constructor(targetDiv) {
         this.x_prop = 's';
         this.y_prop = 'T';
+        this.dispprops = ['T','s','p','v'];
         this.container = targetDiv;
+        this.updatePoints = this.updatePoints.bind(this);
         this.layout();
       let traces = [{
           x: [],
           y: [],
+          customdata: [1],
           mode: 'markers',
+          hovertemplate: "<b> Point prop<br>"+
+              this.x_prop+": %{x}<br>" +
+              this.y_prop+": %{y}<br>" +
+              "attr: %{customdata: .2f}",
           type: 'scatter'
       }];
         //data.push({x:0,y:0})
@@ -143,52 +173,143 @@ class Plot{
         };
 
     }
-    updatePoints(point) {
-        let data = {
-            x: [[point[this.x_prop]]],
-            y: [[point[this.y_prop]]]
+
+    updatePoints(points) {
+        // Build the customdata object for the tooltip
+        // Object has the form [[h1,v1,s1],[h2,v2,s2],[h3,v3,s3]]
+
+        let allkeys = Object.keys(points);
+        let customdataset = [];  // The custom data that will be added to the tooltip
+        let keylist = [];
+        for (let i=0; i<points['T'].length; i++ ){  // Loop over all points
+            let arr = [] // Build an array of all props for this index.
+            arr.push(i); // Make the index the very first datapoint.
+
+            allkeys.forEach(key => {
+                if (key !== this.x_prop &&
+                    key !== this.y_prop &&
+                    this.dispprops.includes(key)) {
+                    if (i==0) {
+                        keylist.push(key);
+                    }
+                    arr.push(points[key][i]);
+                }
+            });
+            customdataset.push(arr);
         }
-        Plotly.extendTraces(this.container, data, [0]);
+
+        // customdataset is now (id, <insert keylist>)
+
+        // Build the strings that identify the points
+        let customrows = "";
+        for (let i=0; i<keylist.length; i++){
+            customrows = customrows + keylist[i] + ": %{customdata["+(i+1)+"]}<br>";
+        }
+
+        // Fully replace trace, including the custom data
+        let update = {
+             x: [points[this.x_prop]],
+             y: [points[this.y_prop]],
+            customdata: [customdataset],
+            hovertemplate: "<b> Point %{customdata[0]}<br>"+
+              this.x_prop+": %{x}<br>" +
+              this.y_prop+": %{y}<br>" +
+                customrows,
+        }
+        Plotly.restyle(this.container, update, [0]) // May need to adjust traceID to accommodate the isolines, etc.
     }
 }
 
+class Table{
+    // delete rows? https://stackoverflow.com/questions/64526856/how-to-add-edit-delete-buttons-in-each-row-of-datatable
+    constructor(targetDiv) {
+        this.dispprops = ['T','p','d','h','s'];
+        this.container = targetDiv;
+        this.updatePoints = this.updatePoints.bind(this);
+        let table = new DataTable('#proptable', {
+        "columnDefs": [ {
+            "targets": -1,
+            "data": null,
+            "defaultContent": "<button id='click2del'>Delete</button>"
+        } ]
+        });
+
+        $(targetDiv + ' tbody').on( 'click', 'button', function () {
+        var data = table.row( $(this).parents('tr') ).data();
+        pointContainer.delete_point(data[0]);
+    } );
+        this.table = table;
+    }
+
+    updatePoints(points) {
+        this.table.rows().remove();
+
+        let customdataset = [];  // The custom data that will be added to the tooltip
+        for (let i=0; i<points['T'].length; i++ ){  // Loop over all points
+            let arr = [] // Build an array of all props for this index.
+            arr.push(i);
+            this.dispprops.forEach(key => {
+                arr.push(points[key][i]);
+            });
+            customdataset.push(arr)
+        }
+
+        for (let i=0; i<customdataset.length; i++ ) {  // Loop over all rows
+            this.table.row.add(customdataset[i]).draw();
+        }
+    }
+}
+
+
+function deletePoint(btn){
+    alert("LOL");
+}
 
 // *********************************************
 // * PAGE SETUP
 // *********************************************
 
 // Instantiate the classes
-var unitMaster;
-var pointMaster;
-var plotMaster;
+var infoContainer;
+var pointContainer;
+var plotContainer;
+var tableContainer;
 
 
 // Execute when the page loads
 $(document).ready(function(){
-    unitMaster = new UnitConfigSubject();
-    unitMaster.addListener(setup_units);
+    tableContainer = new Table('#proptable');
 
-    pointMaster = new PointSubject();
-    pointMaster.addListener(buildTable);
-    pointMaster.addListener(drawPlot);
+    plotContainer = new Plot(document.getElementById("plot"));
 
-    plotMaster = new Plot(document.getElementById("plot"));
-
-    // This function extracts info from Pyromat
+    // Listen for the Info callback from PMGI and update data
+    infoContainer = new InfoSubject();
+    infoContainer.addListener(setup_selects);
     getInfo();
+
+    pointContainer = new PointSubject();
+    pointContainer.addListener(plotContainer.updatePoints);
+    pointContainer.addListener(tableContainer.updatePoints);
+
+
 });
 
 
-function setup_units(unitConfig){
+function setup_selects(data_subject){
     //Program flow is -
     // - Setup document
     // - this function listens for when units are ready
-    // - get unit info from pyromat
-    // - get notified -> set up the form
+    // - get unit info from pyromat (getInfo())
+    // - Update the Observable with the PMGI info data
+    // - this gets notified -> set up the form
+
+    // Remove from the list
+    infoContainer.removeListener(setup_selects);
 
     // Get the unit JSON from the data
-    let units = unitConfig.units;
-    let valid_units = unitConfig.valid_units;
+    let units = data_subject.units;
+    let valid_units = data_subject.valid_units;
+    let substances = data_subject.substances
 
     // Loop over all the configured unit types
     Object.keys(valid_units).forEach(unit_cat => {
@@ -208,34 +329,51 @@ function setup_units(unitConfig){
         // Add the objects to the form
         $('#unitform').append($li.append($label).append($select));
     });
-    unitMaster.removeListener(setup_units);
+
+    let subsel = $('#sel_substance');
+    // Loop over the substances, create option group for each category
+    Object.keys(substances).forEach(subgrp => {
+        let optgroup = $('<optgroup>');
+        optgroup.attr('label',subgrp);
+        substances[subgrp].forEach(substance =>{
+            optgroup.append($("<option>").val(substance).text(substance));
+        });
+        subsel.append(optgroup);
+    });
+    subsel.val('H2O')
+
+    infoContainer.addListener(onUnitsChanged);
 }
 
 // *********************************************
 // * DATA DISPLAY
 // *********************************************
 
-
-function buildTable(data){
-    // Respond to additional points being added
-    let table = document.getElementById("proptable");
-    let lasti = data['T'].length-1;
-    let row = table.insertRow(table.rows.length-1);
-    row.insertCell(0).innerHTML = data["T"][lasti];
-    row.insertCell(1).innerHTML = data["p"][lasti];
-    row.insertCell(2).innerHTML = data["d"][lasti];
-    row.insertCell(3).innerHTML = data["h"][lasti];
-    row.insertCell(4).innerHTML = data["s"][lasti];
+function onUnitsChanged(infoMaster){
+    // TODO - Handle behavior when units change
 }
 
-function drawPlot(data){
-    let lasti = data['T'].length-1;
-    let point = {};
-    for (const key in data) {
-        point[key] = data[key][lasti];
-    }
-    plotMaster.updatePoints(point);
-}
+
+// function buildTable(data){
+//     // Respond to additional points being added
+//     // let table = document.getElementById("proptable");
+//     // let lasti = data['T'].length-1;
+//     // let row = table.insertRow(table.rows.length-1);
+//     // row.insertCell(0).innerHTML = data["T"][lasti];
+//     // row.insertCell(1).innerHTML = data["p"][lasti];
+//     // row.insertCell(2).innerHTML = data["d"][lasti];
+//     // row.insertCell(3).innerHTML = data["h"][lasti];
+//     // row.insertCell(4).innerHTML = data["s"][lasti];
+// }
+//
+// function drawPlot(data){
+//     let lasti = data['T'].length-1;
+//     let point = {};
+//     for (const key in data) {
+//         point[key] = data[key][lasti];
+//     }
+//     plotContainer.updatePoints(point);
+// }
 
 
 // *********************************************
@@ -288,11 +426,10 @@ function popup() {
 // *********************************************
 
 
-
-
+// Callbacks
 function propResponseSuccess(data){
     // TODO generalize!!
-    pointMaster.add_point(data.data);
+    pointContainer.add_point(data.data);
 }
 
 function propResponseFail(data){
@@ -305,11 +442,11 @@ function propResponseFail(data){
     }
 }
 
-
+// AJAX
 function postProps(){
     let requestroute = "/";
     let formData = propFormToJSON('propform', {'id': 'mp.H2O'});
-    let unitFormData = unitMaster.cfgAsJSON();
+    let unitFormData = infoContainer.cfgAsJSON();
     let postData = {state_input: formData, units: unitFormData};
     // Forced to operate as $.ajax because we need to specify that we're
     // passing json.
@@ -336,8 +473,8 @@ function getProps(){
 function getInfo(){
     // Get all the PM info.
     // TODO - the list of substances
-    $.get("/info", function (data){
-        unitMaster.update_units(data.units, data.valid_units);
+    $.get("/info", data=> {
+        infoContainer.set_data(data.units, data.valid_units, data.substances);
     },
     dataType='json')
     .fail(propResponseFail);
