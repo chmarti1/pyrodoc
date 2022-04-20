@@ -24,7 +24,7 @@
 // * CLASSES
 // *********************************************
 Number.prototype.between = function(min, max) {
-  return this >= min && this <= max;
+    return this >= min && this <= max;
 };
 
 
@@ -57,32 +57,103 @@ class Subject {
     }
 }
 
-// An instance of observable that will hold the current unit configuration and
-// notify when it is changed
-class InfoSubject extends Subject{
 
+class SubstanceSubject extends Subject{
     SUB_SHORTLIST=["H2O","C2H4F4","air","O2", "N2"];;
 
-    constructor() {
+    constructor(form, show_all=false) {
+        super();
+        this.substances = {};
+        this.form_init = false;
+        this.show_all = show_all;
+        this.target = form;
+    }
+
+    set_data(substances=null) {
+        this.substances = substances;
+        if (!this.form_init){
+            this.setup();
+        }
+        this.notify(this);
+    }
+
+
+
+    setup(){
+
+        let substances = this.substances;
+
+        let subsel = $(this.target);
+        // Loop over the substances, create option group for each category
+        Object.keys(substances).forEach(subgrp => {
+            let optgroup = $('<optgroup>');
+            optgroup.attr('label',subgrp);
+            substances[subgrp].forEach(substance => {
+                if (this.show_all || this.SUB_SHORTLIST.includes(substance)) {
+                    optgroup.append($("<option>").val(subgrp+"."+substance).text(substance));
+                }
+            });
+            subsel.append(optgroup);
+        });
+        subsel.val(DEFAULT_SUBSTANCE);
+        this.form_init=true;
+    }
+}
+
+// An instance of observable that will hold the current unit configuration and
+// notify when it is changed
+class UnitSubject extends Subject{
+
+    constructor(form) {
         super();
         this.units = {};
         this.valid_units = {};
-        this.substances = {};
+        this.form_init = false;
+        this.target = form;
     }
 
-    set_data(units, valid_units=null, substances=null){
+    set_data(units, valid_units=null){
         if (valid_units !== null){
             this.valid_units = valid_units;
         }
-        if (substances !== null){
-            this.substances = substances;
+
+        if (!this.form_init){
+            this.setup();
         }
+
         this.change_units(units)
+
     }
 
     change_units(units){
         this.units = units;
         this.notify(this)
+    }
+
+    setup(){
+        // Get the unit JSON from the data
+        let units = this.units;
+        let valid_units = this.valid_units;
+
+        // Loop over all the configured unit types
+        Object.keys(valid_units).forEach(unit_cat => {
+            // The form will be a list of labelled select boxes
+            let $li = $("<li>")
+            let capital_name = unit_cat.charAt(0).toUpperCase() + unit_cat.slice(1);
+            let $label = $('<label>'+capital_name+'</label>', {});
+            let $select = $('<select/>', {'name': unit_cat});
+
+            // Loop over each valid unit within the given unit category
+            valid_units[unit_cat].forEach(unit_opt => {
+                // Add an option to the select that corresponds to it
+                $select.append($("<option>").val(unit_opt).text(unit_opt));
+            });
+            // Set the selected value
+            $select.val(units[unit_cat]);
+            // Add the objects to the form
+            $(this.target).append($li.append($label).append($select));
+        });
+        this.form_init=true;
     }
 
     cfgAsJSON(){
@@ -158,18 +229,18 @@ class Plot{
         let myPlot = this.container;
         let myPlotContainer = this;
         d3.select(".plotly").on('click', function(d, i) {
-          var e = d3.event;
-          var bgrect = document.getElementsByClassName('gridlayer')[0].getBoundingClientRect();
+            var e = d3.event;
+            var bgrect = document.getElementsByClassName('gridlayer')[0].getBoundingClientRect();
             var x = ((e.x - bgrect['x']) / (bgrect['width'])) * (myPlot.layout.xaxis.range[1] - myPlot.layout.xaxis.range[0]) + myPlot.layout.xaxis.range[0];
             var y = ((e.y - bgrect['y']) / (bgrect['height'])) * (myPlot.layout.yaxis.range[0] - myPlot.layout.yaxis.range[1]) + myPlot.layout.yaxis.range[1];
-          if (x.between(myPlot.layout.xaxis.range[0], myPlot.layout.xaxis.range[1]) &&
-            y.between(myPlot.layout.yaxis.range[0], myPlot.layout.yaxis.range[1])) {
-              let formData = {}
-              formData['id'] = 'mp.H2O';
-              formData[myPlotContainer.x_prop] = x
-              formData[myPlotContainer.y_prop] = y
-                  let requestroute = "/";
-              let unitFormData = infoContainer.cfgAsJSON();
+            if (x.between(myPlot.layout.xaxis.range[0], myPlot.layout.xaxis.range[1]) &&
+                y.between(myPlot.layout.yaxis.range[0], myPlot.layout.yaxis.range[1])) {
+                let formData = {}
+                formData['id'] = 'mp.H2O';
+                formData[myPlotContainer.x_prop] = x
+                formData[myPlotContainer.y_prop] = y
+                let requestroute = "/";
+                let unitFormData = unitModel.cfgAsJSON();
                 let postData = {state_input: formData, units: unitFormData};
                 // Forced to operate as $.ajax because we need to specify that we're
                 // passing json.
@@ -181,8 +252,8 @@ class Plot{
                     contentType: 'application/json; charset=utf-8',
                     success: propResponseSuccess,
                     error: propResponseFail
-    });
-          }
+                });
+            }
         });
     }
 
@@ -265,7 +336,10 @@ class Table{
     constructor(targetDiv) {
         this.dispprops = ['T','p','d','h','s'];
         this.container = targetDiv;
+        // Bind the definition of "this" when update points is called as a function
         this.updatePoints = this.updatePoints.bind(this);
+
+        // Build the data table with null content. Insert the delete button in the extra column.
         let table = new DataTable('#proptable', {
             "columnDefs": [ {
                 "targets": -1,
@@ -276,7 +350,7 @@ class Table{
 
         $(targetDiv + ' tbody').on( 'click', 'button', function () {
             var data = table.row( $(this).parents('tr') ).data();
-            pointContainer.delete_point(data[0]);
+            pointModel.delete_point(data[0]);
         } );
         this.table = table;
     }
@@ -310,82 +384,38 @@ function deletePoint(btn){
 // *********************************************
 
 // Instantiate the classes
-var infoContainer;
-var pointContainer;
-var plotContainer;
-var tableContainer;
+var unitModel;
+var substanceModel;
+var pointModel;
+var plotView;
+var tableView;
+var unitView;
+
+const DEFAULT_SUBSTANCE = 'mp.H2O';
 
 
 // Execute when the page loads
 $(document).ready(function(){
-    tableContainer = new Table('#proptable');
+    tableView = new Table('#proptable');
+    plotView = new Plot(document.getElementById("plot"));
 
-    plotContainer = new Plot(document.getElementById("plot"));
+    // Create the Objects to manage units and substance
+    unitModel = new UnitSubject('#unitform');
+    substanceModel = new SubstanceSubject('#sel_substance');
+    getInfo(unitModel, substanceModel);
 
-    // Listen for the Info callback from PMGI and update data
-    infoContainer = new InfoSubject();
-    infoContainer.addListener(setup_selects);
-    getInfo();
-
-    pointContainer = new PointSubject();
-    pointContainer.addListener(plotContainer.updatePoints);
-    pointContainer.addListener(tableContainer.updatePoints);
+    pointModel = new PointSubject();
+    pointModel.addListener(plotView.updatePoints);
+    pointModel.addListener(tableView.updatePoints);
 
 
 });
 
 
-function setup_selects(data_subject, show_all=false){
-    //Program flow is -
-    // - Setup document
-    // - this function listens for when units are ready
-    // - get unit info from pyromat (getInfo())
-    // - Update the Observable with the PMGI info data
-    // - this gets notified -> set up the form
+function setup_substance_select(substance_subject, show_all=false){
 
-    // Remove from the list
-    infoContainer.removeListener(setup_selects);
-
-    // Get the unit JSON from the data
-    let units = data_subject.units;
-    let valid_units = data_subject.valid_units;
-    let substances = data_subject.substances
-
-    // Loop over all the configured unit types
-    Object.keys(valid_units).forEach(unit_cat => {
-        // The form will be a list of labelled select boxes
-        let $li = $("<li>")
-        let capital_name = unit_cat.charAt(0).toUpperCase() + unit_cat.slice(1);
-        let $label = $('<label>'+capital_name+'</label>', {});
-        let $select = $('<select/>', {'name': unit_cat});
-
-        // Loop over each valid unit within the given unit category
-        valid_units[unit_cat].forEach(unit_opt => {
-            // Add an option to the select that corresponds to it
-            $select.append($("<option>").val(unit_opt).text(unit_opt));
-        });
-        // Set the selected value
-        $select.val(units[unit_cat]);
-        // Add the objects to the form
-        $('#unitform').append($li.append($label).append($select));
-    });
-
-    let subsel = $('#sel_substance');
-    // Loop over the substances, create option group for each category
-    Object.keys(substances).forEach(subgrp => {
-        let optgroup = $('<optgroup>');
-        optgroup.attr('label',subgrp);
-        substances[subgrp].forEach(substance => {
-            if (show_all || infoContainer.SUB_SHORTLIST.includes(substance)) {
-                optgroup.append($("<option>").val(subgrp+"."+substance).text(substance));
-            }
-        });
-        subsel.append(optgroup);
-    });
-    subsel.val('mp.H2O')
-
-    infoContainer.addListener(onUnitsChanged);
 }
+
 
 // *********************************************
 // * DATA DISPLAY
@@ -394,7 +424,9 @@ function setup_selects(data_subject, show_all=false){
 function onUnitsChanged(infoMaster){
     // TODO - Handle behavior when units change
 }
-
+function onSubstanceChanged(infoMaster){
+    // TODO - Handle behavior when units change
+}
 
 // function buildTable(data){
 //     // Respond to additional points being added
@@ -414,7 +446,7 @@ function onUnitsChanged(infoMaster){
 //     for (const key in data) {
 //         point[key] = data[key][lasti];
 //     }
-//     plotContainer.updatePoints(point);
+//     plotView.updatePoints(point);
 // }
 
 
@@ -471,7 +503,7 @@ function popup() {
 // Callbacks
 function propResponseSuccess(data){
     // TODO generalize!!
-    pointContainer.add_point(data.data);
+    pointModel.add_point(data.data);
 }
 
 function propResponseFail(data){
@@ -488,7 +520,7 @@ function propResponseFail(data){
 function postProps(){
     let requestroute = "/";
     let formData = propFormToJSON('propform', {'id': 'mp.H2O'});
-    let unitFormData = infoContainer.cfgAsJSON();
+    let unitFormData = unitModel.cfgAsJSON();
     let postData = {state_input: formData, units: unitFormData};
     // Forced to operate as $.ajax because we need to specify that we're
     // passing json.
@@ -512,14 +544,15 @@ function getProps(){
 }
 
 
-function getInfo(){
+function getInfo(unitdataModel, substancedataModel){
     // Get all the PM info.
-    // TODO - the list of substances
-    $.get("/info", data=> {
-            infoContainer.set_data(data.units, data.valid_units, data.substances);
+    $.get("/info",
+        data=> { // Callback of the get request
+            unitdataModel.set_data(data.units, data.valid_units);
+            substancedataModel.set_data(data.substances);
         },
-        dataType='json')
-        .fail(propResponseFail);
+        dataType='json')  // Data type of the response.
+        .fail(propResponseFail);  // What to do if it doesn't work
 }
 
 
