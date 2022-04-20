@@ -50,9 +50,9 @@ class Subject {
         }
     }
 
-    notify(subObj, type=null) {
+    notify(subObj, event=null) {
         if (this.listeners.length > 0) {
-            this.listeners.forEach(listener => listener.update(subObj, type));
+            this.listeners.forEach(listener => listener.update(subObj, event));
         }
     }
 }
@@ -67,18 +67,17 @@ class SubstanceView{
         model.addListener(this);
     }
 
-    update(model, type){
-        if (type == "substance"){
+    update(model, event){
+        if (event == "substance"){
             this.set_substance(model);
         }
     }
 
     set_substance(model){
-        // do something
+        $(this.target).val(model.substance);
     }
 
     init(model){
-        let substance = model.substance;
         let substances = model.valid_substances;
         let shortlist = model.SUB_SHORTLIST;
 
@@ -94,8 +93,19 @@ class SubstanceView{
             });
             subsel.append(optgroup);
         });
-        subsel.val(substance);
-        // TODO implement onchange
+
+        // The event handler for changes with a confirmation.
+        subsel.on("change", ()=>{
+            let success = confirm('Changing the substance will reset all data. Are you sure?');
+            if(success){
+                model.set_substance(subsel.val());
+            } else {
+                this.set_substance(model);
+                return false;
+            }
+        });
+
+        this.set_substance(model)
     }
 }
 
@@ -108,8 +118,8 @@ class UnitView{
         model.addListener(this);
     }
 
-    update(model, type){
-        if (type == "unit"){
+    update(model, event){
+        if (event == "unit"){
             this.set_units(model);
         }
     }
@@ -132,20 +142,30 @@ class UnitView{
                 // Add an option to the select that corresponds to it
                 $select.append($("<option>").val(unit_opt).text(unit_opt));
             });
-            // Set the selected value
-            $select.val(units[unit_cat]);
+
+            $select.on("change", this.on_change);
             // Add the objects to the form
             $(this.target).append($li.append($label).append($select));
         });
+        // Set all the values
+        this.set_units(model);
         // TODO - implement onchange
+    }
+
+    on_change(event){
+        let x=0;
     }
 
     set_units(model){
         // do something
+        Object.keys(model.units).forEach(key => {
+            let selobj = $('[name="'+key+'"]');
+            selobj.val(model.units[key]);
+        });
     }
 
-    cfgAsJSON(){
-        return Object.fromEntries(new FormData(document.getElementById("unitform")));
+    valuesAsJSON(){
+        return Object.fromEntries(new FormData(document.getElementById(this.target)));
     }
 }
 
@@ -206,7 +226,11 @@ class PointModel extends Subject{
         for (const key in this.points) {
             this.points[key].splice(index, 1);
         }
-        this.notify(this, "point");
+        if (this.points['ptid'].length == 0){
+            this.clearpoints();
+        } else {
+            this.notify(this, "point");
+        }
     }
 
     clearpoints(){
@@ -255,7 +279,7 @@ class PlotView{
             if (x.between(myPlot.layout.xaxis.range[0], myPlot.layout.xaxis.range[1]) &&
                 y.between(myPlot.layout.yaxis.range[0], myPlot.layout.yaxis.range[1])) {
                 let formData = {}
-                formData['id'] = 'mp.H2O';
+                formData['id'] = pointModel.substance;
                 formData[myPlotContainer.x_prop] = x
                 formData[myPlotContainer.y_prop] = y
                 let requestroute = "/";
@@ -304,10 +328,10 @@ class PlotView{
 
     }
 
-    update(model, type){
-        if (type == "point"){
+    update(model, event){
+        if (event == "point"){
             this.updatePoints(model);
-        } else if (type == "init") {
+        } else if (event == "init") {
             this.init(model);
         }
     }
@@ -361,38 +385,57 @@ class PlotView{
 
 class TableView{
     // delete rows? https://stackoverflow.com/questions/64526856/how-to-add-edit-delete-buttons-in-each-row-of-datatable
+    // showhide columns https://datatables.net/examples/api/show_hide.html
     constructor(target, model) {
-        this.dispprops = ['T','p','d','h','s'];
+        this.dispprops = ['ptid','T','p','d','h','s']; // TODO - switch to dynamic show/hide
         this.target = target;
         model.addListener(this);
 
-        // Build the data table with null content. Insert the delete button in the extra column.
-        let table = new DataTable(this.target, {
-            "columnDefs": [ {
-                "targets": -1,
-                "data": null,
-                "defaultContent": "<button id='click2del'>Delete</button>"
-            } ]
-        });
-
-        $(this.target + ' tbody').on( 'click', 'button', function () {
-            var data = table.row( $(this).parents('tr') ).data();
-            model.delete_point(data[0]);
-        } );
-        this.table = table;
-
-        this.init();
+        this.table = null
+        this.init(model);
     }
 
-    init(){
+    init(model){
+        if (this.table == null){
+            let $tablediv = $(this.target);
+            let $head = $('<thead></thead>');
+            let $foot = $('<tfoot></tfoot>');
+            let $r = $('<tr></tr>')
+            this.dispprops.forEach((prop) =>{
+                let $th = $('<th>'+prop+'</th>');
+                $r.append($th);
+            });
+            $r.append('<th>Ctrl</th>');
+            $head.append($r);
+            //$foot.append($r);
+            $tablediv.append($head);
+            //$tablediv.append($foot);
+
+
+            // Build the data table with null content. Insert the delete button in the extra column.
+            let table = new DataTable(this.target, {
+                "columnDefs": [ {
+                    "targets": -1,
+                    "data": null,
+                    "defaultContent": "<button id='click2del'>Delete</button>"
+                } ]
+            });
+
+            $(this.target + ' tbody').on( 'click', 'button', function () {
+                let data = table.row( $(this).parents('tr') ).data();
+                model.delete_point(data[0]);
+            } );
+            this.table = table;
+        }
+
         this.table.clear().draw();
     }
 
-    update(model, type){
-        if (type == "point"){
+    update(model, event){
+        if (event == "point"){
             this.updatePoints(model);
-        } else if (type == "init") {
-            this.init();
+        } else if (event == "init") {
+            this.init(model);
         }
     }
 
@@ -403,10 +446,10 @@ class TableView{
 
         this.table.rows().remove();
 
-        let customdataset = [];  // The custom data that will be added to the tooltip
+        let customdataset = [];
         for (let i=0; i<points['ptid'].length; i++ ){  // Loop over all points
             let arr = [] // Build an array of all props for this index.
-            arr.push(points['ptid'][i]);
+            //arr.push(points['ptid'][i]);
             this.dispprops.forEach(key => {
                 arr.push(points[key][i]);
             });
@@ -453,38 +496,6 @@ $(document).ready(function(){
 });
 
 
-
-// *********************************************
-// * DATA DISPLAY
-// *********************************************
-
-function onUnitsChanged(infoMaster){
-    // TODO - Handle behavior when units change
-}
-function onSubstanceChanged(infoMaster){
-    // TODO - Handle behavior when units change
-}
-
-// function buildTable(data){
-//     // Respond to additional points being added
-//     // let table = document.getElementById("proptable");
-//     // let lasti = data['T'].length-1;
-//     // let row = table.insertRow(table.rows.length-1);
-//     // row.insertCell(0).innerHTML = data["T"][lasti];
-//     // row.insertCell(1).innerHTML = data["p"][lasti];
-//     // row.insertCell(2).innerHTML = data["d"][lasti];
-//     // row.insertCell(3).innerHTML = data["h"][lasti];
-//     // row.insertCell(4).innerHTML = data["s"][lasti];
-// }
-//
-// function drawPlot(data){
-//     let lasti = data['T'].length-1;
-//     let point = {};
-//     for (const key in data) {
-//         point[key] = data[key][lasti];
-//     }
-//     plotView.updatePoints(point);
-// }
 
 
 // *********************************************
@@ -556,7 +567,7 @@ function propResponseFail(data){
 // AJAX
 function postProps(){
     let requestroute = "/";
-    let formData = propFormToJSON('propform', {'id': 'mp.H2O'});
+    let formData = propFormToJSON('propform', {'id': pointModel.substance});
     let unitFormData = pointModel.units;
     let postData = {state_input: formData, units: unitFormData};
     // Forced to operate as $.ajax because we need to specify that we're
@@ -575,7 +586,7 @@ function postProps(){
 
 function getProps(){
     let requestroute = "/";
-    let formData = propFormToJSON('propform', {'id': 'mp.H2O'});
+    let formData = propFormToJSON('propform', {'id': pointModel.substance});
     $.get(requestroute, formData, propResponseSuccess,dataType='json')
         .fail(propResponseFail);
 }
