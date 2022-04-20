@@ -50,38 +50,37 @@ class Subject {
         }
     }
 
-    notify(subObj) {
+    notify(subObj, type=null) {
         if (this.listeners.length > 0) {
-            this.listeners.forEach(listener => listener(subObj));
+            this.listeners.forEach(listener => listener.update(subObj, type));
         }
     }
 }
 
 
-class SubstanceSubject extends Subject{
-    SUB_SHORTLIST=["H2O","C2H4F4","air","O2", "N2"];;
+class SubstanceView{
 
-    constructor(form, show_all=false) {
-        super();
-        this.substances = {};
-        this.form_init = false;
+
+    constructor(form, model, show_all=false) {
         this.show_all = show_all;
         this.target = form;
+        model.addListener(this);
     }
 
-    set_data(substances=null) {
-        this.substances = substances;
-        if (!this.form_init){
-            this.setup();
+    update(model, type){
+        if (type == "substance"){
+            this.set_substance(model);
         }
-        this.notify(this);
     }
 
+    set_substance(model){
+        // do something
+    }
 
-
-    setup(){
-
-        let substances = this.substances;
+    init(model){
+        let substance = model.substance;
+        let substances = model.valid_substances;
+        let shortlist = model.SUB_SHORTLIST;
 
         let subsel = $(this.target);
         // Loop over the substances, create option group for each category
@@ -89,51 +88,36 @@ class SubstanceSubject extends Subject{
             let optgroup = $('<optgroup>');
             optgroup.attr('label',subgrp);
             substances[subgrp].forEach(substance => {
-                if (this.show_all || this.SUB_SHORTLIST.includes(substance)) {
+                if (this.show_all || shortlist.includes(substance)) {
                     optgroup.append($("<option>").val(subgrp+"."+substance).text(substance));
                 }
             });
             subsel.append(optgroup);
         });
-        subsel.val(DEFAULT_SUBSTANCE);
-        this.form_init=true;
+        subsel.val(substance);
+        // TODO implement onchange
     }
 }
 
 // An instance of observable that will hold the current unit configuration and
 // notify when it is changed
-class UnitSubject extends Subject{
+class UnitView{
 
-    constructor(form) {
-        super();
-        this.units = {};
-        this.valid_units = {};
-        this.form_init = false;
+    constructor(form, model) {
         this.target = form;
+        model.addListener(this);
     }
 
-    set_data(units, valid_units=null){
-        if (valid_units !== null){
-            this.valid_units = valid_units;
+    update(model, type){
+        if (type == "unit"){
+            this.set_units(model);
         }
-
-        if (!this.form_init){
-            this.setup();
-        }
-
-        this.change_units(units)
-
     }
 
-    change_units(units){
-        this.units = units;
-        this.notify(this)
-    }
-
-    setup(){
+    init(model){
         // Get the unit JSON from the data
-        let units = this.units;
-        let valid_units = this.valid_units;
+        let units = model.units;
+        let valid_units = model.valid_units;
 
         // Loop over all the configured unit types
         Object.keys(valid_units).forEach(unit_cat => {
@@ -153,7 +137,11 @@ class UnitSubject extends Subject{
             // Add the objects to the form
             $(this.target).append($li.append($label).append($select));
         });
-        this.form_init=true;
+        // TODO - implement onchange
+    }
+
+    set_units(model){
+        // do something
     }
 
     cfgAsJSON(){
@@ -161,58 +149,90 @@ class UnitSubject extends Subject{
     }
 }
 
-// An instance of observable that will hold an array of individual thermodynamic
-// points that have been computed.
-class PointSubject extends Subject{
+
+class PointModel extends Subject{
+    SUB_SHORTLIST=["H2O","C2H4F4","air","O2", "N2"];
+    DEFAULT_SUBSTANCE = 'mp.H2O'
+
     constructor() {
         super();
         this.points = []
+        this.point_id = 1;
+
+        this.units = null;
+        this.valid_units = null;
+
+        this.substance = null;
+        this.valid_substances = null;
     }
 
-    recalculate(){
-        // Pass points back to Python
+    set_units(units, valid_units=null){
+        if (valid_units !== null){
+            this.valid_units = valid_units;
+        }
+        this.units = units;
+        this.clearpoints();
+        this.notify(this,"unit")
+    }
+
+    set_substance(substance, valid_substances=null){
+        if (valid_substances !== null){
+            this.valid_substances = valid_substances;
+        }
+        this.substance = substance;
+        this.clearpoints();
+        this.notify(this,"substance")
     }
 
     add_point(point){
         if (this.points.length === 0){
             this.points = {};
+            this.points['ptid'] = [this.point_id];
             for (const key in point) {
                 this.points[key] = [point[key]];
             }
         } else {
+            this.points['ptid'].push(this.point_id);
             for (const key in point) {
                 this.points[key].push(point[key]);
             }
         }
-        this.notify(this.points)
+        this.point_id++;
+        this.notify(this, "point")
     }
 
     delete_point(id){
+        let index = this.points['ptid'].indexOf(id);
         for (const key in this.points) {
-            this.points[key].splice(id, 1);
+            this.points[key].splice(index, 1);
         }
-        this.notify(this.points);
+        this.notify(this, "point");
     }
 
     clearpoints(){
         this.points = [];
-        this.notify(this.points);
+        this.notify(this, "init");
     }
 }
 
-
-class Plot{
-    constructor(targetDiv) {
+class PlotView{
+    constructor(target, model) {
+        // TODO - variable plot x- and y-axes
         this.x_prop = 's';
         this.y_prop = 'T';
         this.dispprops = ['T','s','p','v'];
-        this.container = targetDiv;
-        this.updatePoints = this.updatePoints.bind(this);
-        this.layout();
+        this.target = target;
+        this.container = document.getElementById(target);
+        model.addListener(this);
+        this.init(model);
+    }
+
+    init(model){
+        this.set_layout();
         let traces = [{
             x: [],
             y: [],
-            customdata: [1],
+            customdata: [],
             mode: 'markers',
             hovertemplate: "<b> Point prop<br>"+
                 this.x_prop+": %{x}<br>" +
@@ -220,12 +240,11 @@ class Plot{
                 "attr: %{customdata: .2f}",
             type: 'scatter'
         }];
-        //data.push({x:0,y:0})
         Plotly.newPlot(this.container, traces, this.layout);
-        this.setupclicklistener();
+        this.setupPlotClickListener();
     }
 
-    setupclicklistener(){
+    setupPlotClickListener(){
         let myPlot = this.container;
         let myPlotContainer = this;
         d3.select(".plotly").on('click', function(d, i) {
@@ -240,7 +259,7 @@ class Plot{
                 formData[myPlotContainer.x_prop] = x
                 formData[myPlotContainer.y_prop] = y
                 let requestroute = "/";
-                let unitFormData = unitModel.cfgAsJSON();
+                let unitFormData = pointModel.units;
                 let postData = {state_input: formData, units: unitFormData};
                 // Forced to operate as $.ajax because we need to specify that we're
                 // passing json.
@@ -257,7 +276,7 @@ class Plot{
         });
     }
 
-    layout(){
+    set_layout(){
         let x_scale;
         let y_scale;
         if (this.x_prop == 'v'){
@@ -285,16 +304,25 @@ class Plot{
 
     }
 
-    updatePoints(points) {
+    update(model, type){
+        if (type == "point"){
+            this.updatePoints(model);
+        } else if (type == "init") {
+            this.init(model);
+        }
+    }
+
+    updatePoints(model) {
         // Build the customdata object for the tooltip
         // Object has the form [[h1,v1,s1],[h2,v2,s2],[h3,v3,s3]]
+        let points = model.points;
 
         let allkeys = Object.keys(points);
         let customdataset = [];  // The custom data that will be added to the tooltip
         let keylist = [];
         for (let i=0; i<points['T'].length; i++ ){  // Loop over all points
             let arr = [] // Build an array of all props for this index.
-            arr.push(i); // Make the index the very first datapoint.
+            arr.push(points['ptid'][i]); // Make the index the very first datapoint.
 
             allkeys.forEach(key => {
                 if (key !== this.x_prop &&
@@ -331,16 +359,15 @@ class Plot{
     }
 }
 
-class Table{
+class TableView{
     // delete rows? https://stackoverflow.com/questions/64526856/how-to-add-edit-delete-buttons-in-each-row-of-datatable
-    constructor(targetDiv) {
+    constructor(target, model) {
         this.dispprops = ['T','p','d','h','s'];
-        this.container = targetDiv;
-        // Bind the definition of "this" when update points is called as a function
-        this.updatePoints = this.updatePoints.bind(this);
+        this.target = target;
+        model.addListener(this);
 
         // Build the data table with null content. Insert the delete button in the extra column.
-        let table = new DataTable('#proptable', {
+        let table = new DataTable(this.target, {
             "columnDefs": [ {
                 "targets": -1,
                 "data": null,
@@ -348,20 +375,38 @@ class Table{
             } ]
         });
 
-        $(targetDiv + ' tbody').on( 'click', 'button', function () {
+        $(this.target + ' tbody').on( 'click', 'button', function () {
             var data = table.row( $(this).parents('tr') ).data();
-            pointModel.delete_point(data[0]);
+            model.delete_point(data[0]);
         } );
         this.table = table;
+
+        this.init();
     }
 
-    updatePoints(points) {
+    init(){
+        this.table.clear().draw();
+    }
+
+    update(model, type){
+        if (type == "point"){
+            this.updatePoints(model);
+        } else if (type == "init") {
+            this.init();
+        }
+    }
+
+
+
+    updatePoints(model) {
+        let points = model.points;
+
         this.table.rows().remove();
 
         let customdataset = [];  // The custom data that will be added to the tooltip
-        for (let i=0; i<points['T'].length; i++ ){  // Loop over all points
+        for (let i=0; i<points['ptid'].length; i++ ){  // Loop over all points
             let arr = [] // Build an array of all props for this index.
-            arr.push(i);
+            arr.push(points['ptid'][i]);
             this.dispprops.forEach(key => {
                 arr.push(points[key][i]);
             });
@@ -375,46 +420,38 @@ class Table{
 }
 
 
-function deletePoint(btn){
-    alert("LOL");
-}
-
 // *********************************************
 // * PAGE SETUP
 // *********************************************
 
 // Instantiate the classes
-var unitModel;
-var substanceModel;
-var pointModel;
+var unitView;
+var substanceView;
 var plotView;
 var tableView;
-var unitView;
-
-const DEFAULT_SUBSTANCE = 'mp.H2O';
+var pointModel;
 
 
 // Execute when the page loads
 $(document).ready(function(){
-    tableView = new Table('#proptable');
-    plotView = new Plot(document.getElementById("plot"));
+    pointModel = new PointModel();
 
-    // Create the Objects to manage units and substance
-    unitModel = new UnitSubject('#unitform');
-    substanceModel = new SubstanceSubject('#sel_substance');
-    getInfo(unitModel, substanceModel);
+    getInfo((data)=>{
+        unitView = new UnitView('#unitform', pointModel);
+        substanceView = new SubstanceView('#sel_substance', pointModel);
+        tableView = new TableView('#proptable', pointModel);
+        plotView = new PlotView("plot", pointModel);
 
-    pointModel = new PointSubject();
-    pointModel.addListener(plotView.updatePoints);
-    pointModel.addListener(tableView.updatePoints);
+        pointModel.set_units(data.units, data.valid_units);
+        pointModel.set_substance(pointModel.DEFAULT_SUBSTANCE, data.substances);
 
 
+
+        unitView.init(pointModel);
+        substanceView.init(pointModel);
+    });
 });
 
-
-function setup_substance_select(substance_subject, show_all=false){
-
-}
 
 
 // *********************************************
@@ -520,7 +557,7 @@ function propResponseFail(data){
 function postProps(){
     let requestroute = "/";
     let formData = propFormToJSON('propform', {'id': 'mp.H2O'});
-    let unitFormData = unitModel.cfgAsJSON();
+    let unitFormData = pointModel.units;
     let postData = {state_input: formData, units: unitFormData};
     // Forced to operate as $.ajax because we need to specify that we're
     // passing json.
@@ -544,13 +581,10 @@ function getProps(){
 }
 
 
-function getInfo(unitdataModel, substancedataModel){
+function getInfo(callback){
     // Get all the PM info.
     $.get("/info",
-        data=> { // Callback of the get request
-            unitdataModel.set_data(data.units, data.valid_units);
-            substancedataModel.set_data(data.substances);
-        },
+        callback,
         dataType='json')  // Data type of the response.
         .fail(propResponseFail);  // What to do if it doesn't work
 }

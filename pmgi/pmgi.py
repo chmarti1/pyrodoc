@@ -257,8 +257,9 @@ class InfoHandler:
         out = {}
         cfg = pm.config
         for key in cfg.entries:
-            if key.startswith('unit'):
-                out[key.split('_')[1]] = cfg[key]
+            if key.startswith('unit') and \
+                    key.split('_')[1] in InfoHandler._valid_unit_strs:
+                        out[key.split('_')[1]] = cfg[key]
         return out
 
     @staticmethod
