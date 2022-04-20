@@ -23,6 +23,10 @@
 // *********************************************
 // * CLASSES
 // *********************************************
+Number.prototype.between = function(min, max) {
+  return this >= min && this <= max;
+};
+
 
 // A parent class for a observables that notify listeners when they get changed
 // In this case, listener is just a function object that will be called.
@@ -56,6 +60,9 @@ class Subject {
 // An instance of observable that will hold the current unit configuration and
 // notify when it is changed
 class InfoSubject extends Subject{
+
+    SUB_SHORTLIST=["H2O","C2H4F4","air","O2", "N2"];;
+
     constructor() {
         super();
         this.units = {};
@@ -111,7 +118,7 @@ class PointSubject extends Subject{
 
     delete_point(id){
         for (const key in this.points) {
-                this.points[key].splice(id, 1);
+            this.points[key].splice(id, 1);
         }
         this.notify(this.points);
     }
@@ -131,19 +138,52 @@ class Plot{
         this.container = targetDiv;
         this.updatePoints = this.updatePoints.bind(this);
         this.layout();
-      let traces = [{
-          x: [],
-          y: [],
-          customdata: [1],
-          mode: 'markers',
-          hovertemplate: "<b> Point prop<br>"+
-              this.x_prop+": %{x}<br>" +
-              this.y_prop+": %{y}<br>" +
-              "attr: %{customdata: .2f}",
-          type: 'scatter'
-      }];
+        let traces = [{
+            x: [],
+            y: [],
+            customdata: [1],
+            mode: 'markers',
+            hovertemplate: "<b> Point prop<br>"+
+                this.x_prop+": %{x}<br>" +
+                this.y_prop+": %{y}<br>" +
+                "attr: %{customdata: .2f}",
+            type: 'scatter'
+        }];
         //data.push({x:0,y:0})
         Plotly.newPlot(this.container, traces, this.layout);
+        this.setupclicklistener();
+    }
+
+    setupclicklistener(){
+        let myPlot = this.container;
+        let myPlotContainer = this;
+        d3.select(".plotly").on('click', function(d, i) {
+          var e = d3.event;
+          var bgrect = document.getElementsByClassName('gridlayer')[0].getBoundingClientRect();
+            var x = ((e.x - bgrect['x']) / (bgrect['width'])) * (myPlot.layout.xaxis.range[1] - myPlot.layout.xaxis.range[0]) + myPlot.layout.xaxis.range[0];
+            var y = ((e.y - bgrect['y']) / (bgrect['height'])) * (myPlot.layout.yaxis.range[0] - myPlot.layout.yaxis.range[1]) + myPlot.layout.yaxis.range[1];
+          if (x.between(myPlot.layout.xaxis.range[0], myPlot.layout.xaxis.range[1]) &&
+            y.between(myPlot.layout.yaxis.range[0], myPlot.layout.yaxis.range[1])) {
+              let formData = {}
+              formData['id'] = 'mp.H2O';
+              formData[myPlotContainer.x_prop] = x
+              formData[myPlotContainer.y_prop] = y
+                  let requestroute = "/";
+              let unitFormData = infoContainer.cfgAsJSON();
+                let postData = {state_input: formData, units: unitFormData};
+                // Forced to operate as $.ajax because we need to specify that we're
+                // passing json.
+                $.ajax({
+                    url: requestroute,
+                    type: "POST",
+                    data: JSON.stringify(postData),
+                    dataType: "json",
+                    contentType: 'application/json; charset=utf-8',
+                    success: propResponseSuccess,
+                    error: propResponseFail
+    });
+          }
+        });
     }
 
     layout(){
@@ -153,7 +193,7 @@ class Plot{
             x_scale = 'log';
         } else {
             x_scale = 'linear';
-            }
+        }
         if (this.y_prop == 'p'){
             y_scale = 'log';
         } else {
@@ -208,12 +248,12 @@ class Plot{
 
         // Fully replace trace, including the custom data
         let update = {
-             x: [points[this.x_prop]],
-             y: [points[this.y_prop]],
+            x: [points[this.x_prop]],
+            y: [points[this.y_prop]],
             customdata: [customdataset],
             hovertemplate: "<b> Point %{customdata[0]}<br>"+
-              this.x_prop+": %{x}<br>" +
-              this.y_prop+": %{y}<br>" +
+                this.x_prop+": %{x}<br>" +
+                this.y_prop+": %{y}<br>" +
                 customrows,
         }
         Plotly.restyle(this.container, update, [0]) // May need to adjust traceID to accommodate the isolines, etc.
@@ -227,17 +267,17 @@ class Table{
         this.container = targetDiv;
         this.updatePoints = this.updatePoints.bind(this);
         let table = new DataTable('#proptable', {
-        "columnDefs": [ {
-            "targets": -1,
-            "data": null,
-            "defaultContent": "<button id='click2del'>Delete</button>"
-        } ]
+            "columnDefs": [ {
+                "targets": -1,
+                "data": null,
+                "defaultContent": "<button id='click2del'>Delete</button>"
+            } ]
         });
 
         $(targetDiv + ' tbody').on( 'click', 'button', function () {
-        var data = table.row( $(this).parents('tr') ).data();
-        pointContainer.delete_point(data[0]);
-    } );
+            var data = table.row( $(this).parents('tr') ).data();
+            pointContainer.delete_point(data[0]);
+        } );
         this.table = table;
     }
 
@@ -295,7 +335,7 @@ $(document).ready(function(){
 });
 
 
-function setup_selects(data_subject){
+function setup_selects(data_subject, show_all=false){
     //Program flow is -
     // - Setup document
     // - this function listens for when units are ready
@@ -335,12 +375,14 @@ function setup_selects(data_subject){
     Object.keys(substances).forEach(subgrp => {
         let optgroup = $('<optgroup>');
         optgroup.attr('label',subgrp);
-        substances[subgrp].forEach(substance =>{
-            optgroup.append($("<option>").val(substance).text(substance));
+        substances[subgrp].forEach(substance => {
+            if (show_all || infoContainer.SUB_SHORTLIST.includes(substance)) {
+                optgroup.append($("<option>").val(subgrp+"."+substance).text(substance));
+            }
         });
         subsel.append(optgroup);
     });
-    subsel.val('H2O')
+    subsel.val('mp.H2O')
 
     infoContainer.addListener(onUnitsChanged);
 }
@@ -382,10 +424,10 @@ function onUnitsChanged(infoMaster){
 
 function popup() {
     // TODO - make this a units edit place
-   var popwindow = document.getElementById("hideablelist");
-   if (popwindow.style.display === "none") {
-       popwindow.style.display = "block";
-  } else {
+    var popwindow = document.getElementById("hideablelist");
+    if (popwindow.style.display === "none") {
+        popwindow.style.display = "block";
+    } else {
         popwindow.style.display = "none";
     }
 }
@@ -435,10 +477,10 @@ function propResponseSuccess(data){
 function propResponseFail(data){
     // TODO better error handling?
     try {
-       let resp = JSON.parse(data.responseText);
-       alert(resp.message);
+        let resp = JSON.parse(data.responseText);
+        alert(resp.message);
     } catch (error) {
-       alert("An unhandled error occurred: " + data.responseText);
+        alert("An unhandled error occurred: " + data.responseText);
     }
 }
 
@@ -465,8 +507,8 @@ function postProps(){
 function getProps(){
     let requestroute = "/";
     let formData = propFormToJSON('propform', {'id': 'mp.H2O'});
-   $.get(requestroute, formData, propResponseSuccess,dataType='json')
-    .fail(propResponseFail);
+    $.get(requestroute, formData, propResponseSuccess,dataType='json')
+        .fail(propResponseFail);
 }
 
 
@@ -474,10 +516,10 @@ function getInfo(){
     // Get all the PM info.
     // TODO - the list of substances
     $.get("/info", data=> {
-        infoContainer.set_data(data.units, data.valid_units, data.substances);
-    },
-    dataType='json')
-    .fail(propResponseFail);
+            infoContainer.set_data(data.units, data.valid_units, data.substances);
+        },
+        dataType='json')
+        .fail(propResponseFail);
 }
 
 
