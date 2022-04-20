@@ -94,12 +94,13 @@ class SubstanceView{
             subsel.append(optgroup);
         });
 
-        // The event handler for changes with a confirmation.
+        // The event handler for changes, which provides a confirmation.
         subsel.on("change", ()=>{
             let success = confirm('Changing the substance will reset all data. Are you sure?');
             if(success){
-                model.set_substance(subsel.val());
+                change_substance(subsel.val());
             } else {
+                // undo
                 this.set_substance(model);
                 return false;
             }
@@ -115,6 +116,12 @@ class UnitView{
 
     constructor(form, model) {
         this.target = form;
+        this.button_apply = "#unit_apply";
+        this.button_revert = "#unit_revert";
+        this.apply_onclick = this.apply_onclick.bind(this);
+        this.revert_onclick = this.revert_onclick.bind(this);
+        $(this.button_apply).on("click", this.apply_onclick);
+        $(this.button_revert).on("click", this.revert_onclick);
         model.addListener(this);
     }
 
@@ -143,17 +150,35 @@ class UnitView{
                 $select.append($("<option>").val(unit_opt).text(unit_opt));
             });
 
-            $select.on("change", this.on_change);
+            $select.on("change", ()=>{
+                $(this.button_apply).show();
+                $(this.button_revert).show();
+            });
             // Add the objects to the form
             $(this.target).append($li.append($label).append($select));
         });
         // Set all the values
         this.set_units(model);
-        // TODO - implement onchange
     }
 
-    on_change(event){
-        let x=0;
+    apply_onclick(){
+        let success = confirm('Changing the units will reset all data. Are you sure?');
+            if(success){
+                // Set the units in the model
+                pointModel.set_units(this.valuesAsJSON())
+                $(this.button_apply).hide();
+                $(this.button_revert).hide();
+            } else {
+                // do nothing and let them figure it out
+                return false;
+            }
+
+    }
+
+    revert_onclick(){
+        $(this.button_apply).hide();
+        $(this.button_revert).hide();
+        this.set_units(pointModel);
     }
 
     set_units(model){
@@ -165,7 +190,7 @@ class UnitView{
     }
 
     valuesAsJSON(){
-        return Object.fromEntries(new FormData(document.getElementById(this.target)));
+        return Object.fromEntries(new FormData($(this.target)[0]));
     }
 }
 
@@ -235,6 +260,7 @@ class PointModel extends Subject{
 
     clearpoints(){
         this.points = [];
+        this.point_id = 0;
         this.notify(this, "init");
     }
 }
@@ -495,7 +521,9 @@ $(document).ready(function(){
     });
 });
 
-
+function change_substance(newsubstance){
+    pointModel.set_substance(newsubstance);
+}
 
 
 // *********************************************
