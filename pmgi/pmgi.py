@@ -222,23 +222,26 @@ class InfoHandler:
     _valid_unit_strs = ['energy', 'force', 'length', 'mass', 'molar', 'pressure', 'temperature', 'time', 'volume']
 
     @staticmethod
-    def list_valid_substances(sub_cat=None):
-        substs = [dat.data['id'] for dat in pm.search()]
-        classes = [dat.data['class'] for dat in pm.search()]
-        prefixes = [i.split('.')[0] for i in substs]
-        if sub_cat is not None:
-            if sub_cat in prefixes:
-                prefixes = [sub_cat]
+    def list_valid_substances(search_str=None):
+        proplist = ['T', 'p', 'd', 'v', 'cp', 'cv', 'gam', 'e', 'h', 's', 'mw', 'R', 'x', 'X', 'Y']
+        out = {}
+        dat = pm.search(search_str)
+        for subst in dat:
+            key = subst.data['id']
+            out[key] = {}
+            out[key]['prefix'] = subst.data['id'].split('.')[0]
+            out[key]['id'] = subst.data['id']
+            out[key]['class'] = subst.data['class']
+            if 'names' in subst.data:
+                out[key]['names'] = subst.data['names']
             else:
-                raise pm.utility.PMParamError("Invalid substance class:"
-                                              f"{sub_cat}")
+                out[key]['names'] = []
+            out[key]['props'] = []
+            for prop in proplist:
+                if hasattr(subst, prop):
+                    out[key]['props'].append(prop)
 
-        # Initialize a dict, containing an empty list for each subst class/key.
-        allsubs = {key: [] for key in prefixes}
-        for sub in substs:
-            prefix, subst = sub.split('.')
-            allsubs[prefix].append(subst)
-        return allsubs
+        return out
 
     @staticmethod
     def set_units(units):
