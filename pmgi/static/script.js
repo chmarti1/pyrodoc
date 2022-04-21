@@ -112,7 +112,7 @@ class SubstanceFormView{
                 set_substance(subsel.val());
             } else {
                 // undo
-                this.set_value(current_value);
+                this.set_value(get_substance());
                 return false;
             }
         });
