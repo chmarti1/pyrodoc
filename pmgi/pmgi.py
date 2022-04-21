@@ -223,7 +223,8 @@ class InfoHandler:
 
     @staticmethod
     def list_valid_substances(sub_cat=None):
-        substs = pm.info(verbose=False)
+        substs = [dat.data['id'] for dat in pm.search()]
+        classes = [dat.data['class'] for dat in pm.search()]
         prefixes = [i.split('.')[0] for i in substs]
         if sub_cat is not None:
             if sub_cat in prefixes:

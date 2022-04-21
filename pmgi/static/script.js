@@ -20,6 +20,9 @@
 // * * * Change display options?
 
 
+
+
+
 // *********************************************
 // * CLASSES
 // *********************************************
@@ -32,10 +35,19 @@ Number.prototype.between = function(min, max) {
 // In this case, listener is just a function object that will be called.
 class Subject {
     // https://webdevstudios.com/2019/02/19/observable-pattern-in-javascript/
+    static EVENT_UNIT = 'units';
+    static EVENT_SUBSTANCE = 'substance';
+    static EVENT_POINT = 'point'
+    static EVENT_INIT = 'init';
+
     constructor() {
         this.listeners = [];
     }
 
+    /**
+     * Add a listener to the object
+     * @param listener - Object: must contain listener.update(source, event, data)
+     */
     addListener(listener) {
         this.listeners.push(listener);
     }
@@ -50,9 +62,15 @@ class Subject {
         }
     }
 
-    notify(subObj, event=null) {
+    /**
+     * Notify all listeners of events
+     * @param source - Object: the origin object that created the event
+     * @param event - String: an indicator of the event type (or null)
+     * @param data - Various: data associated with the event (or null)
+     */
+    notify(source, event=null, data=null) {
         if (this.listeners.length > 0) {
-            this.listeners.forEach(listener => listener.update(subObj, event));
+            this.listeners.forEach(listener => listener.update(source, event, data));
         }
     }
 }
@@ -60,26 +78,22 @@ class Subject {
 
 class SubstanceView{
 
-
-    constructor(form, model, show_all=false) {
+    constructor(form, show_all=false) {
         this.show_all = show_all;
         this.target = form;
-        model.addListener(this);
     }
 
-    update(model, event){
-        if (event == "substance"){
-            this.set_substance(model);
+    update(source, event, data){
+        if (event == Subject.EVENT_SUBSTANCE){
+            this.set_value(data);
         }
     }
 
-    set_substance(model){
-        $(this.target).val(model.substance);
+    set_value(substance){
+        $(this.target).val(substance);
     }
 
-    init(model){
-        let substances = model.valid_substances;
-        let shortlist = model.SUB_SHORTLIST;
+    init(substances, current_value, shortlist){
 
         let subsel = $(this.target);
         // Loop over the substances, create option group for each category
@@ -98,15 +112,15 @@ class SubstanceView{
         subsel.on("change", ()=>{
             let success = confirm('Changing the substance will reset all data. Are you sure?');
             if(success){
-                change_substance(subsel.val());
+                set_substance(subsel.val());
             } else {
                 // undo
-                this.set_substance(model);
+                this.set_value(current_value);
                 return false;
             }
         });
 
-        this.set_substance(model)
+        this.set_value(current_value);
     }
 }
 
@@ -114,7 +128,7 @@ class SubstanceView{
 // notify when it is changed
 class UnitView{
 
-    constructor(form, model) {
+    constructor(form) {
         this.target = form;
         this.button_apply = "#unit_apply";
         this.button_revert = "#unit_revert";
@@ -122,19 +136,15 @@ class UnitView{
         this.revert_onclick = this.revert_onclick.bind(this);
         $(this.button_apply).on("click", this.apply_onclick);
         $(this.button_revert).on("click", this.revert_onclick);
-        model.addListener(this);
     }
 
-    update(model, event){
-        if (event == "unit"){
-            this.set_units(model);
+    update(source, event, data){
+        if (event == Subject.EVENT_UNIT){
+            this.set_values(data);
         }
     }
 
-    init(model){
-        // Get the unit JSON from the data
-        let units = model.units;
-        let valid_units = model.valid_units;
+    init(valid_units, current_values){
 
         // Loop over all the configured unit types
         Object.keys(valid_units).forEach(unit_cat => {
@@ -158,38 +168,42 @@ class UnitView{
             $(this.target).append($li.append($label).append($select));
         });
         // Set all the values
-        this.set_units(model);
+        this.set_values(current_values);
     }
+
+    set_values(units){
+        // Copy the values from a dict
+        Object.keys(units).forEach(key => {
+            let selobj = $('[name="'+key+'"]');
+            selobj.val(units[key]);
+        });
+    }
+
+
 
     apply_onclick(){
         let success = confirm('Changing the units will reset all data. Are you sure?');
             if(success){
-                // Set the units in the model
-                pointModel.set_units(this.valuesAsJSON())
+                // Pass the units to the controller
+                set_units(this.valuesAsJSON())
                 $(this.button_apply).hide();
                 $(this.button_revert).hide();
             } else {
-                // do nothing and let them figure it out
+                // do nothing and let the user figure it out
                 return false;
             }
 
     }
 
     revert_onclick(){
+        // revert back to what was set previously
+        this.set_values(get_units());
         $(this.button_apply).hide();
         $(this.button_revert).hide();
-        this.set_units(pointModel);
-    }
-
-    set_units(model){
-        // do something
-        Object.keys(model.units).forEach(key => {
-            let selobj = $('[name="'+key+'"]');
-            selobj.val(model.units[key]);
-        });
     }
 
     valuesAsJSON(){
+        // Convert the values to a dict
         return Object.fromEntries(new FormData($(this.target)[0]));
     }
 }
@@ -198,11 +212,12 @@ class UnitView{
 class PointModel extends Subject{
     SUB_SHORTLIST=["H2O","C2H4F4","air","O2", "N2"];
     DEFAULT_SUBSTANCE = 'mp.H2O'
+    INIT_ID = 1
 
     constructor() {
         super();
         this.points = []
-        this.point_id = 1;
+        this.point_id = this.INIT_ID;
 
         this.units = null;
         this.valid_units = null;
@@ -217,7 +232,23 @@ class PointModel extends Subject{
         }
         this.units = units;
         this.clearpoints();
-        this.notify(this,"unit")
+        this.notify(this,Subject.EVENT_UNIT, this.get_units())
+    }
+
+    get_units(){
+        return this.units;
+    }
+
+    get_substance(){
+        return this.substance;
+    }
+
+    get_valid_units(){
+        return this.valid_units;
+    }
+
+    get_valid_substances(){
+        return this.valid_substances;
     }
 
     set_substance(substance, valid_substances=null){
@@ -226,7 +257,11 @@ class PointModel extends Subject{
         }
         this.substance = substance;
         this.clearpoints();
-        this.notify(this,"substance")
+        this.notify(this,Subject.EVENT_SUBSTANCE, this.get_substance())
+    }
+
+    get_points(){
+        return this.points;
     }
 
     add_point(point){
@@ -243,7 +278,7 @@ class PointModel extends Subject{
             }
         }
         this.point_id++;
-        this.notify(this, "point")
+        this.notify(this, Subject.EVENT_POINT, this.get_points())
     }
 
     delete_point(id){
@@ -254,30 +289,29 @@ class PointModel extends Subject{
         if (this.points['ptid'].length == 0){
             this.clearpoints();
         } else {
-            this.notify(this, "point");
+            this.notify(this, Subject.EVENT_POINT, this.get_points());
         }
     }
 
     clearpoints(){
         this.points = [];
-        this.point_id = 0;
-        this.notify(this, "init");
+        this.point_id = this.INIT_ID;
+        this.notify(this, Subject.EVENT_INIT, null);
     }
 }
 
 class PlotView{
-    constructor(target, model) {
+    constructor(target) {
         // TODO - variable plot x- and y-axes
         this.x_prop = 's';
         this.y_prop = 'T';
         this.dispprops = ['T','s','p','v'];
         this.target = target;
         this.container = document.getElementById(target);
-        model.addListener(this);
-        this.init(model);
+        this.init();
     }
 
-    init(model){
+    init(){
         this.set_layout();
         let traces = [{
             x: [],
@@ -305,11 +339,11 @@ class PlotView{
             if (x.between(myPlot.layout.xaxis.range[0], myPlot.layout.xaxis.range[1]) &&
                 y.between(myPlot.layout.yaxis.range[0], myPlot.layout.yaxis.range[1])) {
                 let formData = {}
-                formData['id'] = pointModel.substance;
+                formData['id'] = get_substance();
                 formData[myPlotContainer.x_prop] = x
                 formData[myPlotContainer.y_prop] = y
                 let requestroute = "/";
-                let unitFormData = pointModel.units;
+                let unitFormData = get_units();
                 let postData = {state_input: formData, units: unitFormData};
                 // Forced to operate as $.ajax because we need to specify that we're
                 // passing json.
@@ -354,18 +388,17 @@ class PlotView{
 
     }
 
-    update(model, event){
-        if (event == "point"){
-            this.updatePoints(model);
-        } else if (event == "init") {
-            this.init(model);
+    update(source, event, data){
+        if (event == Subject.EVENT_POINT){
+            this.updatePoints(data);
+        } else if (event == Subject.EVENT_INIT) {
+            this.init();
         }
     }
 
-    updatePoints(model) {
+    updatePoints(points) {
         // Build the customdata object for the tooltip
         // Object has the form [[h1,v1,s1],[h2,v2,s2],[h3,v3,s3]]
-        let points = model.points;
 
         let allkeys = Object.keys(points);
         let customdataset = [];  // The custom data that will be added to the tooltip
@@ -412,16 +445,14 @@ class PlotView{
 class TableView{
     // delete rows? https://stackoverflow.com/questions/64526856/how-to-add-edit-delete-buttons-in-each-row-of-datatable
     // showhide columns https://datatables.net/examples/api/show_hide.html
-    constructor(target, model) {
+    constructor(target) {
         this.dispprops = ['ptid','T','p','d','h','s']; // TODO - switch to dynamic show/hide
         this.target = target;
-        model.addListener(this);
-
         this.table = null
-        this.init(model);
+        this.init();
     }
 
-    init(model){
+    init(){
         if (this.table == null){
             let $tablediv = $(this.target);
             let $head = $('<thead></thead>');
@@ -449,7 +480,7 @@ class TableView{
 
             $(this.target + ' tbody').on( 'click', 'button', function () {
                 let data = table.row( $(this).parents('tr') ).data();
-                model.delete_point(data[0]);
+                delete_point(data[0]);
             } );
             this.table = table;
         }
@@ -457,18 +488,17 @@ class TableView{
         this.table.clear().draw();
     }
 
-    update(model, event){
-        if (event == "point"){
-            this.updatePoints(model);
-        } else if (event == "init") {
-            this.init(model);
+    update(source, event, data){
+        if (event == Subject.EVENT_POINT){
+            this.updatePoints(data);
+        } else if (event == Subject.EVENT_INIT) {
+            this.init();
         }
     }
 
 
 
-    updatePoints(model) {
-        let points = model.points;
+    updatePoints(points) {
 
         this.table.rows().remove();
 
@@ -506,23 +536,66 @@ $(document).ready(function(){
     pointModel = new PointModel();
 
     getInfo((data)=>{
-        unitView = new UnitView('#unitform', pointModel);
-        substanceView = new SubstanceView('#sel_substance', pointModel);
-        tableView = new TableView('#proptable', pointModel);
-        plotView = new PlotView("plot", pointModel);
-
         pointModel.set_units(data.units, data.valid_units);
         pointModel.set_substance(pointModel.DEFAULT_SUBSTANCE, data.substances);
 
 
+        unitView = new UnitView('#unitform');
+        substanceView = new SubstanceView('#sel_substance');
+        tableView = new TableView('#proptable');
+        plotView = new PlotView("plot");
 
-        unitView.init(pointModel);
-        substanceView.init(pointModel);
+
+        pointModel.addListener(unitView);
+        pointModel.addListener(substanceView);
+        pointModel.addListener(tableView);
+        pointModel.addListener(plotView);
+
+        unitView.init(get_valid_units(), get_units());
+        substanceView.init(get_valid_substances(), get_substance(), get_display_substances());
     });
 });
 
-function change_substance(newsubstance){
+
+function get_display_substances(){
+    // TODO - consider where this belongs
+    return pointModel.SUB_SHORTLIST;
+}
+
+function get_points(){
+    return pointModel.get_points();
+}
+
+function delete_point(point){
+    pointModel.delete_point(point)
+}
+
+function get_valid_substances(){
+    return pointModel.get_valid_substances();
+}
+
+function get_substance(){
+    return pointModel.get_substance();
+}
+
+function get_units(){
+    return pointModel.get_units();
+}
+
+function get_valid_units(){
+    return pointModel.get_valid_units();
+}
+
+function set_substance(newsubstance){
     pointModel.set_substance(newsubstance);
+}
+
+function set_units(units){
+    pointModel.set_units(units);
+}
+
+function add_point(point){
+    pointModel.add_point(point);
 }
 
 
@@ -579,7 +652,7 @@ function popup() {
 // Callbacks
 function propResponseSuccess(data){
     // TODO generalize!!
-    pointModel.add_point(data.data);
+    add_point(data.data);
 }
 
 function propResponseFail(data){
