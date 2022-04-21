@@ -35,10 +35,7 @@ Number.prototype.between = function(min, max) {
 // In this case, listener is just a function object that will be called.
 class Subject {
     // https://webdevstudios.com/2019/02/19/observable-pattern-in-javascript/
-    static EVENT_UNIT = 'units';
-    static EVENT_SUBSTANCE = 'substance';
-    static EVENT_POINT = 'point'
-    static EVENT_INIT = 'init';
+    static EVENT_ID_NULL = null;
 
     constructor() {
         this.listeners = [];
@@ -68,7 +65,7 @@ class Subject {
      * @param event - String: an indicator of the event type (or null)
      * @param data - Various: data associated with the event (or null)
      */
-    notify(source, event=null, data=null) {
+    notify(source, event=Subject.EVENT_ID_NULL, data=null) {
         if (this.listeners.length > 0) {
             this.listeners.forEach(listener => listener.update(source, event, data));
         }
@@ -76,15 +73,15 @@ class Subject {
 }
 
 
-class SubstanceView{
+class SubstanceFormView{
 
-    constructor(form, show_all=false) {
+    constructor(formHTMLid, show_all=false) {
         this.show_all = show_all;
-        this.target = form;
+        this.target = formHTMLid;
     }
 
     update(source, event, data){
-        if (event == Subject.EVENT_SUBSTANCE){
+        if (event == PointModel.EVENT_SUBSTANCE){
             this.set_value(data);
         }
     }
@@ -124,12 +121,11 @@ class SubstanceView{
     }
 }
 
-// An instance of observable that will hold the current unit configuration and
-// notify when it is changed
+
 class UnitView{
 
-    constructor(form) {
-        this.target = form;
+    constructor(formHTMLid) {
+        this.target = formHTMLid;
         this.button_apply = "#unit_apply";
         this.button_revert = "#unit_revert";
         this.apply_onclick = this.apply_onclick.bind(this);
@@ -139,7 +135,7 @@ class UnitView{
     }
 
     update(source, event, data){
-        if (event == Subject.EVENT_UNIT){
+        if (event == PointModel.EVENT_UNIT){
             this.set_values(data);
         }
     }
@@ -210,6 +206,11 @@ class UnitView{
 
 
 class PointModel extends Subject{
+    static EVENT_UNIT = 'unit';
+    static EVENT_SUBSTANCE = 'substance';
+    static EVENT_POINT = 'point'
+    static EVENT_INIT = 'init';
+
     SUB_SHORTLIST=["H2O","C2H4F4","air","O2", "N2"];
     DEFAULT_SUBSTANCE = 'mp.H2O'
     INIT_ID = 1
@@ -232,7 +233,7 @@ class PointModel extends Subject{
         }
         this.units = units;
         this.clearpoints();
-        this.notify(this,Subject.EVENT_UNIT, this.get_units())
+        this.notify(this, PointModel.EVENT_UNIT, this.get_units())
     }
 
     get_units(){
@@ -257,7 +258,7 @@ class PointModel extends Subject{
         }
         this.substance = substance;
         this.clearpoints();
-        this.notify(this,Subject.EVENT_SUBSTANCE, this.get_substance())
+        this.notify(this, PointModel.EVENT_SUBSTANCE, this.get_substance())
     }
 
     get_points(){
@@ -278,7 +279,7 @@ class PointModel extends Subject{
             }
         }
         this.point_id++;
-        this.notify(this, Subject.EVENT_POINT, this.get_points())
+        this.notify(this, PointModel.EVENT_POINT, this.get_points())
     }
 
     delete_point(id){
@@ -289,25 +290,25 @@ class PointModel extends Subject{
         if (this.points['ptid'].length == 0){
             this.clearpoints();
         } else {
-            this.notify(this, Subject.EVENT_POINT, this.get_points());
+            this.notify(this, PointModel.EVENT_POINT, this.get_points());
         }
     }
 
     clearpoints(){
         this.points = [];
         this.point_id = this.INIT_ID;
-        this.notify(this, Subject.EVENT_INIT, null);
+        this.notify(this, PointModel.EVENT_INIT, null);
     }
 }
 
 class PlotView{
-    constructor(target) {
+    constructor(divTarget) {
         // TODO - variable plot x- and y-axes
         this.x_prop = 's';
         this.y_prop = 'T';
         this.dispprops = ['T','s','p','v'];
-        this.target = target;
-        this.container = document.getElementById(target);
+        this.target = divTarget;
+        this.container = document.getElementById(divTarget);
         this.init();
     }
 
@@ -389,9 +390,9 @@ class PlotView{
     }
 
     update(source, event, data){
-        if (event == Subject.EVENT_POINT){
+        if (event == PointModel.EVENT_POINT){
             this.updatePoints(data);
-        } else if (event == Subject.EVENT_INIT) {
+        } else if (event == PointModel.EVENT_INIT) {
             this.init();
         }
     }
@@ -445,9 +446,9 @@ class PlotView{
 class TableView{
     // delete rows? https://stackoverflow.com/questions/64526856/how-to-add-edit-delete-buttons-in-each-row-of-datatable
     // showhide columns https://datatables.net/examples/api/show_hide.html
-    constructor(target) {
+    constructor(divTarget) {
         this.dispprops = ['ptid','T','p','d','h','s']; // TODO - switch to dynamic show/hide
-        this.target = target;
+        this.target = divTarget;
         this.table = null
         this.init();
     }
@@ -489,9 +490,9 @@ class TableView{
     }
 
     update(source, event, data){
-        if (event == Subject.EVENT_POINT){
+        if (event == PointModel.EVENT_POINT){
             this.updatePoints(data);
-        } else if (event == Subject.EVENT_INIT) {
+        } else if (event == PointModel.EVENT_INIT) {
             this.init();
         }
     }
@@ -541,7 +542,7 @@ $(document).ready(function(){
 
 
         unitView = new UnitView('#unitform');
-        substanceView = new SubstanceView('#sel_substance');
+        substanceView = new SubstanceFormView('#sel_substance');
         tableView = new TableView('#proptable');
         plotView = new PlotView("plot");
 
