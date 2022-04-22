@@ -73,6 +73,104 @@ class Subject {
 }
 
 
+class PointModel extends Subject{
+    static EVENT_UNIT = 'unit';
+    static EVENT_SUBSTANCE = 'substance';
+    static EVENT_POINT = 'point'
+    static EVENT_INIT = 'init';
+
+    SUB_SHORTLIST=["mp.H2O","mp.C2H2F4","ig.air","ig.O2", "ig.N2"];
+    DEFAULT_SUBSTANCE = 'mp.H2O'
+    INIT_ID = 1
+
+    constructor() {
+        super();
+        this.points = []
+        this.point_id = this.INIT_ID;
+
+        this.units = null;
+        this.valid_units = null;
+
+        this.substance = null;
+        this.valid_substances = null;
+    }
+
+    set_units(units, valid_units=null){
+        if (valid_units !== null){
+            this.valid_units = valid_units;
+        }
+        this.units = units;
+        this.clearpoints();
+        this.notify(this, PointModel.EVENT_UNIT, this.get_units())
+    }
+
+    get_units(){
+        return this.units;
+    }
+
+    get_substance(){
+        return this.substance;
+    }
+
+    get_valid_units(){
+        return this.valid_units;
+    }
+
+    get_valid_substances(){
+        return this.valid_substances;
+    }
+
+    set_substance(substance, valid_substances=null){
+        if (valid_substances !== null){
+            this.valid_substances = valid_substances;
+        }
+        this.substance = substance;
+        this.clearpoints();
+        this.notify(this, PointModel.EVENT_SUBSTANCE, this.get_substance())
+    }
+
+    get_points(){
+        return this.points;
+    }
+
+    add_point(point){
+        if (this.points.length === 0){
+            this.points = {};
+            this.points['ptid'] = [this.point_id];
+            for (const key in point) {
+                this.points[key] = [point[key]];
+            }
+        } else {
+            this.points['ptid'].push(this.point_id);
+            for (const key in point) {
+                this.points[key].push(point[key]);
+            }
+        }
+        this.point_id++;
+        this.notify(this, PointModel.EVENT_POINT, this.get_points())
+    }
+
+    delete_point(id){
+        let index = this.points['ptid'].indexOf(id);
+        for (const key in this.points) {
+            this.points[key].splice(index, 1);
+        }
+        if (this.points['ptid'].length == 0){
+            this.clearpoints();
+        } else {
+            this.notify(this, PointModel.EVENT_POINT, this.get_points());
+        }
+    }
+
+    clearpoints(){
+        this.points = [];
+        this.point_id = this.INIT_ID;
+        this.notify(this, PointModel.EVENT_INIT, null);
+    }
+}
+
+
+
 class SubstanceFormView{
 
     constructor(formHTMLid, show_all=false) {
@@ -218,102 +316,6 @@ class PropFormView{
     }
 }
 
-
-class PointModel extends Subject{
-    static EVENT_UNIT = 'unit';
-    static EVENT_SUBSTANCE = 'substance';
-    static EVENT_POINT = 'point'
-    static EVENT_INIT = 'init';
-
-    SUB_SHORTLIST=["mp.H2O","mp.C2H2F4","ig.air","ig.O2", "ig.N2"];
-    DEFAULT_SUBSTANCE = 'mp.H2O'
-    INIT_ID = 1
-
-    constructor() {
-        super();
-        this.points = []
-        this.point_id = this.INIT_ID;
-
-        this.units = null;
-        this.valid_units = null;
-
-        this.substance = null;
-        this.valid_substances = null;
-    }
-
-    set_units(units, valid_units=null){
-        if (valid_units !== null){
-            this.valid_units = valid_units;
-        }
-        this.units = units;
-        this.clearpoints();
-        this.notify(this, PointModel.EVENT_UNIT, this.get_units())
-    }
-
-    get_units(){
-        return this.units;
-    }
-
-    get_substance(){
-        return this.substance;
-    }
-
-    get_valid_units(){
-        return this.valid_units;
-    }
-
-    get_valid_substances(){
-        return this.valid_substances;
-    }
-
-    set_substance(substance, valid_substances=null){
-        if (valid_substances !== null){
-            this.valid_substances = valid_substances;
-        }
-        this.substance = substance;
-        this.clearpoints();
-        this.notify(this, PointModel.EVENT_SUBSTANCE, this.get_substance())
-    }
-
-    get_points(){
-        return this.points;
-    }
-
-    add_point(point){
-        if (this.points.length === 0){
-            this.points = {};
-            this.points['ptid'] = [this.point_id];
-            for (const key in point) {
-                this.points[key] = [point[key]];
-            }
-        } else {
-            this.points['ptid'].push(this.point_id);
-            for (const key in point) {
-                this.points[key].push(point[key]);
-            }
-        }
-        this.point_id++;
-        this.notify(this, PointModel.EVENT_POINT, this.get_points())
-    }
-
-    delete_point(id){
-        let index = this.points['ptid'].indexOf(id);
-        for (const key in this.points) {
-            this.points[key].splice(index, 1);
-        }
-        if (this.points['ptid'].length == 0){
-            this.clearpoints();
-        } else {
-            this.notify(this, PointModel.EVENT_POINT, this.get_points());
-        }
-    }
-
-    clearpoints(){
-        this.points = [];
-        this.point_id = this.INIT_ID;
-        this.notify(this, PointModel.EVENT_INIT, null);
-    }
-}
 
 class PlotView{
     constructor(divTarget) {
@@ -539,8 +541,8 @@ class TableView{
 // *********************************************
 
 // Instantiate the classes
-var unitView;
-var substanceView;
+var unitFormView;
+var substanceFormView;
 var plotView;
 var tableView;
 var pointModel;
@@ -549,8 +551,8 @@ var pointModel;
 // Execute when the page loads
 $(document).ready(function(){
     pointModel = new PointModel();
-    unitView = new UnitFormView('#unitform');
-    substanceView = new SubstanceFormView('#sel_substance');
+    unitFormView = new UnitFormView('#unitform');
+    substanceFormView = new SubstanceFormView('#sel_substance');
     tableView = new TableView('#proptable');
     plotView = new PlotView("plot");
 
@@ -558,13 +560,13 @@ $(document).ready(function(){
         pointModel.set_units(data.units, data.valid_units);
         pointModel.set_substance(pointModel.DEFAULT_SUBSTANCE, data.substances);
 
-        pointModel.addListener(unitView);
-        pointModel.addListener(substanceView);
+        pointModel.addListener(unitFormView);
+        pointModel.addListener(substanceFormView);
         pointModel.addListener(tableView);
         pointModel.addListener(plotView);
 
-        unitView.init(get_valid_units(), get_units());
-        substanceView.init(get_valid_substances(), get_substance(), get_display_substances());
+        unitFormView.init(get_valid_units(), get_units());
+        substanceFormView.init(get_valid_substances(), get_substance(), get_display_substances());
     });
 });
 
