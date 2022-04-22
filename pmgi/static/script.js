@@ -122,17 +122,24 @@ class SubstanceFormView{
 }
 
 
-class UnitView{
+class UnitFormView{
 
     constructor(formHTMLid) {
         this.target = formHTMLid;
         this.button_apply = "#unit_apply";
         this.button_revert = "#unit_revert";
+        this.button_hide = "#unit_hide"
+        this.unit_list_div = "#hideablelist";
+
         this.apply_onclick = this.apply_onclick.bind(this);
         this.revert_onclick = this.revert_onclick.bind(this);
         $(this.button_apply).on("click", this.apply_onclick);
         $(this.button_revert).on("click", this.revert_onclick);
+
+        this.hide_onclick = this.hide_onclick.bind(this);
+        $(this.button_hide).on("click", this.hide_onclick);
     }
+
 
     update(source, event, data){
         if (event == PointModel.EVENT_UNIT){
@@ -196,6 +203,10 @@ class UnitView{
         this.set_values(get_units());
         $(this.button_apply).hide();
         $(this.button_revert).hide();
+    }
+
+    hide_onclick(){
+        $(this.unit_list_div).toggle();
     }
 
     valuesAsJSON(){
@@ -541,7 +552,7 @@ $(document).ready(function(){
         pointModel.set_substance(pointModel.DEFAULT_SUBSTANCE, data.substances);
 
 
-        unitView = new UnitView('#unitform');
+        unitView = new UnitFormView('#unitform');
         substanceView = new SubstanceFormView('#sel_substance');
         tableView = new TableView('#proptable');
         plotView = new PlotView("plot");
@@ -604,15 +615,6 @@ function add_point(point){
 // * INTERACTIVITY
 // *********************************************
 
-function popup() {
-    // TODO - make this a units edit place
-    var popwindow = document.getElementById("hideablelist");
-    if (popwindow.style.display === "none") {
-        popwindow.style.display = "block";
-    } else {
-        popwindow.style.display = "none";
-    }
-}
 
 
 //

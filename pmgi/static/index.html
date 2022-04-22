@@ -9,48 +9,54 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 </head>
 <body>
+<div id="controls">
+    <div id="unit_controls">
+        <input type="button" id="unit_hide" value="Units"/>
+        <ul id="hideablelist" style="display: none">
+            <form id="unitform">
+                <!--  Will be filled in by JS -->
+            </form>
+            <input type="button" id="unit_apply" value="Apply" style="display: none"/>
+            <input type="button" id="unit_revert" value="Revert" style="display: none"/>
+        </ul>
+    </div>
 
-<div>
-    <input type="button" id="popupbutton" value="Units" onclick="popup(this)"/>
-    <ul id="hideablelist" style="display: none">
-        <form id="unitform">
-            <!--  Will be filled in by JS -->
-        </form>
-        <input type="button" id="unit_apply" value="Apply" style="display: none"/>
-        <input type="button" id="unit_revert" value="Revert" style="display: none"/>
-    </ul>
+
+
+
+    <div id="substance_controls">
+        <label>Select Substance: </label>
+        <select id="sel_substance">
+            <!-- Populated by JS -->
+        </select>
+    </div>
+
+    <div id="property_controls">
+        <table id="propinput">
+            <th>T</th><th>p</th> <th>d</th> <th>h</th> <th>s</th>
+            <form id="propform">
+                <tr>
+                    <td><input type="text" name="T_input" id="Tinput" ></td>
+                    <td><input type="text" name="p_input" id="pinput" ></td>
+                    <td><input type="text" name="d_input" id="dinput" ></td>
+                    <td><input type="text" name="h_input" id="hinput" ></td>
+                    <td><input type="text" name="s_input" id="sinput" ></td>
+                </tr>
+                <button type="button" onclick="getProps()">Change Content - GET</button>
+                <button type="button" onclick="postProps()">Change Content - POST</button>
+            </form>
+        </table>
+    </div>
 </div>
-
-
-
-<div>
-    <label>Select Substance: </label>
-    <select id="sel_substance">
-        <!-- Populated by JS -->
-    </select>
-    <table id="proptable">
-
-    </table>
-    <table id="propinput">
-        <th>T</th><th>p</th> <th>d</th> <th>h</th> <th>s</th>
-        <form id="propform">
-            <tr>
-                <td><input type="text" name="T_input" id="Tinput" ></td>
-                <td><input type="text" name="p_input" id="pinput" ></td>
-                <td><input type="text" name="d_input" id="dinput" ></td>
-                <td><input type="text" name="h_input" id="hinput" ></td>
-                <td><input type="text" name="s_input" id="sinput" ></td>
-            </tr>
-            <button type="button" onclick="getProps()">Change Content - GET</button>
-            <button type="button" onclick="postProps()">Change Content - POST</button>
-        </form>
-    </table>
-
-
-
-</div>
-<div id="plot" style="width:600px;height:400px;">
-    <!-- Will be filled in by JS -->
+<div id="outputs">
+    <div id="plot" style="width:600px;height:400px;">
+        <!-- Will be filled in by JS -->
+    </div>
+    <div id="property_display">
+        <table id="proptable">
+            <!-- Populated by JS -->
+        </table>
+    </div>
 </div>
 </body>
 </html>
