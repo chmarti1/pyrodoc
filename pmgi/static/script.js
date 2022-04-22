@@ -319,52 +319,75 @@ class UnitFormView{
 }
 
 
-class PropFormView{
+class PropFormView {
     constructor(formHTMLid) {
         this.target = formHTMLid;
         this.hide_checks = "#propchoice_hide";
         this.prop_checks = "#propchecks";
         this.prop_table = "#propinput";
+        this.prop_form = "#propform";
+
+        this.get_button = "#get_props";
+        this.post_button = "#post_props";
+
+        this.checkbox_onchange = this.checkbox_onchange.bind(this);
 
         this.hide_onclick = this.hide_onclick.bind(this);
         $(this.hide_checks).on("click", this.hide_onclick);
+
+
+        this.get_onclick = this.get_onclick.bind(this);
+        this.post_onclick = this.post_onclick.bind(this);
+        $(this.get_button).on("click", this.get_onclick);
+        $(this.post_button).on("click", this.post_onclick);
     }
 
-    update(source, event, data){
-        if (event == PointModel.EVENT_SUBSTANCE){
+    update(source, event, data) {
+        if (event == PointModel.EVENT_SUBSTANCE) {
             let disp_props = this.get_checkbox_values();
-            this.create_checkboxes(get_valid_properties());
-            this.set_checkbox_values(disp_props);
+            let prop_vals = this.valuesToJSON();
+            this.init(get_valid_properties(), disp_props, prop_vals);
+        } else if (event == PointModel.EVENT_INIT) {
+            //I think we're good?
         }
     }
 
-    init(valid_properties, show_properties){
+    init(valid_properties, show_properties, prop_values=null) {
         this.create_checkboxes(valid_properties);
         this.set_checkbox_values(show_properties);
 
         this.create_propform(this.get_checkbox_values());
+        this.set_form_values(prop_values);
     }
 
-    create_checkboxes(valid_properties){
+    create_checkboxes(valid_properties) {
         $(this.prop_checks).empty();
         // Loop over all the configured unit types
         valid_properties.forEach(prop => {
             // The form will be a list of labelled check boxes
             let $li = $("<li>")
-            let $label = $('<label>'+prop+'</label>', {});
+            let $label = $('<label>' + prop + '</label>', {});
 
-            let checkbox = '<input type="checkbox" value="'+prop+'" id="'+prop+'_box" name="'+prop+'_box">';
+            let $checkbox = $('<input>',{type: "checkbox", value: prop, id: prop+'_box', name: prop+'_box'});
+            $checkbox.on("click", this.checkbox_onchange);
             // Add the objects to the form
-            $(this.prop_checks).append($li.append($label).append(checkbox));
+            $(this.prop_checks).append($li.append($label).append($checkbox));
         });
     }
 
-    create_propform(props){
+    checkbox_onchange(){
+        let disp_props = this.get_checkbox_values();
+        let prop_vals = this.valuesToJSON();
+        this.create_propform(disp_props);
+        this.set_form_values(prop_vals);
+    }
+
+    create_propform(props) {
         $(this.prop_table).empty();
 
         let head = "<thead><tr>"
         props.forEach((prop) => {
-            head = head + "<th>"+prop+"</th>";
+            head = head + "<th>" + prop + "</th>";
         });
         head = head + "</tr></thead>";
 
@@ -373,32 +396,63 @@ class PropFormView{
         let tr = $("<tr>")
         props.forEach((prop) => {
             let td = $("<td>");
-            let inputbox = '<input type="text" propvalue="'+prop+'" id="'+prop+'_input" name="'+prop+'_input">';
+            let inputbox = '<input type="text" propvalue="' + prop + '" id="' + prop + '_input" name="' + prop + '_input">';
             tr.append(td.append(inputbox));
         });
         $(this.prop_table).append(tr);
     }
 
-    get_checkbox_values(){
+    get_checkbox_values() {
         let names = [];
-        $(this.prop_checks+' input:checked').each((id, box) => {
+        $(this.prop_checks + ' input:checked').each((id, box) => {
             names.push(box.value);
         });
         return names;
     }
 
-    set_checkbox_values(show_properties){
+    set_checkbox_values(show_properties) {
 
-        $(this.prop_checks+' input').each((id, box)=>{
+        $(this.prop_checks + ' input').each((id, box) => {
             let prop = box.value;
             let checked = show_properties.includes(prop);
-            if (checked){
-                box.checked=true;
+            if (checked) {
+                box.checked = true;
             } else {
-                box.checked=false;
+                box.checked = false;
             }
         });
+    }
 
+    set_form_values(props) {
+        if (props != null) {
+
+            $(this.prop_form + ' input').each((id, box) => {
+                let boxkey = box.attributes['propvalue'].nodeValue;
+                if (Object.keys(props).includes(boxkey)) {
+                    box.value = props[boxkey];
+                }
+            });
+        }
+    }
+
+    valuesToJSON() {
+        let outdata = {};
+        $(this.prop_form+ " input").each((id, box) =>{
+            let value = box.value;
+            if (value !== ""){
+                let prop = box.attributes['propvalue'].nodeValue;
+                outdata[prop] = value;
+            }
+        });
+        return outdata;
+    }
+
+    get_onclick(){
+        compute_point(this.valuesToJSON(), "GET");
+    }
+
+    post_onclick(){
+        compute_point(this.valuesToJSON(), "POST");
     }
 
     hide_onclick(){
@@ -446,24 +500,11 @@ class PlotView{
             var y = ((e.y - bgrect['y']) / (bgrect['height'])) * (myPlot.layout.yaxis.range[0] - myPlot.layout.yaxis.range[1]) + myPlot.layout.yaxis.range[1];
             if (x.between(myPlot.layout.xaxis.range[0], myPlot.layout.xaxis.range[1]) &&
                 y.between(myPlot.layout.yaxis.range[0], myPlot.layout.yaxis.range[1])) {
+
                 let formData = {}
-                formData['id'] = get_substance();
                 formData[myPlotContainer.x_prop] = x
                 formData[myPlotContainer.y_prop] = y
-                let requestroute = "/";
-                let unitFormData = get_units();
-                let postData = {state_input: formData, units: unitFormData};
-                // Forced to operate as $.ajax because we need to specify that we're
-                // passing json.
-                $.ajax({
-                    url: requestroute,
-                    type: "POST",
-                    data: JSON.stringify(postData),
-                    dataType: "json",
-                    contentType: 'application/json; charset=utf-8',
-                    success: propResponseSuccess,
-                    error: propResponseFail
-                });
+                compute_point(formData, "POST");
             }
         });
     }
@@ -712,23 +753,39 @@ function add_point(point){
     pointModel.add_point(point);
 }
 
-function compute_point(mode="POST"){
+// TODO - Expand/contract table display based on property selection
+
+function compute_point(props, mode="POST"){
     let requestroute = "/";
-    let formData = propFormToJSON('propform', {'id': pointModel.substance});
-    let unitFormData = pointModel.units;
-    let postData = {state_input: formData, units: unitFormData};
-    // Forced to operate as $.ajax because we need to specify that we're
-    // passing json.
-    $.ajax({
-        url: requestroute,
-        type: "POST",
-        data: JSON.stringify(postData),
-        dataType: "json",
-        contentType: 'application/json; charset=utf-8',
-        success: propResponseSuccess,
-        error: propResponseFail
-    });
+
+    // Add the substance ID to props
+    props['id'] = get_substance();
+
+    if (mode == "GET"){
+        $.get(requestroute, props, propResponseSuccess,dataType='json')
+            .fail(propResponseFail);
+    } else if (mode == "POST") {
+        let postData = {state_input: props, units: get_units()};
+        $.ajax({
+            url: requestroute,
+            type: "POST",
+            data: JSON.stringify(postData),
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: propResponseSuccess,
+            error: propResponseFail
+        });
+    }
 }
+
+function getInfo(callback){
+    // Get all the PM info.
+    $.get("/info",
+        callback,
+        dataType='json')  // Data type of the response.
+        .fail(propResponseFail);  // What to do if it doesn't work
+}
+
 
 // *********************************************
 // * INTERACTIVITY
@@ -787,75 +844,7 @@ function propResponseFail(data){
     }
 }
 
-// AJAX
-function postProps(){
-    let requestroute = "/";
-    let formData = propFormToJSON('propform', {'id': pointModel.substance});
-    let unitFormData = pointModel.units;
-    let postData = {state_input: formData, units: unitFormData};
-    // Forced to operate as $.ajax because we need to specify that we're
-    // passing json.
-    $.ajax({
-        url: requestroute,
-        type: "POST",
-        data: JSON.stringify(postData),
-        dataType: "json",
-        contentType: 'application/json; charset=utf-8',
-        success: propResponseSuccess,
-        error: propResponseFail
-    });
-}
 
 
-function getProps(){
-    let requestroute = "/";
-    let formData = propFormToJSON('propform', {'id': pointModel.substance});
-    $.get(requestroute, formData, propResponseSuccess,dataType='json')
-        .fail(propResponseFail);
-}
-
-
-function getInfo(callback){
-    // Get all the PM info.
-    $.get("/info",
-        callback,
-        dataType='json')  // Data type of the response.
-        .fail(propResponseFail);  // What to do if it doesn't work
-}
-
-
-
-/**
- * Convert the properties form's data into JSON that is suitable for passing to
- * PMGI.
- *
- * Form elements must have a "name" field. The keys of the JSON will be
- * shortened using only the first letter of the name. In order to be useful
- * with PMGI, the form element names should all use their PMGI property
- * identifier as their first letter.
- *
- * @param formID the Element ID of the form
- * @returns Object, keyed by thermodynamic property, with values as floats.
- */
-function propFormToJSON(formID, append){
-    //TODO - probably make this more general
-    let outdata = {};
-    let data = Object.fromEntries(new FormData(document.getElementById(formID)));
-    for (const key in data) {
-        // The key we need for the JSON is just a single letter, not the full name
-        let shortkey = key[0];
-        let v = parseFloat(data[key]);
-        if (v){
-            outdata[shortkey] = v;
-        }
-    };
-
-    if (append !== undefined){
-        for (const key in append){
-            outdata[key] = append[key];
-        }
-    }
-    return outdata;
-}
 
 
