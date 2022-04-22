@@ -80,6 +80,7 @@ class PointModel extends Subject{
     static EVENT_INIT = 'init';
 
     SUB_SHORTLIST=["mp.H2O","mp.C2H2F4","ig.air","ig.O2", "ig.N2"];
+    PROP_SHORTLIST=["T","p","v","e","h","s","x"];
     DEFAULT_SUBSTANCE = 'mp.H2O'
     INIT_ID = 1
 
@@ -102,6 +103,10 @@ class PointModel extends Subject{
         this.units = units;
         this.clearpoints();
         this.notify(this, PointModel.EVENT_UNIT, this.get_units())
+    }
+
+    get_valid_properties(){
+        return this.valid_substances[this.substance]['props'];
     }
 
     get_units(){
@@ -188,12 +193,12 @@ class SubstanceFormView{
         $(this.target).val(substance);
     }
 
-    init(substances, current_value, shortlist){
+    init(substances, current_value, shortlist=null){
 
         let subsel = $(this.target);
         // Loop over the substances, create option group for each category
         Object.keys(substances).forEach(subst => {
-            if (this.show_all || shortlist.includes(subst)) {
+            if (this.show_all || shortlist == null || shortlist.includes(subst)) {
                     subsel.append($("<option>").val(subst).text(subst));
             }
         });
@@ -240,6 +245,11 @@ class UnitFormView{
         }
     }
 
+    /**
+     * Create the selects for the unit form
+     * @param valid_units Expects an Object with keys of the unit categories and values of arrays of the allowable unit values for that unit category
+     * @param current_values Expects an Object with keys of the unit categories and values of the current unit for that unit category
+     */
     init(valid_units, current_values){
 
         // Loop over all the configured unit types
@@ -312,8 +322,89 @@ class UnitFormView{
 class PropFormView{
     constructor(formHTMLid) {
         this.target = formHTMLid;
+        this.hide_checks = "#propchoice_hide";
+        this.prop_checks = "#propchecks";
+        this.prop_table = "#propinput";
+
+        this.hide_onclick = this.hide_onclick.bind(this);
+        $(this.hide_checks).on("click", this.hide_onclick);
+    }
+
+    update(source, event, data){
+        if (event == PointModel.EVENT_SUBSTANCE){
+            let disp_props = this.get_checkbox_values();
+            this.create_checkboxes(get_valid_properties());
+            this.set_checkbox_values(disp_props);
+        }
+    }
+
+    init(valid_properties, show_properties){
+        this.create_checkboxes(valid_properties);
+        this.set_checkbox_values(show_properties);
+
+        this.create_propform(this.get_checkbox_values());
+    }
+
+    create_checkboxes(valid_properties){
+        $(this.prop_checks).empty();
+        // Loop over all the configured unit types
+        valid_properties.forEach(prop => {
+            // The form will be a list of labelled check boxes
+            let $li = $("<li>")
+            let $label = $('<label>'+prop+'</label>', {});
+
+            let checkbox = '<input type="checkbox" value="'+prop+'" id="'+prop+'_box" name="'+prop+'_box">';
+            // Add the objects to the form
+            $(this.prop_checks).append($li.append($label).append(checkbox));
+        });
+    }
+
+    create_propform(props){
+        $(this.prop_table).empty();
+
+        let head = "<thead><tr>"
+        props.forEach((prop) => {
+            head = head + "<th>"+prop+"</th>";
+        });
+        head = head + "</tr></thead>";
+
+        $(this.prop_table).append(head);
+
+        let tr = $("<tr>")
+        props.forEach((prop) => {
+            let td = $("<td>");
+            let inputbox = '<input type="text" propvalue="'+prop+'" id="'+prop+'_input" name="'+prop+'_input">';
+            tr.append(td.append(inputbox));
+        });
+        $(this.prop_table).append(tr);
+    }
+
+    get_checkbox_values(){
+        let names = [];
+        $(this.prop_checks+' input:checked').each((id, box) => {
+            names.push(box.value);
+        });
+        return names;
+    }
+
+    set_checkbox_values(show_properties){
+
+        $(this.prop_checks+' input').each((id, box)=>{
+            let prop = box.value;
+            let checked = show_properties.includes(prop);
+            if (checked){
+                box.checked=true;
+            } else {
+                box.checked=false;
+            }
+        });
 
     }
+
+    hide_onclick(){
+        $(this.prop_checks).toggle();
+    }
+
 }
 
 
@@ -543,6 +634,7 @@ class TableView{
 // Instantiate the classes
 var unitFormView;
 var substanceFormView;
+var propFormView;
 var plotView;
 var tableView;
 var pointModel;
@@ -553,6 +645,7 @@ $(document).ready(function(){
     pointModel = new PointModel();
     unitFormView = new UnitFormView('#unitform');
     substanceFormView = new SubstanceFormView('#sel_substance');
+    propFormView = new PropFormView("#property_controls")
     tableView = new TableView('#proptable');
     plotView = new PlotView("plot");
 
@@ -564,12 +657,19 @@ $(document).ready(function(){
         pointModel.addListener(substanceFormView);
         pointModel.addListener(tableView);
         pointModel.addListener(plotView);
+        pointModel.addListener(propFormView);
 
         unitFormView.init(get_valid_units(), get_units());
         substanceFormView.init(get_valid_substances(), get_substance(), get_display_substances());
+        propFormView.init(get_valid_properties(), pointModel.PROP_SHORTLIST);
     });
 });
 
+
+function get_valid_properties(){
+    // TODO - consider where this belongs
+    return pointModel.get_valid_properties();
+}
 
 function get_display_substances(){
     // TODO - consider where this belongs
