@@ -94,15 +94,10 @@ class SubstanceFormView{
 
         let subsel = $(this.target);
         // Loop over the substances, create option group for each category
-        Object.keys(substances).forEach(subgrp => {
-            let optgroup = $('<optgroup>');
-            optgroup.attr('label',subgrp);
-            substances[subgrp].forEach(substance => {
-                if (this.show_all || shortlist.includes(substance)) {
-                    optgroup.append($("<option>").val(subgrp+"."+substance).text(substance));
-                }
-            });
-            subsel.append(optgroup);
+        Object.keys(substances).forEach(subst => {
+            if (this.show_all || shortlist.includes(subst)) {
+                    subsel.append($("<option>").val(subst).text(subst));
+            }
         });
 
         // The event handler for changes, which provides a confirmation.
@@ -112,7 +107,7 @@ class SubstanceFormView{
                 set_substance(subsel.val());
             } else {
                 // undo
-                this.set_value(current_value);
+                this.set_value(get_substance());
                 return false;
             }
         });
@@ -216,13 +211,21 @@ class UnitFormView{
 }
 
 
+class PropFormView{
+    constructor(formHTMLid) {
+        this.target = formHTMLid;
+
+    }
+}
+
+
 class PointModel extends Subject{
     static EVENT_UNIT = 'unit';
     static EVENT_SUBSTANCE = 'substance';
     static EVENT_POINT = 'point'
     static EVENT_INIT = 'init';
 
-    SUB_SHORTLIST=["H2O","C2H4F4","air","O2", "N2"];
+    SUB_SHORTLIST=["mp.H2O","mp.C2H2F4","ig.air","ig.O2", "ig.N2"];
     DEFAULT_SUBSTANCE = 'mp.H2O'
     INIT_ID = 1
 
@@ -546,17 +549,14 @@ var pointModel;
 // Execute when the page loads
 $(document).ready(function(){
     pointModel = new PointModel();
+    unitView = new UnitFormView('#unitform');
+    substanceView = new SubstanceFormView('#sel_substance');
+    tableView = new TableView('#proptable');
+    plotView = new PlotView("plot");
 
     getInfo((data)=>{
         pointModel.set_units(data.units, data.valid_units);
         pointModel.set_substance(pointModel.DEFAULT_SUBSTANCE, data.substances);
-
-
-        unitView = new UnitFormView('#unitform');
-        substanceView = new SubstanceFormView('#sel_substance');
-        tableView = new TableView('#proptable');
-        plotView = new PlotView("plot");
-
 
         pointModel.addListener(unitView);
         pointModel.addListener(substanceView);
@@ -610,6 +610,23 @@ function add_point(point){
     pointModel.add_point(point);
 }
 
+function compute_point(mode="POST"){
+    let requestroute = "/";
+    let formData = propFormToJSON('propform', {'id': pointModel.substance});
+    let unitFormData = pointModel.units;
+    let postData = {state_input: formData, units: unitFormData};
+    // Forced to operate as $.ajax because we need to specify that we're
+    // passing json.
+    $.ajax({
+        url: requestroute,
+        type: "POST",
+        data: JSON.stringify(postData),
+        dataType: "json",
+        contentType: 'application/json; charset=utf-8',
+        success: propResponseSuccess,
+        error: propResponseFail
+    });
+}
 
 // *********************************************
 // * INTERACTIVITY
