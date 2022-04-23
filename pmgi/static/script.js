@@ -801,6 +801,9 @@ class PlotView{
             this.updatePoints(data);
         } else if (event == PointModel.EVENT_INIT) {
             this.init();
+        } else if (event == PropChooserView.EVENT_PROPERTY_VISIBILITY){
+            this.dispprops = data;
+            this.updatePoints(get_points());
         }
     }
 
@@ -813,45 +816,47 @@ class PlotView{
         // Object has the form [[h1,v1,s1],[h2,v2,s2],[h3,v3,s3]]
 
         let allkeys = Object.keys(points);
-        let customdataset = [];  // The custom data that will be added to the tooltip
-        let keylist = [];
-        for (let i=0; i<points['T'].length; i++ ){  // Loop over all points
-            let arr = [] // Build an array of all props for this index.
-            arr.push(points['ptid'][i]); // Make the index the very first datapoint.
+        if (allkeys.length >0) {
+            let customdataset = [];  // The custom data that will be added to the tooltip
+            let keylist = [];
+            for (let i = 0; i < points['ptid'].length; i++) {  // Loop over all points
+                let arr = [] // Build an array of all props for this index.
+                arr.push(points['ptid'][i]); // Make the index the very first datapoint.
 
-            allkeys.forEach(key => {
-                if (key !== this.x_prop &&
-                    key !== this.y_prop &&
-                    this.dispprops.includes(key)) {
-                    if (i==0) {
-                        keylist.push(key);
+                allkeys.forEach(key => {
+                    if (key !== this.x_prop &&
+                        key !== this.y_prop &&
+                        this.dispprops.includes(key)) {
+                        if (i == 0) {
+                            keylist.push(key);
+                        }
+                        arr.push(points[key][i]);
                     }
-                    arr.push(points[key][i]);
-                }
-            });
-            customdataset.push(arr);
-        }
+                });
+                customdataset.push(arr);
+            }
 
-        // customdataset is now (ptid, T, p, v, ...)
+            // customdataset is now (ptid, T, p, v, ...)
 
-        // Build the strings that identify the points
-        let customrows = "";
-        for (let i=0; i<keylist.length; i++){
-            customrows = customrows + keylist[i] + ": %{customdata["+(i+1)+"]}<br>";
-        }
+            // Build the strings that identify the points
+            let customrows = "";
+            for (let i = 0; i < keylist.length; i++) {
+                customrows = customrows + keylist[i] + ": %{customdata[" + (i + 1) + "]}<br>";
+            }
 
-        // Fully replace trace, including the custom data
-        let update = {
-            x: [points[this.x_prop]],
-            y: [points[this.y_prop]],
-            customdata: [customdataset],
-            hovertemplate: "<b> Point %{customdata[0]}<br>"+
-                this.x_prop+": %{x}<br>" +
-                this.y_prop+": %{y}<br>" +
-                customrows,
+            // Fully replace trace, including the custom data
+            let update = {
+                x: [points[this.x_prop]],
+                y: [points[this.y_prop]],
+                customdata: [customdataset],
+                hovertemplate: "<b> Point %{customdata[0]}<br>" +
+                    this.x_prop + ": %{x}<br>" +
+                    this.y_prop + ": %{y}<br>" +
+                    customrows,
+            }
+            // May need to adjust traceID when we accommodate the isolines, etc.
+            Plotly.restyle(this.container, update, [0])
         }
-        // May need to adjust traceID when we accommodate the isolines, etc.
-        Plotly.restyle(this.container, update, [0])
     }
 }
 
@@ -997,7 +1002,7 @@ $(document).ready(function(){
     pointModel = new PointModel();
     unitFormView = new UnitFormView('#unitform');
     substanceFormView = new SubstanceFormView('#sel_substance');
-    propChooserView = new PropChooserView("#property_controls")
+    propChooserView = new PropChooserView("#property_selection")
     propEntryView = new PropEntryView("#property_controls")
     tableView = new TableView('#proptable');
     plotView = new PlotView("plot");
@@ -1019,6 +1024,7 @@ $(document).ready(function(){
 
         // Assign views to listen to the views that hold state data
         propChooserView.addListener(tableView);
+        propChooserView.addListener(plotView);
 
         // Call inits on views now that the properties exist
         tableView.init(get_valid_properties());

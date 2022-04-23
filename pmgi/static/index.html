@@ -27,12 +27,12 @@
     </div>
 
 
-
-
     <div id="substance_controls">
         <h3>Substance Selection</h3>
         User can select a substance via this menu. Changing the substance will
-        completely reset all data.
+        completely reset all data. Ideal gases currently suffer from a backend bug on
+        specifying T&s. Air doesn't work yet because something isn't implemented
+        on the backed.<br>
         <label>Select Substance: </label>
         <select id="sel_substance">
             <!-- Populated by JS -->
@@ -40,27 +40,52 @@
     </div>
 
     <div id="property_controls">
-        <input type="button" id="propchoice_hide" value="Show Props"/>
-        <ul id="propchecks" style="display: none">
-        </ul>
+        <h3>Property Input</h3>
+        This is where the user can input property data, using whatever units have been
+        apply'd. Only two properties can be specified at one time. Adjusts visible
+        for mp substances vs. ideal gases. Buttons of GET and POST use separate HTTP
+        request types. GET will be removed for deploy, because it doesn't accommodate units.<br>
         <form id="propform">
-        <table id="propinput">
-<th>T</th><th>p</th> <th>d</th> <th>h</th> <th>s</th>
+            <table id="propinput">
                 <button type="button" id="get_props">Change Content - GET</button>
                 <button type="button" id="post_props">Change Content - POST</button>
 
-        </table>
-            </form>
+            </table>
+        </form>
     </div>
 </div>
 <div id="outputs">
+    <div id="property_selection">
+        <h3>Property Display Selection</h3>
+        User can specify which properties should be shown in the table. Expand and
+        adjust the checkboxes as desired.<br>
+        <input type="button" id="propchoice_hide" value="Show Props"/>
+        <ul id="propchecks" style="display: none">
+        </ul>
+    </div>
     <div id="property_display">
+        <h3>Property Table</h3>
+        Most interactivity provided by Datatables. Should be responsive to which
+        properties are checked in the property selection. Lots of cleanup and display
+        optimization is needed here, but the basic functionality exists. Prettify!<br>
         <table id="proptable">
             <!-- Populated by JS -->
         </table>
     </div>
-    <div id="plot" style="width:600px;height:400px;">
-        <!-- Will be filled in by JS -->
+    <div>
+        <h3>Plot</h3>
+        The plot responds to the points added to the table. It should display
+        all the points that were added. It should also allow the user to click
+        to add a point for substances (subject to the points being in range). We
+        need better initialization to show some iso-lines for the selected substance
+        so right now you can't really click-to-add until you've added a point manually.
+        Hover tooltip works with extra property info. Ideal gas click-to-add
+        doesn't work right now but that's a backend issue. Lots of prettification
+        needed here.<br>
+        <div id="plot" style="width:600px;height:400px;">
+
+            <!-- Will be filled in by JS -->
+        </div>
     </div>
 </div>
 </body>
