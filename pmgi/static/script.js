@@ -24,15 +24,16 @@
 
 
 // *********************************************
-// * CLASSES
+// * MODEL
 // *********************************************
 Number.prototype.between = function(min, max) {
     return this >= min && this <= max;
 };
 
 
-// A parent class for a observables that notify listeners when they get changed
-// In this case, listener is just a function object that will be called.
+/**
+ * Class that can handle notifying listeners when a change occurs
+ */
 class Subject {
     // https://webdevstudios.com/2019/02/19/observable-pattern-in-javascript/
     static EVENT_ID_NULL = null;
@@ -72,8 +73,11 @@ class Subject {
     }
 }
 
-
+/**
+ * Class to hold data about the thermodynamic substance including a list of values that has been computed
+ */
 class PointModel extends Subject{
+    // Several event IDs thrown by this
     static EVENT_UNIT = 'unit';
     static EVENT_SUBSTANCE = 'substance';
     static EVENT_POINT = 'point'
@@ -86,29 +90,61 @@ class PointModel extends Subject{
 
     constructor() {
         super();
+        // Current list of defined points
         this.points = []
         this.point_id = this.INIT_ID;
 
+        // Current units, and all possible units
         this.units = null;
         this.valid_units = null;
 
+        // Current substance and all possible substances
         this.substance = null;
         this.valid_substances = null;
     }
 
-    set_units(units, valid_units=null){
-        if (valid_units !== null){
-            this.valid_units = valid_units;
-        }
+    /**
+     * Initialize the valid units and substance lists
+     * @param valid_units - dict of valid units, keys are unit category, values are arrays of legal values
+     * @param valid_substances - dict of valid substances, keys are the substance id, values are a dict with info from PMGI
+     */
+    init(valid_units, valid_substances){
+        this.valid_units = valid_units;
+        this.valid_substances = valid_substances;
+    }
+
+    /**
+     * Change the current units. This invalidates all stored point data.
+     * @param units - a dict of the current units. Keys are unit category, values are the unit value
+     */
+    set_units(units){
         this.units = units;
         this.clearpoints();
         this.notify(this, PointModel.EVENT_UNIT, this.get_units())
     }
 
+    /**
+     * Change the current substance. This invalidates all stored point data
+     * @param substance - a string for the substance.
+     */
+    set_substance(substance){
+        this.substance = substance;
+        this.clearpoints();
+        this.notify(this, PointModel.EVENT_SUBSTANCE, this.get_substance())
+    }
+
+    /**
+     * Return the properties possible for the current substance
+     * @returns {*} array of properties represented by strings
+     */
     get_valid_properties(){
         return this.valid_substances[this.substance]['props'];
     }
 
+    /**
+     * Get the current unit set
+     * @returns units - a dict of the current units. Keys are unit category, values are the unit value
+     */
     get_units(){
         return this.units;
     }
@@ -125,14 +161,7 @@ class PointModel extends Subject{
         return this.valid_substances;
     }
 
-    set_substance(substance, valid_substances=null){
-        if (valid_substances !== null){
-            this.valid_substances = valid_substances;
-        }
-        this.substance = substance;
-        this.clearpoints();
-        this.notify(this, PointModel.EVENT_SUBSTANCE, this.get_substance())
-    }
+
 
     get_points(){
         return this.points;
@@ -174,7 +203,9 @@ class PointModel extends Subject{
     }
 }
 
-
+// *********************************************
+// * VIEWS
+// *********************************************
 
 class SubstanceFormView{
 
@@ -291,9 +322,9 @@ class UnitFormView{
         let success = confirm('Changing the units will reset all data. Are you sure?');
             if(success){
                 // Pass the units to the controller
-                set_units(this.valuesAsJSON())
                 $(this.button_apply).hide();
                 $(this.button_revert).hide();
+                set_units(this.valuesAsJSON())
             } else {
                 // do nothing and let the user figure it out
                 return false;
@@ -350,7 +381,7 @@ class PropFormView extends Subject{
             let prop_vals = this.valuesToJSON();
             this.init(get_valid_properties(), disp_props, prop_vals);
         } else if (event == PointModel.EVENT_INIT) {
-            //I think we're good?
+            // I think we're good
         }
     }
 
@@ -606,8 +637,8 @@ class TableView{
     }
 
     init(props){
-        this.dispprops = [...props];
-        this.dispprops.unshift("ptid");
+        this.dispprops = [...props]; // copy of props
+        this.dispprops.unshift("ptid"); // ptid should be in the table but not the prop list
         if (this.table == null){
             let $tablediv = $(this.target);
             let $head = $('<thead></thead>');
@@ -647,7 +678,7 @@ class TableView{
         if (event == PointModel.EVENT_POINT){
             this.updatePoints(data);
         } else if (event == PointModel.EVENT_INIT) {
-            this.init();
+            this.init(this.dispprops);
         } else if (event == PropFormView.EVENT_PROPERTY_VISIBILITY) {
             this.columnVisibility(data);
         }
@@ -676,9 +707,11 @@ class TableView{
             let arr = [] // Build an array of all props for this index.
             //arr.push(points['ptid'][i]);
             this.dispprops.forEach(key => {
-                arr.push(points[key][i].toLocaleString('en-US',{
-                    maximumSignificantDigits: 5
-                }));
+                if (key in points) {
+                    arr.push(points[key][i].toLocaleString('en-US', {
+                        maximumSignificantDigits: 5
+                    }));
+                }
             });
             customdataset.push(arr)
         }
@@ -691,7 +724,7 @@ class TableView{
 
 
 // *********************************************
-// * PAGE SETUP
+// * CONTROLLER
 // *********************************************
 
 // Instantiate the classes
@@ -713,8 +746,9 @@ $(document).ready(function(){
     plotView = new PlotView("plot");
 
     getInfo((data)=>{
-        pointModel.set_units(data.units, data.valid_units);
-        pointModel.set_substance(pointModel.DEFAULT_SUBSTANCE, data.substances);
+        pointModel.init(data.valid_units, data.substances);
+        pointModel.set_units(data.units);
+        pointModel.set_substance(pointModel.DEFAULT_SUBSTANCE);
 
         pointModel.addListener(unitFormView);
         pointModel.addListener(substanceFormView);
@@ -777,8 +811,6 @@ function set_units(units){
 function add_point(point){
     pointModel.add_point(point);
 }
-
-// TODO - Expand/contract table display based on property selection
 
 function compute_point(props, mode="POST"){
     let requestroute = "/";

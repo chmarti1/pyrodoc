@@ -191,7 +191,7 @@ class PropertyRequest(PMGIRequest):
         json_friendly(self.out)
 
     def _ig_process(self):
-        self.error('THE IG PROCESS IS NOT WRITTEN YET!\nSorry for shouting')
+        return self._mp_process() # works for now
 
     def _mp_process(self):
         """_mp_process
