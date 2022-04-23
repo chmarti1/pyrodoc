@@ -156,7 +156,7 @@ class PointModel extends Subject{
     }
 
     delete_point(id){
-        let index = this.points['ptid'].indexOf(id);
+        let index = this.points['ptid'].indexOf(parseInt(id));
         for (const key in this.points) {
             this.points[key].splice(index, 1);
         }
