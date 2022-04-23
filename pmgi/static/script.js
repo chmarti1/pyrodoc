@@ -319,8 +319,10 @@ class UnitFormView{
 }
 
 
-class PropFormView {
+class PropFormView extends Subject{
+    static EVENT_PROPERTY_VISIBILITY = 'propvis';
     constructor(formHTMLid) {
+        super();
         this.target = formHTMLid;
         this.hide_checks = "#propchoice_hide";
         this.prop_checks = "#propchecks";
@@ -358,6 +360,8 @@ class PropFormView {
 
         this.create_propform(this.get_checkbox_values());
         this.set_form_values(prop_values);
+
+        this.notify(this,PropFormView.EVENT_PROPERTY_VISIBILITY, this.get_checkbox_values());
     }
 
     create_checkboxes(valid_properties) {
@@ -380,6 +384,7 @@ class PropFormView {
         let prop_vals = this.valuesToJSON();
         this.create_propform(disp_props);
         this.set_form_values(prop_vals);
+        this.notify(this,PropFormView.EVENT_PROPERTY_VISIBILITY,disp_props);
     }
 
     create_propform(props) {
@@ -595,13 +600,14 @@ class TableView{
     // delete rows? https://stackoverflow.com/questions/64526856/how-to-add-edit-delete-buttons-in-each-row-of-datatable
     // showhide columns https://datatables.net/examples/api/show_hide.html
     constructor(divTarget) {
-        this.dispprops = ['ptid','T','p','d','h','s']; // TODO - switch to dynamic show/hide
+         // TODO - switch to dynamic show/hide
         this.target = divTarget;
         this.table = null
-        this.init();
     }
 
-    init(){
+    init(props){
+        this.dispprops = [...props];
+        this.dispprops.unshift("ptid");
         if (this.table == null){
             let $tablediv = $(this.target);
             let $head = $('<thead></thead>');
@@ -642,10 +648,24 @@ class TableView{
             this.updatePoints(data);
         } else if (event == PointModel.EVENT_INIT) {
             this.init();
+        } else if (event == PropFormView.EVENT_PROPERTY_VISIBILITY) {
+            this.columnVisibility(data);
         }
     }
 
+   columnVisibility(columns){
 
+        this.table.columns().every((ind) => {
+            let col = this.table.column(ind);
+            let name = col.header().textContent
+            if (columns.includes(name) || name=="ptid" || name=="Ctrl"){
+                col.visible(true);
+            } else {
+                col.visible(false);
+            }
+        });
+
+   }
 
     updatePoints(points) {
 
@@ -700,6 +720,9 @@ $(document).ready(function(){
         pointModel.addListener(plotView);
         pointModel.addListener(propFormView);
 
+        propFormView.addListener(tableView);
+
+        tableView.init(get_valid_properties());
         unitFormView.init(get_valid_units(), get_units());
         substanceFormView.init(get_valid_substances(), get_substance(), get_display_substances());
         propFormView.init(get_valid_properties(), pointModel.PROP_SHORTLIST);

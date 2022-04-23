@@ -223,7 +223,7 @@ class InfoHandler:
 
     @staticmethod
     def list_valid_substances(search_str=None):
-        proplist = ['T', 'p', 'd', 'v', 'cp', 'cv', 'gam', 'e', 'h', 's', 'mw', 'R', 'x', 'X', 'Y']
+        proplist = ['T', 'p', 'd', 'v', 'cp', 'cv', 'gam', 'e', 'h', 's', 'x', 'X', 'Y']
         out = {}
         dat = pm.search(search_str)
         for subst in dat:
