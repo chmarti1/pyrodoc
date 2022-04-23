@@ -11,6 +11,11 @@
 <body>
 <div id="controls">
     <div id="unit_controls">
+        <h3>Unit Selection</h3>
+        User can click to show/hide unit selection menu. Units are set using an
+        apply/revert modality because multiple of them can be set at once. Changing
+        the units resets everything. Not all units work on the backend.
+        Units only work when using POST<br>
         <input type="button" id="unit_hide" value="Units"/>
         <ul id="hideablelist" style="display: none">
             <form id="unitform">
@@ -25,6 +30,9 @@
 
 
     <div id="substance_controls">
+        <h3>Substance Selection</h3>
+        User can select a substance via this menu. Changing the substance will
+        completely reset all data.
         <label>Select Substance: </label>
         <select id="sel_substance">
             <!-- Populated by JS -->

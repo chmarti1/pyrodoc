@@ -223,7 +223,8 @@ class InfoHandler:
 
     @staticmethod
     def list_valid_substances(search_str=None):
-        proplist = ['T', 'p', 'd', 'v', 'cp', 'cv', 'gam', 'e', 'h', 's', 'x', 'X', 'Y']
+        proplist_out = ['T', 'p', 'd', 'v', 'cp', 'cv', 'gam', 'e', 'h', 's', 'x']
+        proplist_in = ['T', 'p', 'd', 'v', 'e', 'h', 's', 'x']
         out = {}
         dat = pm.search(search_str)
         for subst in dat:
@@ -237,10 +238,13 @@ class InfoHandler:
             else:
                 out[key]['names'] = []
             out[key]['props'] = []
-            for prop in proplist:
+            for prop in proplist_out:
                 if hasattr(subst, prop):
                     out[key]['props'].append(prop)
-
+            out[key]['inputs'] = []
+            for prop in proplist_in:
+                if hasattr(subst, prop):
+                    out[key]['inputs'].append(prop)
         return out
 
     @staticmethod
@@ -355,8 +359,8 @@ def meta():
 # ##### /static/index.html
 @app.route('/<string:page_name>/')
 def render_static(page_name):
-    if not app.debug:
-        flask.abort(404)
+    # if not app.debug:
+    #     flask.abort(404)
     return app.send_static_file('%s.html' % page_name)
 
 
