@@ -676,7 +676,9 @@ class TableView{
             let arr = [] // Build an array of all props for this index.
             //arr.push(points['ptid'][i]);
             this.dispprops.forEach(key => {
-                arr.push(points[key][i]);
+                arr.push(points[key][i].toLocaleString('en-US',{
+                    maximumSignificantDigits: 5
+                }));
             });
             customdataset.push(arr)
         }
