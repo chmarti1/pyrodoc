@@ -16,6 +16,59 @@ def toarray(a):
     except ValueError:
         return np.asarray(a.split(','), dtype=float)
 
+
+def compute_sat_state(subst, **kwargs):
+    """
+    Compute a state given any set of state properties
+    :param subst: A pyromat substance object
+    :param kwargs: The thermodynamic property at which to compute the states
+                        specified by name. e.g. compute_sat_state(water, T=300)
+    :return: (satLiqProps, satVapProps) - A full description of the states
+                including all valid properties.
+                Valid properties are: p,T,v,d,e,h,s,x
+    """
+    kwargs = {k.lower(): v for k, v in kwargs.items()}
+    if 'p' in kwargs:
+        ps = np.array(kwargs['p']).flatten()
+        Ts = subst.Ts(p=ps)
+    elif 't' in kwargs:
+        Ts = np.array(kwargs['t']).flatten()
+        ps = subst.ps(T=Ts)
+    else:
+        raise pm.utility.PMParamError('Saturation state computation not '
+                                      'supported for {}.'.format(kwargs.keys))
+
+    sf, sg = subst.ss(T=Ts)
+    hf, hg = subst.hs(T=Ts)
+    df, dg = subst.ds(T=Ts)
+    vf = 1/df
+    vg = 1/dg
+    ef, eg = subst.es(T=Ts)
+    xf = np.zeros_like(sf)
+    xg = np.ones_like(sg)
+    liq_state = {
+            'T': Ts,
+            'p': ps,
+            'd': df,
+            'v': vf,
+            'e': ef,
+            's': sf,
+            'h': hf,
+            'x': xf
+        }
+    vap_state = {
+            'T': Ts,
+            'p': ps,
+            'd': dg,
+            'v': vg,
+            'e': eg,
+            's': sg,
+            'h': hg,
+            'x': xg
+        }
+    return liq_state, vap_state
+
+
 ###
 # Custom request processing classes
 #   These are designed to construct a JSON dictionary that will be used
@@ -216,6 +269,119 @@ class PropertyRequest(PMGIRequest):
             return
 
 
+class SaturationRequest(PMGIRequest):
+    def __init__(self, args, units=None):
+        # Clean initialization
+        PMGIRequest.__init__(self)
+
+        # Read in the arguments from raw
+        self.args = dict(args)
+        # Process the arguments
+        if self.require(
+                types={
+                    'T': toarray,
+                    'p': toarray,
+                    'id': str
+                },
+                mandatory=['id']):
+            return
+
+        # Config the units
+        if units is not None:
+            try:
+                InfoRequest.set_units(units)
+            except pm.utility.PMParamError as e:
+                self.error(e.args[0])
+
+        # Retrieve the PM entry
+        if self.init_subst(self.args['id']):
+            return
+
+    def process(self):
+        """Process the request
+        This method is responsible for populating the "out" member dict with
+        correctly formatted data that can be returned as a JSON object.
+
+        If no property is specified, the entire steam dome will be returned
+        """
+        # If there was an error, abort the processing
+        if self.out['error']:
+            return
+        elif not isinstance(self.substance, pm.reg.__basedata__):
+            self.error('Substance data seems to be corrupt!  Halting.')
+            return
+
+        if self.substance.data['id'].startswith('mp'):
+            if not ('p' in self.args or 'T' in self.args):
+                self._mp_steamdome_process()
+            else:
+                self._mp_process()
+        else:
+            self.error(f'Substance does not have saturation properties: '
+                       f'{self.substance.data["id"]}')
+            return
+
+        # Finally, clean up the return parameters
+        PMGIRequest.json_friendly(self.out)
+
+    def _mp_process(self):
+        """_mp_process
+
+        computes a full state of saturation properties
+        """
+        args = self.args.copy()
+        self.out['inputs'] = self.args
+        # Leave only the property arguments
+        args.pop('id')
+
+        try:
+            liq, vap = compute_sat_state(self.substance, **args)
+            self.out['data'] = {}
+            self.out['data']['liquid'] = liq
+            self.out['data']['vapor'] = vap
+        except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e:
+            # Add in the error response from pyromat
+            self.error(e.args[0])
+            return
+
+    def _mp_steamdome_process(self):
+        """
+        _mp_steamdome_process
+
+        Compute the entire steam dome for the substance
+        """
+        n = 25
+        scaling = 'linear'
+        Tc, pc = self.substance.critical()
+        critical = self.substance.state(T=Tc, p=pc)
+        Tmin = self.substance.triple()[0]
+
+        # Find valid limits
+        Teps = (Tc - Tmin) / 1000
+
+        line_T = np.linspace(Tmin, Tc-Teps, n).flatten()
+        # line_T = np.logspace(np.log10(Tmin), np.log10(Tc-Teps), n).flatten()
+
+        try:
+            sll, svl = compute_sat_state(self.substance, T=line_T)
+
+            # Append the critical point to the end of both lines
+            satliq_states = {}
+            satvap_states = {}
+            for k in sll:
+                satliq_states[k] = np.append(sll[k], critical[k])
+                satvap_states[k] = np.append(svl[k], critical[k])
+
+            self.out['data'] = {}
+            self.out['data']['liquid'] = satliq_states
+            self.out['data']['vapor'] = satvap_states
+
+        except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e:
+            # Add in the error response from pyromat
+            self.error(e.args[0])
+            return
+
+
 class InfoRequest(PMGIRequest):
     _valid_unit_strs = ['energy', 'force', 'length', 'mass', 'molar',
                         'pressure', 'temperature', 'time', 'volume']
@@ -336,6 +502,30 @@ def pmgi():
         return pr.out, 500
     else:
         return pr.out, 200
+
+
+# The root pmgi accepts property requests.
+@app.route('/saturation', methods=['POST', 'GET'])
+def sat():
+    # Read in the request data to an args dict
+    if request.method == 'POST':
+        jsondat = dict(request.json)
+        args = jsondat['state_input']
+        units = None
+        if 'units' in jsondat:
+            units = (jsondat['units'])
+        sr = SaturationRequest(args, units)
+    elif request.method == 'GET':
+        args = dict(request.args)
+        sr = SaturationRequest(args)
+
+    sr.process()
+
+    # Check for error and return code
+    if sr.out['error']:
+        return sr.out, 500
+    else:
+        return sr.out, 200
 
 
 # The get pmgi returns substance metadata
