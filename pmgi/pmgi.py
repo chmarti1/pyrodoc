@@ -3,40 +3,24 @@ import flask
 import pyromat as pm
 import numpy as np
 from flask import __version__ as flaskv
-from flask import Flask,request
-import os,sys
+from flask import Flask, request
+import sys
 
 __version__ = '0.0'
 
 
-#### Helper functions
+# ### Helper functions
 def toarray(a):
     try:
         return np.asarray(a, dtype=float)
     except ValueError:
         return np.asarray(a.split(','), dtype=float)
 
-
-def json_friendly(dictdata):
-    """
-    Clean up a dictionary for output as JSON.
-    """
-    for name, value in dictdata.items():
-        if isinstance(value, dict):
-            json_friendly(value)
-        elif isinstance(value, np.ndarray):
-            if value.size == 1:
-                dictdata[name] = np.asscalar(value)
-            else:
-                dictdata[name] = value.tolist()
-
-
 ###
 # Custom request processing classes
 #   These are designed to construct a JSON dictionary that will be used
 #   by the HTML/JS on the client side to construct tables and plots.
 ###
-
 
 
 class PMGIRequest:
@@ -128,6 +112,20 @@ class PMGIRequest:
         if append_newline:
             self.out['message'] += "\n"
 
+    @staticmethod
+    def json_friendly(somedict):
+        """
+        Clean up the out dictionary for output as JSON.
+        """
+        for name, value in somedict.items():
+            if isinstance(value, dict):
+                PMGIRequest.json_friendly(value)
+            elif isinstance(value, np.ndarray):
+                if value.size == 1:
+                    somedict[name] = np.asscalar(value)
+                else:
+                    somedict[name] = value.tolist()
+
 
 class PropertyRequest(PMGIRequest):
     def __init__(self, args, units=None):
@@ -138,8 +136,7 @@ class PropertyRequest(PMGIRequest):
         self.args = dict(args)
         # Process the arguments
         if self.require(
-                types=
-                {
+                types={
                     's': toarray,
                     'h': toarray,
                     'e': toarray,
@@ -156,7 +153,7 @@ class PropertyRequest(PMGIRequest):
         # Config the units
         if units is not None:
             try:
-                InfoHandler.set_units(units)
+                InfoRequest.set_units(units)
             except pm.utility.PMParamError as e:
                 self.error(e.args[0])
 
@@ -184,14 +181,15 @@ class PropertyRequest(PMGIRequest):
         elif self.substance.data['id'].startswith('mp'):
             self._mp_process()
         else:
-            self.error(f'Could not determine the collection for substance: {self.substance.data["id"]}')
+            self.error(f'Could not determine the collection for substance: '
+                       f'{self.substance.data["id"]}')
             return
 
         # Finally, clean up the return parameters
-        json_friendly(self.out)
+        PMGIRequest.json_friendly(self.out)
 
     def _ig_process(self):
-        return self._mp_process() # works for now
+        return self._mp_process()  # works for now
 
     def _mp_process(self):
         """_mp_process
@@ -218,12 +216,55 @@ class PropertyRequest(PMGIRequest):
             return
 
 
-class InfoHandler:
-    _valid_unit_strs = ['energy', 'force', 'length', 'mass', 'molar', 'pressure', 'temperature', 'time', 'volume']
+class InfoRequest(PMGIRequest):
+    _valid_unit_strs = ['energy', 'force', 'length', 'mass', 'molar',
+                        'pressure', 'temperature', 'time', 'volume']
+
+    def __init__(self):
+        # Clean initialization
+        PMGIRequest.__init__(self)
+
+    def process(self):
+        """Process the request
+        This method is responsible for populating the "out" member dict with
+        correctly formatted data that can be returned as a JSON object.
+        """
+        self.out['substances'] = InfoRequest.list_valid_substances()
+        self.out['units'] = InfoRequest.get_units()
+        self.out['valid_units'] = InfoRequest.list_valid_units()
+        # If there was an error, abort the processing
+        if self.out['error']:
+            return
+
+        # Finally, clean up the return parameters
+        PMGIRequest.json_friendly(self.out)
+
+    @staticmethod
+    def set_units(units):
+        units = dict(units)
+
+        for name, value in units.items():
+            if name in InfoRequest._valid_unit_strs and \
+                    value in InfoRequest.list_valid_units(name):
+                pm.config['unit_'+name] = value
+            else:
+                raise pm.utility.PMParamError("Invalid unit specification:"
+                                              f"{name}={value}")
+
+    @staticmethod
+    def get_units():
+        out = {}
+        cfg = pm.config
+        for key in cfg.entries:
+            if key.startswith('unit') and \
+                    key.split('_')[1] in InfoRequest._valid_unit_strs:
+                out[key.split('_')[1]] = cfg[key]
+        return out
 
     @staticmethod
     def list_valid_substances(search_str=None):
-        proplist_out = ['T', 'p', 'd', 'v', 'cp', 'cv', 'gam', 'e', 'h', 's', 'x']
+        proplist_out = ['T', 'p', 'd', 'v', 'e', 'h', 's', 'x',
+                        'cp', 'cv', 'gam']
         proplist_in = ['T', 'p', 'd', 'v', 'e', 'h', 's', 'x']
         out = {}
         dat = pm.search(search_str)
@@ -248,34 +289,11 @@ class InfoHandler:
         return out
 
     @staticmethod
-    def set_units(units):
-        units = dict(units)
-
-        for name, value in units.items():
-            if name in InfoHandler._valid_unit_strs and \
-                    value in InfoHandler.list_valid_units(name):
-                pm.config['unit_'+name] = value
-            else:
-                raise pm.utility.PMParamError("Invalid unit specification:"
-                                              f"{name}={value}")
-
-
-    @staticmethod
-    def get_units():
-        out = {}
-        cfg = pm.config
-        for key in cfg.entries:
-            if key.startswith('unit') and \
-                    key.split('_')[1] in InfoHandler._valid_unit_strs:
-                        out[key.split('_')[1]] = cfg[key]
-        return out
-
-    @staticmethod
     def list_valid_units(units=None):
         out = {}
 
         if units is None:
-            units = InfoHandler._valid_unit_strs
+            units = InfoRequest._valid_unit_strs
 
         if type(units) is str:
             unitfun = getattr(pm.units, units)
@@ -294,9 +312,9 @@ app = Flask(__name__)
 # Flask will see the route as relative to the apache WSGI alias
 # The intent is that the WSGI root be set to pyromat.org/pmgi, so that
 # will redirect here - to root.
-#
-# The root pmgi accepts property requests.
 
+
+# The root pmgi accepts property requests.
 @app.route('/', methods=['POST', 'GET'])
 def pmgi():
     # Read in the request data to an args dict
@@ -319,6 +337,7 @@ def pmgi():
     else:
         return pr.out, 200
 
+
 # The get pmgi returns substance metadata
 @app.route('/get', methods=['POST', 'GET'])
 def get():
@@ -333,11 +352,13 @@ def get():
 # The info pmgi will return the results of queries (e.g. substance search)
 @app.route('/info', methods=['POST', 'GET'])
 def info():
-    return {
-        'substances': InfoHandler.list_valid_substances(),
-        'units': InfoHandler.get_units(),
-        'valid_units': InfoHandler.list_valid_units()
-    }
+    ir = InfoRequest()
+    ir.process()
+    if ir.out['error']:
+        return ir.out, 500
+    else:
+        return ir.out, 200
+
 
 # Version is responsible for returning basic system information
 # This will be important if users want to diagnose differences between
@@ -346,10 +367,10 @@ def info():
 def meta():
     out = {
         'python': sys.version.split()[0],
-        'flask':flaskv,
-        'pyromat':pm.config['version'],
-        'pmgi':__version__,
-        'numpy':np.version.full_version,
+        'flask': flaskv,
+        'pyromat': pm.config['version'],
+        'pmgi': __version__,
+        'numpy': np.version.full_version,
     }
     return out
 
