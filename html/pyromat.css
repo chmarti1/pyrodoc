@@ -224,7 +224,7 @@ li.menuitem a:hover{
 
 /* If the screen is wide, then we can use a more spacious layout.
  */
-@media screen and (min-width: 750px) {
+@media screen and (min-width: 1030px) {
 
     /* Page Layout
      * There are three primary areas in the body; the menu, content, and 
@@ -238,7 +238,7 @@ li.menuitem a:hover{
     }
 
     #content {
-        width:550px;
+        width:850px;
         text-align:justify;
         position:absolute;
         top:0;

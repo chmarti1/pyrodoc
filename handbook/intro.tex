@@ -4,7 +4,7 @@
 
 Probably, no reader will need to digest this handbook in its entirity.  The goal is to include all the important information in a single portable document.  Chatper \ref{ch:start} on Getting Started is probably the one that most users will need, since it describes installation and basic use of the software.
 
-For users who want a review of the thermodynamic properties, this introduction goes into detail on the fundamental definitions for the properties used.  We will attempt to briefly give some intuitive motivation for the importance of each.
+For users who want a review of the thermodynamic properties, this introduction goes into detail on the fundamental definitions for the properties used.  First, we talk briefly about the ideas of \emph{primary} and \emph{basic properties}, which \PM\ uses to organize its work on the back-end.  Then, we will briefly define each property with a modest attempt to describe its origins and relevance.
 
 For the curious or for developers who may want to add their own substance models, the inner workings of the package are described in some detail in Chapters \ref{ch:regdat}, \ref{ch:ig}, \ref{ch:mp}, and \ref{ch:num}.
 
@@ -65,43 +65,52 @@ V & \verb|unit_volume| & m$^3$ & Volume\\
 \end{tabular}
 \end{table}
 
-\subsection{Primary Properties}
+\subsection{Primary Properties}\label{sec:intro:primary}
 
-When studying a substance, the theory of thermodynamics can make equal use of any set of properties to discover the others, but in a practical sense, it is almost always prudent to define a pair or more of core properties that are standard for defining the thermodynamic state.  
+The theory of thermodynamics can make equal use of any set of properties to discover the others, but it is almost always prudent to define a pair or more of core properties that are standard for defining the thermodynamic state.  After version 2.2.0, \PM\ has been quite flexible in how it allows users to specify the thermodynamic state, but computational mysteries are likely to plague those users who do not have some appreciation for what is going on in the background.  Some approaches produce more floating point error and are noticeably slower than others.  Why?
 
-For most problems of engineering relevance, temperature and pressure $(T,p)$ are the favorite, since both are readily measured, and both are of immediate importance to fluid machinery design.  Fortunately, all of the common properties of ideal gases can be conveniently constructed directly from these two properties.  Unfortunately, that is not the case with non-ideal fluids.
+Every thermodynamic model supported by \PM\ provides a means for calculating the substance's many properties in terms of temperature and/or density.  For example, an ideal gas model allows entropy (see sec. \ref{sec:ig:hs}) to be calculated explicitly in terms of temperature and pressure.  While this theoretically provides a means for calculating temperature from entropy and pressure, $T(s,p)$, there is not guaranteed to be any such explicit relationship - in fact, in general, there is not.  That means that specifying a state in this way is theoretically sound, but it requires a computationally expensive numerical iteration routine to invert $s(T,p)$.  Chapter \ref{ch:num} discusses this process in some detail.
 
-It is intuitive that when gases are compressed into tighter and tighter spaces, the distance between the molecules becomes a vitally important parameter for predicting the substance's properties.  Pressure is not a convenient metric of that distance, but density is.  For this reason, nearly all non-ideal gas properties are modeled in terms of $(T,\rho)$, and pressure has to be calculated indirectly.  This creates a substantial amount of work for the design engineer who may not wish to delve into the details of how properties are calculated.
+The \emph{primary properties} for a thermodynamic model are the two that are used in the back-end to do the most basic thermodynamic state calculations.  The performance will always be best if users can write their code to use these properties when they are available.  Table \ref{tab:primary} lists the current \PM\ substance classes and their primary properties.
 
-To address the issue, \PM\ designates four \emph{primary properties} that may be used interchangeably in pairs to specify the thermodynamic state.  When more than two are included, the state is over-specified, and \PM\ assumes that the values specify a consistent state.  Which two are used to calculations are selected in order of precedence shown in Table \ref{tab:primary}.
+For most problems of engineering relevance, temperature and pressure $(T,p)$ are the favorite since both are readily measured, and both are of immediate importance to fluid machinery design.  Fortunately, all of the common properties of ideal gases can be conveniently constructed directly from these two properties.  Unfortunately, that is not the case with non-ideal fluids.
+
+It is intuitive that when gases are compressed into tighter spaces, the distance between the molecules becomes a vitally important parameter for predicting the substance's properties.  Pressure is not a convenient metric of that distance, but density is.  For this reason, nearly all non-ideal gas properties are modeled in terms of $(T,\rho)$, and pressure has to be calculated indirectly.  This creates a substantial amount of work for the design engineer who may not wish to delve into the details of how properties are calculated.
 
 \begin{table}
 \centering
-\caption{Primary properties and their order of precedence}\label{tab:primary}
-\begin{tabular}{|ccc|}
+\caption{The \PM\ substance classes and their primary property pairs}\label{tab:primary}
+\begin{tabular}{|lcc|}
 \hline
-Order & Symb. & Description\\
+Desription & Class & Prim.\\
 \hline
-1 & $T$ & Temperature\\
-2 & $p$ & Pressure\\
-3 & $\rho$ & Density\\
-4 & $x$ & Quality\\
+Shomate Eqn. & \verb|ig| & $(T,p)$\\
+NASA poly. & \verb|ig2| & $(T,p)$\\
+IG mixture & \verb|igmix| & $(T,p)$\\
+Span \& Wagner & \verb|mp1| & $(T,\rho)$\\
 \hline
 \end{tabular}
 \end{table}
 
-For example, let's say I needed to calculate the specific heat of oxygen.  
+\subsection{Basic Properties}\label{sec:intro:basic}
 
-\begin{lstlisting}[language=Python]
->>> import pyromat as pm
->>> o2 = pm.get('ig.O2')
->>> o2.cp(300,2)
-\end{lstlisting}
+Though the most efficient means for specifying a thermodynamic state will always be in the primary property pair for whatever substance is being used, the entire point of using a package like \PM\ is to handle this kind of computational meta-awareness automatically.  To that end, it is also useful to think in terms of \emph{basic properties}:
+\begin{itemize}
+\item temperature, $T$,
+\item pressure, $p$,
+\item density, $\rho$,
+\item specific volume, $v$,
+\item quality, $x$.
+\end{itemize}
+States may always be defined in terms of any pair of these with little additional computational cost.
 
-How should the two numbers (300,2) be interpreted?  Using the order of precedence, those refer to a state $T=300$ K and $p=2$ bar using \PM 's default units.  To deliberately specify density, a keyword syntax should be used instead.
-\begin{lstlisting}[language=Python]
->>> o2.cp(d=1.2, p=2)
-\end{lstlisting}
+Other properties, like 
+\begin{itemize}
+\item internal energy, $e$,
+\item enthalpy, $h$, 
+\item entropy, $s$,
+\end{itemize}
+can also be used to specify the thermodynamic state, but the user should be aware of their limitations.  These may only be given one-at-a-time (i.e. they must be paired with a basic property), and specifying them forces \PM\ to use a slower back-end algorithm with inherent numerical precision limitations.  For example, as of version 2.2.0, specifying entropy and enthalpy together is not supported by any of the property methods.  
 
 \subsection{Density, $\rho$}
 

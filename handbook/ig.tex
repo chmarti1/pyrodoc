@@ -49,7 +49,7 @@ The next step to predict the force on the surface requires a prediction for the 
 
 The number of molecules with a certain velocity that will strike an area, $A$, in time $t$ will be determined by the size of the volume that can be traversed by molecules traveling at that velocity.  Molecules traveling with $z$-component velocity $u_z$ will traverse a length $u_z t$ in the time interval.  So, the total volume occupied by molecules with that velocity that will strike the surface is $A t u_z$.  The total number of collisions is $A t u_z n'(u_z) \d u_z$.  So, the impulse becomes
 \begin{align}
-\int_0^\tau F \d \tau &= 2 m \int_0^{\infty} A t u_z{^2} n'(u_z) \d u_z\nonumber
+\int_0^t F \d \tau &= 2 m \int_0^{\infty} A t u_z{^2} n'(u_z) \d u_z\nonumber\\
  &= m A t \int_{-\infty}^\infty u_z{^2} n'(u_z) \d u_z
 \end{align}
 Note that only half of the gas's population will have a velocity component in the positive direction, and the other half will not cause pressure.  Therefore, the 2 coefficient is canceled when the bounds of the integral are extended to include all molecules.
@@ -65,7 +65,7 @@ The last simplification to this relationship comes when we assert that gas veloc
 \end{align}
 Therefore, pressure is proportional to the mean square of molecular translational velocity,
 \begin{align}
-p = 3 m n \langle u{^2} \rangle.
+p = \frac{1}{3} m n \langle u{^2} \rangle.
 \end{align}
 When this relationship is substituted into the ideal gas law above, it provides a purely mechanical interpretation for temperature as well,
 \begin{align}
@@ -143,7 +143,7 @@ Figure \ref{fig:dof} shows the quantities $2 c_v / R$ for six gases with increas
 
 For H$_2$O, rigid motion means six degrees of freedom: three coordinates of translation and three axes of rotation.  For diatomic molecules like O$_2$ and N$_2$, however, their symmetry robs them of one of their axes of rotation, so they only exhibit five degrees of freedom at low temperatures.  Since CO$_2$ is also an axisymmetric molecule, it can be seen asymptotically approaching 5 at low temperatures as well.
 
-\subsection{Entropy and enthalpy revisited}
+\subsection{Entropy and enthalpy revisited}\label{sec:ig:hs}
 
 Recall from Section \ref{sec:intro:s} that the entropy of any substance changes like
 \begin{align}

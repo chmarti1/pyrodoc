@@ -50,7 +50,9 @@ Table \ref{tab:config} lists the configuration parameters, their hard-coded init
 \verb|dat_recursive| & \verb|True| & Recurse into sub-directories when looking for data files?\\
 \verb|dat_verbose| & \verb|False| & Print descriptions of the data load process?\\
 \verb|def_T| & \verb|298.15| & Default temperature in units, \verb|unit_temperature|\\
+\verb|def_oob| & \verb|numpy.nan| & Value to use when the state is out-of-bounds\\
 \verb|def_p| & \verb|1.01325| & Default pressure in units, \verb|unit_pressure|\\
+\verb|error_verbose| & \verb|True| & Is verbose PYroMat error printing enabled?\\
 \verb|install_dir| (R) & \verb|'./'| & Path to the \PM\ installation\\
 \verb|reg_dir| (A) & \tiny\verb|['./registry']| & A list of directories to scan for \texttt{.py} files containing \PM\ classes\\
 \verb|reg_exist_fatal| & \verb|False| & Raise an exception if there are two definitions for the same class?\\
@@ -67,6 +69,7 @@ Table \ref{tab:config} lists the configuration parameters, their hard-coded init
 \verb|unit_time| & \verb|'s'| & Unit string for time\\
 \verb|unit_volume| & \verb|'m3'| & Unit string for volume\\
 \verb|version| (R) & \verb|<version>| & The \PM\ installation version string\\
+\verb|warning_verbose| & \verb|True| & Is verbose PYroMat warning printing enabled?\\
 \hline
 \end{longtable}
 \endgroup
@@ -77,7 +80,7 @@ Configuration entry values can be retrieved and written like dictionary values. 
 \begin{lstlisting}[language=Python]
 >>> import pyromat as pm
 >>> pm.config['version']
-'2.1.0'
+'2.2.0'
 >>> pm.config['unit_temperature'] = 'F'
 \end{lstlisting}
 Parameters that are appendable do not behave the same way.  When they are written to, they accumulate new values.  For example,

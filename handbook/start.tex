@@ -98,115 +98,17 @@ Import \PM\ like any other package.
 \end{lstlisting}
 It automatically loads its modules, and automatically seeks out and loads data.
 
-There are only two functions in the \PM\ package that most users will ever need: \texttt{info()} and \texttt{get()}.  These retrieve information about the \PM\ substance data and retrieves the various substance class instances.  The properties will be calculated by the objects returned by \texttt{get}.
-
-\subsection{Finding substances with \texttt{info()}}
-
-When called without any arguments, the \texttt{info()} function lists all of the substances available, and it lists all of the property methods available for each.  That's great, but it is difficult to manually scan over 1,000 substances for the one you want.
-\begin{lstlisting}[language=Python,style=tinystyle]
->>> pm.info()
-  PYroMat
-Thermodynamic computational tools for Python
-version: 2.1.0
----------------------------------------------------------------------
- ID        : class : properties
----------------------------------------------------------------------
- ig.Al     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Al+    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Al-    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Al2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Al2Br6 :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Al2Cl6 :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Al2F6  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Al2I6  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Al2O   :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Al2O+  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Al2O2  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Al2O2+ :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.AlBO2  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.AlBr   :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.AlBr3  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s      
-    ...
-\end{lstlisting}
-
-To help figure out ways to look for the substances that interest you, we first need to learn how the data are organized.
-
-The {\bf substance id string} in the first column is split into two parts by a period, \verb|<collection>.<formula>|.  For example, \verb|ig.Al2O2|, is an aluminum oxide in the ideal gas (\verb|ig|) collection.  Collections are groupings of substance models based on the kinds of thermodynamic models they use.  There is also a multi-phase collection, which uses a \texttt{mp} id prefix.  Some substances have both ideal gas and multi-phase models (e.g. \texttt{ig.CO2} and \texttt{mp.CO2}, \texttt{ig.H2O} and \texttt{mp.H2O}, etc.)
-
-The {\bf class string} is the name of the class that is used to implement the data model for each substance.  There can be multiple classes included in the same collection (e.g. \texttt{ig}, \texttt{ig2}, and \texttt{igmix} instances are all members of the \texttt{ig} collection).
-
-The {\bf properties} list is a space-separated list of property methods that is offered by each of the substance.  
-
-In order to narrow down the selection, users can pass optional keyword arguments into the \texttt{info} function.  These specify filters that will narrow down the substances listed.  If only one substance is left, its detailed documentation is displayed instead.
-
-The {\bf name} keyword allows users to specify all or part of a substance id string.  If there is an exact match in the database, its documentation will be displayed.  If it matches part of multiple id strings, they will all be listed.
-
-The {\bf collection} keyword allows users to specify the collection to which species must belong.  This forces the substance id string to begin with ``\verb|collection.|''
-
-The {\bf contains} keyword allows users to specify the atomic contents of the substance.  Values may be the string name of an element, or lists of elements. 
-
-The {\bf pmclass} keyword allows users to specify which of the class specifier strings should be listed.  As of version 2.1.0, there were four classes: \texttt{ig}, \texttt{ig2}, \texttt{igmix}, and \texttt{mp1}.  These are described in detail in sections \ref{sec:ig:ig}, \ref{sec:ig:ig2}, \ref{sec:ig:igmix}, and \ref{sec:mp:mp1}.
-
-These can be combined to further narrow down the selection.  Only substances that match all of the criteria will be printed.  In this example, the display shows only members of the multi-phase collection that also contain hydrogen.
-\begin{lstlisting}[language=Python,style=tinystyle]
->>> pm.info(collection='mp', contains='H')
-  PYroMat
-Thermodynamic computational tools for Python
-version: 2.1.0
----------------------------------------------------------------------
- ID        : class : properties
----------------------------------------------------------------------
- mp.C2H2F4 :  mp1  : T p d cp cv gam e h s      s T_h T_s     d_s    
- mp.H2O    :  mp1  : T p d cp cv gam e h s      s T_h T_s     d_s    
-\end{lstlisting}
-
-In this example, only ideal gases that contain the string \texttt{'N2'} in their name are displayed.
-\begin{lstlisting}[language=Python,style=tinystyle]
->>> pm.info(name='N2', collection='ig')
-  PYroMat
-Thermodynamic computational tools for Python
-version: 2.1.0
-----------------------------------------------------------------------
- ID         : class : properties
-----------------------------------------------------------------------
- ig.C2H6N2  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.C2K2N2  :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.C2N2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.C2N2Na2 :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.C4N2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.CN2     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.D2N2    :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.F2N2    :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.F4N2    :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.H2N2    :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.H4N2    :  ig   : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.K2C2N2  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2      :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2+     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2-     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
-----------------------------------------------------------------------
- ID         : class : properties
-----------------------------------------------------------------------
- ig.N2C     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2D2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2F2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2F4    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2H2    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2H2O2  :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2H4    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2O     :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2O+    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2O3    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2O4    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.N2O5    :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s        
- ig.Na2C2N2 :  ig2  : T p d cp cv gam e h s mw R s T_h T_s p_s   
-\end{lstlisting}
-
-When the {\bf verbose} keyword is set to \texttt{False}, the \texttt{info} function returns a list of the substance id strings that match the criteria.  This is intended for use in scripts where users may want to search for substances with certain attributes.
+Once loaded, there are only three functions in the base \PM\ package that most users will ever need: \texttt{get()}, \texttt{search()}, and \texttt{info()}.  These are tools that interact with the \PM\ data collection to retrieve data class instances and print information about them.  All of the rest of the functionality is offered by the class instances themselves.
 
 \subsection{Retrieving substance data}
 
-Once a user or a script has the substance id string of a desired substance, the \texttt{get} function returns the corresponding class instance.  This instance provides all of the property methods.  This example calculates the ideal gas enthalpy of nitrogen at 492 K.
+\PM\ identifies substances by a unique string called the substance identifier (ID).  The substance ID string for ideal gas nitrogen is \texttt{'ig.N2'}.  The \texttt{ig} prefix indicates that the substance model belongs to \PM's ideal gas collection.  The rest of the string is the substance's chemica formula using Hill notation.  
+
+Hill notation removes the ambiguity in how a chemical formula is represented by mandating that all substances with the same atomic composition will be represented by the same strings.  The atomic contents are listed in order of carbon, hydrogen, and then all others in alphabetical order.
+
+By deliberately omitting all chemical structure from the notation, there will be collisions between compounds with the same atomic composition in dissimilar arrangements.  So far, these collisions are rare in the \PM\ data collection, and they are addressed by appending an underscore and an index.  For example, the CNN radical and methanetetraylbis-amidogen both have the same chemical formula, so the former has the ID string, \texttt{ig.CN2}, and the latter is listed under \verb|ig.CN2_1|.
+
+Given an ID string, the \texttt{get} function returns the corresponding class instance.  This instance provides all of the property methods.  This example calculates the ideal gas enthalpy of nitrogen at 492 K.
 \begin{lstlisting}[language=Python]
 >>> n2 = pm.get('ig.N2')
 >>> n2.h(T=492)
@@ -214,6 +116,100 @@ array([202.68455864])
 \end{lstlisting}
 
 In this example, the variable, \texttt{n2}, is an ideal gas class instance with all the methods (like \texttt{h()}) needed to calculate its properties.
+
+
+\subsection{Searching for substances with \texttt{search()}}
+
+There are about 1,000 unique substance models in PYroMat version 2.2.0, so manually skimming through the list is not a very efficient means of finding the species you want.  The \texttt{search()} function returns sets of substances that match the criteria supplied.  Those sets can either be used directly, or the \texttt{info()} function can display more information (see below).
+
+Searching is done by specifying keywords to the \texttt{search()} function.  Each one adds a new criterion that further narrows the search.  The results are 
+
+The {\bf name} keyword is used to search for an exact match with part of the substance ID or for a case-insensitive match with one of the substance's names.  For example, 
+\begin{lstlisting}[language=Python]
+>>> pm.search(name='Acetylene')
+{<ig2, ig.C2F2>, <ig2, ig.C2HCl>, <ig2, ig.C2HF>, ...
+>>> pm.search(name='C2H')
+{<ig2, ig.C2HCl>, <ig2, ig.C2HF>, <ig2, ig.C2HN>, ...
+\end{lstlisting}
+
+These show how a name string can be used to match part of one of a substance's common name \emph{or} part of the substance ID string.
+
+The {\bf pmclass} is the name of the class that is used to implement the data model for each substance.  As of version 2.2.0, there are four classes implemented: \texttt{ig}, \texttt{ig2}, \texttt{igmix}, and \texttt{mp1}. These are described in detail in sections \ref{sec:ig:ig}, \ref{sec:ig:ig2}, \ref{sec:ig:igmix}, and \ref{sec:mp:mp1}.
+
+The {\bf collection} keyword allows users to specify the collection to which species must belong.  This forces the substance id string to begin with ``\verb|collection.|''  For example \texttt{collection='ig'} forces all of the substances returned to belong to the ideal gas collection.
+
+The {\bf InChI}\cite{inchi:website} and {\bf CAS}\cite{cas:website} substance identifiers can also be used to narrow the search.  Since these are unique substance identifiers, they will only return multiple entries when the same substance is represented in multiple collections.  To specify these, use \texttt{inchi=...} or \texttt{cas=...} as keyword arguments.  It is important to keep in mind that as of version 2.2.0, not all entries have had these values added to the data, so some results may not come back as expected.
+
+Probably the most powerful of the search tools, the {\bf contains} keyword allows users to specify the atomic contents of the substance.  Values may be the string name of an element, or lists of element name strings, or dictionaries with element names and their precise amounts.  For example, these queries return all substances (1) with any amount of iron, (2) with any amount of bromine and carbon, and (3) with two hydrogen, one oxygen, and any nonzero amount of carbon.
+\begin{lstlisting}[language=Python]
+>>> pm.search(contains='Fe')
+{<ig, ig.Br4Fe2>, <ig, ig.FFe>, <ig2, ig.H2FeO2>, ...
+>>> pm.search(contains=['Br','C'])
+{<ig, ig.CBrF3>, <ig, ig.CBr4>, <ig, ig.CBr>, ...
+>>> pm.search(contains={'H':2, 'O':1, 'C':None})
+{<ig2, ig.C2H2O>, <ig2, ig.CH2O>}
+\end{lstlisting}
+
+Because the \texttt{search()} function returns a Python \texttt{set} instance, applications that demand more nuanced search operations can use the set operations to combine the results of separate searches.  For example, to find substances that contain two hydrogen \emph{or} three carbon,
+\begin{lstlisting}[language=Python]
+>>> h2 = pm.search(contains={'H':2})
+>>> c3 = pm.search(contains={'C':3})
+>>> h2.union(c3)
+{<ig, ig.H2P>, <ig2, ig.C6H2>, <ig2, ig.CH2Cl2>, ...
+\end{lstlisting}
+For more tips and tricks with sets, see the Python documentation \url{https://docs.python.org/3/tutorial/datastructures.html#sets}.
+
+\subsection{Finding substances with \texttt{info()}}
+
+When called without any arguments, the \texttt{info()} function lists all of the substances available, and it lists all of the property methods available for each.  That probably won't be useful for most users, so the function also passes any keyword arguments to \texttt{search()} internally to narrow down the set.
+\begin{lstlisting}[language=Python,style=tinystyle]
+>>> pm.info(contains=['Br','C'])
+  PYroMat
+Thermodynamic computational tools for Python
+version: 2.2.0
+------------------------------------------------------------------------------
+ ID       : class : name                  : properties
+------------------------------------------------------------------------------
+ ig.CBr   :  ig   : Bromomethylidyne      : T p d v cp cv gam e h s mw R    
+ ig.CBr4  :  ig   : Carbon tetrabromide   : T p d v cp cv gam e h s mw R    
+ ig.CBrF3 :  ig   : Bromotrifluoromethane : T p d v cp cv gam e h s mw R    
+ ig.CBrN  :  ig   : Cyanogen bromide      : T p d v cp cv gam e h s mw R    
+\end{lstlisting}
+
+Alternately, an iterable of substance instances (like the one generated by \texttt{search()} may be passed directly to \texttt{info()}.  
+
+The table shows each substance listed by its ID string and one of its common names (if one is included in the data).  There is also a list of the properties currently offered in the data model.
+
+If a substance ID string, a single substance instance, or a set (or other iterable) with only one entry is passed, the \texttt{info()} function prints detailed information on that substance.
+\begin{lstlisting}[language=Python,style=tinystyle]
+>>> pm.info('ig.N2')
+***
+Information summary for substance: "ig.N2"
+***
+
+    N 
+     2
+
+             Names : Nitrogen
+                     Nitrogen gas
+                     N2
+                     UN 1066
+                     UN 1977
+                     Dinitrogen
+                     Molecular nitrogen
+                     Diatomic nitrogen
+                     Nitrogen-14
+  Molecular Weight : 28.01348
+        CAS number : 7727-37-9
+      InChI string : InChI=1S/N2/c1-2
+        Data class : ig2
+       Loaded from : /home/chris/Documents/pyromat/src/pyromat/data/ig2/N2.hpd
+      Last updated : 21:11 April 20, 2022
+
+The supporting data for this object were adapted from: B. McBride, S.
+Gordon, M. Reno, "Coefficients for Calculating Thermodynamic and Transport
+Properties of Individual Species," NASA Technical Memorandum 4513, 1993.
+\end{lstlisting}
 
 \subsection{In-line documentation}
 
@@ -232,7 +228,7 @@ The property methods that belong to the many substance class instances use flexi
 
 \subsection{Property method arguments}
 
-With a few special exceptions, a thermodynamic state can be specified with any two primary properties.  For example,
+With a few special exceptions, a thermodynamic state can be specified with any two properties except specific heats.  For example,
 \begin{lstlisting}[language=Python]
 >>> n2 = pm.get('ig.N2')
 >>> T = 452.
@@ -254,62 +250,17 @@ array([4.18094321])
 \end{lstlisting}
 The last line uses quality to specify a 50/50 mixture of liquid and vapor nitrogen at 100 K.
 
-\subsection{Inverse methods}\label{sec:start:inverse}
-
-\PM\ only supports passing primary properties to most property methods.  For example, it is not possible to calculate density directly from entropy and pressure.  Instead, \PM\ forces the user to first calculate the the primary properties (tempreature, pressure, density, quality) using the \emph{inverse} property methods like \verb|T_s| and \verb|T_h|, which are pronounced ``temperature from entropy'' or ``temperature from enthalpy'' respectively.  There are also \verb|p_s| or \verb|d_s| methods available in the different collections.
-
-For example, consider the calculation of density and enthalpy from entropy and pressure,
+This works with all basic properties (see section \ref{sec:intro:basic}) $T$, $p$, $\rho$, $v$, and $x$ (multi-phase only).  Other properties like $e$, $h$, and $s$, may be specified as well, but only one at a time with a basic property.  For example, \PM\ does not support property evaluations with $h$ and $s$ simultaneously.  Instead $s$ \emph{or} $h$ may be specified with one of the basic properties like $T$.
 \begin{lstlisting}[language=Python]
->>> n2 = pm.get('ig.N2')
->>> s = 6.5 # kJ/kg/K
->>> p = 2.5 # bar
->>> T = n2.T_s(s=s, p=p)
->>> h = n2.h(T=T,p=p)
->>> d = n2.d(T=T,p=p)
+>>> n2.h(T=100,x=0.5)
+array([7.27884341])
+>>> n2.h(s=4.18090744, T=100)
+array([7.27884313])
+>>> n2.T(s=4.18090744, h=7.27884313)
+  ...
+pyromat.utility.PMParamError: Properties may not be specified together: s, h
 \end{lstlisting}
 
-Why not allow users to pass entropy directly to the enthalpy or density methods?  Why force the extra step of calculating temperature?  The back-end property calculations require $T,p$ pairs for ideal gases and $T,\rho$ pairs for multi-phase substances.  Calculating temperature (or density) from a property requires numerical inversion (see Chapter \ref{ch:num}), which is computationally expensive and causes a small amount of numerical error.  If users were allowed to pass entropy (or other non-primative properties) to all of the property methods, it would cause redundant iterative inversion each time a method was called.  Instead, in this code, the inversion is performed once with the \verb|T_s| call.  See section \ref{sec:start:inverse} for more information.
-
-The effect of numerical error is clear in this example:
-\begin{lstlisting}[language=Python]
->>> n2 = pm.get('ig.N2')
->>> n2.s(T=200, d=1)
-array([6.5796721])
->>> n2.T_s(s=_, d=1)
-array([200.0007351])
-\end{lstlisting}
-No inverse routine is \emph{exact}, but they are correct to better than the original precision of the model uncertainties.
-
-Table \ref{tab:start:inverse} shows the other inverse property methods that are available on other classes.
-
-\begin{table}\label{tab:start:inverse}
-\centering
-\caption{Inverse property methods and their availability by class}
-\begin{tabular}{|c|ccc|}
-\hline
- & \texttt{ig} & \texttt{ig2} & \texttt{mp1}\\
-\hline
-\verb|T_h| & \CheckedBox & \CheckedBox & \CheckedBox\\
-\verb|T_s| & \CheckedBox & \CheckedBox & \CheckedBox\\
-\verb|d_s| & \Square & \Square & \CheckedBox\\
-\verb|p_s| & \CheckedBox & \CheckedBox & \Square\\
-\hline
-\end{tabular}
-\end{table}
-
-Note that pressure and density methods are only available from entropy.  Ideal gas classes provide an inverse pressure method while the multi-phase class provides an inverse density method.  The choice is for efficiency since the ideal gas entropy is modeled in terms of temperature and pressure, while all multi-phase properties are modeled in terms of temperature and density.  Once two of the fundamental properties are available, the third is easily obtained by the appropriate method.
-
-Multi-phase inverse methods also support returning quality when the optional \texttt{quality} keyword is set.
-\begin{lstlisting}[language=Python]
->>> h2o = pm.get('mp.H2O')
->>> s = [6.0, 6.5, 7.0, 7.5, 8.0]
->>> T,x = h2o.T_s(s=s, p=1., quality=True)
->>> print(T)
-[372.75591695 372.75591695 372.75591695 399.48028414 514.10384734]
->>> print(x)
-[ 0.77560479  0.85816469  0.9407246  -1.         -1.        ]
-\end{lstlisting}
-In this example, by setting \texttt{quality=True}, the value for $x$ is returned in a tuple with $T$.  The inverse algorithms automatically detect if the properties are ``under the dome,'' or mixed saturated liquid-vapor.  Passing the quality further prevents the user from needing to repeat that calculation.  When the state is not saturated, quality reverts to -1.
 
 \subsection{Default values}
 
@@ -334,6 +285,28 @@ array([1.87870465])
 \end{lstlisting}
 
 Note that the default values are specified in whatever units \PM\ has been configured to use.  By default, \PM\ uses K, kJ, kg, bar, m$^3$.  If the unit system is changed, the default values should also be changed to reflect the intended values in the new unit system.  See chapter \ref{ch:units} for more information on units and chapter \ref{ch:config} for more information on configuring \PM.
+
+\subsection{Inverse methods}\label{sec:start:inverse}
+
+Before version 2.2.0, the interface only accepted \emph{basic properties} (see section \ref{sec:intro:basic}) $T$, $p$, $\rho$, and $x$.  To handle cases where users had secondary properties like entropy or enthalpy, methods like \verb|T_s| were created to calculate ``temperature from entropy'' and one other property.  Originally, \verb|T_s|, \verb|p_s|, \verb|d_s|, \verb|T_h|, and other \emph{inverse property} methods were specific to the class and the property.  The new interface introduced in version 2.2.0 obsoleted these methods, but they are still available for reverse compatibility.  New codes should not use these methods, and they are scheduled to be removed in a future major release.
+
+Table \ref{tab:start:inverse} shows the historical inverse property methods that are still available on the basic classes.
+
+\begin{table}\label{tab:start:inverse}
+\centering
+\caption{Inverse property methods and their availability by class}
+\begin{tabular}{|c|ccc|}
+\hline
+ & \texttt{ig} & \texttt{ig2} & \texttt{mp1}\\
+\hline
+\verb|T_h| & \CheckedBox & \CheckedBox & \CheckedBox\\
+\verb|T_s| & \CheckedBox & \CheckedBox & \CheckedBox\\
+\verb|d_s| & \Square & \Square & \CheckedBox\\
+\verb|p_s| & \CheckedBox & \CheckedBox & \Square\\
+\hline
+\end{tabular}
+\end{table}
+
 
 \subsection{Tips and tricks}
 
@@ -361,11 +334,11 @@ On many systems, the first code segment can take four or five seconds to run!  T
 
 {\bf Prefer temperature and density when working with multi-phase substances.}  The \texttt{mp1} class calculates all properties (including pressure) in terms of temperature and density.  When another combination of properties is specified (e.g. temperature and pressure) an iterative routine has to run first to isolate temperature and density.  That is why the example above takes so long to run; it requires two iterative algorithms run in series.  When a series of properties are needed at a given state, it is much faster to calculate the density first and pass temperature and density to all of the successive property methods.
 
-{\bf Using the \texttt{mp1.hsd()} method is faster than separate calls to density, enthalpy, and entropy.}  Multi-phase properties require the calculation of a number of intermediate parameters that can be re-used in successive property evaluations.  The \texttt{hsd()} method calculates all three properties at once without needing to repeat these intermediate steps.
+{\bf Using the \texttt{state()} method is faster than separate calls to properties.}  In all classes, the \verb|state()| method minimizes the number of back-end polynomial evaluations to calculate the properties at a state.  If a user needs more than two properties, chances are good that it is worth it to just go ahead and calculate them all.  Multi-phase properties especially require the calculation of a number of intermediate parameters that can be re-used in successive property evaluations.
 
-{\bf The \texttt{mp1} inverse routines can return quality too.}  When running an inverse property routine like \verb|T_h|, \verb|T_s|, or \verb|d_s|, it is often a good idea to go ahead and calculate the quality by setting the optional keyword \verb|quality=True|.  All of these routines have to calculate the saturation properties anyway, so one might as well save the redudnant steps.
+{\bf The \texttt{mp1} property methods can return quality too.}  When running a property method like \verb|T()|, it is often a good idea to go ahead and calculate the quality by setting the optional keyword \verb|quality=True|.  All of these routines have to calculate the saturation properties anyway, so one might as well save the redudnant steps.
 \begin{lstlisting}[language=Python]
->>> T,x = h2o.T_s(s=4.331, p=1.01325, quality=True)
+>>> T,x = h2o.T(s=4.331, p=1.01325, quality=True)
 >>> print(T,x)
 [373.12429581] [0.50004124]
 \end{lstlisting}

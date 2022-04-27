@@ -34,7 +34,7 @@ The formulation for dimensionless free energy, $\alpha$, is split into two parts
 \begin{align}
 \alpha(\tau, \delta) = \alpha^o(\tau, \delta) + \alpha^r(\tau, \delta)
 \end{align}
-This approach separates the problem of needing to model the energy contained in molecular vibration ($\alpha^o$) from the problem of modeling the effects of intermolecular forces with increasing density ($\alpha^r$).
+This approach separates the problem of needing to model the energy contained in molecular vibration and translation of a large number of independent oscillators ($\alpha^o$) from the problem of modeling the effects of intermolecular forces with increasing density ($\alpha^r$).
 
 \subsection{Ideal gas portion of free energy}
 The ideal gas portion of the free energy can be constructed from a specific heat model, just as other properties were for the ideal gas substances in Chapter \ref{ch:ig}.  The ideal gas enthalpy is merely the integral of specific heat, and ideal gas entropy can be similarly constructed in terms of specific heat, temperature, and density,
@@ -54,26 +54,46 @@ When these are used to calculate the dimensionless free energy,
 \alpha^o &= \frac{h - RT - Ts}{RT} = \frac{h \tau}{R T_c} - 1 - \frac{s}{R}\nonumber\\
  &= \frac{h_0}{RT_c} \tau - \frac{s_0}{R} - 1 + \ln\left(\frac{\delta \tau_0}{\delta_0 \tau}\right) + \left(-\tau\int_{\tau_0}^\tau \frac{c_p}{R \tau^2} \d \tau + \int_{\tau_0}^\tau \frac{c_p}{R \tau} \d \tau \right)\label{eqn:mp1:aodef}
 \end{align}
+Note that, for ease of interpretation, we have adopted a lazy notation with $\tau$ both inside and outside of the integrals.  We will adopt a more strict notation below.
 
-The difficulty involved in formulating the specific heat of even an ideal gas is explained in Section \ref{sec:intro:e}.  The portion of energy that goes into translation versus molecular vibration is temperature-dependent.  In the ideal gas models described in Chapter \ref{ch:ig}, this dependency is dealt with using empirical polynomials.  However, the Span and Wagner models use exponential functions to describe the activation of new degrees of freedom with increasing temperature,
+The difficulty in formulating the specific heat of even an ideal gas is introduced in Section \ref{sec:intro:e}.  It is, briefly, that portions of energy that a substance stores in translation (thermal energy) versus the many internal forms of vibration depends heavily on the temperature (and intermolecular distance for a real substance).  A fully detailed model would need to include molecular vibration, electronic, magnetic energies, and quantom mechanical effects.  Approaches to this problem range from a few relatively complicated terms derived from first principles to purely empirical approaches with many simple polynomial terms.  In this discussion, we will spend a little time addressing those approaches that are most common to the ideal gas portion of the \verb|mp1| model.
+
+In the ideal gas models described so far in Chapter \ref{ch:ig}, generic empirical polynomials do a reasonable job of matching the phenomena that dominate there with the advantage that a couple of standard algorithms can consistently evaluate them.  The caveat is that they require piece-wise definitions to adequately capture all of the relevant features of the curve, but the \verb|mp1| model covers the entire temperature range with a single expression.  Even though the residual terms are responsible for the intermolecular forces, low-temperature gas behaviors still need to be considered in the ideal gas portion.  As a result, many high-performing published models tend to include a mix of polynomial and physics-based terms derived from quantum theory.
+
+Models that include terms derived from quantum mechanics can compactly match the decrease in specific heat seen at low temperature.  The specific heat of many independent oscillators assuming a distribution of discrete energies adopts the form
 \begin{align}
-\frac{c_p}{R} = \ldots + b m^2 \frac{\tau^2 \exp(m\tau)}{\left(\exp(m\tau) - 1\right)^2} + \ldots\nonumber,
+\frac{c_p(\tau)}{R} = \ldots + b m^2 \frac{\tau^2 \exp(m\tau)}{\left(\exp(m\tau) - 1\right)^2} + \ldots\nonumber,
 \end{align}
-and any remaining effects are still addressed with additional polynomial terms.  The polynomial terms may be integrated directly, and pose no challenge for efficient implementation.  However, these exponentials require some attention.
+where $b$ represents the magnitude of the feature, and $m$ is a dimensionless temperature (normalized by $T_c$) at which the feature occurs.
 
-The integrals can be collectively simplified by inverting the integration-by-parts procedure with a series of substitutions, so that
+The integrals of specific heat can be collectively simplified by inverting the integration-by-parts procedure with a series of substitutions, so that
 \begin{align}
--\tau \int \frac{c_p}{\tau^2} \d \tau + \int \frac{c_p}{\tau} \d \tau & = - \iint \frac{c_p}{\tau^2} \d \tau^2 \nonumber\\
- &= \dots + \iint \frac{b m^2 \exp(m \tau)}{\left(\exp(m\tau) - 1\right)^2} \d \tau^2 + \ldots \nonumber\\
- &= \ldots + b \ln\left(1 - \exp(-m\tau)\right) + \ldots
+-\tau \int_{\tau_0}^\tau \frac{c_p(t)}{Rt^2} \d t + \int_{\tau_0}^\tau \frac{c_p(t)}{Rt} \d t = - \int_{\tau_0}^\tau \left[ \int_{\tau_0}^t \frac{c_p(t')}{Rt'^2} \d t'\right] \d t.
+\end{align}
+This has the fortunate effect of canceling the $\tau^2$ in the quantum component of specific heat, making its integral straightforward.
+\begin{align}
+-\int_{\tau_0}^\tau &\int_{\tau_0}^t \frac{b m^2 \exp(m t')}{\left(\exp(m t') - 1\right)^2} \d t' \d t  \ldots\nonumber\\
+ &= \int_{\tau_0}^\tau \left[ \frac{b m}{\exp(m t) - 1} - \frac{b m}{\exp(m \tau_0) - 1} \right] \d t \nonumber\\
+ &= \int_{\tau_0}^\tau \frac{b m\exp(-mt)}{1 - \exp(-mt)}\d t - \frac{b m}{\exp(m\tau_0)-1}(\tau - \tau_0) \nonumber\\
+ &= b\ln(1-\exp(-m\tau)) - b\ln(1-\exp(-m\tau_0)) + \ldots\nonumber\\
+ & \hspace{2em} -\frac{b m}{\exp(m\tau_0)-1}(\tau - \tau_0)
 \end{align}
 
-This analysis motivates the form that is now commonplace in contemporary free energy-based substance models,
+The same approach could be applied to the integration of the polynomial, but it is probably more easily dealt with in separate terms.  For a sum of terms with arbitrary exponents,
+\begin{align}
+-\tau \int_{\tau_0}^\tau &\sum_k c_k t^{k-2} \d t + \int_{\tau_0}^\tau \sum_k c_k t^{k-1} \d t \ldots \nonumber\\
+&= -\tau \left[c_1 \ln t + \sum_{k\ne 1} \frac{c_k t^{k-1}}{k-1} \right]_{\tau_0}^\tau  + \left[c_0 \ln t + \sum_{k\ne 0} \frac{c_k t^{k}}{k} \right]_{\tau_0}^\tau\nonumber\\
+&= - \tau c_1 \ln \tau + \tau c_1 \ln \tau_0 - \left[\sum_{k\ne 1} \frac{c_k \tau^k}{k-1}\right] + \tau \left[\sum_{k\ne 1} \frac{c_k \tau_0^{k-1}}{k-1} \right] + \ldots\nonumber\\
+&\hspace{2em}  + c_0 \ln \tau - c_0 \ln \tau_0 + \left[ \sum_{k\ne 0} \frac{c_k \tau^{k}}{k} \right] - \left[ \sum_{k\ne 0} \frac{c_k \tau_0^{k}}{k} \right].
+\end{align}
+Note that this analysis does not require that values of $k$ be limited to integers.
+
+Collectively, these integrals motivate the form that is now commonplace in contemporary free-energy-based models,
 \begin{subequations}
 \begin{align}
-\alpha^o(\tau,\delta) = \ln \delta + a \ln \tau + \alpha^o_0(\tau) + \alpha^o_1(\tau),\label{eqn:mp1:ao}.
+\alpha^o(\tau,\delta) = \ln \delta + (c_0 + c_1\tau) \ln \tau + \alpha^o_0(\tau) + \alpha^o_1(\tau),\label{eqn:mp1:ao}.
 \end{align}
-Here, the natural logarithm of $\tau$ is given an empirical coefficient, which allows it to include aspects of the $c_p$ integrals that resemble $1/\tau$, and the remaining terms are organized into groups of terms, $\alpha^o_0$ and $\alpha^o_1$, which are only functions of temperature.  The $\alpha^o_1$ term includes a sum of all of the exponential functions,
+In many models, the $\tau \ln \tau$ term is omitted, implying that there was no linear term on $\tau$ (proportional to $1/T$) in the formulation of specific heat, but permitting it in the \verb|mp1| model makes it highly extensible.  The remaining terms are a polynomial on $\tau$, $\alpha^o_0$, and the quantum terms, $\alpha^o_1$. which are only functions of temperature.  The $\alpha^o_1$ term includes a sum of all of the quantum functions,
 \begin{align}
 \alpha^o_1(\tau) = \sum_j b_j \ln\left(1 - \exp( -m_j \tau ) \right)\label{eqn:mp1:ao:q},
 \end{align}
@@ -91,7 +111,8 @@ In the data files, the ideal gas terms are contained in a dictionary called the 
 "AOgroup" : {
     "Tscale" : <Tc>,
     "dscale" : <dc>,
-    "logt" : <a>,
+    "logt" : <c0>,
+    "tlogt" : <c1>,
     "coef0" : <p coefficients>,
     "coef1" : [[<b0>, <m0>], [<b1>, <m1>], <...>]
 }
@@ -110,11 +131,11 @@ The first group of terms is a series of polynomials multiplied by exponentials o
 \alpha^r_0 &= \sum_{k=0}^K \exp\left(-\delta^k\right) p_k(\tau, \delta)\\
 & p_k = \sum_i c_i \tau^a_i \delta^b_i.
 \end{align}
-These terms deal with the steep slope that occurs at the phase change.  In most (if not all) models, there are no terms with the $\delta$ exponent as zero, and it is always positive.  As a result, $\alpha^r_0$ terms with exponential functions vanish near $\delta \rightarrow 0$ and $\delta \rightarrow \infty$.  These terms model the complicated behaviors that occur near the phase change (when $\delta$ is on the order 1).
+When $k=0$ the exponential term is constant and may alternately be absorbed into the corresponding polynomial, $_0$.  The polynomials rarely (if ever) have terms where the $\delta$ exponent, $b$, is zero, so $\alpha^r_0$ terms where $k\ne 0$ tend to vanish near $\delta \rightarrow 0$ and $\delta \rightarrow \infty$.  These terms model the complicated behaviors that occur near the phase change (when $\delta$ is on the order 1).
 
-The first group usually constitutes the largest number of terms (usually dozens).  The exponents in the polynomial expansion are usually integers, but they are occasionally rationals for efficient numerical implementation.
+The first group ($\alpha^r_0$) usually constitutes the largest number of terms (often dozens).  The exponents in the polynomial expansion are usually integers, but they are occasionally rationals, which permits efficient numerical evaluation.  Many models do not include the terms in $\alpha^r_1$ or $\alpha^r_2$, and most that do will only permit a few of them.
 
-The second and third groups are gaussian functions multiplied by powers of $\tau$, $\delta$, or function, $\Delta$.  The second group, $\alpha^r_1$, centers the gaussian function around temperature and density, $\gamma$ and $\epsilon$.  These are usually set near the critical point.  The third group, $\alpha^r_2$, is a gaussian centered on exactly the critical point, but the $\Delta$ function is a scaled distance from the critical point.
+The second and third groups are Gaussian functions multiplied by powers of $\tau$, $\delta$, or function, $\Delta$.  The second group, $\alpha^r_1$, centers the Gaussian function around temperature and density, $\gamma$ and $\epsilon$.  These are usually set near the critical point.  The third group, $\alpha^r_2$, is a gaussian centered on exactly the critical point, but the $\Delta$ function is a scaled distance from the critical point.
 \begin{align}
 \alpha^r_1 &= \sum_{l=0}^L c_l \delta^{d_l} \tau^{t_l} \exp\left( -a_l(\delta-\epsilon_l)^2 - b_l(\tau-\gamma_l)^2 \right)\\
 \alpha^r_2 &= \sum_{m=0}^M c_m \Delta_m{^{b_m}} \delta \exp\left(-C_m(\delta-1)^2 - D_m(\tau-1)^2 \right)\\
@@ -131,15 +152,15 @@ In the data files, these terms are encoded in a format shown below.  The \texttt
 "ARgroup" : {
     "Tscale" : <Tc>,
     "dscale" : <dc>,
-    "coef0" : [<p0 coefficients>, <p1 coefficients>, <...>]
-    "coef1" : [[<t>, <d>, <b>, <a>, <gamma>, <epsilon>, <c>], <...>]
-    "coef2" : [[<a>, <b>, <beta>, <A>, <B>, <C>, <D>, <c>], <...>]
+    "coef0" : [<p0 coef>, <p1 coef>, ...]
+    "coef1" : [[<t>, <d>, <b>, <a>, <gamma>, <epsilon>, <c>], ...]
+    "coef2" : [[<a>, <b>, <beta>, <A>, <B>, <C>, <D>, <c>], ...]
 }
 \end{lstlisting}
 
 For more information on polynomial coefficients, see Section \ref{sec:num:poly2}.  It is worth emphasizing that \texttt{coef0} is a four-deep nested list.
 \begin{lstlisting}[language=Python]
-"coef" : [# This begins the list of polynomials
+"coef0" : [# This begins the list of polynomials
              [# This begins the first polynomial
                  [# First sub-polynomial
                      [<a>, <b>],

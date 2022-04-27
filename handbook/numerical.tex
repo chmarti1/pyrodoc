@@ -3,15 +3,13 @@
 \PM\ is designed with a number of custom back-end numerical routines.  Even though low-level custom numerical routines composed in plain Python are unlikely to ever compete well with compiled numerical binaries that have been developed over decades, there are distinct advantages to this approach.
 \begin{itemize}
 \item Reducing the number of dependencies makes the installation simpler and less likely to exhibit mysterious problems on other systems,
-\item The installation footprint is minimal,
-\item Algorithms can be designed to provide exactly the outputs required by the application,
-\item Algorithms can be designed to accept the data in precisely the format used by \PM,
-\item Numerical algorithms can be designed specifically to provide consistent convergence for the types of numerical problems encountered in thermodynamic property evaluation.
+\item The installation footprint is minimal - not requiring entire tertiary libraries,
+\item Algorithms can be customized to conform to the inputs and outputs required by the \PM.
+\item Numerical algorithms can be (and have been) tuned specifically to provide consistent convergence for the types of numerical problems encountered in thermodynamic property evaluation.
+\item The \PM\ numerical routines are specially designed to iterate on \emph{parts} of a Numpy array at a time while still benefiting from Numpy's compiled algorithm speed.
 \end{itemize}
 
-A package written in plain Python is unlikely to ever be used in numerically intense applications like computational fluid dynamics, so it is sensible to designed for reliability instead of speed.  Still, as we discuss in this chapter, extreme care must be taken to ensure that these algorithms do not become unnecessarily slow.  
-
-\PM\ property methods should be sufficiently fast so they can be used in user-written custom iterative design codes, but they should (above all) converge reliably.
+A package written in plain Python is unlikely to ever be used in numerically intense applications like computational fluid dynamics, so we have consistently prioritized reliability over speed.  Still, that's no reason to be wasteful with clock cycles!  Even on arrays with thousands of elements, the most cumbersome of \PM\ property calculations reliably converge in fractions of a second in testing.  The author has yet to hear of a use case for which this performance is unacceptably slow.  Until that changes, this is how the \PM\ back-end will continue to do things.
 
 %
 % 2D Polynomials
