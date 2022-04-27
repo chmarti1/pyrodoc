@@ -69,6 +69,85 @@ def compute_sat_state(subst, **kwargs):
     return liq_state, vap_state
 
 
+def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
+    """
+    Compute a constant line for a given property at a given value
+    :param subst: a pyromat substance object
+    :param n: The number of points to compute to define the line
+    :param scaling: Should point spacing be 'linear' or 'log'
+    :param kwargs: A property specified by name
+    :return: A dict containing arrays of properties
+    """
+    multiphase = hasattr(subst, 'Ts')
+
+    if multiphase:
+        Tc, pc = subst.critical()
+        crit = subst.state(T=Tc, p=pc)
+        pmin, pmax = subst.plim()
+        Tmin, Tmax = subst.Tlim()
+    else:
+        Tc, pc = -999999, -999999
+        Tmin, Tmax = subst.Tlim()
+        pmin, pmax = np.array([subst.p(T=Tmin, d=0.01), subst.p(T=Tmax, d=1000)]).flatten()
+
+
+    if len(kwargs) != 1:
+        raise pm.utility.PMParamError("Specify exactly one property "
+                                      "for an isoline")
+
+    # The props for which we will plot against a T list
+    if any(prop in kwargs for prop in ['p', 'd', 'v', 's', 'x']):
+        # quality doesn't go as high
+        if 'x' in kwargs:
+            if multiphase:
+                Tmax = Tc
+        Teps = (Tmax-Tmin)/1000
+
+        if scaling == 'linear':
+            line_T = np.linspace(Tmin + Teps, Tmax - Teps, n)
+        elif scaling == 'log':
+            line_T = np.logspace(np.log10(Tmin + Teps), np.log10(Tmax - Teps),
+                                 n)
+        else:
+            raise ValueError('Invalid scaling.')
+
+        if 'p' in kwargs and kwargs['p'] < pc:
+            Tsat = subst.Ts(p=kwargs['p'])
+            i_insert = np.argmax(line_T > Tsat)
+
+            line_T = np.insert(line_T, i_insert, np.array([Tsat, Tsat]).flatten())
+            x = -np.ones_like(line_T)
+            x[line_T == Tsat] = np.array([0, 1])
+            kwargs['x'] = x
+
+        kwargs['T'] = line_T
+
+    elif any(prop in kwargs for prop in ['T', 'h', 'e']):
+        # ph & pe are going to be really slow, but what's better?
+        peps = (pmax - pmin) / 1e6
+
+        # line_p = np.linspace(pmin + peps, pmax - peps, n)
+        line_p = np.logspace(np.log10(pmin + peps), np.log10(pmax - peps),
+                                 n)
+
+        if 'T' in kwargs and kwargs['T'] < Tc:
+            psat = subst.ps(T=kwargs['T'])
+            i_insert = np.argmax(line_p > psat)
+
+            line_p = np.insert(line_p, i_insert, np.array([psat, psat]).flatten())
+            x = -np.ones_like(line_p)
+            x[line_p == psat] = np.array([0, 1])
+            kwargs['x'] = x
+
+        kwargs['p'] = line_p
+    else:
+        raise pm.utility.PMParamError('property invalid')
+
+    states = subst.state(**kwargs)
+
+    return states
+
+
 ###
 # Custom request processing classes
 #   These are designed to construct a JSON dictionary that will be used
@@ -179,6 +258,23 @@ class PMGIRequest:
                 else:
                     somedict[name] = value.tolist()
 
+    @staticmethod
+    def clean_nan(somedict):
+        """
+        Clean out nan values from a computated dict in place. Requires a dict of np arrays of equal length
+        """
+        indices = None
+        for name, value in somedict.items():
+            if indices is None:
+                indices = np.isnan(value)
+            else:
+                indices = np.bitwise_or(indices, np.isnan(value))
+
+        if indices.any():
+            good = np.bitwise_not(indices)
+            for name in somedict:
+                somedict[name] = somedict[name][good]
+
 
 class PropertyRequest(PMGIRequest):
     def __init__(self, args, units=None):
@@ -239,6 +335,7 @@ class PropertyRequest(PMGIRequest):
             return
 
         # Finally, clean up the return parameters
+        PMGIRequest.clean_nan(self.out['data'])
         PMGIRequest.json_friendly(self.out)
 
     def _ig_process(self):
@@ -267,6 +364,66 @@ class PropertyRequest(PMGIRequest):
                 prefix = ', '
             self.warn('')
             return
+
+
+class IsolineRequest(PMGIRequest):
+    def __init__(self, args, units=None):
+        # Clean initialization
+        PMGIRequest.__init__(self)
+
+        # Read in the arguments from raw
+        self.args = dict(args)
+        # Process the arguments
+        if self.require(
+                types={
+                    's': toarray,
+                    'h': toarray,
+                    'e': toarray,
+                    'T': toarray,
+                    'p': toarray,
+                    'd': toarray,
+                    'v': toarray,
+                    'x': toarray,
+                    'id': str
+                },
+                mandatory=['id']):
+            return
+
+        # Config the units
+        if units is not None:
+            try:
+                InfoRequest.set_units(units)
+            except pm.utility.PMParamError as e:
+                self.error(e.args[0])
+
+        # Retrieve the PM entry
+        if self.init_subst(self.args['id']):
+            return
+
+    def process(self):
+        """Process the request
+        This method is responsible for populating the "out" member dict with
+        correctly formatted data that can be returned as a JSON object.
+        """
+        # If there was an error, abort the processing
+        if self.out['error']:
+            return
+        elif not isinstance(self.substance, pm.reg.__basedata__):
+            self.error('Substance data seems to be corrupt!  Halting.')
+            return
+
+        args = self.args.copy()
+        self.out['inputs'] = self.args
+        # Leave only the property arguments
+        args.pop('id')
+
+        try:
+            self.out['data'] = compute_iso_line(self.substance, **args)
+        except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e:
+            self.error(e.args[0])
+        # Finally, clean up the return parameters
+        PMGIRequest.clean_nan(self.out['data'])
+        PMGIRequest.json_friendly(self.out)
 
 
 class SaturationRequest(PMGIRequest):
@@ -322,6 +479,8 @@ class SaturationRequest(PMGIRequest):
             return
 
         # Finally, clean up the return parameters
+        PMGIRequest.clean_nan(self.out['data']['liquid'])
+        PMGIRequest.clean_nan(self.out['data']['vapor'])
         PMGIRequest.json_friendly(self.out)
 
     def _mp_process(self):
@@ -504,7 +663,7 @@ def pmgi():
         return pr.out, 200
 
 
-# The root pmgi accepts property requests.
+# The saturation route computes saturation points or the steam dome
 @app.route('/saturation', methods=['POST', 'GET'])
 def sat():
     # Read in the request data to an args dict
@@ -526,6 +685,30 @@ def sat():
         return sr.out, 500
     else:
         return sr.out, 200
+
+
+# The isoline route computes isolines
+@app.route('/isoline', methods=['POST', 'GET'])
+def iso():
+    # Read in the request data to an args dict
+    if request.method == 'POST':
+        jsondat = dict(request.json)
+        args = jsondat['state_input']
+        units = None
+        if 'units' in jsondat:
+            units = (jsondat['units'])
+        isr = IsolineRequest(args, units)
+    elif request.method == 'GET':
+        args = dict(request.args)
+        isr = IsolineRequest(args)
+
+    isr.process()
+
+    # Check for error and return code
+    if isr.out['error']:
+        return isr.out, 500
+    else:
+        return isr.out, 200
 
 
 # The get pmgi returns substance metadata
