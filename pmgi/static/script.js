@@ -720,6 +720,11 @@ class PlotView{
         this.dispprops = ['T','s','p','v'];
         this.target = divTarget;
         this.container = document.getElementById(divTarget);
+
+        this.onChangeAxes = this.onChangeAxes.bind(this);
+        $("#yprop").on("change", this.onChangeAxes);
+        $("#xprop").on("change", this.onChangeAxes);
+
         this.init();
     }
 
@@ -805,6 +810,13 @@ class PlotView{
             this.dispprops = data;
             this.updatePoints(get_points());
         }
+    }
+
+    onChangeAxes(){
+        this.x_prop = $('#xprop').val();
+        this.y_prop = $('#yprop').val();
+        this.init();
+        this.updatePoints(get_points());
     }
 
     /**

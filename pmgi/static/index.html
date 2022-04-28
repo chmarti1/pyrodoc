@@ -82,6 +82,18 @@
         Hover tooltip works with extra property info. Ideal gas click-to-add
         doesn't work right now but that's a backend issue. Lots of prettification
         needed here.<br>
+        <label labelfor="xprop">X Property</label>
+        <select id="xprop" name="xprop" val="s">
+            <option value="p">p</option>
+            <option value="v">v</option>
+            <option value="s" selected>s</option>
+            <option value="h">h</option>
+        </select>
+        <label labelfor="yprop">Y Property</label>
+        <select id="yprop" name="yprop" val="T">
+            <option value="T" selected>T</option>
+            <option value="p">p</option>
+        </select>
         <div id="plot" style="width:600px;height:400px;">
 
             <!-- Will be filled in by JS -->
