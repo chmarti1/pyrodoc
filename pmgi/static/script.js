@@ -715,8 +715,6 @@ class PlotView{
         // TODO - Additional background data, steam dome, isolines
         // TODO - variable display props in popups
         // TODO - axis labels, plot quality
-        this.x_prop = 's';
-        this.y_prop = 'T';
         this.dispprops = ['T','s','p','v'];
         this.target = divTarget;
         this.container = document.getElementById(divTarget);
@@ -724,6 +722,7 @@ class PlotView{
         this.onChangeAxes = this.onChangeAxes.bind(this);
         $("#yprop").on("change", this.onChangeAxes);
         $("#xprop").on("change", this.onChangeAxes);
+        this.setAxes('s', 'T')
 
         this.init();
     }
@@ -830,10 +829,14 @@ class PlotView{
     }
 
     onChangeAxes(){
-        this.x_prop = $('#xprop').val();
-        this.y_prop = $('#yprop').val();
+        this.setAxes($('#xprop').val(), $('#yprop').val())
         this.init();
         this.updatePoints(get_points());
+    }
+
+    setAxes(xprop, yprop){
+        this.x_prop = xprop;
+        this.y_prop = yprop;
     }
 
     /**
