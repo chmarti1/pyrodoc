@@ -68,6 +68,30 @@ def compute_sat_state(subst, **kwargs):
         }
     return liq_state, vap_state
 
+def get_default_lines(subst, prop):
+    if not hasattr(subst, prop):
+        raise pm.utility.PMParamError(f"{subst} has no such property: {prop}")
+
+    vals = None
+
+    multiphase = hasattr(subst, 'Ts')
+
+    if multiphase:
+        pmin, pmax = subst.plim()
+        Tmin, Tmax = subst.Tlim()
+    else:
+        Tmin, Tmax = subst.Tlim()
+        pmin, pmax = np.array([subst.p(T=Tmin, d=0.01), subst.p(T=Tmax, d=1000)]).flatten()
+
+    if prop == 'p':
+        peps = (pmax - pmin) / 1e6
+        vals = np.logspace(np.log10(pmin + peps), np.log10(pmax - peps), 10)
+    elif prop == 'T':
+        Teps = (Tmax - Tmin) / 1000
+        vals = np.linspace(Tmin + Teps, Tmax - Teps, 10)
+
+    return vals
+
 
 def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
     """
@@ -89,6 +113,16 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
         Tc, pc = -999999, -999999
         Tmin, Tmax = subst.Tlim()
         pmin, pmax = np.array([subst.p(T=Tmin, d=0.01), subst.p(T=Tmax, d=1000)]).flatten()
+
+    # Perform a default computation
+    if 'default' in kwargs:
+        kwargs.pop('default')
+        prop = list(kwargs.keys())[0]
+        lines = {}
+        for val in get_default_lines(subst, prop):
+            arg = {prop: val}
+            lines[val] = compute_iso_line(subst, n, scaling, **arg)
+        return lines
 
 
     if len(kwargs) != 1:
@@ -261,14 +295,17 @@ class PMGIRequest:
     @staticmethod
     def clean_nan(somedict):
         """
-        Clean out nan values from a computated dict in place. Requires a dict of np arrays of equal length
+        Clean out nan values from a computed dict in place. Requires a dict of np arrays of equal length
         """
-        indices = None
+        indices = np.array([], dtype=bool)
         for name, value in somedict.items():
-            if indices is None:
-                indices = np.isnan(value)
-            else:
-                indices = np.bitwise_or(indices, np.isnan(value))
+            if isinstance(value, np.ndarray):
+                if indices.size == 0:
+                    indices = np.isnan(value)
+                else:
+                    indices = np.bitwise_or(indices, np.isnan(value))
+            elif isinstance(value, dict):
+                PMGIRequest.clean_nan(value)
 
         if indices.any():
             good = np.bitwise_not(indices)
@@ -384,6 +421,7 @@ class IsolineRequest(PMGIRequest):
                     'd': toarray,
                     'v': toarray,
                     'x': toarray,
+                    'default': str,
                     'id': str
                 },
                 mandatory=['id']):
@@ -419,11 +457,12 @@ class IsolineRequest(PMGIRequest):
 
         try:
             self.out['data'] = compute_iso_line(self.substance, **args)
+            PMGIRequest.clean_nan(self.out['data'])
+            PMGIRequest.json_friendly(self.out)
         except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e:
             self.error(e.args[0])
         # Finally, clean up the return parameters
-        PMGIRequest.clean_nan(self.out['data'])
-        PMGIRequest.json_friendly(self.out)
+
 
 
 class SaturationRequest(PMGIRequest):
