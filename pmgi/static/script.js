@@ -79,6 +79,7 @@ class PointModel extends Subject{
     static EVENT_SUBSTANCE = 'substance'; // Data will be get_substance()
     static EVENT_POINT = 'point' // Data will be get_points()
     static EVENT_INIT = 'init'; // Data will be null
+    static EVENT_AUXLINE = 'auxline'; // data will be get_auxlines()
 
     DEFAULT_SUB_SHORTLIST=["mp.H2O","mp.C2H2F4","ig.air","ig.O2", "ig.N2"];
     DEFAULT_PROP_SHORTLIST=["T","p","v","e","h","s","x"];
@@ -90,6 +91,9 @@ class PointModel extends Subject{
         // Current list of defined points
         this.points = []
         this.point_id = this.INIT_ID;
+
+        this.aux_lines = {}
+        this.aux_lines['global'] = []
 
         // Current units, and all possible units
         this.units = null;
@@ -203,6 +207,29 @@ class PointModel extends Subject{
     }
 
     /**
+     * Get all currently computed aux iso lines
+     * @returns lines - dict of arrays, key of parent dict is the parent of
+     *                        the lines being reported ('global' for general
+     *                        lines like the steamdome, etc.). The array values
+     *                        of the dict contain two keys: 'type' and 'data'.
+     *                        The string 'type' represents the property
+     *                        associated with this particular line (e.g. 'p'
+     *                        for an isobar. 'data' is a dict, keyed by
+     *                        property name and whose values are arrays of
+     *                        values making up the whole line.
+     *
+     *                        lines['global'][0]['data']['p'] gets the pressure
+     *                        values for a given line in global at index 0.
+     */
+    get_auxlines(id=null){
+        if (id == null) {
+            return this.aux_lines;
+        } else if (id in this.aux_lines){
+            return {id: this.aux_lines[id]};
+        }
+    }
+
+    /**
      * Add a new point to the list
      * @param point - A dict keyed by property.
      */
@@ -225,7 +252,7 @@ class PointModel extends Subject{
     }
 
     /**
-     * Remove a point based on it's integer id
+     * Remove a point based on its integer id
      * @param id - the integer id of the point (via 'ptid' property)
      */
     delete_point(id){
@@ -233,6 +260,8 @@ class PointModel extends Subject{
         for (const key in this.points) {
             this.points[key].splice(index, 1);
         }
+        this.delete_auxlines(id);
+
         // If this was the last point, we want to clear things out.
         if (this.points['ptid'].length == 0){
             this.clearpoints();
@@ -242,11 +271,41 @@ class PointModel extends Subject{
     }
 
     /**
+     * Add a new auxiliary line
+     * @param type - string, iso-property
+     * @param data - dict of property value arrays
+     * @param parent - ptid of parent point being represented, or 'global'
+     */
+    add_auxline(type, data, parent='global'){
+        // If it's a new parent, the array might not exist yet, initialize
+        if (!(parent in this.aux_lines)){
+            this.aux_lines[parent] = [];
+        }
+        this.aux_lines[parent].push({'type': type, 'data': data});
+        this.notify(this, PointModel.EVENT_AUXLINE, this.get_auxlines());
+    }
+
+    /**
+     * * Remove an auxiliary line its parent point integer id
+     * @param id - the integer id of the parent point (via 'ptid' property)
+     */
+    delete_auxlines(id){
+        if (id in this.aux_lines){
+            delete this.aux_lines[id];
+        }
+    }
+
+    /**
      * Clear all points stored and get ready to start over.
      */
     clearpoints(){
         this.points = [];
         this.point_id = this.INIT_ID;
+
+        let gl = this.aux_lines['global'];
+        this.aux_lines = {};
+        this.aux_lines['global'] = gl;
+
         this.notify(this, PointModel.EVENT_INIT, null);
     }
 }
@@ -735,11 +794,24 @@ class PlotView{
             y: [],
             customdata: [],
             mode: 'markers',
+            name: "User Points",
             hovertemplate: "<b> Point prop<br>"+
                 this.x_prop+": %{x}<br>" +
                 this.y_prop+": %{y}<br>" +
                 "attr: %{customdata: .2f}",
             type: 'scatter'
+        }, {
+            x: [],
+            y: [],
+            mode: 'lines',
+            type: 'scatter',
+            name: 'Steam Dome',
+            hovertemplate: " ",
+            showlegend: false,
+            line: {
+                color: 'rgb(0, 0, 0)',
+                width: 3
+            }
         }];
         // Create the plot object
         Plotly.newPlot(this.container, traces, this.layout);
@@ -825,12 +897,31 @@ class PlotView{
         } else if (event == PropChooserView.EVENT_PROPERTY_VISIBILITY){
             this.dispprops = data;
             this.updatePoints(get_points());
+        } else if (event == PointModel.EVENT_AUXLINE) {
+            this.draw_auxlines(data);
         }
+    }
+
+    draw_auxlines(data){
+        let steamdome = null;
+        data['global'].forEach((line)=>{
+           if (line['type'] == 'steamdome'){
+               steamdome = line['data'];
+           }
+        });
+        let update = {
+                x: [steamdome[this.x_prop]],
+                y: [steamdome[this.y_prop]],
+        };
+
+        Plotly.restyle(this.container, update, [1]);
+
     }
 
     onChangeAxes(){
         this.setAxes($('#xprop').val(), $('#yprop').val())
         this.init();
+        this.draw_auxlines(get_auxlines());
         this.updatePoints(get_points());
     }
 
@@ -1043,8 +1134,8 @@ $(document).ready(function(){
     getInfo((data)=>{
         // Get the general info data, assign to model
         pointModel.init(data.valid_units, data.substances);
-        pointModel.set_units(data.units);
-        pointModel.set_substance(pointModel.DEFAULT_SUBSTANCE);
+        set_units(data.units);
+        set_substance(pointModel.DEFAULT_SUBSTANCE);
 
         // Assign views to listen to the main model
         pointModel.addListener(unitFormView);
@@ -1103,8 +1194,33 @@ function delete_point(point){
     pointModel.delete_point(point)
 }
 
+function get_auxlines(){
+    return pointModel.get_auxlines();
+}
+
 function set_substance(newsubstance){
     pointModel.set_substance(newsubstance);
+    compute_auxline();
+}
+
+function compute_auxline(){
+    if (get_substance().startsWith('mp')){
+        compute_steamdome((data)=>{
+            let sll = data.data['liquid'];
+            let svl = data.data['vapor'];
+            // concatenate vapor to liquid
+            Object.keys(svl).forEach(key => {
+                for (let i = svl[key].length; i > -1; i--) {
+                    sll[key].push(svl[key][i]);
+                }
+            });
+            add_steamdome(sll);
+        });
+    }
+}
+
+function add_steamdome(steamdome){
+    pointModel.add_auxline('steamdome', steamdome, parent='global');
 }
 
 function get_substance(){
@@ -1148,6 +1264,34 @@ function compute_point(props, mode="POST"){
             dataType: "json",
             contentType: 'application/json; charset=utf-8',
             success: propResponseSuccess,
+            error: propResponseFail
+        });
+    }
+}
+
+/**
+ * Async request for getting a state from the backend.
+ * @param props - Dict with keys of property and numeric values
+ * @param mode - GET/POST. Only POST can handle units with the request
+ */
+function compute_steamdome(callback, props={}, mode="POST"){
+    let requestroute = "/saturation";
+
+    // Add the substance ID to props always
+    props['id'] = get_substance();
+
+    if (mode == "GET"){
+        $.get(requestroute, props, callback,dataType='json')
+            .fail(propResponseFail);
+    } else if (mode == "POST") {
+        let postData = {state_input: props, units: get_units()};
+        $.ajax({
+            url: requestroute,
+            type: "POST",
+            data: JSON.stringify(postData),
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: callback,
             error: propResponseFail
         });
     }
