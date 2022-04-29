@@ -99,8 +99,13 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
     :param subst: a pyromat substance object
     :param n: The number of points to compute to define the line
     :param scaling: Should point spacing be 'linear' or 'log'
-    :param kwargs: A property specified by name
-    :return: A dict containing arrays of properties
+    :param kwargs: A property specified by name. If 'default' is specified in
+                    kwargs, the value of the prop will be ignored and a set
+                    of default lines for that prop will be computed (see
+                    get_default_lines()).
+    :return: A dict containing arrays of properties. If 'default' flag is set
+                the response will be an array dicts representing all the
+                individual lines.
     """
     multiphase = hasattr(subst, 'Ts')
 
@@ -118,10 +123,10 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
     if 'default' in kwargs:
         kwargs.pop('default')
         prop = list(kwargs.keys())[0]
-        lines = {}
+        lines = []
         for val in get_default_lines(subst, prop):
             arg = {prop: val}
-            lines[val] = compute_iso_line(subst, n, scaling, **arg)
+            lines.append(compute_iso_line(subst, n, scaling, **arg))
         return lines
 
 
@@ -283,20 +288,31 @@ class PMGIRequest:
         """
         Clean up the out dictionary for output as JSON.
         """
-        for name, value in somedict.items():
-            if isinstance(value, dict):
-                PMGIRequest.json_friendly(value)
-            elif isinstance(value, np.ndarray):
-                if value.size == 1:
-                    somedict[name] = np.asscalar(value)
-                else:
-                    somedict[name] = value.tolist()
+
+        if isinstance(somedict, dict):
+            for name, value in somedict.items():
+                if isinstance(value, dict) or isinstance(value, list):
+                    PMGIRequest.json_friendly(value)
+                elif isinstance(value, np.ndarray):
+                    if value.size == 1:
+                        somedict[name] = np.asscalar(value)
+                    else:
+                        somedict[name] = value.tolist()
+        elif isinstance(somedict, list):
+            for item in somedict:
+                PMGIRequest.json_friendly(item)
 
     @staticmethod
     def clean_nan(somedict):
         """
         Clean out nan values from a computed dict in place. Requires a dict of np arrays of equal length
         """
+
+        if not hasattr(somedict, 'items') and isinstance(somedict, list):
+            for item in somedict:
+                PMGIRequest.clean_nan(item)
+            return
+
         indices = np.array([], dtype=bool)
         for name, value in somedict.items():
             if isinstance(value, np.ndarray):
