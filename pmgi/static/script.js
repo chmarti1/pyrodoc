@@ -786,11 +786,28 @@ class PlotView{
         d3.select(".plotly").on('click', function(d, i) {
             var e = d3.event;
             var bgrect = document.getElementsByClassName('gridlayer')[0].getBoundingClientRect();
-            var x = ((e.x - bgrect['x']) / (bgrect['width'])) * (myPlot.layout.xaxis.range[1] - myPlot.layout.xaxis.range[0]) + myPlot.layout.xaxis.range[0];
-            var y = ((e.y - bgrect['y']) / (bgrect['height'])) * (myPlot.layout.yaxis.range[0] - myPlot.layout.yaxis.range[1]) + myPlot.layout.yaxis.range[1];
-            if (x.between(myPlot.layout.xaxis.range[0], myPlot.layout.xaxis.range[1]) &&
-                y.between(myPlot.layout.yaxis.range[0], myPlot.layout.yaxis.range[1])) {
+            let x = 0;
+            let y = 0;
+            let betweenx = false;
+            let betweeny = false;
+            // X Axis
+            if (myPlotContainer.layout['xaxis']['type'] == 'linear') {
+                x = ((e.x - bgrect['x']) / (bgrect['width'])) * (myPlot.layout.xaxis.range[1] - myPlot.layout.xaxis.range[0]) + myPlot.layout.xaxis.range[0];
+                betweenx = x.between(myPlot.layout.xaxis.range[0], myPlot.layout.xaxis.range[1]);
+            } else if (myPlotContainer.layout['xaxis']['type'] == 'log'){
+                x = 10**(((e.x - bgrect['x']) / (bgrect['width'])) * (myPlot.layout.xaxis.range[1] - myPlot.layout.xaxis.range[0]) + myPlot.layout.xaxis.range[0]);
+                betweenx = Math.log10(x).between(myPlot.layout.xaxis.range[0], myPlot.layout.xaxis.range[1]);
+            }
+            // Y Axis (flipped coords)
+            if (myPlotContainer.layout['yaxis']['type'] == 'linear') {
+                y = ((e.y - bgrect['y']) / (bgrect['height'])) * (myPlot.layout.yaxis.range[0] - myPlot.layout.yaxis.range[1]) + myPlot.layout.yaxis.range[1];
+                betweeny = y.between(myPlot.layout.yaxis.range[0], myPlot.layout.yaxis.range[1]);
+            } else if (myPlotContainer.layout['yaxis']['type'] == 'log') {
+                y = 10 ** (((e.y - bgrect['y']) / (bgrect['height'])) * (myPlot.layout.yaxis.range[0] - myPlot.layout.yaxis.range[1]) + myPlot.layout.yaxis.range[1]);
+                betweeny = Math.log10(y).between(myPlot.layout.yaxis.range[0], myPlot.layout.yaxis.range[1]);
+            }
 
+            if (betweenx && betweeny) {
                 // Build the data and send to the controller
                 let formData = {}
                 formData[myPlotContainer.x_prop] = x
