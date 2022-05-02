@@ -27,6 +27,11 @@ def compute_sat_state(subst, **kwargs):
                 including all valid properties.
                 Valid properties are: p,T,v,d,e,h,s,x
     """
+
+    if not hasattr(subst, 'ps'):
+        raise pm.utility.PMParamError('Saturation states not available for '
+                                      f'{subst}.')
+
     kwargs = {k.lower(): v for k, v in kwargs.items()}
     if 'p' in kwargs:
         ps = np.array(kwargs['p']).flatten()
@@ -68,14 +73,20 @@ def compute_sat_state(subst, **kwargs):
         }
     return liq_state, vap_state
 
+
 def get_default_lines(subst, prop):
+    """
+    Get a default set of isolines for a given property.
+    :param subst: A pyromat substance object
+    :param prop: A string representing the requested property
+    :return: vals - a np array of suitable default values.
+    """
     if not hasattr(subst, prop):
         raise pm.utility.PMParamError(f"{subst} has no such property: {prop}")
 
     vals = None
 
-    multiphase = hasattr(subst, 'Ts')
-
+    multiphase = hasattr(subst, 'ps')
     if multiphase:
         pmin, pmax = subst.plim()
         Tmin, Tmax = subst.Tlim()
@@ -89,6 +100,8 @@ def get_default_lines(subst, prop):
     elif prop == 'T':
         Teps = (Tmax - Tmin) / 1000
         vals = np.linspace(Tmin + Teps, Tmax - Teps, 10)
+    else:
+        raise pm.utility.PMParamError(f'Default Lines Undefined for {prop}.')
 
     return vals
 
@@ -104,14 +117,35 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
                     of default lines for that prop will be computed (see
                     get_default_lines()).
     :return: A dict containing arrays of properties. If 'default' flag is set
-                the response will be an array dicts representing all the
+                the response will be an array of dicts representing all the
                 individual lines.
     """
+
+    # Perform a default computation
+    if len(kwargs) != 1:
+        if 'default' not in kwargs or len(kwargs) != 2:
+            raise pm.utility.PMParamError("Specify exactly one property "
+                                          "for an isoline")
+
+    # Get an array of lines, ignore the value of prop.
+    if 'default' in kwargs:
+        kwargs.pop('default')
+        prop = list(kwargs.keys())[0]  # only value left is prop
+        lines = []
+        # Recursively compute the single line
+        for val in get_default_lines(subst, prop):
+            arg = {prop: val}  # Build an argument
+            lines.append(compute_iso_line(subst, n, scaling, **arg))
+        return lines
+
+    # We have a single property, so compute the line
+
+    # Compute the limit pressures and temperatures
     multiphase = hasattr(subst, 'Ts')
 
     if multiphase:
         Tc, pc = subst.critical()
-        crit = subst.state(T=Tc, p=pc)
+        # crit = subst.state(T=Tc, p=pc)
         pmin, pmax = subst.plim()
         Tmin, Tmax = subst.Tlim()
     else:
@@ -119,37 +153,23 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
         Tmin, Tmax = subst.Tlim()
         pmin, pmax = np.array([subst.p(T=Tmin, d=0.01), subst.p(T=Tmax, d=1000)]).flatten()
 
-    # Perform a default computation
-    if 'default' in kwargs:
-        kwargs.pop('default')
-        prop = list(kwargs.keys())[0]
-        lines = []
-        for val in get_default_lines(subst, prop):
-            arg = {prop: val}
-            lines.append(compute_iso_line(subst, n, scaling, **arg))
-        return lines
-
-
-    if len(kwargs) != 1:
-        raise pm.utility.PMParamError("Specify exactly one property "
-                                      "for an isoline")
-
     # The props for which we will plot against a T list
     if any(prop in kwargs for prop in ['p', 'd', 'v', 's', 'x']):
-        # quality doesn't go as high
+
+        # If quality, we stop at the crit pt
         if 'x' in kwargs:
             if multiphase:
                 Tmax = Tc
+            else:
+                raise pm.utility.PMParamError('x cannot be computed for non-'
+                                              'multiphase substances.')
+
+        # An epsilon for the max/min
         Teps = (Tmax-Tmin)/1000
 
-        if scaling == 'linear':
-            line_T = np.linspace(Tmin + Teps, Tmax - Teps, n)
-        elif scaling == 'log':
-            line_T = np.logspace(np.log10(Tmin + Teps), np.log10(Tmax - Teps),
-                                 n)
-        else:
-            raise ValueError('Invalid scaling.')
+        line_T = np.linspace(Tmin + Teps, Tmax - Teps, n)
 
+        # We can insert the phase change points
         if 'p' in kwargs and kwargs['p'] < pc:
             Tsat = subst.Ts(p=kwargs['p'])
             i_insert = np.argmax(line_T > Tsat)
@@ -165,10 +185,9 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
         # ph & pe are going to be really slow, but what's better?
         peps = (pmax - pmin) / 1e6
 
-        # line_p = np.linspace(pmin + peps, pmax - peps, n)
-        line_p = np.logspace(np.log10(pmin + peps), np.log10(pmax - peps),
-                                 n)
+        line_p = np.logspace(np.log10(pmin + peps), np.log10(pmax - peps), n)
 
+        # We can insert the phase change points
         if 'T' in kwargs and kwargs['T'] < Tc:
             psat = subst.ps(T=kwargs['T'])
             i_insert = np.argmax(line_p > psat)
@@ -179,7 +198,8 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
             kwargs['x'] = x
 
         kwargs['p'] = line_p
-    else:
+
+    else:  # Should never arrive here without error
         raise pm.utility.PMParamError('property invalid')
 
     states = subst.state(**kwargs)
@@ -330,6 +350,9 @@ class PMGIRequest:
 
 
 class PropertyRequest(PMGIRequest):
+    """
+    This class will handle requests for properties at a fixed state or states.
+    """
     def __init__(self, args, units=None):
         # Clean initialization
         PMGIRequest.__init__(self)
@@ -420,6 +443,9 @@ class PropertyRequest(PMGIRequest):
 
 
 class IsolineRequest(PMGIRequest):
+    """
+    This class will handle requests for an isoline
+    """
     def __init__(self, args, units=None):
         # Clean initialization
         PMGIRequest.__init__(self)
@@ -480,8 +506,10 @@ class IsolineRequest(PMGIRequest):
         # Finally, clean up the return parameters
 
 
-
 class SaturationRequest(PMGIRequest):
+    """
+    This class will handle requests for saturation properties.
+    """
     def __init__(self, args, units=None):
         # Clean initialization
         PMGIRequest.__init__(self)
@@ -597,6 +625,9 @@ class SaturationRequest(PMGIRequest):
 
 
 class InfoRequest(PMGIRequest):
+    """
+    This class will handle generic info requests about pyromat data
+    """
     _valid_unit_strs = ['energy', 'force', 'length', 'mass', 'molar',
                         'pressure', 'temperature', 'time', 'volume']
 
