@@ -86,8 +86,9 @@ class PointModel extends Subject{
 
     DEFAULT_SUB_SHORTLIST=["mp.H2O","mp.C2H2F4","ig.air","ig.O2", "ig.N2"];
     DEFAULT_PROP_SHORTLIST=["T","p","v","e","h","s","x"];
-    DEFAULT_SUBSTANCE = 'mp.H2O'
-    INIT_ID = 1
+    DEFAULT_SUBSTANCE = 'mp.H2O';
+    INIT_PT_ID = 1;
+    INIT_AUX_ID = 1;
 
     constructor() {
         super();
@@ -121,6 +122,7 @@ class PointModel extends Subject{
      * Clear all auxiliary lines stored and get ready to start over
      */
     init_auxlines() {
+        this.aux_id = this.INIT_AUX_ID;
         this.aux_lines = {}
         this.aux_lines['global'] = []
 
@@ -132,7 +134,7 @@ class PointModel extends Subject{
      */
     init_points(){
         this.points = {};
-        this.point_id = this.INIT_ID;
+        this.point_id = this.INIT_PT_ID;
 
         let keys = this.get_output_properties();
         keys.push('ptid');
@@ -324,7 +326,8 @@ class PointModel extends Subject{
         if (!(parent in this.aux_lines)){
             this.aux_lines[parent] = [];
         }
-        let line = {'type': type, 'data': data};
+        let line = {'type': type, 'id': this.aux_id, 'data': data};
+        this.aux_id++;
         this.aux_lines[parent].push(line);
         this.notify(this, PointModel.EVENT_AUXLINE_ADD, line);
     }
@@ -815,13 +818,16 @@ class PlotView{
         $("#xprop").on("change", this.onChangeAxes);
         this.setAxes('s', 'T')
 
+        this.traces = [];
+
         this.init();
     }
 
     init(){
         this.set_layout();
         // Create the plot trace
-        let traces = [{
+        this.traces = [];
+        this.traces.push({
             x: [],
             y: [],
             customdata: [],
@@ -832,7 +838,8 @@ class PlotView{
                 this.y_prop+": %{y}<br>" +
                 "attr: %{customdata: .2f}",
             type: 'scatter'
-        }, {
+        });
+        this.traces.push({
             x: [],
             y: [],
             mode: 'lines',
@@ -844,9 +851,9 @@ class PlotView{
                 color: 'rgb(0, 0, 0)',
                 width: 3
             }
-        }];
+        });
         // Create the plot object
-        Plotly.newPlot(this.container, traces, this.layout);
+        Plotly.newPlot(this.container, this.traces, this.layout);
         this.setupPlotClickListener();
     }
 
@@ -945,9 +952,7 @@ class PlotView{
                 x: [steamdome[this.x_prop]],
                 y: [steamdome[this.y_prop]],
         };
-
         Plotly.restyle(this.container, update, [1]);
-
     }
 
     onChangeAxes(){
@@ -1249,8 +1254,12 @@ function get_auxline(){
         });
     }
 
-
-    //let line = compute_auxline(props );
+    // Compute Auxiliary lines
+    compute_auxline((data)=>{
+        data.data.forEach((line)=>{
+            pointModel.add_auxline('p', line, 'global');
+        });
+    },{"p":0, "default": true});
 }
 
 function add_steamdome(steamdome){
