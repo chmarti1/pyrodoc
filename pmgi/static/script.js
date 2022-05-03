@@ -77,9 +77,12 @@ class PointModel extends Subject{
     // Several event IDs thrown by this
     static EVENT_UNIT = 'unit'; // Data will be get_unit()
     static EVENT_SUBSTANCE = 'substance'; // Data will be get_substance()
-    static EVENT_POINT = 'point' // Data will be get_points()
-    static EVENT_INIT = 'init'; // Data will be null
-    static EVENT_AUXLINE = 'auxline'; // data will be get_auxlines()
+    static EVENT_POINT_ADD = 'point_add' // Data will be the added point
+    static EVENT_POINT_DELETE = 'point_delete' // Data will be id of deleted point
+    static EVENT_INIT_POINTS = 'init_pts'; // Data will be null
+    static EVENT_INIT_AUXLINE = 'init_aux'; // Data will be null
+    static EVENT_AUXLINE_ADD = 'auxline_add'; // data will be the added line
+    static EVENT_AUXLINE_DELETE = 'auxline_del'; // data will be the id of the deleted line
 
     DEFAULT_SUB_SHORTLIST=["mp.H2O","mp.C2H2F4","ig.air","ig.O2", "ig.N2"];
     DEFAULT_PROP_SHORTLIST=["T","p","v","e","h","s","x"];
@@ -88,12 +91,9 @@ class PointModel extends Subject{
 
     constructor() {
         super();
-        // Current list of defined points
-        this.points = []
-        this.point_id = this.INIT_ID;
-
-        this.aux_lines = {}
-        this.aux_lines['global'] = []
+        // Init this.points and this.auxlines
+        this.init_auxlines();
+        this.init_points();
 
         // Current units, and all possible units
         this.units = null;
@@ -112,9 +112,40 @@ class PointModel extends Subject{
      *                             substance id, values are a dict with info
      *                             from PMGI
      */
-    init(valid_units, valid_substances){
+    init_info(valid_units, valid_substances){
         this.valid_units = valid_units;
         this.valid_substances = valid_substances;
+    }
+
+    /**
+     * Clear all auxiliary lines stored and get ready to start over
+     */
+    init_auxlines() {
+        this.aux_lines = {}
+        this.aux_lines['global'] = []
+
+        this.notify(this, PointModel.EVENT_INIT_AUXLINE, null);
+    }
+
+    /**
+     * Clear all points stored and get ready to start over.
+     */
+    init_points(){
+        this.points = {};
+        this.point_id = this.INIT_ID;
+
+        let keys = this.get_output_properties();
+        keys.push('ptid');
+        keys.forEach((key) =>{
+             this.points[key] = [];
+        });
+
+        // Keep the global aux lines (i.e. assume substance constant)
+        let gl = this.aux_lines['global'];
+        this.aux_lines = {};
+        this.aux_lines['global'] = gl;
+
+        this.notify(this, PointModel.EVENT_INIT_POINTS, null);
     }
 
     /**
@@ -124,7 +155,9 @@ class PointModel extends Subject{
      */
     set_units(units){
         this.units = units;
-        this.clearpoints();
+        // Reset everything
+        this.init_auxlines();
+        this.init_points();
         this.notify(this, PointModel.EVENT_UNIT, this.get_units())
     }
 
@@ -137,7 +170,8 @@ class PointModel extends Subject{
             throw new Error("No a valid substance");
         }
         this.substance = substance;
-        this.clearpoints();
+        this.init_auxlines();
+        this.init_points();
         this.notify(this, PointModel.EVENT_SUBSTANCE, this.get_substance())
     }
 
@@ -147,34 +181,11 @@ class PointModel extends Subject{
      *                             values are arrays of legal values
      */
     get_valid_units(){
-        return this.valid_units;
-    }
-
-    /**
-     * Get all valid substance data
-     * @returns valid_substances - dict of valid substances, keys are the
-     *                              substance id, values are a dict with info
-     *                              from PMGI
-     */
-    get_valid_substances(){
-        return this.valid_substances;
-    }
-
-
-    /**
-     * Return the properties possible for the current substance
-     * @returns {*} array of properties represented by strings
-     */
-    get_valid_properties(){
-        return this.valid_substances[this.substance]['props'];
-    }
-
-    /**
-     * Returns the input properties possible for the current substance
-     * @returns {*} array of properties represented by strings
-     */
-    get_input_properties(){
-        return this.valid_substances[this.substance]['inputs'];
+        if (this.valid_units != null) {
+            return this.valid_units;
+        } else {
+            return [];
+        }
     }
 
     /**
@@ -187,13 +198,47 @@ class PointModel extends Subject{
     }
 
     /**
+     * Get all valid substance data
+     * @returns valid_substances - dict of valid substances, keys are the
+     *                              substance id, values are a dict with info
+     *                              from PMGI
+     */
+    get_valid_substances(){
+        return this.valid_substances;
+    }
+
+    /**
+     * Return the properties possible for the current substance
+     * @returns {*} array of properties represented by strings
+     */
+    get_output_properties(){
+        if (this.valid_substances != null && this.substance != null) {
+            let props = [...this.valid_substances[this.substance]['props']]
+            return props;
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * Returns the input properties possible for the current substance
+     * @returns {*} array of properties represented by strings
+     */
+    get_input_properties(){
+        if (this.valid_substances != null && this.substance != null) {
+            return this.valid_substances[this.substance]['inputs'];
+        } else {
+            return [];
+        }
+    }
+
+    /**
      * Returns the current substance set
      * @returns substance - a string with the substance id.
      */
     get_substance(){
         return this.substance;
     }
-
 
     /**
      * Get all currently calculated points
@@ -205,6 +250,7 @@ class PointModel extends Subject{
     get_points(){
         return this.points;
     }
+
 
     /**
      * Get all currently computed aux iso lines
@@ -231,24 +277,20 @@ class PointModel extends Subject{
 
     /**
      * Add a new point to the list
-     * @param point - A dict keyed by property.
+     * @param point - A dict keyed by property. An integer ID will be added to
+     *                  the point for internal tracking.
      */
     add_point(point){
-        // If it's new, the keys might not exist yet, initialize array
-        if (this.points.length === 0){
-            this.points = {};
-            this.points['ptid'] = [this.point_id];
-            for (const key in point) {
-                this.points[key] = [point[key]];
-            }
-        } else {
-            this.points['ptid'].push(this.point_id);
-            for (const key in point) {
-                this.points[key].push(point[key]);
-            }
+        let pt = Object.assign({}, point);  // Copy object
+        pt['ptid'] = this.point_id;  // Append the id to the point
+
+        // Push to the existing array
+        for (const key in pt) {
+            this.points[key].push(pt[key]);
         }
+        // Increment the id and notify
         this.point_id++;
-        this.notify(this, PointModel.EVENT_POINT, this.get_points())
+        this.notify(this, PointModel.EVENT_POINT_ADD, pt);
     }
 
     /**
@@ -256,6 +298,7 @@ class PointModel extends Subject{
      * @param id - the integer id of the point (via 'ptid' property)
      */
     delete_point(id){
+        // Points is a dict keyed by property, with arrays
         let index = this.points['ptid'].indexOf(parseInt(id));
         for (const key in this.points) {
             this.points[key].splice(index, 1);
@@ -264,9 +307,9 @@ class PointModel extends Subject{
 
         // If this was the last point, we want to clear things out.
         if (this.points['ptid'].length == 0){
-            this.clearpoints();
+            this.init_points();
         } else {
-            this.notify(this, PointModel.EVENT_POINT, this.get_points());
+            this.notify(this, PointModel.EVENT_POINT_DELETE, id);
         }
     }
 
@@ -281,8 +324,9 @@ class PointModel extends Subject{
         if (!(parent in this.aux_lines)){
             this.aux_lines[parent] = [];
         }
-        this.aux_lines[parent].push({'type': type, 'data': data});
-        this.notify(this, PointModel.EVENT_AUXLINE, this.get_auxlines());
+        let line = {'type': type, 'data': data};
+        this.aux_lines[parent].push(line);
+        this.notify(this, PointModel.EVENT_AUXLINE_ADD, line);
     }
 
     /**
@@ -290,23 +334,11 @@ class PointModel extends Subject{
      * @param id - the integer id of the parent point (via 'ptid' property)
      */
     delete_auxlines(id){
+        // Make sure we've computed auxlines for this point first
         if (id in this.aux_lines){
             delete this.aux_lines[id];
+            this.notify(this, PointModel.EVENT_AUXLINE_DELETE, id);
         }
-    }
-
-    /**
-     * Clear all points stored and get ready to start over.
-     */
-    clearpoints(){
-        this.points = [];
-        this.point_id = this.INIT_ID;
-
-        let gl = this.aux_lines['global'];
-        this.aux_lines = {};
-        this.aux_lines['global'] = gl;
-
-        this.notify(this, PointModel.EVENT_INIT, null);
     }
 }
 
@@ -326,7 +358,7 @@ class SubstanceFormView{
 
     update(source, event, data){
         if (event == PointModel.EVENT_SUBSTANCE){
-            this.set_value(data);
+            this.set_value(data);  // Set the current value to the model's state
         }
     }
 
@@ -638,7 +670,7 @@ class PropChooserView extends Subject{
     update(source, event, data) {
         if (event == PointModel.EVENT_SUBSTANCE) {
             let disp_props = this.get_checkbox_values();
-            this.init(get_valid_properties(), disp_props);
+            this.init(get_output_properties(), disp_props);
         }
     }
 
@@ -890,15 +922,15 @@ class PlotView{
 
 
     update(source, event, data){
-        if (event == PointModel.EVENT_POINT){
-            this.updatePoints(data);
-        } else if (event == PointModel.EVENT_INIT) {
+        if (event == PointModel.EVENT_POINT_ADD || event == PointModel.EVENT_POINT_DELETE){
+            this.updatePoints(source.get_points());
+        } else if (event == PointModel.EVENT_INIT_POINTS) {
             this.init();
         } else if (event == PropChooserView.EVENT_PROPERTY_VISIBILITY){
             this.dispprops = data;
             this.updatePoints(get_points());
-        } else if (event == PointModel.EVENT_AUXLINE) {
-            this.draw_auxlines(data);
+        } else if (event == PointModel.EVENT_AUXLINE_ADD) {
+            this.draw_auxlines(source.get_auxlines());
         }
     }
 
@@ -1001,7 +1033,6 @@ class TableView{
             this.dispprops.unshift("ptid");// ptid should be in the table but not the prop list
         }
 
-        // Can only init the table the very first time
         if (this.table == null){
             let $tablediv = $(this.target);
             $tablediv.empty();
@@ -1045,10 +1076,10 @@ class TableView{
     }
 
     update(source, event, data){
-        if (event == PointModel.EVENT_POINT){
-            this.updatePoints(data);
-        } else if (event == PointModel.EVENT_INIT) {
-            this.init(get_valid_properties());
+        if (event == PointModel.EVENT_POINT_ADD || event == PointModel.EVENT_POINT_DELETE){
+            this.updatePoints(source.get_points());
+        } else if (event == PointModel.EVENT_INIT_POINTS) {
+            this.init(get_output_properties());
         } else if (event == PropChooserView.EVENT_PROPERTY_VISIBILITY) {
             this.columnVisibility(data);
         }
@@ -1133,7 +1164,7 @@ $(document).ready(function(){
     // getInfo is an async request, so use the callback to complete setup.
     getInfo((data)=>{
         // Get the general info data, assign to model
-        pointModel.init(data.valid_units, data.substances);
+        pointModel.init_info(data.valid_units, data.substances);
         set_units(data.units);
         set_substance(pointModel.DEFAULT_SUBSTANCE);
 
@@ -1150,10 +1181,10 @@ $(document).ready(function(){
         propChooserView.addListener(plotView);
 
         // Call inits on views now that the properties exist
-        tableView.init(get_valid_properties());
+        tableView.init(get_output_properties());
         unitFormView.init(get_valid_units(), get_units());
         substanceFormView.init(get_valid_substances(), get_substance(), get_display_substances());
-        propChooserView.init(get_valid_properties(), pointModel.DEFAULT_PROP_SHORTLIST);
+        propChooserView.init(get_output_properties(), pointModel.DEFAULT_PROP_SHORTLIST);
         propEntryView.init(get_input_properties());
     });
 });
@@ -1161,9 +1192,9 @@ $(document).ready(function(){
 
 // Passthrough controller functions that get/set on behalf of the model
 
-function get_valid_properties(){
+function get_output_properties(){
     // TODO - consider where this belongs
-    return pointModel.get_valid_properties();
+    return pointModel.get_output_properties();
 }
 
 function get_input_properties(){
@@ -1233,6 +1264,9 @@ function get_units(){
 
 function set_units(units){
     pointModel.set_units(units);
+    if (get_substance() != null){
+        compute_auxline();
+    }
 }
 
 // *********************************************
