@@ -628,8 +628,7 @@ class InfoRequest(PMGIRequest):
     """
     This class will handle generic info requests about pyromat data
     """
-    _valid_unit_strs = ['energy', 'force', 'length', 'mass', 'molar',
-                        'pressure', 'temperature', 'time', 'volume']
+    _valid_unit_strs = ['energy', 'pressure', 'temperature', 'matter', 'volume']
 
     def __init__(self):
         # Clean initialization
@@ -707,12 +706,22 @@ class InfoRequest(PMGIRequest):
             units = InfoRequest._valid_unit_strs
 
         if type(units) is str:
-            unitfun = getattr(pm.units, units)
-            out = list(unitfun.get())
+            if units == 'matter':
+                mass = list(pm.units.mass.get())
+                molar = list(pm.units.molar.get())
+                out = mass + molar
+            else:
+                unitfun = getattr(pm.units, units)
+                out = list(unitfun.get())
         else:
             for unit in units:
-                unitfun = getattr(pm.units, unit)
-                out[unit] = list(unitfun.get())
+                if unit == 'matter':
+                    mass = list(pm.units.mass.get())
+                    molar = list(pm.units.molar.get())
+                    out[unit] = mass + molar
+                else:
+                    unitfun = getattr(pm.units, unit)
+                    out[unit] = list(unitfun.get())
         return out
 
 

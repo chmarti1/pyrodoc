@@ -167,7 +167,7 @@ class PointModel extends Subject{
      */
     set_substance(substance){
         if (!substance in this.valid_substances){
-            throw new Error("No a valid substance");
+            throw new Error("Not a valid substance");
         }
         this.substance = substance;
         this.init_auxlines();
@@ -1231,12 +1231,12 @@ function get_auxlines(){
 
 function set_substance(newsubstance){
     pointModel.set_substance(newsubstance);
-    compute_auxline();
+    get_auxline();
 }
 
-function compute_auxline(){
+function get_auxline(){
     if (get_substance().startsWith('mp')){
-        compute_steamdome((data)=>{
+        compute_auxline((data)=>{
             let sll = data.data['liquid'];
             let svl = data.data['vapor'];
             // concatenate vapor to liquid
@@ -1248,6 +1248,9 @@ function compute_auxline(){
             add_steamdome(sll);
         });
     }
+
+
+    //let line = compute_auxline(props );
 }
 
 function add_steamdome(steamdome){
@@ -1265,7 +1268,7 @@ function get_units(){
 function set_units(units){
     pointModel.set_units(units);
     if (get_substance() != null){
-        compute_auxline();
+        get_auxline();
     }
 }
 
@@ -1308,8 +1311,13 @@ function compute_point(props, mode="POST"){
  * @param props - Dict with keys of property and numeric values
  * @param mode - GET/POST. Only POST can handle units with the request
  */
-function compute_steamdome(callback, props={}, mode="POST"){
-    let requestroute = "/saturation";
+function compute_auxline(callback, props={}, mode="POST"){
+    let requestroute = "";
+    if (Object.keys(props).length == 0) {
+        requestroute = "/saturation";
+    } else {
+        requestroute = "/isoline"
+    }
 
     // Add the substance ID to props always
     props['id'] = get_substance();
