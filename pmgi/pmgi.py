@@ -100,6 +100,13 @@ def get_default_lines(subst, prop):
     elif prop == 'T':
         Teps = (Tmax - Tmin) / 1000
         vals = np.linspace(Tmin + Teps, Tmax - Teps, 10)
+    elif prop == 's':
+        Teps = (Tmax - Tmin) / 1000
+        peps = (pmax - pmin) / 1e6
+        smin = subst.s(T=Tmin+Teps, p=pmin+peps)
+        smax = subst.s(T=Tmax-Teps, p=pmin+peps)
+        seps = (smin - smax) / 100
+        vals = np.linspace(smin + seps, smax - seps, 10)
     else:
         raise pm.utility.PMParamError(f'Default Lines Undefined for {prop}.')
 
@@ -145,6 +152,7 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
 
     if multiphase:
         Tc, pc = subst.critical()
+        Tt, pt = subst.triple()
         # crit = subst.state(T=Tc, p=pc)
         pmin, pmax = subst.plim()
         Tmin, Tmax = subst.Tlim()
@@ -170,7 +178,7 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
         line_T = np.linspace(Tmin + Teps, Tmax - Teps, n)
 
         # We can insert the phase change points
-        if 'p' in kwargs and kwargs['p'] < pc:
+        if 'p' in kwargs and kwargs['p'] < pc and kwargs['p'] > pt:
             Tsat = subst.Ts(p=kwargs['p'])
             i_insert = np.argmax(line_T > Tsat)
 

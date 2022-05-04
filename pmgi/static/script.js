@@ -833,10 +833,10 @@ class PlotView{
             customdata: [],
             mode: 'markers',
             name: "User Points",
-            hovertemplate: "<b> Point prop<br>"+
+            hovertemplate: "<b> Point prop</b><br>"+
                 this.x_prop+": %{x}<br>" +
                 this.y_prop+": %{y}<br>" +
-                "attr: %{customdata: .2f}",
+                "attr: %{customdata}",
             type: 'scatter'
         });
         this.traces.push({
@@ -852,6 +852,34 @@ class PlotView{
                 width: 3
             }
         });
+        this.traces.push({
+            x: [],
+            y: [],
+            mode: 'lines',
+            type: 'scatter',
+            name: 'isolines p',
+            hovertemplate: "<b> Isobar<br></b>"+
+                "p: %{customdata}",
+            showlegend: false,
+            line: {
+                color: 'rgb(0, 100, 0)',
+                width: 1
+            }
+        });
+        this.traces.push({
+            x: [],
+            y: [],
+            mode: 'lines',
+            type: 'scatter',
+            name: 'isolines s',
+            hovertemplate: "<b> Iso-s line<br></b>"+
+                "s: %{customdata}",
+            showlegend: false,
+            line: {
+                color: 'rgb(0, 0, 100)',
+                width: 1
+            }
+        });
         // Create the plot object
         Plotly.newPlot(this.container, this.traces, this.layout);
         this.setupPlotClickListener();
@@ -863,7 +891,7 @@ class PlotView{
     set_layout(){
         let x_scale;
         let y_scale;
-        if (this.x_prop == 'v'){
+        if (this.x_prop == 'v' || this.x_prop == 'p'){
             x_scale = 'log';
         } else {
             x_scale = 'linear';
@@ -876,10 +904,12 @@ class PlotView{
 
         this.layout = {
             xaxis: {
+                title: this.x_prop,
                 type: x_scale,
                 autorange: true
             },
             yaxis: {
+                title: this.y_prop,
                 type: y_scale,
                 autorange: true
             },
@@ -943,16 +973,58 @@ class PlotView{
 
     draw_auxlines(data){
         let steamdome = null;
+        let isobars = null;
+        let isos = null;
         data['global'].forEach((line)=>{
            if (line['type'] == 'steamdome'){
                steamdome = line['data'];
+           } else if (line['type'] == 'p'){
+               if (isobars == null){
+                   isobars = {};
+                   Object.keys(line['data']).forEach((key)=>{
+                            isobars[key] = [];
+                   });
+               }
+               Object.keys(line['data']).forEach((key)=>{
+                            isobars[key] = isobars[key].concat(line['data'][key]);
+                            isobars[key].push(null);
+               });
+           } else if (line['type'] == 's'){
+               if (isos == null){
+                   isos = {};
+                   Object.keys(line['data']).forEach((key)=>{
+                            isos[key] = [];
+                   });
+               }
+               Object.keys(line['data']).forEach((key)=>{
+                            isos[key] = isos[key].concat(line['data'][key]);
+                            isos[key].push(null);
+               });
            }
         });
-        let update = {
+        if (steamdome != null) {
+            let update = {
                 x: [steamdome[this.x_prop]],
                 y: [steamdome[this.y_prop]],
-        };
-        Plotly.restyle(this.container, update, [1]);
+            };
+            Plotly.restyle(this.container, update, [1]);
+        }
+        if (isobars != null) {
+            let update_p = {
+                x: [isobars[this.x_prop]],
+                y: [isobars[this.y_prop]],
+                customdata: [isobars['p']]
+            };
+            Plotly.restyle(this.container, update_p, [2]);
+        }
+        if (isos != null) {
+            let update_s = {
+                x: [isos[this.x_prop]],
+                y: [isos[this.y_prop]],
+                customdata: [isos['s']]
+            };
+            Plotly.restyle(this.container, update_s, [3]);
+        }
     }
 
     onChangeAxes(){
@@ -1009,7 +1081,7 @@ class PlotView{
                 x: [points[this.x_prop]],
                 y: [points[this.y_prop]],
                 customdata: [customdataset],
-                hovertemplate: "<b> Point %{customdata[0]}<br>" +
+                hovertemplate: "<b> Point %{customdata[0]}</b><br>" +
                     this.x_prop + ": %{x}<br>" +
                     this.y_prop + ": %{y}<br>" +
                     customrows,
@@ -1260,6 +1332,13 @@ function get_auxline(){
             pointModel.add_auxline('p', line, 'global');
         });
     },{"p":0, "default": true});
+
+        // Compute Auxiliary lines
+    compute_auxline((data)=>{
+        data.data.forEach((line)=>{
+            pointModel.add_auxline('s', line, 'global');
+        });
+    },{"s":0, "default": true});
 }
 
 function add_steamdome(steamdome){
