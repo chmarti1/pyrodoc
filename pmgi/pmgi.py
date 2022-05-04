@@ -103,7 +103,15 @@ def get_default_lines(subst, prop):
     elif prop == 's':
         Teps = (Tmax - Tmin) / 1000
         peps = (pmax - pmin) / 1e6
-        smin = subst.s(T=Tmin+Teps, p=pmin+peps)
+        smin_a = subst.s(T=Tmin+Teps, p=pmin+peps)
+        try:
+            smin_b = subst.s(T=Tmin+Teps, p=pmax-peps)
+        except pm.utility.PMParamError:
+            if multiphase:
+                smin_b = subst.ss(T=Tmin+Teps)[0]
+            else:
+                smin_b = smin_a
+        smin = min(smin_a, smin_b)
         smax = subst.s(T=Tmax-Teps, p=pmin+peps)
         seps = (smin - smax) / 100
         vals = np.linspace(smin + seps, smax - seps, 10)
