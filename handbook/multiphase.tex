@@ -1,8 +1,12 @@
 \chapter{Multi-phase substance models}\label{ch:mp}
 
-Unlike ideal gas properties, it is sensible to formulate multi-phase properties in terms of temperature and density instead of temperature and pressure.  
+Unlike ideal gas properties, it is sensible to formulate multi-phase properties in terms of temperature and density instead of temperature and pressure.  Modeling phase changes with temperature and pressure as independent variables requires a discontinuity at the phase change.  On the other hand, using density requires no such discontinuity, and it even permits modeling meta-stable states.
 
-Modeling phase changes with temperature and pressure as independent variables requires a discontinuity at the phase change.  On the other hand, using density requires no such discontinuity.  Using $T,\rho$ also opens the possibility of extending the model to govern meta-stable states, which would require two values from a single $T,p$ pair.  Finally, in the molecular view of substances, density and temperature are descriptive of a fluid's local properties, while pressure is somewhat more contrived.
+Historically, there have been countless approaches to the problem, beginning with the so-called ``viral'' terms inspired by Van der Waals forces in early work on the kinetic theory of gases.  This approach began an evolution of increasingly complex variants of the ideal gas law, but parallel models for the specific heat are needed to establish a total substance model.  Eventually, this approach fell out of popularity in favor of single property models from which all other properties could be derived.  
+
+If these general models have some basis in physics, these approaches have often been argued to be superior because they make it possible to derive properties that are not so easily measured.  For example, the specific heat or the speed of sound may be quite practical to measure precisely in a laboratory, and a substance model that reliably predicts them throughout the thermodynamic domain may also provide good predictions for a quantity that is harder to measure, like the precise location of the critical point.
+
+It is possible that future releases of \PM\ may include other formulations, but the wide availability of works providing coefficients for more contemporary methods has made it practical to use a single multi-phase class to model pure substances.  There are works extending these models to mixtures like air, but those are not yet implemented.
 
 \section{General formulation for \texttt{mp1}}\label{sec:mp:mp1}
 
@@ -13,7 +17,9 @@ a(T,\rho) &\equiv e(T,\rho) - T s(T,\rho)\\
 \end{align}
 By constructing the formulation from a bank of terms inspired by theoretical formulae for the intermolecular forces, there is greater hope of reducing the number of terms needed. 
 
-The formulation that we describe in this chapter is sometimes referred to as a ``Span and Wagner'' fit for Helmholtz free energy.  An expansive body of papers by Span, Wagner, Lemon, Jacobsen, and others provides a library of formulations for substances that use a standard bank of terms to construct the free energy equation.
+The formulation that we describe in this chapter is sometimes referred to as a ``Span and Wagner'' fit for Helmholtz free energy.  Though some version of the approach had already been applied successfully to specific substances years earlier, the need for a general form that a code could apply generically to many substances prompted Span and Wagner's three-part 2003 paper defending its broad use for thermodynamic properties of fluids \cite{span:2003:1, span:2003:2, span:2003:3}.  An expanding body of papers by Span, Wagner, Lemon, Jacobsen, and others a library of formulations for substances that use a standard bank of terms to construct the free energy equation.
+
+In its independent implementation of this model, \PM\ is a modest open-source Pythonic alternative to REFPROP \cite{refprop}, the NIST code widely adopted for implementing these general forms.
 
 \subsection{Nondimensionalization}
 
@@ -91,9 +97,9 @@ Note that this analysis does not require that values of $k$ be limited to intege
 Collectively, these integrals motivate the form that is now commonplace in contemporary free-energy-based models,
 \begin{subequations}
 \begin{align}
-\alpha^o(\tau,\delta) = \ln \delta + (c_0 + c_1\tau) \ln \tau + \alpha^o_0(\tau) + \alpha^o_1(\tau),\label{eqn:mp1:ao}.
+\alpha^o(\tau,\delta) = \ln \delta + (c_0 - 1 + c_1\tau) \ln \tau + \alpha^o_0(\tau) + \alpha^o_1(\tau)\label{eqn:mp1:ao}.
 \end{align}
-In many models, the $\tau \ln \tau$ term is omitted, implying that there was no linear term on $\tau$ (proportional to $1/T$) in the formulation of specific heat, but permitting it in the \verb|mp1| model makes it highly extensible.  The remaining terms are a polynomial on $\tau$, $\alpha^o_0$, and the quantum terms, $\alpha^o_1$. which are only functions of temperature.  The $\alpha^o_1$ term includes a sum of all of the quantum functions,
+In many models, the $\tau \ln \tau$ term is omitted, implying that there was no linear term on $\tau$ (proportional to $1/T$) in the formulation of specific heat.  This is often seen in models that model specific heat with a constant and a series of quantum terms with no polynomial terms.  The remaining terms are a polynomial on $\tau$, $\alpha^o_0$, and the quantum terms, $\alpha^o_1$. which are only functions of temperature.  The $\alpha^o_1$ term includes a sum of all of the quantum functions,
 \begin{align}
 \alpha^o_1(\tau) = \sum_j b_j \ln\left(1 - \exp( -m_j \tau ) \right)\label{eqn:mp1:ao:q},
 \end{align}
@@ -114,7 +120,7 @@ In the data files, the ideal gas terms are contained in a dictionary called the 
     "logt" : <c0>,
     "tlogt" : <c1>,
     "coef0" : <p coefficients>,
-    "coef1" : [[<b0>, <m0>], [<b1>, <m1>], <...>]
+    "coef1" : [[<m0>, <b0>], [<m1>, <b1>], <...>]
 }
 \end{lstlisting}
 
@@ -128,14 +134,14 @@ Many of these terms are physically motivated, but that discussion is not include
 
 The first group of terms is a series of polynomials multiplied by exponentials of powers of density,
 \begin{align}
-\alpha^r_0 &= \sum_{k=0}^K \exp\left(-\delta^k\right) p_k(\tau, \delta)\\
-& p_k = \sum_i c_i \tau^a_i \delta^b_i.
+\alpha^r_0 &= p_0(\tau, \delta) + \sum_{k=1}^K \exp\left(-\delta^k\right) p_k(\tau, \delta)\\
+& p_k = \sum_i c_i \tau^{a_i} \delta^{b_i}.
 \end{align}
-When $k=0$ the exponential term is constant and may alternately be absorbed into the corresponding polynomial, $_0$.  The polynomials rarely (if ever) have terms where the $\delta$ exponent, $b$, is zero, so $\alpha^r_0$ terms where $k\ne 0$ tend to vanish near $\delta \rightarrow 0$ and $\delta \rightarrow \infty$.  These terms model the complicated behaviors that occur near the phase change (when $\delta$ is on the order 1).
+The polynomials rarely (if ever) have terms where the $\delta$ exponent, $b$, is zero, so $\alpha^r_0$ terms where $k\ne 0$ tend to vanish near $\delta \rightarrow 0$ and $\delta \rightarrow \infty$.  These terms model the complicated behaviors that occur near the phase change (when $\delta$ is on the order 1).
 
-The first group ($\alpha^r_0$) usually constitutes the largest number of terms (often dozens).  The exponents in the polynomial expansion are usually integers, but they are occasionally rationals, which permits efficient numerical evaluation.  Many models do not include the terms in $\alpha^r_1$ or $\alpha^r_2$, and most that do will only permit a few of them.
+In most models, the first group ($\alpha^r_0$) constitutes the largest number of terms (often dozens).  The exponents in the polynomial expansion are usually integers, but they are occasionally rationals, which permits efficient numerical evaluation.  While many authors include several terms in the $\alpha^r_1$ group, terms from $\alpha^r_2$ are comparatively rare, and the few models that use them only use a few terms at most.  
 
-The second and third groups are Gaussian functions multiplied by powers of $\tau$, $\delta$, or function, $\Delta$.  The second group, $\alpha^r_1$, centers the Gaussian function around temperature and density, $\gamma$ and $\epsilon$.  These are usually set near the critical point.  The third group, $\alpha^r_2$, is a gaussian centered on exactly the critical point, but the $\Delta$ function is a scaled distance from the critical point.
+The second and third groups are Gaussian functions multiplied by powers of $\tau$, $\delta$, or the function, $\Delta$.  The second group, $\alpha^r_1$, centers the Gaussian function around temperature and density, $\gamma$ and $\epsilon$.  These are often set near the critical point to help deal with the sharp distortion of the thermodynamic surface there.  The third group, $\alpha^r_2$, is a Gaussian centered on exactly the critical point, but the coefficient, $\Delta$, is a scaled distance from the critical point.
 \begin{align}
 \alpha^r_1 &= \sum_{l=0}^L c_l \delta^{d_l} \tau^{t_l} \exp\left( -a_l(\delta-\epsilon_l)^2 - b_l(\tau-\gamma_l)^2 \right)\\
 \alpha^r_2 &= \sum_{m=0}^M c_m \Delta_m{^{b_m}} \delta \exp\left(-C_m(\delta-1)^2 - D_m(\tau-1)^2 \right)\\
@@ -180,12 +186,35 @@ For more information on polynomial coefficients, see Section \ref{sec:num:poly2}
              
 \end{lstlisting}
 
+\subsection{Derivatives of free energy}
+
+As we will address in the next section, it is also important to evaluate up to the second derivative of these terms.  This is sufficiently cumbersome to deserve some treatment here.  The efficient evaluation of derivatives of polynomials is addressed in Section \ref{sec:num:poly2}, so we only need to treat the other aspects of these functional forms.
+
+The ideal gas portion in (\ref{eqn:mp1:ao}) has derivatives
+\begin{subequations}
+\begin{align}
+\alpha^o_\tau &= (c_0-1)\tau^{-1} + c_1 (1 + \ln \tau) + \alpha^o_{0,\tau} + \alpha^o_{1,\tau}\\
+\alpha^o_\delta &= \delta^{-1}\\
+\alpha^o_{\tau\tau} &= -(c_0-1)\tau^{-2} + c_1 \tau^{-1} + \alpha^o_{0,\tau\tau} + \alpha^o_{1,\tau\tau}\\
+\alpha^o_{\tau\delta} &= 0\\
+\alpha^o_{\delta\delta} &= -\delta^{-2}
+\end{align}
+\end{subequations}
+The polynomial, $\alpha^o_0(\tau)$, and its derivatives can be evaluated separately.  All that remains is to determine the derivatives of $\alpha^o_1(\tau)$.
+
+\begin{subequations}
+\begin{align}
+\alpha^o_{1,\tau} &= \sum_j \frac{b_j m_j}{\exp(m_j \tau) - 1}\\
+\alpha^o_{1,\tau\tau} &= \sum_j \frac{b_j m_j^2 \exp(m_j \tau)}{(\exp(m_j \tau) - 1)^{2}}
+\end{align}
+\end{subequations}
+
+Derivatives of the residual portion in (\ref{eqn:mp1:ar}) can be calculated individually.
+
 
 \section{Calculation of properties}\label{sec:mp1:properties}
 
 The \texttt{mp1} class calculates all substance properties from temperature, density, $\alpha$, and its derivatives.  In this section, the formulae that are used to calculate the various properties are developed from first principles.
-
-Validating a code to efficiently and reliably calculate derivatives of the above functinos is a substantial task.  Some discussion is afforded the problem of evaluating polynomials in Section \ref{sec:num:poly2}, but term-by-term details for how this is done in the \texttt{mp1} class is beyond the scope of this document.  For readers concerned with this question, in-line comments in the original code are intended to be instructional.
 
 In this development, it will be useful to have this form of the first law:
 \begin{align}
@@ -357,3 +386,15 @@ In data, there are three groups that are used to define the saturation pressure 
 \end{lstlisting}
 
 The \texttt{fn} parameter is an index (0-3) that selects the form of the formula to use.  The \texttt{pscale} and \texttt{dscale} parameters are used to re-scale the dimensionless property calculated by the selected formula.  The \texttt{Tscale} parameter is used to normalize temperature to calculate $\theta$.  Finally, \texttt{coef} is a polynomial coefficient list described in Section \ref{sec:num:poly1}.
+
+\subsection{Sources implemented}
+As of version 2.2.0, \PM\ implements 
+
+\begin{table}
+\centering
+\begin{tabular}{|ccc|}
+\hline
+
+\hline
+\end{tabular}
+\end{table}

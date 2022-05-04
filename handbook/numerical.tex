@@ -43,7 +43,7 @@ p(x,y) &= 2x^{-2} + x^{0.1}y + xy^2.\nonumber\\
 X &= x^{0.1}\nonumber\\
 p(x,y) &= x^{-2}\left(2 + X^{21}y + X^{40}y^2 \right)\nonumber
 \end{align}
-Using scaling values $a = 0.1$ and $\alpha = -20$, the polynomial can be adjusted to be evaluated with only integer exponents.  
+Using scaling values $a = 0.1$ and $\alpha = -2$, the polynomial can be adjusted to be evaluated with only integer exponents.  
 
 However, this also illustrates a potential problem in the approach.  For individual elements a call to Numpy's \texttt{power} funciton costs about double a single multiplication, but for larger arrays (when the difference is most important) the difference diverges.  Figure \ref{fig:benchmark} shows a timing study of \texttt{power}, \texttt{*}, and \text{**} operations on arrays of random positive floating point numbers.  For small arrays, the interpreter's overhead dominates the measurement, but above 100 elements, the two adopt classical power curves.
 \begin{figure}
@@ -98,7 +98,7 @@ The widely accepted method for evaluating a polynomial of one variable is to con
 \begin{align}
 q(y) = c_0 + y ( c_1 + y ( c_2 + y ( \ldots
 \end{align}
-If there are $n$ coefficients, then this amounts to only $n$ multiplications with no \verb|pow| calls.  In order to extend this algorithm to two variables, more elegant notation will be helpful.  If we name the intermediate value calculated in the process of these recursions $q$, then a polynomial with $n$ terms implies the series
+If there are $n$ coefficients, then this amounts to only $n$ multiplications with no \verb|pow| calls.  In order to extend this algorithm to two variables, more elegant notation will be helpful.  If we name the intermediate value calculated in the process of these recursions $q_j$, then a polynomial with $n$ terms implies the series
 \begin{align}
 q_n &= c_n\\
 q_j(y) &= c_j + y\,q_{j+1}(y)\\
@@ -106,7 +106,7 @@ q_0(y) &= q(y).
 \end{align}
 This is a series beginning with $j=n$ and proceeding backwards to $j=0$.  The final function in the series, $q_0$ is also the desired polynomial, $q(y)$.  In practice, there is no need to keep the old values of $q$, so a single register may be used to hold the latest value.
 
-How can this be extended to a polynomial of two variables?  We may consider the polynomials to be nested; the evaluation of a polynomial on $Y$ determines the individual coefficients for a polynomial on $X$.
+How can this be extended to a polynomial of two variables?  We may consider the polynomials to be nested; the evaluation of a polynomial on $y$ determines the individual coefficients for a polynomial on $x$.
 \begin{align}
 p(x,y) &= \sum_i q_i(y) x^i\\
 q_i(y) &= \sum_j c_{i,j} y^j

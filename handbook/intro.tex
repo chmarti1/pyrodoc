@@ -65,36 +65,11 @@ V & \verb|unit_volume| & m$^3$ & Volume\\
 \end{tabular}
 \end{table}
 
-\subsection{Primary Properties}\label{sec:intro:primary}
-
-The theory of thermodynamics can make equal use of any set of properties to discover the others, but it is almost always prudent to define a pair or more of core properties that are standard for defining the thermodynamic state.  After version 2.2.0, \PM\ has been quite flexible in how it allows users to specify the thermodynamic state, but computational mysteries are likely to plague those users who do not have some appreciation for what is going on in the background.  Some approaches produce more floating point error and are noticeably slower than others.  Why?
-
-Every thermodynamic model supported by \PM\ provides a means for calculating the substance's many properties in terms of temperature and/or density.  For example, an ideal gas model allows entropy (see sec. \ref{sec:ig:hs}) to be calculated explicitly in terms of temperature and pressure.  While this theoretically provides a means for calculating temperature from entropy and pressure, $T(s,p)$, there is not guaranteed to be any such explicit relationship - in fact, in general, there is not.  That means that specifying a state in this way is theoretically sound, but it requires a computationally expensive numerical iteration routine to invert $s(T,p)$.  Chapter \ref{ch:num} discusses this process in some detail.
-
-The \emph{primary properties} for a thermodynamic model are the two that are used in the back-end to do the most basic thermodynamic state calculations.  The performance will always be best if users can write their code to use these properties when they are available.  Table \ref{tab:primary} lists the current \PM\ substance classes and their primary properties.
-
-For most problems of engineering relevance, temperature and pressure $(T,p)$ are the favorite since both are readily measured, and both are of immediate importance to fluid machinery design.  Fortunately, all of the common properties of ideal gases can be conveniently constructed directly from these two properties.  Unfortunately, that is not the case with non-ideal fluids.
-
-It is intuitive that when gases are compressed into tighter spaces, the distance between the molecules becomes a vitally important parameter for predicting the substance's properties.  Pressure is not a convenient metric of that distance, but density is.  For this reason, nearly all non-ideal gas properties are modeled in terms of $(T,\rho)$, and pressure has to be calculated indirectly.  This creates a substantial amount of work for the design engineer who may not wish to delve into the details of how properties are calculated.
-
-\begin{table}
-\centering
-\caption{The \PM\ substance classes and their primary property pairs}\label{tab:primary}
-\begin{tabular}{|lcc|}
-\hline
-Desription & Class & Prim.\\
-\hline
-Shomate Eqn. & \verb|ig| & $(T,p)$\\
-NASA poly. & \verb|ig2| & $(T,p)$\\
-IG mixture & \verb|igmix| & $(T,p)$\\
-Span \& Wagner & \verb|mp1| & $(T,\rho)$\\
-\hline
-\end{tabular}
-\end{table}
-
 \subsection{Basic Properties}\label{sec:intro:basic}
 
-Though the most efficient means for specifying a thermodynamic state will always be in the primary property pair for whatever substance is being used, the entire point of using a package like \PM\ is to handle this kind of computational meta-awareness automatically.  To that end, it is also useful to think in terms of \emph{basic properties}:
+The theory of thermodynamics can make equal use of any pair of properties to discover the others, and as of version 2.2.0, \PM\ is quite flexible about which two are used.  While this kind of convenience is part of the purpose of a high-level software tool, users may notice that some combinations are faster than others, and some produce more numerical inaccuracies than others.
+
+In general, users will see the best performance when other properties are calculated in terms of the \emph{basic properties}:
 \begin{itemize}
 \item temperature, $T$,
 \item pressure, $p$,
@@ -112,6 +87,33 @@ Other properties, like
 \end{itemize}
 can also be used to specify the thermodynamic state, but the user should be aware of their limitations.  These may only be given one-at-a-time (i.e. they must be paired with a basic property), and specifying them forces \PM\ to use a slower back-end algorithm with inherent numerical precision limitations.  For example, as of version 2.2.0, specifying entropy and enthalpy together is not supported by any of the property methods.  
 
+\subsection{Primary Properties}\label{sec:intro:primary}
+
+Every thermodynamic model supported by \PM\ is formulated to calculate the substance's many properties in terms of temperature and one other property.  For ideal gases, it is temperature and pressure, and for multi-phase substances it is temperature and density.  The properties that are used in the back-end to calculate the others are called the \emph{primary properties} for each model.  \PM\ is designed so that users do not need to be aware of this distinction unless they are concerned with speed or extreme numerical precision.
+
+For example, an ideal gas model allows entropy (see sec. \ref{sec:ig:hs}) to be calculated from a polynomial in terms of temperature and pressure.  While this theoretically provides a means for calculating temperature from entropy and pressure, $T(s,p)$, the entropy polynomial is far too complex to be inverted explicitly, and defining a separate polynomial for every combination of properties is impractical.  That means that calculating temperature from entropy and pressure is theoretically sound, but it requires a (relatively) computationally expensive numerical iteration routine - $s(T,p)$ is evaluated repeatedly until a value of $T$ can be found that produces a value ``close enough'' to the desired value of $s$.  Chapter \ref{ch:num} discusses this process in some detail.
+
+Each class is designed around its own primary properties, and the performance will always be best if users can write their code to use these properties when they are available.  Table \ref{tab:primary} lists the current \PM\ substance classes and their primary properties.
+
+For most problems of engineering relevance, temperature and pressure $(T,p)$ are the favorite since both are readily measured, and both are of immediate importance to fluid machinery design.  Fortunately, all of the common properties of ideal gases can be conveniently constructed directly from these two properties.  Unfortunately, that is not the case with real fluids.
+
+It is intuitive that when gases are compressed into tighter spaces, the distance between the molecules becomes a vitally important parameter for predicting the substance's properties.  Pressure is not a convenient metric of that distance, but density is.  For this reason, nearly all non-ideal gas properties are modeled in terms of $(T,\rho)$, and pressure has to be calculated indirectly. 
+
+\begin{table}
+\centering
+\caption{The \PM\ substance classes and their primary property pairs}\label{tab:primary}
+\begin{tabular}{|lcc|}
+\hline
+Desription & Class & Prim.\\
+\hline
+Shomate Eqn. & \verb|ig| & $(T,p)$\\
+NASA poly. & \verb|ig2| & $(T,p)$\\
+IG mixture & \verb|igmix| & $(T,p)$\\
+Span \& Wagner & \verb|mp1| & $(T,\rho)$\\
+\hline
+\end{tabular}
+\end{table}
+
 \subsection{Density, $\rho$}
 
 It is convenient to begin our discussion of properties with density since it is the easiest to define.
@@ -120,7 +122,7 @@ Density is the quantity of a substance per unit volume it occupies in space.  It
 
 When the unit volume is very tiny, this is a poorly defined quantity.  For example, as the volume shrinks to be about the same size as the distance between molecules, the density one might measure would vary hugely as individual molecules entered and left the region of space.  However, as the volume grows within a thermodynamically homogeneous region, the ratio of matter to volume converges to a consistent well-defined value.
 
-This introduces the idea that the study of thermodynamics is essentially a careful study of averages over a large population of mechanical bodies.  It is important that we study a quantity of a substance large enough that the extremes of individual molecules do not weigh heavily in our measurements.  On the other hand, our measurements must consider a region of space small enough that the properties that interest us do not vary significantly.  We may consider a region to be thermodynamically homogeneous if it can be divided into two equal smaller regions that exhibit identical thermodynamic properties.
+This introduces the idea that the study of thermodynamics is essentially a careful study of averages over a large population of mechanical bodies.  It is important that we study a quantity of a substance large enough that the quasi-random motions of individual molecules do not weigh heavily in our measurements.  On the other hand, our measurements must consider a region of space small enough that the properties do not vary significantly.  We may consider a region to be thermodynamically homogeneous if any two of its halves exhibit identical thermodynamic properties.
 
 The density of the gas in molecules per unit volume is
 \begin{align}
@@ -128,7 +130,7 @@ n = \frac{N}{V}.
 \end{align}
 where $V$ is the volume of the region, and $N$ is the number of molecules.  These numbers are extremely large, and early in the history of chemistry, there was no way to know the true number of molecules in a sample anyway.  So, the use of molar quantities was of great utility.
 
-The density, in molar units, is a slight variation on $n$,
+The density in molar units is a slight variation on $n$,
 \begin{align}
 \overline{\rho} = \frac{N}{N_a V} = \frac{\overline{N}}{V},
 \end{align}
@@ -149,9 +151,9 @@ Specific volume is the volume occupied by a unit of matter, and is calculated as
 \begin{align}
 v \equiv \frac{1}{\rho}.
 \end{align}
-Even though density is the property with the clearer fundamental definition, specific volume is mathematically identical to other intensive properties because it is formulated per unit matter.
+Density is the property with the clearer fundamental definition.  After all, how much space can be said to be occupied by a gas molecule?  Formulations that address the average distance between molecules essentially reduce to defining specific volume as the inverse of density.
 
-\PM\ does not calculate specific volume directly, but deals in density instead.  The user is called on to calculate \verb|v=1/d| when specific volume is needed.
+However, specific volume is mathematically identical to other intensive properties because it expresses the quantity of interest (volume) per unit matter.  That makes it extremely convenient for a number of thermodynamic calculations.
 
 \subsection{Temperature, $T$}
 
@@ -165,7 +167,9 @@ For a gas,
 \end{align}
 Here, $m$ is the mass of an individual molecule, $\langle u^2 \rangle$ is the mean square of velocity, $k$ is the Boltzmann constant, and $T$ is the temperature in absolute units.
 
-The ITS-90 temperature scale establishes an international standard for the definition of temperature in terms of the triple points of various pure substances.  Many of the property models included in \PM\ were formulated when the previous ITPS-68 was the international temperature scale, but the changes were so minute that the uncertainties in the properties dominate\cite[p.10]{janaf:1:1998}.  As a result, they are treated as interchangeable for the purposes of this handbook.
+The ITS-90 temperature scale establishes an international standard for the definition of temperature in terms of the triple points of various pure substances.  Many of the property models included in \PM\ were formulated when the previous ITPS-68 was the international temperature scale, but the changes were so minute that the uncertainties in the properties usually dominate\cite[p.10]{janaf:1:1998}.  As a result, they are treated as interchangeable for the purposes of this handbook.
+
+See chapter \ref{sec:units:temperature} for more information on the formal definition of temperature.
 
 \subsection{Pressure, $p$}\label{sec:intro:p}
 

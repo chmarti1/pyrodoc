@@ -228,7 +228,7 @@ The property methods that belong to the many substance class instances use flexi
 
 \subsection{Property method arguments}
 
-With a few special exceptions, a thermodynamic state can be specified with any two properties except specific heats.  For example,
+With a few special exceptions, a thermodynamic state can be specified with any two properties (except specific heats).  For example,
 \begin{lstlisting}[language=Python]
 >>> n2 = pm.get('ig.N2')
 >>> T = 452.
@@ -261,6 +261,12 @@ array([7.27884313])
 pyromat.utility.PMParamError: Properties may not be specified together: s, h
 \end{lstlisting}
 
+Note that some numerical accuracy is lost in the process of inverting the property.  Specifying a property like entropy is also far more computationally expensive than specifying basic properties like temperature, density, or pressure.  As a result, it is best practice to calculate temperature, density, pressure, or quality and calculate other properties in terms of those.
+\begin{lstlisting}[language=Python]
+>>> import pyromat as pm
+>>> n2.T(s=n2.s(T=300,p=2.5), p=2.5)
+array([299.99994672])
+\end{lstlisting}
 
 \subsection{Default values}
 
@@ -288,9 +294,7 @@ Note that the default values are specified in whatever units \PM\ has been confi
 
 \subsection{Inverse methods}\label{sec:start:inverse}
 
-Before version 2.2.0, the interface only accepted \emph{basic properties} (see section \ref{sec:intro:basic}) $T$, $p$, $\rho$, and $x$.  To handle cases where users had secondary properties like entropy or enthalpy, methods like \verb|T_s| were created to calculate ``temperature from entropy'' and one other property.  Originally, \verb|T_s|, \verb|p_s|, \verb|d_s|, \verb|T_h|, and other \emph{inverse property} methods were specific to the class and the property.  The new interface introduced in version 2.2.0 obsoleted these methods, but they are still available for reverse compatibility.  New codes should not use these methods, and they are scheduled to be removed in a future major release.
-
-Table \ref{tab:start:inverse} shows the historical inverse property methods that are still available on the basic classes.
+Before version 2.2.0, the interface only accepted \emph{basic properties} (see section \ref{sec:intro:basic}) $T$, $p$, $\rho$, and $x$.  To handle cases where users had secondary properties like entropy or enthalpy, methods like \verb|T_s| were created to calculate ``temperature from entropy'' and one other property.  Originally, \verb|T_s|, \verb|p_s|, \verb|d_s|, \verb|T_h|, and other \emph{inverse property} methods were specific to the class and the property.  The new interface introduced in version 2.2.0 obsoleted these methods, but they are still available for reverse compatibility.  Table \ref{tab:start:inverse} shows the historical inverse property methods that are still available on the basic classes.  They should not be used in new codes.
 
 \begin{table}\label{tab:start:inverse}
 \centering
@@ -306,6 +310,8 @@ Table \ref{tab:start:inverse} shows the historical inverse property methods that
 \hline
 \end{tabular}
 \end{table}
+
+New codes designed to determine temperature (or any other property) from enthalpy or entropy should merely use a direct call to \texttt{T()} or other desired methods.  
 
 
 \subsection{Tips and tricks}

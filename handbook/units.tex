@@ -68,7 +68,7 @@ Sym. & Name & \multicolumn{2}{c}{Value} & Description \\
 $g^*$ & \verb|const_g| & 9.806 65 & m s$^{-2}$ & Gravity at 45$^\circ$ lat.\\
 $h$ & \verb|const_h| & 6.626 070 15$\times 10^{-34}$ & J s & Plank constant\\
 $k$ & \verb|const_k| & 1.380 649 $\times 10^{-23}$ & J K$^{-1}$ & Boltzmann constant\\
-$N_a$ & \verb|const_Na| & 6.022 140 857$\times 10^{23}$ & mol$^{-1}$ & Avagadro number\\
+$N_a$ & \verb|const_Na| & 6.022 140 76$\times 10^{23}$ & mol$^{-1}$ & Avagadro number\\
 $N_c$ & \verb|const_Nc| & 6.241 509 34$\times 10^{18}$ & C$^{-1}$ & Electrons per Coulumb\\
 $\overline{\rho}_{std}{^*}$ & \verb|const_nstd| & 44.615 048 197 83 & mol m$^{-3}$ & Standard molar density\\
 $p_{std}{^*}$ & \verb|const_pstd| & 1.013 25 & bar & Standard pressure\\
@@ -489,7 +489,7 @@ The rankine scale is the US customary and imperial equivalent to the kelvin, wit
 
 Scales with offsets defy the unit conversion rules implemented by the \verb|Conversion| instance; that all measurements can be converted between the units merely by multiplying by a factor.  Obviously, when converting values for a temperature, it is important to handle these offsets correctly, but when considering derivatives involving temperature or other changes in temperature, the offsets must be ignored.  As a result, there are two temperature-based unit conversion tools.
 
-The \verb|pm.units.temperature| is a \verb|Conversion| instance should only be used in cases where changes or derivatives in temperature are being considered (e.g. in specific heat or entropy).  In these cases, offsets can be ignored, and the conversion factor rules are observed.  
+The \verb|pm.units.temperature| is a \verb|Conversion| instance and should only be used in cases where changes or derivatives in temperature are being considered (e.g. in specific heat or entropy).  In these cases, offsets can be ignored, and the conversion factor rules are observed.  
 
 When temperatures are being converted between scales so that the offsets between them must be respected, the \verb|pm.units.temperature_scale| function should be used instead.  It is a function that mimics the \verb|Conversion| call signature, but that is specially written to handle temperature scales. 
 
@@ -664,7 +664,7 @@ Because they are identical to practical precision, the Torr and the mmHg are oft
 
 \begin{table}
 \centering
-\caption{Pressure units recognized by \PM}\label{tab:pressure}
+\caption{Pressure units recognized by \PM. Values with a * are affected by calls to \texttt{setup()}.}\label{tab:pressure}
 \begin{tabular}{crl}
 \hline
 Setting & Value & Description\\
@@ -686,7 +686,7 @@ Setting & Value & Description\\
 \end{tabular}
 \end{table}
 
-As mentioned above in the discussion on water column, ``gauge'' measurements of pressure are often made relative to the ambient conditions.  These kinds of pressures should never be used in thermodynamic calculations, so to avoid confusion, \PM\ only works in ``absolute'' pressure, which is actual force per actual area.  To convert back-and-forth between absolute pressure and the gauge measurements that are easier in the laboratory, the \texttt{units} module includes the \verb|abs_to_gauge| and \verb|gauge_to_abs| functions.  See their in-line documentation for more information.
+As mentioned above in the discussion on water column, ``gauge'' measurements of pressure are often made relative to the ambient conditions.  These kinds of pressures should never be used in thermodynamic calculations, so to avoid confusion, \PM\ only works in ``absolute'' pressure, which is actual force per actual area.  To convert back-and-forth between absolute pressure and the gauge measurements that are easier in the laboratory, the \texttt{units} module includes the \verb|abs_to_gauge()| and \verb|gauge_to_abs()| functions.  See their in-line documentation for more information.
 
 %
 % Volume
