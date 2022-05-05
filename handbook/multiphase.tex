@@ -17,7 +17,7 @@ a(T,\rho) &\equiv e(T,\rho) - T s(T,\rho)\\
 \end{align}
 By constructing the formulation from a bank of terms inspired by theoretical formulae for the intermolecular forces, there is greater hope of reducing the number of terms needed. 
 
-The formulation that we describe in this chapter is sometimes referred to as a ``Span and Wagner'' fit for Helmholtz free energy.  Though some version of the approach had already been applied successfully to specific substances years earlier, the need for a general form that a code could apply generically to many substances prompted Span and Wagner's three-part 2003 paper defending its broad use for thermodynamic properties of fluids \cite{span:2003:1, span:2003:2, span:2003:3}.  An expanding body of papers by Span, Wagner, Lemon, Jacobsen, and others a library of formulations for substances that use a standard bank of terms to construct the free energy equation.
+The formulation that we describe in this chapter is sometimes referred to as a ``Span and Wagner'' fit for Helmholtz free energy.  Though some version of the approach had already been applied successfully to specific substances over a decade earlier \cite{stewart:1991, setzmann:1991}, the need for a form that a code could apply generically to many substances prompted Span and Wagner's three-part 2003 paper defending its broad use for thermodynamic properties of fluids \cite{span:2003:1, span:2003:2, span:2003:3}.  An expanding body of papers by Span, Wagner, Lemon, Jacobsen, and others a library of formulations for substances that use a standard bank of terms to construct the free energy equation.
 
 In its independent implementation of this model, \PM\ is a modest open-source Pythonic alternative to REFPROP \cite{refprop}, the NIST code widely adopted for implementing these general forms.
 
@@ -125,7 +125,7 @@ In the data files, the ideal gas terms are contained in a dictionary called the 
 \end{lstlisting}
 
 \subsection{Residual portion of free energy}
-The residual (or real-fluid) portion of free energy accounts for the intermolecular forces that defy the ideal gas assumption.  Many of these terms become especially important when the substance density is high.  The model is divided into three groups of terms,
+The residual (or real-fluid) portion of free energy attempts to account for everything that the ideal gas portion does not.  Many of these terms become especially important when the substance density is high, because intermolecular forces are specifically ignored in the ideal gas model.  The model is divided into three groups of terms,
 \begin{subequations}
 \begin{align}
 \alpha^r &= \alpha^r_0(\tau, \delta) + \alpha^r_1(\tau, \delta) + \alpha^r_2(\tau, \delta)
@@ -135,16 +135,21 @@ Many of these terms are physically motivated, but that discussion is not include
 The first group of terms is a series of polynomials multiplied by exponentials of powers of density,
 \begin{align}
 \alpha^r_0 &= p_0(\tau, \delta) + \sum_{k=1}^K \exp\left(-\delta^k\right) p_k(\tau, \delta)\\
-& p_k = \sum_i c_i \tau^{a_i} \delta^{b_i}.
+& p_k = \sum_i c_i \tau^{a_i} \delta^{b_i}.\label{eqn:alpha:r0}
 \end{align}
-The polynomials rarely (if ever) have terms where the $\delta$ exponent, $b$, is zero, so $\alpha^r_0$ terms where $k\ne 0$ tend to vanish near $\delta \rightarrow 0$ and $\delta \rightarrow \infty$.  These terms model the complicated behaviors that occur near the phase change (when $\delta$ is on the order 1).
+While it is not explicitly forbidden, the $\delta$ exponent, $b$, is neither zero nor negative in these models, so $\alpha^r_0$ terms with the exponential multipliers vanish near $\delta \rightarrow 0$ and $\delta \rightarrow \infty$.  These terms model the complicated behaviors that occur near the phase change (when $\delta$ is on the order 1).
 
-In most models, the first group ($\alpha^r_0$) constitutes the largest number of terms (often dozens).  The exponents in the polynomial expansion are usually integers, but they are occasionally rationals, which permits efficient numerical evaluation.  While many authors include several terms in the $\alpha^r_1$ group, terms from $\alpha^r_2$ are comparatively rare, and the few models that use them only use a few terms at most.  
+In most models, the first group ($\alpha^r_0$) constitutes the largest number of terms (often dozens).  The exponents in the polynomial expansion are sometimes integers, but they are often rationals (which permits efficient evaluation using the method described in Section \ref{sec:num:poly2}), and they are rarely long decimal values.  
 
-The second and third groups are Gaussian functions multiplied by powers of $\tau$, $\delta$, or the function, $\Delta$.  The second group, $\alpha^r_1$, centers the Gaussian function around temperature and density, $\gamma$ and $\epsilon$.  These are often set near the critical point to help deal with the sharp distortion of the thermodynamic surface there.  The third group, $\alpha^r_2$, is a Gaussian centered on exactly the critical point, but the coefficient, $\Delta$, is a scaled distance from the critical point.
+The second group of terms, $\alpha^r_1$, is a Gaussian function multiplied by polynomial terms of $\tau$ and $\delta$.  It was first introduced in 1991 by Setzmann et al. to better model the severely distorted surface that occurs near the critical point in oxygen.  Most models only use a few of these terms at most, and they are usually centered (by $\epsilon$ and $\gamma$) very close to the critical point.  From to the 1991 paper, ``The opinion has been widely held that analytic equations of state covering the whole fluid region are not able to represent the properties in the critical region.'' The authors continue to say, ``We will show that our new equation is
+able to represent the existing experimental information on the thermodynamic properties of methane in the critical
+region at least as well as [competing models].'' \cite{setzmann:1991}
+
+The third group, $\alpha^r_2$, is a Gaussian centered on exactly the critical point, but the coefficient, $\Delta$, is a scaled distance from the critical point.  The term appears in a 1994 paper modeling carbon dioxide \cite{span:1994} and again in a 2014 revision to the properties of water and steam \cite{iapws:2014}, but in conspicuously few others.  While its formulation is not explained in detail in these sources, it allows for a more complicated shape from the term without the computational expense of additional polynomial terms.  It seems to have been designed to reduce the number of Gaussian terms required to produce the desired result at the critical point.
+
 \begin{align}
-\alpha^r_1 &= \sum_{l=0}^L c_l \delta^{d_l} \tau^{t_l} \exp\left( -a_l(\delta-\epsilon_l)^2 - b_l(\tau-\gamma_l)^2 \right)\\
-\alpha^r_2 &= \sum_{m=0}^M c_m \Delta_m{^{b_m}} \delta \exp\left(-C_m(\delta-1)^2 - D_m(\tau-1)^2 \right)\\
+\alpha^r_1 &= \sum_{l=0}^L c_l \delta^{d_l} \tau^{t_l} \exp\left( -a_l(\delta-\epsilon_l)^2 - b_l(\tau-\gamma_l)^2 \right)\label{eqn:alpha:r1}\\
+\alpha^r_2 &= \sum_{m=0}^M c_m \Delta_m{^{b_m}} \delta \exp\left(-C_m(\delta-1)^2 - D_m(\tau-1)^2 \right)\label{eqn:alpha:r2}\\
  &\Delta_m = \left[1-\tau + A_m\left((\delta-1)^2\right)^{1/2\beta_m} \right]^2 + B_m\left((\delta - 1)^2\right)^{a_m}.
 \end{align}
 \end{subequations}
@@ -209,7 +214,7 @@ The polynomial, $\alpha^o_0(\tau)$, and its derivatives can be evaluated separat
 \end{align}
 \end{subequations}
 
-Derivatives of the residual portion in (\ref{eqn:mp1:ar}) can be calculated individually.
+Derivatives of the residual portion in (\ref{eqn:mp1:ar}) can be calculated individually.  Much of $\alpha^r_0$ in (\ref{eqn:alpha:r0}) can be calculated trivially from the efficient derivatives of the polynomials. 
 
 
 \section{Calculation of properties}\label{sec:mp1:properties}
