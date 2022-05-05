@@ -245,6 +245,19 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
 
         kwargs['T'] = line_T
 
+    elif any(prop in kwargs for prop in ['h', 'e']):
+        try:  # Finding the low value can be flaky for some substances
+            dmax = subst.d(T=Tmin, p=pmax)
+        except pm.utility.PMParamError:
+            if multiphase:
+                dmax = subst.ds(T=Tt)[0]
+            else:
+                dmax = subst.d(T=Tmin, p=pmin)
+        dmin = subst.d(T=Tmax, p=pmin)
+        line_d = np.logspace(np.log10(dmin), np.log10(dmax), n)
+        # line_d = np.linspace(dmin, dmax, n)
+        kwargs['d'] = line_d
+
     elif any(prop in kwargs for prop in ['T', 'h', 'e']):
         # ph & pe are going to be really slow, but what's better?
 
@@ -261,6 +274,8 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
             kwargs['x'] = x
 
         kwargs['p'] = line_p
+
+
 
     else:  # Should never arrive here without error
         raise pm.utility.PMParamError('property invalid')
