@@ -231,7 +231,7 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
                 raise pm.utility.PMParamError('x cannot be computed for non-'
                                               'multiphase substances.')
 
-        line_T = np.linspace(Tmin, Tmax, n)
+        line_T = np.linspace(Tmin, Tmax, n).flatten()
 
         # We can insert the phase change points
         if multiphase and 'p' in kwargs and pc > kwargs['p'] > pt:
@@ -254,14 +254,14 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
             else:
                 dmax = subst.d(T=Tmin, p=pmin)
         dmin = subst.d(T=Tmax, p=pmin)
-        line_d = np.logspace(np.log10(dmin), np.log10(dmax), n)
+        line_d = np.logspace(np.log10(dmin), np.log10(dmax), n).flatten()
         # line_d = np.linspace(dmin, dmax, n)
         kwargs['d'] = line_d
 
     elif any(prop in kwargs for prop in ['T', 'h', 'e']):
         # ph & pe are going to be really slow, but what's better?
 
-        line_p = np.logspace(np.log10(pmin), np.log10(pmax), n)
+        line_p = np.logspace(np.log10(pmin), np.log10(pmax), n).flatten()
 
         # We can insert the phase change points
         if multiphase and 'T' in kwargs and Tc > kwargs['T'] > Tt:
@@ -270,7 +270,7 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
 
             line_p = np.insert(line_p, i_insert, np.array([psat, psat]).flatten())
             x = -np.ones_like(line_p)
-            x[line_p == psat] = np.array([0, 1])
+            x[line_p == psat] = np.array([1, 0])
             kwargs['x'] = x
 
         kwargs['p'] = line_p

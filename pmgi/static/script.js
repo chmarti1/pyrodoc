@@ -804,6 +804,8 @@ Number.prototype.between = function(min, max) {
  * A plot of the data
  */
 class PlotView{
+    TRACEORDER = ['user','steamdome','p','T','d', 'h', 's', 'x']
+
     constructor(divTarget) {
         // TODO - variable plot x- and y-axes
         // TODO - Additional background data, steam dome, isolines
@@ -858,7 +860,7 @@ class PlotView{
             mode: 'lines',
             type: 'scatter',
             name: 'isolines p',
-            hovertemplate: "<b> Isobar<br></b>"+
+            hovertemplate: "<b>Isobar<br></b>"+
                 "p: %{customdata}",
             showlegend: false,
             line: {
@@ -871,12 +873,68 @@ class PlotView{
             y: [],
             mode: 'lines',
             type: 'scatter',
+            name: 'isolines p',
+            hovertemplate: "<b>Isotherm<br></b>"+
+                "T: %{customdata}",
+            showlegend: false,
+            line: {
+                color: 'rgb(155, 0, 0)',
+                width: 1
+            }
+        });
+        this.traces.push({
+            x: [],
+            y: [],
+            mode: 'lines',
+            type: 'scatter',
+            name: 'isolines d',
+            hovertemplate: "<b>Iso-d Line<br></b>"+
+                "d: %{customdata}",
+            showlegend: false,
+            line: {
+                color: 'rgb(0, 155, 155)',
+                width: 1
+            }
+        });
+        this.traces.push({
+            x: [],
+            y: [],
+            mode: 'lines',
+            type: 'scatter',
+            name: 'isolines h',
+            hovertemplate: "<b>Iso-h Line<br></b>"+
+                "h: %{customdata}",
+            showlegend: false,
+            line: {
+                color: 'rgb(155, 155, 0)',
+                width: 1
+            }
+        });
+        this.traces.push({
+            x: [],
+            y: [],
+            mode: 'lines',
+            type: 'scatter',
             name: 'isolines s',
-            hovertemplate: "<b> Iso-s line<br></b>"+
+            hovertemplate: "<b>Iso-s line<br></b>"+
                 "s: %{customdata}",
             showlegend: false,
             line: {
-                color: 'rgb(0, 0, 100)',
+                color: 'rgb(0, 0, 155)',
+                width: 1
+            }
+        });
+        this.traces.push({
+            x: [],
+            y: [],
+            mode: 'lines',
+            type: 'scatter',
+            name: 'isolines x',
+            hovertemplate: "<b>Iso-x line<br></b>"+
+                "x: %{customdata}",
+            showlegend: false,
+            line: {
+                color: 'rgb(155, 0, 155)',
                 width: 1
             }
         });
@@ -972,59 +1030,35 @@ class PlotView{
     }
 
     draw_auxlines(data){
-        let steamdome = null;
-        let isobars = null;
-        let isos = null;
-        data['global'].forEach((line)=>{
-           if (line['type'] == 'steamdome'){
-               steamdome = line['data'];
-           } else if (line['type'] == 'p'){
-               if (isobars == null){
-                   isobars = {};
-                   Object.keys(line['data']).forEach((key)=>{
-                            isobars[key] = [];
-                   });
-               }
-               Object.keys(line['data']).forEach((key)=>{
-                            isobars[key] = isobars[key].concat(line['data'][key]);
-                            isobars[key].push(null);
+        this.TRACEORDER.forEach((prop) =>{
+           let ind = this.TRACEORDER.indexOf(prop);
+           if (ind > 0) {
+               let iso_update = null;
+               data['global'].forEach((line) => {
+                   if (line['type'] == prop) {
+                       if (iso_update == null) {
+                           iso_update = {};
+                           Object.keys(line['data']).forEach((key) => {
+                               iso_update[key] = [];
+                           });
+                       }
+                       Object.keys(line['data']).forEach((key) => {
+                           iso_update[key] = iso_update[key].concat(line['data'][key]);
+                           iso_update[key].push(null);
+                       });
+                   }
                });
-           } else if (line['type'] == 's'){
-               if (isos == null){
-                   isos = {};
-                   Object.keys(line['data']).forEach((key)=>{
-                            isos[key] = [];
-                   });
+
+               if (iso_update != null) {
+                   let update = {
+                       x: [iso_update[this.x_prop]],
+                       y: [iso_update[this.y_prop]],
+                       customdata: [iso_update[prop]]
+                   };
+                   Plotly.restyle(this.container, update, [ind]);
                }
-               Object.keys(line['data']).forEach((key)=>{
-                            isos[key] = isos[key].concat(line['data'][key]);
-                            isos[key].push(null);
-               });
            }
         });
-        if (steamdome != null) {
-            let update = {
-                x: [steamdome[this.x_prop]],
-                y: [steamdome[this.y_prop]],
-            };
-            Plotly.restyle(this.container, update, [1]);
-        }
-        if (isobars != null) {
-            let update_p = {
-                x: [isobars[this.x_prop]],
-                y: [isobars[this.y_prop]],
-                customdata: [isobars['p']]
-            };
-            Plotly.restyle(this.container, update_p, [2]);
-        }
-        if (isos != null) {
-            let update_s = {
-                x: [isos[this.x_prop]],
-                y: [isos[this.y_prop]],
-                customdata: [isos['s']]
-            };
-            Plotly.restyle(this.container, update_s, [3]);
-        }
     }
 
     onChangeAxes(){
@@ -1308,10 +1342,10 @@ function get_auxlines(){
 
 function set_substance(newsubstance){
     pointModel.set_substance(newsubstance);
-    get_auxline();
+    calc_auxline();
 }
 
-function get_auxline(){
+function calc_auxline(){
     if (get_substance().startsWith('mp')){
         compute_auxline((data)=>{
             let sll = data.data['liquid'];
@@ -1324,21 +1358,25 @@ function get_auxline(){
             });
             add_steamdome(sll);
         });
+
+        compute_auxline((data)=>{
+            data.data.forEach((line)=>{
+                pointModel.add_auxline('x', line, 'global');
+            });
+        },{'x': 0, 'default': true});
     }
 
-    // Compute Auxiliary lines
-    compute_auxline((data)=>{
-        data.data.forEach((line)=>{
-            pointModel.add_auxline('p', line, 'global');
-        });
-    },{"p":0, "default": true});
-
-        // Compute Auxiliary lines
-    compute_auxline((data)=>{
-        data.data.forEach((line)=>{
-            pointModel.add_auxline('s', line, 'global');
-        });
-    },{"s":0, "default": true});
+    // Add a few types of lines
+    ['p', 'T', 'd', 'h', 's'].forEach((prop_val)=>{
+        compute_args = {};
+        compute_args[prop_val] = 0;
+        compute_args["default"] = true;
+        compute_auxline((data)=>{
+            data.data.forEach((line)=>{
+                pointModel.add_auxline(prop_val, line, 'global');
+            });
+        },compute_args);
+    })
 }
 
 function add_steamdome(steamdome){
