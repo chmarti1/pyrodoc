@@ -387,14 +387,27 @@ In data, there are three groups that are used to define the saturation pressure 
 
 The \texttt{fn} parameter is an index (0-3) that selects the form of the formula to use.  The \texttt{pscale} and \texttt{dscale} parameters are used to re-scale the dimensionless property calculated by the selected formula.  The \texttt{Tscale} parameter is used to normalize temperature to calculate $\theta$.  Finally, \texttt{coef} is a polynomial coefficient list described in Section \ref{sec:num:poly1}.
 
-\subsection{Sources implemented}
-As of version 2.2.0, \PM\ implements 
+\section{Sources implemented}
+Table \ref{tab:mp:source} lists the multi-phase models currently implemented in \PM\ as of version 2.2.0.  Entries marked with an asterisk were not yet complete for the 2.2.0 release, but are planned to be implemented later.
 
 \begin{table}
 \centering
+\caption{Sources for multi-phase data used in \PM.  Substances with a * were not yet implemented in version 2.2.0, but they are planned for a later release.}\label{tab:mp:source}
 \begin{tabular}{|ccc|}
 \hline
-
+Argon* & Ar & \cite{tegeler:1999}\\
+Carbon dioxide & CO$_2$ & \cite{span:1994}\\
+Deuterium* & D$_2$ & \cite{richardson:2013}\\
+Hydrogen* & H$_2$ & \cite{leachman:2009}\\
+Nitrogen & N$_2$ & \cite{span:2000}\\
+Oxygen & O$_2$ & \cite{setzmann:1991}\\
+Water & H$_2$O & \cite{iapws:2014}\\
+R-125* & C$_2$HF$_5$ & \cite{piao:1998}\\
+R-134a & C$_2$H$_2$F$_4$ & \cite{tilner:1994}\\
+R-143a* & C$_2$H$_2$F$_3$ & \cite{lemmon:2000}\\
+R-245fa* & C$_3$H$_3$F$_5$ & \cite{akasaka:2015}\\
+R-1234yf* & C$_3$H$_2$F$_4$ & \cite{richter:2011}\\
+R-1234ze & C$_3$H$_2$F$_4$ & \cite{thol:2016}\\
 \hline
 \end{tabular}
 \end{table}

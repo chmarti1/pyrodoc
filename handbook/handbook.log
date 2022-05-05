@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.9.17)  4 MAY 2022 09:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.9.17)  5 MAY 2022 09:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -586,7 +586,7 @@ LaTeX Info: Redefining \nameref on input line 57.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-<figures/PYro_Black_Small.png, id=414, 55.6479pt x 50.1072pt>
+<figures/PYro_Black_Small.png, id=418, 55.6479pt x 50.1072pt>
 File: figures/PYro_Black_Small.png Graphic file (type png)
 <use figures/PYro_Black_Small.png>
 Package pdftex.def Info: figures/PYro_Black_Small.png  used on input line 63.
@@ -875,13 +875,36 @@ and avoirdupois
 [40] [41] [42] [43] [44
 
 
-] [45] [46] [47] [48] [49] [50]
+]
+
+LaTeX Warning: Citation `si:2019' on page 45 undefined on input line 160.
+
+[45]
+
+LaTeX Warning: Citation `si:2019' on page 46 undefined on input line 213.
+
+[46] [47]
+
+LaTeX Warning: Citation `si:2019' on page 48 undefined on input line 273.
+
+
+LaTeX Warning: Citation `si:2019' on page 48 undefined on input line 275.
+
+[48] [49]
+
+LaTeX Warning: Citation `si:2019' on page 50 undefined on input line 333.
+
+[50]
 Overfull \hbox (11.7654pt too wide) in paragraph at lines 371--372
 []\OT1/cmr/m/n/10.95 Table [][]4.5[][] shows the mo-lar units and their val-ues
  ex-pressed in kilogram-
  []
 
-[51] [52] [53] [54]
+[51] [52] [53]
+
+LaTeX Warning: Citation `si:2019' on page 54 undefined on input line 484.
+
+[54]
 Overfull \hbox (21.37817pt too wide) in paragraph at lines 494--495
 \OT1/cmr/m/n/10.95 off-sets be-tween them must be re-spected, the [][]\OT1/cmtt
 /m/n/10.95 pm.units.temperature_scale
@@ -894,7 +917,25 @@ r/m/n/10.95 in-stances, it re-spects the [][]\OT1/cmtt/m/n/10.95 unit_temperatu
 re
  []
 
-[55] [56] [57] [58] [59] [60] [61]) [62]
+[55]
+
+LaTeX Warning: Citation `si:2019' on page 56 undefined on input line 556.
+
+[56]
+
+LaTeX Warning: Citation `si:2019' on page 57 undefined on input line 599.
+
+
+LaTeX Warning: Citation `crc' on page 57 undefined on input line 601.
+
+[57] [58]
+
+LaTeX Warning: Citation `si:2019' on page 59 undefined on input line 647.
+
+
+LaTeX Warning: Citation `crc' on page 59 undefined on input line 649.
+
+[59] [60] [61]) [62]
 \openout2 = `regdat.aux'.
 
  (./regdat.tex
@@ -939,7 +980,7 @@ Chapter 6.
 
 
 ] [71] [72] [73] [74] [75] [76]
-<figures/dof.png, id=1373, 578.16pt x 433.62pt>
+<figures/dof.png, id=1365, 578.16pt x 433.62pt>
 File: figures/dof.png Graphic file (type png)
 <use figures/dof.png>
 Package pdftex.def Info: figures/dof.png  used on input line 140.
@@ -951,7 +992,7 @@ or phase change,
  []
 
 [79] [80]
-<figures/hf.png, id=1411, 433.62pt x 289.08pt>
+<figures/hf.png, id=1403, 433.62pt x 289.08pt>
 File: figures/hf.png Graphic file (type png)
 <use figures/hf.png>
 Package pdftex.def Info: figures/hf.png  used on input line 223.
@@ -973,15 +1014,6 @@ Chapter 7.
 
 ]
 
-LaTeX Warning: Citation `span:2003:1' on page 96 undefined on input line 20.
-
-
-LaTeX Warning: Citation `span:2003:2' on page 96 undefined on input line 20.
-
-
-LaTeX Warning: Citation `span:2003:3' on page 96 undefined on input line 20.
-
-
 LaTeX Warning: Citation `refprop' on page 96 undefined on input line 22.
 
 [96] [97] [98] [99] [100] [101] [102] [103]
@@ -994,7 +1026,12 @@ Overfull \hbox (7.50996pt too wide) in paragraph at lines 324--325
 m pro-vide enough
  []
 
-[107] [108]) [109] [110]
+[107] [108] [109]
+
+LaTeX Warning: Citation `setzmann:1991' on page 110 undefined on input line 403
+.
+
+) [110]
 \openout2 = `numerical.aux'.
 
  (./numerical.tex
@@ -1010,7 +1047,7 @@ s, be-cause they
  []
 
 [112]
-<figures/benchmark.png, id=1759, 462.528pt x 346.896pt>
+<figures/benchmark.png, id=1783, 462.528pt x 346.896pt>
 File: figures/benchmark.png Graphic file (type png)
 <use figures/benchmark.png>
 Package pdftex.def Info: figures/benchmark.png  used on input line 51.
@@ -1023,19 +1060,19 @@ put line 222.
 LaTeX Warning: Float too large for page by 9.94191pt on input line 260.
 
 [119] [120]
-<figures/iter1.png, id=1875, 433.62pt x 289.08pt>
+<figures/iter1.png, id=1899, 433.62pt x 289.08pt>
 File: figures/iter1.png Graphic file (type png)
 <use figures/iter1.png>
 Package pdftex.def Info: figures/iter1.png  used on input line 305.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
  [121] [122 <./figures/iter1.png>] [123]
-<figures/bisection.png, id=1905, 433.62pt x 289.08pt>
+<figures/bisection.png, id=1929, 433.62pt x 289.08pt>
 File: figures/bisection.png Graphic file (type png)
 <use figures/bisection.png>
 Package pdftex.def Info: figures/bisection.png  used on input line 349.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
  [124] [125 <./figures/bisection.png>]
-<figures/hybrid1.png, id=1919, 433.62pt x 289.08pt>
+<figures/hybrid1.png, id=1943, 433.62pt x 289.08pt>
 File: figures/hybrid1.png Graphic file (type png)
 <use figures/hybrid1.png>
 Package pdftex.def Info: figures/hybrid1.png  used on input line 384.
@@ -1051,13 +1088,30 @@ Underfull \hbox (badness 2662) in paragraph at lines 11--13
 
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 58--60
+Underfull \hbox (badness 10000) in paragraph at lines 50--52
 []\OT1/cmr/m/n/10.95 National In-sti-tute for Stan-dards and Tech-nol-ogy,
+ []
+
+[134]
+Underfull \hbox (badness 1817) in paragraph at lines 115--119
+[]\OT1/cmr/m/n/10.95 R. Tilner-Roth and H. D. Baehr, ``An in-ter-na-tional stan
+-
+ []
+
+[135]
+Underfull \hbox (badness 2772) in paragraph at lines 138--142
+[]\OT1/cmr/m/n/10.95 M. Thol and E. W. Lem-mon, ``Ther-mo-dy-namic equa-tion
+ []
+
+
+Underfull \hbox (badness 2253) in paragraph at lines 138--142
+\OT1/cmr/m/n/10.95 of state for the ther-mo-dy-namic prop-er-ties of trans-13,3
+,3-
  []
 
 )
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 89.
- [134]
+ [136]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 89.
  (./handbook.aux (./nomenclature.aux) (./intro.aux) (./start.aux)
 (./config.aux) (./units.aux) (./regdat.aux) (./ig.aux) (./multiphase.aux)
@@ -1065,7 +1119,7 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 89.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 89.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 89.
 Package rerunfilecheck Info: File `handbook.out' has not changed.
-(rerunfilecheck)             Checksum: F58452E9A526CB315FB1A9E31862B1C6;7666.
+(rerunfilecheck)             Checksum: C4468BD91C708614E57D618E62DBB2D6;7736.
 
 
 LaTeX Warning: There were undefined references.
@@ -1073,10 +1127,10 @@ LaTeX Warning: There were undefined references.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 89.
  ) 
 Here is how much of TeX's memory you used:
- 18181 strings out of 481239
- 251039 string characters out of 5920377
- 774690 words of memory out of 5000000
- 32188 multiletter control sequences out of 15000+600000
+ 18213 strings out of 481239
+ 251504 string characters out of 5920377
+ 774314 words of memory out of 5000000
+ 32203 multiletter control sequences out of 15000+600000
  549039 words of font info for 90 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  37i,13n,55p,930b,3676s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1107,9 +1161,9 @@ exmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texmf/fonts/type
 1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sf
 tt1000.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/wasy-type1/wasy10.
 pfb>
-Output written on handbook.pdf (136 pages, 1038225 bytes).
+Output written on handbook.pdf (138 pages, 1046505 bytes).
 PDF statistics:
- 2271 PDF objects out of 2487 (max. 8388607)
- 903 named destinations out of 1000 (max. 500000)
- 864 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 2306 PDF objects out of 2487 (max. 8388607)
+ 920 named destinations out of 1000 (max. 500000)
+ 872 words of extra memory for PDF output out of 10000 (max. 10000000)
 

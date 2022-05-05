@@ -85,6 +85,7 @@
 \contentsline {subsection}{\numberline {7.2.4}Enthalpy}{106}{subsection.7.2.4}%
 \contentsline {subsection}{\numberline {7.2.5}Specific heats}{106}{subsection.7.2.5}%
 \contentsline {subsection}{\numberline {7.2.6}Liquid-vapor line}{108}{subsection.7.2.6}%
+\contentsline {section}{\numberline {7.3}Sources implemented}{110}{section.7.3}%
 \contentsline {chapter}{\numberline {8}Numerical routines}{111}{chapter.8}%
 \contentsline {section}{\numberline {8.1}Polynomials of two variables}{112}{section.8.1}%
 \contentsline {subsection}{\numberline {8.1.1}Modifying polynomials for non-integer and negative powers}{112}{subsection.8.1.1}%
