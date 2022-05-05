@@ -17,6 +17,40 @@ def toarray(a):
         return np.asarray(a.split(','), dtype=float)
 
 
+def compute_steamdome(subst, n=25):
+    """
+    Compute a steam dome for a given substance
+    :param subst: A pyromat substance object
+    :param n: int, a number of points per half of the dome
+    :return (satLiqProps, satVapProps): a dict of satliq/satvap property arrays
+    """
+
+    if not hasattr(subst, 'ps'):
+        raise pm.utility.PMParamError('Saturation states not available for '
+                                      f'{subst}.')
+
+    Tc, pc = subst.critical()
+    critical = subst.state(T=Tc, p=pc)
+    Tmin = subst.triple()[0]
+
+    # Find valid limits
+    Teps = (Tc - Tmin) / 1000
+
+    line_T = np.linspace(Tmin, Tc - Teps, n).flatten()
+    # line_T = np.logspace(np.log10(Tmin), np.log10(Tc-Teps), n).flatten()
+
+    sll, svl = compute_sat_state(subst, T=line_T)
+
+    # Append the critical point to the end of both lines
+    satliq_states = {}
+    satvap_states = {}
+    for k in sll:
+        satliq_states[k] = np.append(sll[k], critical[k])
+        satvap_states[k] = np.append(svl[k], critical[k])
+
+    return satliq_states, satvap_states
+
+
 def compute_sat_state(subst, **kwargs):
     """
     Compute a state given any set of state properties
@@ -74,6 +108,27 @@ def compute_sat_state(subst, **kwargs):
     return liq_state, vap_state
 
 
+def get_practical_limits(subst):
+
+    multiphase = hasattr(subst, 'ps')
+    if multiphase:
+        pmin, pmax = subst.plim()
+        Tt, pt = subst.triple()
+        if pmin == 0:
+            pmin = 0.1 * pt
+        Tmin, Tmax = subst.Tlim()
+    else:
+        Tmin, Tmax = subst.Tlim()
+        pmin, pmax = np.array([subst.p(T=Tmin, d=0.01), subst.p(T=Tmax, d=1000)]).flatten()
+
+
+    peps_hi, peps_lo = 0.01 * pmax, pmin
+    Teps = 0.001 * (Tmax - Tmin)
+
+    return Tmin + Teps, pmin + peps_lo, Tmax - Teps, pmax - peps_hi
+
+
+
 def get_default_lines(subst, prop):
     """
     Get a default set of isolines for a given property.
@@ -87,32 +142,33 @@ def get_default_lines(subst, prop):
     vals = None
 
     multiphase = hasattr(subst, 'ps')
+    Tmin, pmin, Tmax, pmax = get_practical_limits(subst)
     if multiphase:
-        pmin, pmax = subst.plim()
-        Tmin, Tmax = subst.Tlim()
-    else:
-        Tmin, Tmax = subst.Tlim()
-        pmin, pmax = np.array([subst.p(T=Tmin, d=0.01), subst.p(T=Tmax, d=1000)]).flatten()
+        Tt, pt = subst.triple()
 
     if prop == 'p':
-        peps = (pmax - pmin) / 1e6
-        vals = np.logspace(np.log10(pmin + peps), np.log10(pmax - peps), 10)
+        vals = np.logspace(np.log10(pmin), np.log10(pmax), 10)
     elif prop == 'T':
-        Teps = (Tmax - Tmin) / 1000
-        vals = np.linspace(Tmin + Teps, Tmax - Teps, 10)
-    elif prop == 's':
-        Teps = (Tmax - Tmin) / 1000
-        peps = (pmax - pmin) / 1e6
-        try:  # Finding the low entropy can be flaky for some substances
-            smin = subst.s(T=Tmin+Teps, p=pmax-peps)
+        vals = np.linspace(Tmin, Tmax, 10)
+    elif prop == 'x':
+        vals = np.linspace(0.1, 0.9, 9)
+    elif prop in ['v', 'd', 'h', 'e', 's']:
+        pfn = getattr(subst, prop)
+        try:  # Finding the low value can be flaky for some substances
+            propmin = pfn(T=Tmin, p=pmax)
         except pm.utility.PMParamError:
             if multiphase:
-                smin = subst.ss(T=Tmin+Teps)[0]
+                pfns = getattr(subst, prop + 's')
+                propmin = pfns(T=Tt)[0]
             else:
-                smin = subst.s(T=Tmin+Teps, p=pmin+peps)
-        smax = subst.s(T=Tmax-Teps, p=pmin+peps)
-        seps = (smin - smax) / 100
-        vals = np.linspace(smin + seps, smax - seps, 10)
+                propmin = pfn(T=Tmin, p=pmin)
+        propmax = pfn(T=Tmax, p=pmin)
+        if prop == 'v':
+            vals = np.logspace(np.log10(propmin), np.log10(propmax), 10)
+        elif prop == 'd':  # Inverse of v means max and min flip
+            vals = np.logspace(np.log10(propmax), np.log10(propmin), 10)
+        else:
+            vals = np.linspace(propmin, propmax, 10)
     else:
         raise pm.utility.PMParamError(f'Default Lines Undefined for {prop}.')
 
@@ -148,24 +204,21 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
         # Recursively compute the single line
         for val in get_default_lines(subst, prop):
             arg = {prop: val}  # Build an argument
-            lines.append(compute_iso_line(subst, n, scaling, **arg))
+            try:
+                lines.append(compute_iso_line(subst, n, scaling, **arg))
+            except pm.utility.PMParamError:
+                pass
         return lines
 
     # We have a single property, so compute the line
 
     # Compute the limit pressures and temperatures
     multiphase = hasattr(subst, 'Ts')
-
+    Tmin, pmin, Tmax, pmax = get_practical_limits(subst)
     if multiphase:
         Tc, pc = subst.critical()
         Tt, pt = subst.triple()
-        # crit = subst.state(T=Tc, p=pc)
-        pmin, pmax = subst.plim()
-        Tmin, Tmax = subst.Tlim()
-    else:
-        Tc, pc = -999999, -999999
-        Tmin, Tmax = subst.Tlim()
-        pmin, pmax = np.array([subst.p(T=Tmin, d=0.01), subst.p(T=Tmax, d=1000)]).flatten()
+
 
     # The props for which we will plot against a T list
     if any(prop in kwargs for prop in ['p', 'd', 'v', 's', 'x']):
@@ -178,13 +231,10 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
                 raise pm.utility.PMParamError('x cannot be computed for non-'
                                               'multiphase substances.')
 
-        # An epsilon for the max/min
-        Teps = (Tmax-Tmin)/1000
-
-        line_T = np.linspace(Tmin + Teps, Tmax - Teps, n)
+        line_T = np.linspace(Tmin, Tmax, n)
 
         # We can insert the phase change points
-        if 'p' in kwargs and kwargs['p'] < pc and kwargs['p'] > pt:
+        if multiphase and 'p' in kwargs and pc > kwargs['p'] > pt:
             Tsat = subst.Ts(p=kwargs['p'])
             i_insert = np.argmax(line_T > Tsat)
 
@@ -197,12 +247,11 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
 
     elif any(prop in kwargs for prop in ['T', 'h', 'e']):
         # ph & pe are going to be really slow, but what's better?
-        peps = (pmax - pmin) / 1e6
 
-        line_p = np.logspace(np.log10(pmin + peps), np.log10(pmax - peps), n)
+        line_p = np.logspace(np.log10(pmin), np.log10(pmax), n)
 
         # We can insert the phase change points
-        if 'T' in kwargs and kwargs['T'] < Tc:
+        if multiphase and 'T' in kwargs and Tc > kwargs['T'] > Tt:
             psat = subst.ps(T=kwargs['T'])
             i_insert = np.argmax(line_p > psat)
 
@@ -606,31 +655,12 @@ class SaturationRequest(PMGIRequest):
 
         Compute the entire steam dome for the substance
         """
-        n = 25
-        scaling = 'linear'
-        Tc, pc = self.substance.critical()
-        critical = self.substance.state(T=Tc, p=pc)
-        Tmin = self.substance.triple()[0]
-
-        # Find valid limits
-        Teps = (Tc - Tmin) / 1000
-
-        line_T = np.linspace(Tmin, Tc-Teps, n).flatten()
-        # line_T = np.logspace(np.log10(Tmin), np.log10(Tc-Teps), n).flatten()
-
         try:
-            sll, svl = compute_sat_state(self.substance, T=line_T)
-
-            # Append the critical point to the end of both lines
-            satliq_states = {}
-            satvap_states = {}
-            for k in sll:
-                satliq_states[k] = np.append(sll[k], critical[k])
-                satvap_states[k] = np.append(svl[k], critical[k])
+            liq, vap = compute_steamdome(self.substance)
 
             self.out['data'] = {}
-            self.out['data']['liquid'] = satliq_states
-            self.out['data']['vapor'] = satvap_states
+            self.out['data']['liquid'] = liq
+            self.out['data']['vapor'] = vap
 
         except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e:
             # Add in the error response from pyromat
