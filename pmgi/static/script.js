@@ -394,8 +394,13 @@ class PointModel extends Subject{
 class SubstanceFormView{
 
     constructor(formHTMLid, show_all=false) {
+        this.select_name = "select";
+
         this.show_all = show_all;
-        this.target = formHTMLid;
+        this.target = $("#"+formHTMLid);
+        let select = $('<select/>').attr({id: this.select_name});
+        this.target.append(select);
+        this.select = $('#'+this.select_name, this.target);
     }
 
     update(source, event, data){
@@ -409,7 +414,7 @@ class SubstanceFormView{
      * @param substance - A substance id as a string
      */
     set_value(substance){
-        $(this.target).val(substance);
+        this.select.val(substance);
     }
 
     /**
@@ -421,7 +426,7 @@ class SubstanceFormView{
      */
     init(substances, current_value=null, shortlist=null){
 
-        let subsel = $(this.target);
+        let subsel = this.select;
         // Loop over the substances, create option group for each category
         Object.keys(substances).forEach(subst => {
             if (this.show_all || shortlist == null || shortlist.includes(subst)) {
@@ -1391,7 +1396,7 @@ $(document).ready(function(){
     // Instantiate classes with their targets
     pointModel = new PointModel();
     unitFormView = new UnitFormView('unit_controls');
-    substanceFormView = new SubstanceFormView('#sel_substance');
+    substanceFormView = new SubstanceFormView('substance_controls');
     propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY);
     isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T','d','p','s','h','x']);
     propEntryView = new PropEntryView("#property_controls");
