@@ -14,8 +14,7 @@
         <h3>Unit Selection</h3>
         User can click to show/hide unit selection menu. Units are set using an
         apply/revert modality because multiple of them can be set at once. Changing
-        the units resets everything. Not all units work on the backend.
-        Units only work when using POST<br>
+        the units resets everything. Units only work when using POST.<br>
         <input type="button" id="unit_hide" value="Units"/>
         <ul id="hideablelist" style="display: none">
             <form id="unitform">
@@ -30,9 +29,8 @@
     <div id="substance_controls">
         <h3>Substance Selection</h3>
         User can select a substance via this menu. Changing the substance will
-        completely reset all data. Ideal gases currently suffer from a backend bug on
-        specifying T&s. Air doesn't work yet because something isn't implemented
-        on the backed.<br>
+        completely reset all data. Air has some mild issues because igmix lags
+        development on the backed.<br>
         <label>Select Substance: </label>
         <select id="sel_substance">
             <!-- Populated by JS -->
@@ -43,11 +41,9 @@
         <h3>Property Input</h3>
         This is where the user can input property data, using whatever units have been
         apply'd. Only two properties can be specified at one time. Adjusts visible
-        for mp substances vs. ideal gases. Buttons of GET and POST use separate HTTP
-        request types. GET will be removed for deploy, because it doesn't accommodate units.<br>
+        for mp substances vs. ideal gases. Button submits HTTP POST request.<br>
         <form id="propform">
             <table id="propinput">
-                <button type="button" id="get_props">Change Content - GET</button>
                 <button type="button" id="post_props">Change Content - POST</button>
 
             </table>
@@ -57,8 +53,8 @@
 <div id="outputs">
     <div id="property_selection">
         <h3>Property Display Selection</h3>
-        User can specify which properties should be shown in the table. Expand and
-        adjust the checkboxes as desired.<br>
+        User can specify which properties should be shown in the table. Expand
+        and adjust the checkboxes as desired.<br>
         <input type="button" id="propchoice_hide" value="Show Props"/>
         <ul id="propchecks" style="display: none">
         </ul>
@@ -76,11 +72,8 @@
         <h3>Plot</h3>
         The plot responds to the points added to the table. It should display
         all the points that were added. It should also allow the user to click
-        to add a point for substances (subject to the points being in range). We
-        need better initialization to show some iso-lines for the selected substance
-        so right now you can't really click-to-add until you've added a point manually.
-        Hover tooltip works with extra property info. Ideal gas click-to-add
-        doesn't work right now but that's a backend issue. Lots of prettification
+        to add a point for substances (subject to the points being in range).
+        Hover tooltip works with extra property info. Lots of prettification
         needed here.<br>
         <label labelfor="xprop">X Property</label>
         <select id="xprop" name="xprop" val="s">

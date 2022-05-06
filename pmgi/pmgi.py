@@ -576,7 +576,7 @@ class IsolineRequest(PMGIRequest):
         args.pop('id')
 
         try:
-            self.out['data'] = compute_iso_line(self.substance, **args)
+            self.out['data'] = compute_iso_line(self.substance, n=50, **args)
             PMGIRequest.clean_nan(self.out['data'])
             PMGIRequest.json_friendly(self.out)
         except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e:

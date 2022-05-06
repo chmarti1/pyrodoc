@@ -200,6 +200,40 @@ class PointModel extends Subject{
     }
 
     /**
+     * Get the current unit strings for a list of properties
+     * @returns units - a dict of the current units. Keys are property,
+     *                  values are the unit value as a string
+     */
+    get_units_for_prop(props=[]){
+        if (props.length == 0) {
+            props = this.get_output_properties();
+        }
+
+        let unitstrs = {}
+        props.forEach((prop) => {
+            let propstr = '';
+            // Case it out by the property
+            if (prop == 'T'){
+                propstr = this.units['temperature'];
+            } else if (prop == 'p'){
+                propstr = this.units['pressure'];
+            } else if (prop == 'd'){
+                propstr = this.units['matter'] + '/' + this.units['volume'];
+            } else if (prop == 'v'){
+                propstr = this.units['volume'] + '/' + this.units['matter'];
+            } else if (prop == 'e' || prop == 'h') {
+                propstr = this.units['energy'] + '/' + this.units['matter'];
+            } else if (prop == 's' || prop == 'cp' || prop == 'cv') {
+                propstr = this.units['energy'] + '/ (' + this.units['matter'] + ' ' + this.units['temperature'] + ')';
+            } else {
+                propstr = '-';
+            }
+            unitstrs[prop] = propstr;
+        });
+        return unitstrs;
+    }
+
+    /**
      * Get all valid substance data
      * @returns valid_substances - dict of valid substances, keys are the
      *                              substance id, values are a dict with info
@@ -558,17 +592,20 @@ class PropEntryView{
     update(source, event, data){
         if (event == PointModel.EVENT_SUBSTANCE) {
             let prop_vals = this.get_values();  // Retain values
-            this.init(get_input_properties(), prop_vals);
+            this.init(get_input_properties(), get_unit_strings(), prop_vals);
+        } else if (event == PointModel.EVENT_UNIT) {
+            this.init(get_input_properties(), get_unit_strings());
         }
     }
 
     /**
      * Initialize things
      * @param input_properties - An array of input property strings
+     * @param unit_strings - A dict of units keyed by prop
      * @param prop_values - a dict keyed by property and with string values
      */
-    init(input_properties, prop_values=null) {
-        this.create_propform(input_properties);
+    init(input_properties, unit_strings=null, prop_values=null) {
+        this.create_propform(input_properties, unit_strings);
         this.set_form_values(prop_values);
     }
 
@@ -576,14 +613,18 @@ class PropEntryView{
      * Build the form. Note that an extra HTML attribute of propvalue will be
      * used to specify the actual property string separate from the name.
      * @param props - an array of property strings
+     * @param units - an dict of unit strings by prop
      */
-    create_propform(props) {
+    create_propform(props, units=null) {
         // Always start from scratch
         $(this.prop_table).empty();
 
         // Build a header
         let head = "<thead><tr>"
         props.forEach((prop) => {
+            if (units != null){
+                prop = prop + " (" + units[prop] +")";
+            }
             head = head + "<th>" + prop + "</th>";
         });
         head = head + "</tr></thead>";
@@ -1125,7 +1166,7 @@ class PlotView{
             // Build the strings that represent the tooltip
             let customrows = "";
             for (let i = 0; i < keylist.length; i++) {
-                customrows = customrows + keylist[i] + ": %{customdata[" + (i + 1) + "]}<br>";
+                customrows = customrows + keylist[i] + ": %{customdata[" + (i + 1) + "]:#.5g}<br>";
             }
 
             // Fully replace User Point trace, including the custom data
@@ -1315,7 +1356,7 @@ $(document).ready(function(){
         unitFormView.init(get_valid_units(), get_units());
         substanceFormView.init(get_valid_substances(), get_substance(), get_display_substances());
         propChooserView.init(get_output_properties(), pointModel.DEFAULT_PROP_SHORTLIST);
-        propEntryView.init(get_input_properties());
+        propEntryView.init(get_input_properties(), get_unit_strings());
     });
 });
 
@@ -1410,10 +1451,14 @@ function get_units(){
     return pointModel.get_units();
 }
 
+function get_unit_strings(){
+    return pointModel.get_units_for_prop();
+}
+
 function set_units(units){
     pointModel.set_units(units);
     if (get_substance() != null){
-        get_auxline();
+        calc_auxline();
     }
 }
 
