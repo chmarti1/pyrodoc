@@ -602,18 +602,24 @@ class UnitFormView{
  */
 class PropEntryView{
     constructor(formHTMLid) {
-        this.target = formHTMLid;
-        this.prop_table = "#propinput";
-        this.prop_form = "#propform";
+        this.target = $("#"+formHTMLid);
+        this.prop_table_name = "propinput";
+        this.prop_form_name = "propform";
+        this.post_button_name = "post_props";
 
-        this.get_button = "#get_props";
-        this.post_button = "#post_props";
+        let propform = $('<form/>').attr({id: this.prop_form_name});
+        this.target.append(propform);
+        this.prop_form = $("#"+this.prop_form_name, this.target);
 
-        // Since these are callbacks they need to be bound to this
-        this.get_onclick = this.get_onclick.bind(this);
+        let proptable = $('<table/>').attr({id: this.prop_table_name});
+        this.target.append(proptable);
+        this.prop_table = $("#"+this.prop_table_name, this.target);
+
+        let postbutton = $('<input/>').attr({type: 'button', id: this.post_button_name, value: "Compute"});
+        this.target.append(postbutton);
+        this.post_button = $("#"+this.post_button_name, this.target);
         this.post_onclick = this.post_onclick.bind(this);
-        $(this.get_button).on("click", this.get_onclick);
-        $(this.post_button).on("click", this.post_onclick);
+        this.post_button.on("click", this.post_onclick);
     }
 
     update(source, event, data){
@@ -644,7 +650,7 @@ class PropEntryView{
      */
     create_propform(props, units=null) {
         // Always start from scratch
-        $(this.prop_table).empty();
+        this.prop_table.empty();
 
         // Build a header
         let head = "<thead><tr>"
@@ -656,7 +662,7 @@ class PropEntryView{
         });
         head = head + "</tr></thead>";
 
-        $(this.prop_table).append(head);
+        this.prop_table.append(head);
 
         // Build each input box
         let tr = $("<tr>")
@@ -666,7 +672,7 @@ class PropEntryView{
             let inputbox = `<input type="text" propvalue="${prop}" id="${prop}_input" name="${prop}_input">`;
             tr.append(td.append(inputbox));
         });
-        $(this.prop_table).append(tr);
+        this.prop_table.append(tr);
     }
 
     /**
@@ -675,7 +681,7 @@ class PropEntryView{
      */
     set_form_values(props) {
         if (props != null) {
-            $(this.prop_form + ' input').each((id, box) => {
+            $('input', this.prop_table).each((id, box) => {
                 let boxkey = box.attributes['propvalue'].nodeValue;
                 if (Object.keys(props).includes(boxkey)) {
                     box.value = props[boxkey];
@@ -692,7 +698,7 @@ class PropEntryView{
         let outdata = {}; // A dict of specified props
 
         // Loop over each input box
-        $(this.prop_form+ " input").each((id, box) =>{
+        $('input', this.prop_table).each((id, box) =>{
             let value = box.value;
             if (value !== ""){ // If specified, add it to the prop dict
                 let prop = box.attributes['propvalue'].nodeValue;
@@ -700,13 +706,6 @@ class PropEntryView{
             }
         });
         return outdata;
-    }
-
-    /**
-     * A callback to execute the GET operation. Probably not needed for deployment
-     */
-    get_onclick(){
-        compute_point(this.get_values(), "GET");
     }
 
     /**
@@ -1399,7 +1398,7 @@ $(document).ready(function(){
     substanceFormView = new SubstanceFormView('substance_controls');
     propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY);
     isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T','d','p','s','h','x']);
-    propEntryView = new PropEntryView("#property_controls");
+    propEntryView = new PropEntryView("property_controls");
     tableView = new TableView('property_table');
     plotView = new PlotView("plot");
 
