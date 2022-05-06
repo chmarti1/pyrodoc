@@ -698,22 +698,27 @@ class PropEntryView{
  */
 class PropChooserView extends Subject{
     static EVENT_PROPERTY_VISIBILITY = 'propvis'; // When the checkboxes change
-    constructor(formHTMLid) {
+    constructor(target_div_id, event_type) {
         super();
-        this.target = formHTMLid;
+        this.event_type = event_type;
+
+        this.target_name = target_div_id;
         this.hide_checks_name = "propchoice_hide";
         this.prop_checks_name = "propchecks";
 
+        // Initialize selectors for the components that make up this control
+        this.target = null;
+        this.hide_checks = null;
+        this.prop_checks = null;
+
         // Since these will be used as callbacks, they need to be bound
         this.checkbox_onchange = this.checkbox_onchange.bind(this);
-
-        this.hide_onclick = this.hide_onclick.bind(this);
     }
 
     update(source, event, data) {
         if (event == PointModel.EVENT_SUBSTANCE) {
             let disp_props = this.get_checkbox_values();
-            this.init(get_output_properties(), disp_props);
+            this.init(source.get_output_properties(), disp_props);
         }
     }
 
@@ -723,19 +728,29 @@ class PropChooserView extends Subject{
      * @param show_properties - an array of properties that are true
      */
     init(valid_properties, show_properties) {
-        let hidebutton = $('<input/>').attr({type: 'button', id: this.hide_checks_name, value: "Show Props"});
-        $(this.target).append(hidebutton);
-        this.hide_checks = $('#'+this.hide_checks_name);
-        this.hide_checks.on("click", this.hide_onclick);
+        this.target = $("#" + this.target_name);
 
+        // Create the show/hide button
+        let hidebutton = $('<input/>').attr({type: 'button', id: this.hide_checks_name, value: "Show Props"});
+        this.target.append(hidebutton);
+        // Get its selector
+        this.hide_checks = $('#'+this.hide_checks_name, this.target);
+
+        // Create a <ul> to hold the checklist
         let checklist = $('<ul/>').attr({id: this.prop_checks_name, style: "display: none"});
-        $(this.target).append(checklist);
-        this.prop_checks = $('#'+this.prop_checks_name);
+        this.target.append(checklist);
+        // Get its selector
+        this.prop_checks = $('#'+this.prop_checks_name, this.target);
+
+        this.hide_checks.on("click", () =>{
+            this.prop_checks.toggle();  // Toggle visibility of checklist
+        });
+
 
         this.create_checkboxes(valid_properties);
         this.set_checkbox_values(show_properties);
 
-        this.notify(this,PropChooserView.EVENT_PROPERTY_VISIBILITY, this.get_checkbox_values());
+        this.notify(this, this.event_type, this.get_checkbox_values());
     }
 
     /**
@@ -750,6 +765,7 @@ class PropChooserView extends Subject{
             let $li = $("<li>")
             let $label = $('<label>' + prop + '</label>', {});
 
+            // Add this checkbox
             let $checkbox = $('<input>',{
                 type: "checkbox",
                 value: prop,
@@ -779,7 +795,7 @@ class PropChooserView extends Subject{
      */
     get_checkbox_values() {
         let names = [];
-        $('#'+this.prop_checks_name + ' input:checked').each((id, box) => {
+        $('input:checked', this.prop_checks).each((id, box) => {
             names.push(box.value);
         });
         return names;
@@ -791,7 +807,7 @@ class PropChooserView extends Subject{
      */
     set_checkbox_values(show_properties) {
 
-        $('#'+this.prop_checks_name + ' input').each((id, box) => {
+        $('input', this.prop_checks).each((id, box) => {
             let prop = box.value;
             let checked = show_properties.includes(prop);
             if (checked) {
@@ -800,13 +816,6 @@ class PropChooserView extends Subject{
                 box.checked = false;
             }
         });
-    }
-
-    /**
-     * Toggle visibility of properties
-     */
-    hide_onclick(){
-        this.prop_checks.toggle();
     }
 
 
@@ -1335,7 +1344,7 @@ $(document).ready(function(){
     pointModel = new PointModel();
     unitFormView = new UnitFormView('#unitform');
     substanceFormView = new SubstanceFormView('#sel_substance');
-    propChooserView = new PropChooserView("#property_selection")
+    propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY)
     propEntryView = new PropEntryView("#property_controls")
     tableView = new TableView('#proptable');
     plotView = new PlotView("plot");
