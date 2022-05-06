@@ -698,36 +698,17 @@ class PropEntryView{
  */
 class PropChooserView extends Subject{
     static EVENT_PROPERTY_VISIBILITY = 'propvis'; // When the checkboxes change
-    constructor(target_div_id, event_type) {
+    static EVENT_ISOLINE_VISIBILITY = 'isolinevis'; // When the checkboxes change
+    constructor(target_div_id, event_type, shortlist = null) {
         super();
         this.event_type = event_type;
+        this.shortlist = shortlist;
 
         this.target_name = target_div_id;
         this.hide_checks_name = "propchoice_hide";
         this.prop_checks_name = "propchecks";
 
         // Initialize selectors for the components that make up this control
-        this.target = null;
-        this.hide_checks = null;
-        this.prop_checks = null;
-
-        // Since these will be used as callbacks, they need to be bound
-        this.checkbox_onchange = this.checkbox_onchange.bind(this);
-    }
-
-    update(source, event, data) {
-        if (event == PointModel.EVENT_SUBSTANCE) {
-            let disp_props = this.get_checkbox_values();
-            this.init(source.get_output_properties(), disp_props);
-        }
-    }
-
-    /**
-     * Initialize
-     * @param valid_properties - an array of valid property strings
-     * @param show_properties - an array of properties that are true
-     */
-    init(valid_properties, show_properties) {
         this.target = $("#" + this.target_name);
 
         // Create the show/hide button
@@ -746,7 +727,24 @@ class PropChooserView extends Subject{
             this.prop_checks.toggle();  // Toggle visibility of checklist
         });
 
+        // Since these will be used as callbacks, they need to be bound
+        this.checkbox_onchange = this.checkbox_onchange.bind(this);
+    }
 
+
+    update(source, event, data) {
+        if (event == PointModel.EVENT_SUBSTANCE) {
+            let disp_props = this.get_checkbox_values();
+            this.init(source.get_output_properties(), disp_props);
+        }
+    }
+
+    /**
+     * Initialize
+     * @param valid_properties - an array of valid property strings
+     * @param show_properties - an array of properties that are true
+     */
+    init(valid_properties, show_properties) {
         this.create_checkboxes(valid_properties);
         this.set_checkbox_values(show_properties);
 
@@ -761,23 +759,25 @@ class PropChooserView extends Subject{
         this.prop_checks.empty();
         // Loop over all properties
         valid_properties.forEach(prop => {
-            // The form will be a list of labelled check boxes
-            let $li = $("<li>")
-            let $label = $('<label>' + prop + '</label>', {});
+            if (this.shortlist == null || this.shortlist.includes(prop)) {
+                // The form will be a list of labelled check boxes
+                let $li = $("<li>")
+                let $label = $('<label>' + prop + '</label>', {});
 
-            // Add this checkbox
-            let $checkbox = $('<input>',{
-                type: "checkbox",
-                value: prop,
-                id: prop+'_box',
-                name: prop+'_box'
-            });
+                // Add this checkbox
+                let $checkbox = $('<input>', {
+                    type: "checkbox",
+                    value: prop,
+                    id: prop + '_box',
+                    name: prop + '_box'
+                });
 
-            // add the callback
-            $checkbox.on("click", this.checkbox_onchange);
+                // add the callback
+                $checkbox.on("click", this.checkbox_onchange);
 
-            // Add the objects to the form
-            this.prop_checks.append($li.append($label).append($checkbox));
+                // Add the objects to the form
+                this.prop_checks.append($li.append($label).append($checkbox));
+            }
         });
     }
 
@@ -786,7 +786,7 @@ class PropChooserView extends Subject{
      */
     checkbox_onchange(){
         let disp_props = this.get_checkbox_values();
-        this.notify(this, PropChooserView.EVENT_PROPERTY_VISIBILITY, disp_props);
+        this.notify(this, this.event_type, disp_props);
     }
 
     /**
@@ -869,6 +869,7 @@ class PlotView{
     constructor(divTarget) {
         // TODO - axis labels, plot quality
         this.dispprops = ['T','s','p','v'];
+        this.dispisos = ['T', 'p', 'h'];
         this.target = divTarget;
         this.container = document.getElementById(divTarget);
 
@@ -1073,14 +1074,17 @@ class PlotView{
     }
 
     update(source, event, data){
-        if (event == PointModel.EVENT_POINT_ADD || event == PointModel.EVENT_POINT_DELETE){
+        if (event === PointModel.EVENT_POINT_ADD || event === PointModel.EVENT_POINT_DELETE){
             this.updatePoints(source.get_points());
-        } else if (event == PointModel.EVENT_INIT_POINTS) {
+        } else if (event === PointModel.EVENT_INIT_POINTS) {
             this.init();
-        } else if (event == PropChooserView.EVENT_PROPERTY_VISIBILITY){
+        } else if (event === PropChooserView.EVENT_PROPERTY_VISIBILITY) {
             this.dispprops = data;
             this.updatePoints(get_points());
-        } else if (event == PointModel.EVENT_AUXLINE_ADD) {
+        } else if (event === PropChooserView.EVENT_ISOLINE_VISIBILITY){
+            this.dispisos = data;
+            this.draw_auxlines(get_auxlines());
+        } else if (event === PointModel.EVENT_AUXLINE_ADD) {
             this.draw_auxlines(source.get_auxlines());
         }
     }
@@ -1109,41 +1113,51 @@ class PlotView{
 
             // Establish the index in the order of the traces
             let ind = this.TRACEORDER.indexOf(prop);
-            if (ind > 0) {  // 0 is the Point data
+            if (ind > 0) { // ind 0 is the user points
 
                 // Make a placeholder for the updates
                 let iso_update = null;
 
-                // Loop over all the aux lines that are in the "global" category
-                data['global'].forEach((line) => {
+                if (prop == 'steamdome' ||
+                    (this.x_prop != prop && this.y_prop != prop &&
+                        this.dispisos.includes(prop))
+                ) {
+                    // Loop over all the aux lines that are in the "global" category
+                    data['global'].forEach((line) => {
 
-                    if (line['type'] == prop) {
+                        if (line['type'] == prop) {
 
-                        // Initialize the trace update on the first call
-                        if (iso_update == null) {
-                            iso_update = {};
+                            // Initialize the trace update on the first call
+                            if (iso_update == null) {
+                                iso_update = {};
+                                Object.keys(line['data']).forEach((key) => {
+                                    iso_update[key] = [];
+                                });
+                            }
+
+                            // Add the line to the trace property by property
                             Object.keys(line['data']).forEach((key) => {
-                                iso_update[key] = [];
+                                iso_update[key] = iso_update[key].concat(line['data'][key]);
+                                iso_update[key].push(null);
                             });
                         }
-
-                        // Add the line to the trace property by property
-                        Object.keys(line['data']).forEach((key) => {
-                            iso_update[key] = iso_update[key].concat(line['data'][key]);
-                            iso_update[key].push(null);
-                        });
-                    }
-                });
+                    });
+                }
 
                 // Send the updated traces to the actual plot
+                let update = {
+                        x: [null],
+                        y: [null],
+                        customdata: [null]  // Display their text
+                    };
                 if (iso_update != null) {
-                    let update = {
+                    update = {
                         x: [iso_update[this.x_prop]],
                         y: [iso_update[this.y_prop]],
                         customdata: [iso_update[prop]]  // Display their text
                     };
-                    Plotly.restyle(this.container, update, [ind]);
                 }
+                Plotly.restyle(this.container, update, [ind]);
             }
         });
     }
@@ -1332,6 +1346,7 @@ class TableView{
 var unitFormView;
 var substanceFormView;
 var propChooserView;
+var isolineChooserView;
 var propEntryView;
 var plotView;
 var tableView;
@@ -1344,8 +1359,9 @@ $(document).ready(function(){
     pointModel = new PointModel();
     unitFormView = new UnitFormView('#unitform');
     substanceFormView = new SubstanceFormView('#sel_substance');
-    propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY)
-    propEntryView = new PropEntryView("#property_controls")
+    propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY);
+    isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T','d','p','s','h','x']);
+    propEntryView = new PropEntryView("#property_controls");
     tableView = new TableView('#proptable');
     plotView = new PlotView("plot");
 
@@ -1362,17 +1378,21 @@ $(document).ready(function(){
         pointModel.addListener(tableView);
         pointModel.addListener(plotView);
         pointModel.addListener(propChooserView);
+        pointModel.addListener(isolineChooserView);
         pointModel.addListener(propEntryView);
 
         // Assign views to listen to the views that hold state data
         propChooserView.addListener(tableView);
         propChooserView.addListener(plotView);
 
+        isolineChooserView.addListener(plotView);
+
         // Call inits on views now that the properties exist
         tableView.init(get_output_properties());
         unitFormView.init(get_valid_units(), get_units());
         substanceFormView.init(get_valid_substances(), get_substance(), get_display_substances());
         propChooserView.init(get_output_properties(), pointModel.DEFAULT_PROP_SHORTLIST);
+        isolineChooserView.init(get_output_properties(), ['T','p','x']);
         propEntryView.init(get_input_properties(), get_unit_strings());
     });
 });
