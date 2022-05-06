@@ -205,6 +205,8 @@ class PointModel extends Subject{
      *                  values are the unit value as a string
      */
     get_units_for_prop(props=[]){
+        if (this.units === null) { return ""; }
+
         if (props.length == 0) {
             props = this.get_output_properties();
         }
@@ -213,13 +215,13 @@ class PointModel extends Subject{
         props.forEach((prop) => {
             let propstr = '';
             // Case it out by the property
-            if (prop == 'T'){
+            if (prop == 'T') {
                 propstr = this.units['temperature'];
-            } else if (prop == 'p'){
+            } else if (prop == 'p') {
                 propstr = this.units['pressure'];
-            } else if (prop == 'd'){
+            } else if (prop == 'd') {
                 propstr = this.units['matter'] + '/' + this.units['volume'];
-            } else if (prop == 'v'){
+            } else if (prop == 'v') {
                 propstr = this.units['volume'] + '/' + this.units['matter'];
             } else if (prop == 'e' || prop == 'h') {
                 propstr = this.units['energy'] + '/' + this.units['matter'];
@@ -230,7 +232,11 @@ class PointModel extends Subject{
             }
             unitstrs[prop] = propstr;
         });
-        return unitstrs;
+        if (props.length == 1) {
+            return unitstrs[props[0]];
+        } else {
+            return unitstrs;
+        }
     }
 
     /**
@@ -1020,12 +1026,12 @@ class PlotView{
 
         this.layout = {
             xaxis: {
-                title: this.x_prop,
+                title: this.x_prop + " (" + get_unit_strings([this.x_prop])+")",
                 type: x_scale,
                 autorange: true
             },
             yaxis: {
-                title: this.y_prop,
+                title: this.y_prop + " (" + get_unit_strings([this.y_prop])+")",
                 type: y_scale,
                 autorange: true
             },
@@ -1076,8 +1082,9 @@ class PlotView{
     update(source, event, data){
         if (event === PointModel.EVENT_POINT_ADD || event === PointModel.EVENT_POINT_DELETE){
             this.updatePoints(source.get_points());
-        } else if (event === PointModel.EVENT_INIT_POINTS) {
+        } else if (event === PointModel.EVENT_INIT_POINTS || event === PointModel.EVENT_UNIT) {
             this.init();
+            this.draw_auxlines(source.get_auxlines());
         } else if (event === PropChooserView.EVENT_PROPERTY_VISIBILITY) {
             this.dispprops = data;
             this.updatePoints(get_points());
@@ -1225,7 +1232,10 @@ class TableView{
     // delete rows? https://stackoverflow.com/questions/64526856/how-to-add-edit-delete-buttons-in-each-row-of-datatable
     // showhide columns https://datatables.net/examples/api/show_hide.html
     constructor(divTarget) {
-        this.target = divTarget;
+        this.target = $("#"+divTarget);
+        this.tabletarget = $("<table id='proptable'></table>");
+        this.target.append(this.tabletarget);
+        this.proptext_to_id = {};
         this.table = null
     }
 
@@ -1236,24 +1246,29 @@ class TableView{
         }
 
         if (this.table == null){
-            let $tablediv = $(this.target);
-            $tablediv.empty();
+            this.tabletarget.empty();
             let $head = $('<thead></thead>');
             let $foot = $('<tfoot></tfoot>'); // Havent figured out the footer
             let $r = $('<tr></tr>')
+            this.proptext_to_id = {};
             this.dispprops.forEach((prop) =>{
-                let $th = $('<th>'+prop+'</th>');
+                let propstr = prop;
+                if (prop != 'ptid'){
+                    propstr = propstr + " ("+get_unit_strings([prop])+")";
+                    this.proptext_to_id[propstr] = prop;
+                }
+                let $th = $('<th>'+propstr+'</th>');
                 $r.append($th);
             });
             $r.append('<th>Ctrl</th>');
             $head.append($r);
             //$foot.append($r);
-            $tablediv.append($head);
+            this.tabletarget.append($head);
             //$tablediv.append($foot);
 
 
             // Build the data table with null content. Insert the delete button in the extra column.
-            let table = new DataTable(this.target, {
+            let table = new DataTable(this.tabletarget, {
                 "columnDefs": [ {
                     "targets": -1,
                     "data": null,
@@ -1262,7 +1277,7 @@ class TableView{
             });
 
             // Click handler for each row's delete button
-            $(this.target + ' tbody').on( 'click', 'button', function () {
+            $('tbody', this.tabletarget).on( 'click', 'button', function () {
                 let data = table.row( $(this).parents('tr') ).data();
                 delete_point(data[0]);
             } );
@@ -1297,7 +1312,7 @@ class TableView{
             let col = this.table.column(ind);
             let name = col.header().textContent
             // Always display ptid and ctrl columns
-            if (columns.includes(name) || name=="ptid" || name=="Ctrl"){
+            if (name=="ptid" || name=="Ctrl" || columns.includes(this.proptext_to_id[name]) ){
                 col.visible(true);
             } else {
                 col.visible(false);
@@ -1362,7 +1377,7 @@ $(document).ready(function(){
     propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY);
     isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T','d','p','s','h','x']);
     propEntryView = new PropEntryView("#property_controls");
-    tableView = new TableView('#proptable');
+    tableView = new TableView('property_table');
     plotView = new PlotView("plot");
 
     // getInfo is an async request, so use the callback to complete setup.
@@ -1389,6 +1404,7 @@ $(document).ready(function(){
 
         // Call inits on views now that the properties exist
         tableView.init(get_output_properties());
+        plotView.init();
         unitFormView.init(get_valid_units(), get_units());
         substanceFormView.init(get_valid_substances(), get_substance(), get_display_substances());
         propChooserView.init(get_output_properties(), pointModel.DEFAULT_PROP_SHORTLIST);
@@ -1488,8 +1504,8 @@ function get_units(){
     return pointModel.get_units();
 }
 
-function get_unit_strings(){
-    return pointModel.get_units_for_prop();
+function get_unit_strings(props=[]){
+    return pointModel.get_units_for_prop(props);
 }
 
 function set_units(units){

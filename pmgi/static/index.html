@@ -18,7 +18,9 @@
         <input type="button" id="unit_hide" value="Units"/>
         <ul id="hideablelist" style="display: none">
             <form id="unitform">
+
                 <!--  Will be filled in by JS -->
+
             </form>
             <input type="button" id="unit_apply" value="Apply" style="display: none"/>
             <input type="button" id="unit_revert" value="Revert" style="display: none"/>
@@ -33,7 +35,9 @@
         development on the backed.<br>
         <label>Select Substance: </label>
         <select id="sel_substance">
-            <!-- Populated by JS -->
+
+            <!-- Options populated by JS -->
+
         </select>
     </div>
 
@@ -55,20 +59,26 @@
         <h3>Property Display Selection</h3>
         User can specify which properties should be shown in the table. Expand
         and adjust the checkboxes as desired.<br>
+
+        <!-- Control Inserted by JS -->
+
     </div>
     <div id="isoline_selection">
         <h3>Isoline Display Selection</h3>
         User can specify which isobars should be shown in the plot. Expand
         and adjust the checkboxes as desired.<br>
+
+        <!-- Control Inserted by JS -->
+
     </div>
-    <div id="property_display">
+    <div id="property_table" style="width:864px;">
         <h3>Property Table</h3>
         Most interactivity provided by Datatables. Should be responsive to which
         properties are checked in the property selection. Lots of cleanup and display
         optimization is needed here, but the basic functionality exists. Prettify!<br>
-        <table id="proptable">
-            <!-- Populated by JS -->
-        </table>
+
+        <!-- Table Inserted by JS -->
+
     </div>
     <div>
         <h3>Plot</h3>
@@ -89,9 +99,10 @@
             <option value="T" selected>T</option>
             <option value="p">p</option>
         </select>
-        <div id="plot" style="width:600px;height:400px;">
+        <div id="plot" style="width:800px;height:600px;">
 
             <!-- Will be filled in by JS -->
+
         </div>
     </div>
 </div>
