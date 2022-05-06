@@ -894,6 +894,7 @@ class PlotView{
 
     constructor(divTarget) {
         // TODO - plot quality
+        // TODO - move instantiation to JS
         this.dispprops = ['T','s','p','v'];
         this.dispisos = ['T', 'p', 'h'];
         this.target = divTarget;
