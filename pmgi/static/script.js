@@ -701,14 +701,13 @@ class PropChooserView extends Subject{
     constructor(formHTMLid) {
         super();
         this.target = formHTMLid;
-        this.hide_checks = "#propchoice_hide";
-        this.prop_checks = "#propchecks";
+        this.hide_checks_name = "propchoice_hide";
+        this.prop_checks_name = "propchecks";
 
         // Since these will be used as callbacks, they need to be bound
         this.checkbox_onchange = this.checkbox_onchange.bind(this);
 
         this.hide_onclick = this.hide_onclick.bind(this);
-        $(this.hide_checks).on("click", this.hide_onclick);
     }
 
     update(source, event, data) {
@@ -724,6 +723,15 @@ class PropChooserView extends Subject{
      * @param show_properties - an array of properties that are true
      */
     init(valid_properties, show_properties) {
+        let hidebutton = $('<input/>').attr({type: 'button', id: this.hide_checks_name, value: "Show Props"});
+        $(this.target).append(hidebutton);
+        this.hide_checks = $('#'+this.hide_checks_name);
+        this.hide_checks.on("click", this.hide_onclick);
+
+        let checklist = $('<ul/>').attr({id: this.prop_checks_name, style: "display: none"});
+        $(this.target).append(checklist);
+        this.prop_checks = $('#'+this.prop_checks_name);
+
         this.create_checkboxes(valid_properties);
         this.set_checkbox_values(show_properties);
 
@@ -735,7 +743,7 @@ class PropChooserView extends Subject{
      * @param valid_properties - an array of valid property strings
      */
     create_checkboxes(valid_properties) {
-        $(this.prop_checks).empty();
+        this.prop_checks.empty();
         // Loop over all properties
         valid_properties.forEach(prop => {
             // The form will be a list of labelled check boxes
@@ -753,7 +761,7 @@ class PropChooserView extends Subject{
             $checkbox.on("click", this.checkbox_onchange);
 
             // Add the objects to the form
-            $(this.prop_checks).append($li.append($label).append($checkbox));
+            this.prop_checks.append($li.append($label).append($checkbox));
         });
     }
 
@@ -771,7 +779,7 @@ class PropChooserView extends Subject{
      */
     get_checkbox_values() {
         let names = [];
-        $(this.prop_checks + ' input:checked').each((id, box) => {
+        $('#'+this.prop_checks_name + ' input:checked').each((id, box) => {
             names.push(box.value);
         });
         return names;
@@ -783,7 +791,7 @@ class PropChooserView extends Subject{
      */
     set_checkbox_values(show_properties) {
 
-        $(this.prop_checks + ' input').each((id, box) => {
+        $('#'+this.prop_checks_name + ' input').each((id, box) => {
             let prop = box.value;
             let checked = show_properties.includes(prop);
             if (checked) {
@@ -798,7 +806,7 @@ class PropChooserView extends Subject{
      * Toggle visibility of properties
      */
     hide_onclick(){
-        $(this.prop_checks).toggle();
+        this.prop_checks.toggle();
     }
 
 
