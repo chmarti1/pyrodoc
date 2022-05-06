@@ -139,7 +139,7 @@ class PointModel extends Subject{
         let keys = this.get_output_properties();
         keys.push('ptid');
         keys.forEach((key) =>{
-             this.points[key] = [];
+            this.points[key] = [];
         });
 
         // Keep the global aux lines (i.e. assume substance constant)
@@ -702,10 +702,10 @@ class PropChooserView extends Subject{
             let $label = $('<label>' + prop + '</label>', {});
 
             let $checkbox = $('<input>',{
-                    type: "checkbox",
-                    value: prop,
-                    id: prop+'_box',
-                    name: prop+'_box'
+                type: "checkbox",
+                value: prop,
+                id: prop+'_box',
+                name: prop+'_box'
             });
 
             // add the callback
@@ -805,11 +805,10 @@ Number.prototype.between = function(min, max) {
  */
 class PlotView{
     TRACEORDER = ['user','steamdome','p','T','d', 'h', 's', 'x']
+    TRACENAMES = ['User Data', 'Steam Dome', 'Const. p', 'Const. T', 'Const. d', 'Const. h', 'Const. s', 'Const. x']
+    TRACECOLORS = ['']
 
     constructor(divTarget) {
-        // TODO - variable plot x- and y-axes
-        // TODO - Additional background data, steam dome, isolines
-        // TODO - variable display props in popups
         // TODO - axis labels, plot quality
         this.dispprops = ['T','s','p','v'];
         this.target = divTarget;
@@ -860,8 +859,8 @@ class PlotView{
             mode: 'lines',
             type: 'scatter',
             name: 'isolines p',
-            hovertemplate: "<b>Isobar<br></b>"+
-                "p: %{customdata}",
+            hovertemplate: "<b>Isobar</b><br>"+
+                "p: %{customdata:.5g}",
             showlegend: false,
             line: {
                 color: 'rgb(0, 100, 0)',
@@ -874,8 +873,8 @@ class PlotView{
             mode: 'lines',
             type: 'scatter',
             name: 'isolines p',
-            hovertemplate: "<b>Isotherm<br></b>"+
-                "T: %{customdata}",
+            hovertemplate: "<b>Isotherm</b><br>"+
+                "T: %{customdata:#.4g}",
             showlegend: false,
             line: {
                 color: 'rgb(155, 0, 0)',
@@ -888,8 +887,8 @@ class PlotView{
             mode: 'lines',
             type: 'scatter',
             name: 'isolines d',
-            hovertemplate: "<b>Iso-d Line<br></b>"+
-                "d: %{customdata}",
+            hovertemplate: "<b>Iso-d Line</b><br>"+
+                "d: %{customdata:#.4g}",
             showlegend: false,
             line: {
                 color: 'rgb(0, 155, 155)',
@@ -902,8 +901,8 @@ class PlotView{
             mode: 'lines',
             type: 'scatter',
             name: 'isolines h',
-            hovertemplate: "<b>Iso-h Line<br></b>"+
-                "h: %{customdata}",
+            hovertemplate: "<b>Iso-h Line</b><br>"+
+                "h: %{customdata:#.4g}",
             showlegend: false,
             line: {
                 color: 'rgb(155, 155, 0)',
@@ -916,8 +915,8 @@ class PlotView{
             mode: 'lines',
             type: 'scatter',
             name: 'isolines s',
-            hovertemplate: "<b>Iso-s line<br></b>"+
-                "s: %{customdata}",
+            hovertemplate: "<b>Iso-s line</b><br>"+
+                "s: %{customdata:#.3g}",
             showlegend: false,
             line: {
                 color: 'rgb(0, 0, 155)',
@@ -930,8 +929,8 @@ class PlotView{
             mode: 'lines',
             type: 'scatter',
             name: 'isolines x',
-            hovertemplate: "<b>Iso-x line<br></b>"+
-                "x: %{customdata}",
+            hovertemplate: "<b>Iso-x line</b><br>"+
+                "x: %{customdata:#.2g}",
             showlegend: false,
             line: {
                 color: 'rgb(155, 0, 155)',
@@ -1015,7 +1014,6 @@ class PlotView{
         });
     }
 
-
     update(source, event, data){
         if (event == PointModel.EVENT_POINT_ADD || event == PointModel.EVENT_POINT_DELETE){
             this.updatePoints(source.get_points());
@@ -1029,37 +1027,6 @@ class PlotView{
         }
     }
 
-    draw_auxlines(data){
-        this.TRACEORDER.forEach((prop) =>{
-           let ind = this.TRACEORDER.indexOf(prop);
-           if (ind > 0) {
-               let iso_update = null;
-               data['global'].forEach((line) => {
-                   if (line['type'] == prop) {
-                       if (iso_update == null) {
-                           iso_update = {};
-                           Object.keys(line['data']).forEach((key) => {
-                               iso_update[key] = [];
-                           });
-                       }
-                       Object.keys(line['data']).forEach((key) => {
-                           iso_update[key] = iso_update[key].concat(line['data'][key]);
-                           iso_update[key].push(null);
-                       });
-                   }
-               });
-
-               if (iso_update != null) {
-                   let update = {
-                       x: [iso_update[this.x_prop]],
-                       y: [iso_update[this.y_prop]],
-                       customdata: [iso_update[prop]]
-                   };
-                   Plotly.restyle(this.container, update, [ind]);
-               }
-           }
-        });
-    }
 
     onChangeAxes(){
         this.setAxes($('#xprop').val(), $('#yprop').val())
@@ -1073,16 +1040,67 @@ class PlotView{
         this.y_prop = yprop;
     }
 
+
+    /**
+     * Handle updates to the auxiliary lines on the plot (i.e. isobars, dome)
+     * @param data - the isolines dict corresponding to PointModel.get_auxlines()
+     */
+    draw_auxlines(data){
+        // Loop over every iso-trace that we put in the diagram
+        this.TRACEORDER.forEach((prop) =>{
+
+            // Establish the index in the order of the traces
+            let ind = this.TRACEORDER.indexOf(prop);
+            if (ind > 0) {  // 0 is the Point data
+
+                // Make a placeholder for the updates
+                let iso_update = null;
+
+                // Loop over all the aux lines that are in the "global" category
+                data['global'].forEach((line) => {
+
+                    if (line['type'] == prop) {
+
+                        // Initialize the trace update on the first call
+                        if (iso_update == null) {
+                            iso_update = {};
+                            Object.keys(line['data']).forEach((key) => {
+                                iso_update[key] = [];
+                            });
+                        }
+
+                        // Add the line to the trace property by property
+                        Object.keys(line['data']).forEach((key) => {
+                            iso_update[key] = iso_update[key].concat(line['data'][key]);
+                            iso_update[key].push(null);
+                        });
+                    }
+                });
+
+                // Send the updated traces to the actual plot
+                if (iso_update != null) {
+                    let update = {
+                        x: [iso_update[this.x_prop]],
+                        y: [iso_update[this.y_prop]],
+                        customdata: [iso_update[prop]]  // Display their text
+                    };
+                    Plotly.restyle(this.container, update, [ind]);
+                }
+            }
+        });
+    }
+
     /**
      * Handling points being added to the list of points
      * @param points
      */
     updatePoints(points) {
-        // Build the customdata object for the tooltip
-        // Object has the form [[h1,v1,s1],[h2,v2,s2],[h3,v3,s3]]
+        // Build the customdata object for the tooltip according to the API
+        // Object takes the form [[h1,v1,s1,...],[h2,v2,s2,...],[h3,v3,s3,...]]
 
+        // Loop over all the points
         let allkeys = Object.keys(points);
-        if (allkeys.length >0) {
+        if (allkeys.length >0) {  // Only if there are points
             let customdataset = [];  // The custom data that will be added to the tooltip
             let keylist = [];
             for (let i = 0; i < points['ptid'].length; i++) {  // Loop over all points
@@ -1102,26 +1120,27 @@ class PlotView{
                 customdataset.push(arr);
             }
 
-            // customdataset is now (ptid, T, p, v, ...)
+            // customdataset is now ordered as (ptid, T, p, v, ...)
 
-            // Build the strings that identify the points
+            // Build the strings that represent the tooltip
             let customrows = "";
             for (let i = 0; i < keylist.length; i++) {
                 customrows = customrows + keylist[i] + ": %{customdata[" + (i + 1) + "]}<br>";
             }
 
-            // Fully replace trace, including the custom data
+            // Fully replace User Point trace, including the custom data
             let update = {
                 x: [points[this.x_prop]],
                 y: [points[this.y_prop]],
                 customdata: [customdataset],
-                hovertemplate: "<b> Point %{customdata[0]}</b><br>" +
+                hovertemplate: "<b>Point %{customdata[0]}</b><br>" +
                     this.x_prop + ": %{x}<br>" +
                     this.y_prop + ": %{y}<br>" +
                     customrows,
             }
-            // May need to adjust traceID when we accommodate the isolines, etc.
-            Plotly.restyle(this.container, update, [0])
+
+            let ind = this.TRACEORDER.indexOf('user');
+            Plotly.restyle(this.container, update, [ind])
         }
     }
 }
