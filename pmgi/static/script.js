@@ -455,24 +455,41 @@ class SubstanceFormView{
 class UnitFormView{
 
     constructor(formHTMLid) {
-        this.target = formHTMLid;
-        this.unit_list_div = "#hideablelist"; // Target for the unit selects
+        this.target = $("#"+formHTMLid);
+        this.button_hide_name = "unit_hide";
+        this.unit_list_div_name = "hideablelist";
+        this.unit_form_name = "unitform";
+        this.button_apply_name = "unit_apply";
+        this.button_revert_name = "unit_revert";
 
-        // Button to hide the whole form
-        this.button_hide = "#unit_hide"
-
-        // Buttons for apply/revert functionality since multiple options may change at once
-        this.button_apply = "#unit_apply";
-        this.button_revert = "#unit_revert";
-
-        // Because these are callbacks they need "this" bound.
-        this.apply_onclick = this.apply_onclick.bind(this);
-        this.revert_onclick = this.revert_onclick.bind(this);
-        $(this.button_apply).on("click", this.apply_onclick);
-        $(this.button_revert).on("click", this.revert_onclick);
-
+        // Create the hide button and assign its callback.
+        let hidebutton = $('<input/>').attr({type: 'button', id: this.button_hide_name, value: "Units"});
+        this.target.append(hidebutton);
+        this.button_hide = $('#'+this.button_hide_name, this.target);
         this.hide_onclick = this.hide_onclick.bind(this);
-        $(this.button_hide).on("click", this.hide_onclick);
+        this.button_hide.on("click", this.hide_onclick);
+
+
+        // Create a <ul> to hold the checklist, and the checklist
+        let unitlist = $('<ul/>').attr({id: this.unit_list_div_name, style: "display: none"});
+        this.target.append(unitlist);
+        this.unit_list_div = $('#'+this.unit_list_div_name, this.target);
+        let unitform = $('<form/>').attr({id: this.unit_form_name});
+        this.unit_list_div.append(unitform);
+        this.unit_form = $('#'+this.unit_form_name, this.target);
+
+        // Create the apply and revert buttons
+        let applybutton = $('<input/>').attr({type: 'button', id: this.button_apply_name, value: "Apply", style: "display: none"});
+        this.unit_list_div.append(applybutton);
+        this.button_apply = $('#'+this.button_apply_name, this.target);
+        this.apply_onclick = this.apply_onclick.bind(this);
+        this.button_apply.on("click", this.apply_onclick);
+
+        let revertbutton = $('<input/>').attr({type: 'button', id: this.button_revert_name, value: "Revert", style: "display: none"});
+        this.unit_list_div.append(revertbutton);
+        this.button_revert = $('#'+this.button_revert_name, this.target);
+        this.revert_onclick = this.revert_onclick.bind(this);
+        this.button_revert.on("click", this.revert_onclick);
     }
 
 
@@ -508,11 +525,11 @@ class UnitFormView{
             });
 
             $select.on("change", ()=>{
-                $(this.button_apply).show();
-                $(this.button_revert).show();
+                this.button_apply.show();
+                this.button_revert.show();
             });
             // Add the objects to the form
-            $(this.target).append($li.append($label).append($select));
+            this.unit_form.append($li.append($label).append($select));
         });
         // Set all the values
         this.set_values(current_values);
@@ -525,7 +542,7 @@ class UnitFormView{
     set_values(units){
         // Copy the values from a dict
         Object.keys(units).forEach(key => {
-            let selobj = $('[name="'+key+'"]');
+            let selobj = $('[name="'+key+'"]', this.target);
             selobj.val(units[key]);
         });
     }
@@ -536,7 +553,7 @@ class UnitFormView{
      */
     get_values(){
         // Convert the values to a dict
-        return Object.fromEntries(new FormData($(this.target)[0]));
+        return Object.fromEntries(new FormData(this.unit_form[0]));
     }
 
     /**
@@ -548,8 +565,8 @@ class UnitFormView{
         let success = confirm('Changing the units will reset all data. Are you sure?');
         if(success){
             // Pass the units to the controller
-            $(this.button_apply).hide();
-            $(this.button_revert).hide();
+            this.button_apply.hide();
+            this.button_revert.hide();
             set_units(this.get_values())
         } else {
             // do nothing and let the user figure it out
@@ -563,15 +580,15 @@ class UnitFormView{
     revert_onclick(){
         // revert back to what was set previously
         this.set_values(get_units());
-        $(this.button_apply).hide();
-        $(this.button_revert).hide();
+        this.button_apply.hide();
+        this.button_revert.hide();
     }
 
     /**
      * User clicks the show/hide button
      */
     hide_onclick(){
-        $(this.unit_list_div).toggle();
+        this.unit_list_div.toggle();
     }
 }
 
@@ -1373,7 +1390,7 @@ var pointModel;
 $(document).ready(function(){
     // Instantiate classes with their targets
     pointModel = new PointModel();
-    unitFormView = new UnitFormView('#unitform');
+    unitFormView = new UnitFormView('unit_controls');
     substanceFormView = new SubstanceFormView('#sel_substance');
     propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY);
     isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T','d','p','s','h','x']);
