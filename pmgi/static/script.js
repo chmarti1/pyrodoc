@@ -207,32 +207,32 @@ class PointModel extends Subject{
     get_units_for_prop(props=[]){
         if (this.units === null) { return ""; }
 
-        if (props.length == 0) {
+        if (props.length === 0) {
             props = this.get_output_properties();
         }
 
         let unitstrs = {}
         props.forEach((prop) => {
-            let propstr = '';
+            let propstr;
             // Case it out by the property
-            if (prop == 'T') {
+            if (prop === 'T') {
                 propstr = this.units['temperature'];
-            } else if (prop == 'p') {
+            } else if (prop === 'p') {
                 propstr = this.units['pressure'];
-            } else if (prop == 'd') {
+            } else if (prop === 'd') {
                 propstr = this.units['matter'] + '/' + this.units['volume'];
-            } else if (prop == 'v') {
+            } else if (prop === 'v') {
                 propstr = this.units['volume'] + '/' + this.units['matter'];
-            } else if (prop == 'e' || prop == 'h') {
+            } else if (prop === 'e' || prop === 'h') {
                 propstr = this.units['energy'] + '/' + this.units['matter'];
-            } else if (prop == 's' || prop == 'cp' || prop == 'cv') {
+            } else if (prop === 's' || prop === 'cp' || prop === 'cv') {
                 propstr = this.units['energy'] + '/ (' + this.units['matter'] + ' ' + this.units['temperature'] + ')';
             } else {
                 propstr = '-';
             }
             unitstrs[prop] = propstr;
         });
-        if (props.length == 1) {
+        if (props.length === 1) {
             return unitstrs[props[0]];
         } else {
             return unitstrs;
@@ -255,8 +255,7 @@ class PointModel extends Subject{
      */
     get_output_properties(){
         if (this.valid_substances != null && this.substance != null) {
-            let props = [...this.valid_substances[this.substance]['props']]
-            return props;
+            return [...this.valid_substances[this.substance]['props']]
         } else {
             return [];
         }
@@ -348,7 +347,7 @@ class PointModel extends Subject{
         this.delete_auxlines(id);
 
         // If this was the last point, we want to clear things out.
-        if (this.points['ptid'].length == 0){
+        if (this.points['ptid'].length === 0){
             this.init_points();
         } else {
             this.notify(this, PointModel.EVENT_POINT_DELETE, id);
@@ -400,7 +399,7 @@ class SubstanceFormView{
     }
 
     update(source, event, data){
-        if (event == PointModel.EVENT_SUBSTANCE){
+        if (event === PointModel.EVENT_SUBSTANCE){
             this.set_value(data);  // Set the current value to the model's state
         }
     }
@@ -478,7 +477,7 @@ class UnitFormView{
 
 
     update(source, event, data){
-        if (event == PointModel.EVENT_UNIT){
+        if (event === PointModel.EVENT_UNIT){
             this.set_values(data);
         }
     }
@@ -596,10 +595,10 @@ class PropEntryView{
     }
 
     update(source, event, data){
-        if (event == PointModel.EVENT_SUBSTANCE) {
+        if (event === PointModel.EVENT_SUBSTANCE) {
             let prop_vals = this.get_values();  // Retain values
             this.init(get_input_properties(), get_unit_strings(), prop_vals);
-        } else if (event == PointModel.EVENT_UNIT) {
+        } else if (event === PointModel.EVENT_UNIT) {
             this.init(get_input_properties(), get_unit_strings());
         }
     }
@@ -739,7 +738,7 @@ class PropChooserView extends Subject{
 
 
     update(source, event, data) {
-        if (event == PointModel.EVENT_SUBSTANCE) {
+        if (event === PointModel.EVENT_SUBSTANCE) {
             let disp_props = this.get_checkbox_values();
             this.init(source.get_output_properties(), disp_props);
         }
@@ -873,7 +872,7 @@ class PlotView{
     TRACECOLORS = ['']
 
     constructor(divTarget) {
-        // TODO - axis labels, plot quality
+        // TODO - plot quality
         this.dispprops = ['T','s','p','v'];
         this.dispisos = ['T', 'p', 'h'];
         this.target = divTarget;
@@ -1013,12 +1012,12 @@ class PlotView{
     set_layout(){
         let x_scale;
         let y_scale;
-        if (this.x_prop == 'v' || this.x_prop == 'p'){
+        if (this.x_prop === 'v' || this.x_prop === 'p'){
             x_scale = 'log';
         } else {
             x_scale = 'linear';
         }
-        if (this.y_prop == 'p'){
+        if (this.y_prop === 'p'){
             y_scale = 'log';
         } else {
             y_scale = 'linear';
@@ -1046,25 +1045,25 @@ class PlotView{
         let myPlot = this.container;
         let myPlotContainer = this;
         d3.select(".plotly").on('click', function(d, i) {
-            var e = d3.event;
-            var bgrect = document.getElementsByClassName('gridlayer')[0].getBoundingClientRect();
+            let e = d3.event;
+            let bgrect = document.getElementsByClassName('gridlayer')[0].getBoundingClientRect();
             let x = 0;
             let y = 0;
             let betweenx = false;
             let betweeny = false;
             // X Axis
-            if (myPlotContainer.layout['xaxis']['type'] == 'linear') {
+            if (myPlotContainer.layout['xaxis']['type'] === 'linear') {
                 x = ((e.x - bgrect['x']) / (bgrect['width'])) * (myPlot.layout.xaxis.range[1] - myPlot.layout.xaxis.range[0]) + myPlot.layout.xaxis.range[0];
                 betweenx = x.between(myPlot.layout.xaxis.range[0], myPlot.layout.xaxis.range[1]);
-            } else if (myPlotContainer.layout['xaxis']['type'] == 'log'){
+            } else if (myPlotContainer.layout['xaxis']['type'] === 'log'){
                 x = 10**(((e.x - bgrect['x']) / (bgrect['width'])) * (myPlot.layout.xaxis.range[1] - myPlot.layout.xaxis.range[0]) + myPlot.layout.xaxis.range[0]);
                 betweenx = Math.log10(x).between(myPlot.layout.xaxis.range[0], myPlot.layout.xaxis.range[1]);
             }
             // Y Axis (flipped coords)
-            if (myPlotContainer.layout['yaxis']['type'] == 'linear') {
+            if (myPlotContainer.layout['yaxis']['type'] === 'linear') {
                 y = ((e.y - bgrect['y']) / (bgrect['height'])) * (myPlot.layout.yaxis.range[0] - myPlot.layout.yaxis.range[1]) + myPlot.layout.yaxis.range[1];
                 betweeny = y.between(myPlot.layout.yaxis.range[0], myPlot.layout.yaxis.range[1]);
-            } else if (myPlotContainer.layout['yaxis']['type'] == 'log') {
+            } else if (myPlotContainer.layout['yaxis']['type'] === 'log') {
                 y = 10 ** (((e.y - bgrect['y']) / (bgrect['height'])) * (myPlot.layout.yaxis.range[0] - myPlot.layout.yaxis.range[1]) + myPlot.layout.yaxis.range[1]);
                 betweeny = Math.log10(y).between(myPlot.layout.yaxis.range[0], myPlot.layout.yaxis.range[1]);
             }
@@ -1125,14 +1124,14 @@ class PlotView{
                 // Make a placeholder for the updates
                 let iso_update = null;
 
-                if (prop == 'steamdome' ||
-                    (this.x_prop != prop && this.y_prop != prop &&
+                if (prop === 'steamdome' ||
+                    (this.x_prop !== prop && this.y_prop !== prop &&
                         this.dispisos.includes(prop))
                 ) {
                     // Loop over all the aux lines that are in the "global" category
                     data['global'].forEach((line) => {
 
-                        if (line['type'] == prop) {
+                        if (line['type'] === prop) {
 
                             // Initialize the trace update on the first call
                             if (iso_update == null) {
@@ -1190,7 +1189,7 @@ class PlotView{
                     if (key !== this.x_prop &&
                         key !== this.y_prop &&
                         this.dispprops.includes(key)) {
-                        if (i == 0) {
+                        if (i === 0) {
                             keylist.push(key);
                         }
                         arr.push(points[key][i]);
@@ -1228,13 +1227,15 @@ class PlotView{
  * A class for managing the interactive table
  */
 class TableView{
-    // TODO - Unit display in header?
     // delete rows? https://stackoverflow.com/questions/64526856/how-to-add-edit-delete-buttons-in-each-row-of-datatable
     // showhide columns https://datatables.net/examples/api/show_hide.html
     constructor(divTarget) {
         this.target = $("#"+divTarget);
+
+        // create a <table> within the div that we'll operate on
         this.tabletarget = $("<table id='proptable'></table>");
         this.target.append(this.tabletarget);
+
         this.proptext_to_id = {};
         this.table = null
     }
@@ -1253,7 +1254,7 @@ class TableView{
             this.proptext_to_id = {};
             this.dispprops.forEach((prop) =>{
                 let propstr = prop;
-                if (prop != 'ptid'){
+                if (prop !== 'ptid'){
                     propstr = propstr + " ("+get_unit_strings([prop])+")";
                     this.proptext_to_id[propstr] = prop;
                 }
@@ -1293,11 +1294,11 @@ class TableView{
     }
 
     update(source, event, data){
-        if (event == PointModel.EVENT_POINT_ADD || event == PointModel.EVENT_POINT_DELETE){
+        if (event === PointModel.EVENT_POINT_ADD || event === PointModel.EVENT_POINT_DELETE){
             this.updatePoints(source.get_points());
-        } else if (event == PointModel.EVENT_INIT_POINTS) {
+        } else if (event === PointModel.EVENT_INIT_POINTS) {
             this.init(get_output_properties());
-        } else if (event == PropChooserView.EVENT_PROPERTY_VISIBILITY) {
+        } else if (event === PropChooserView.EVENT_PROPERTY_VISIBILITY) {
             this.columnVisibility(data);
         }
     }
@@ -1312,7 +1313,7 @@ class TableView{
             let col = this.table.column(ind);
             let name = col.header().textContent
             // Always display ptid and ctrl columns
-            if (name=="ptid" || name=="Ctrl" || columns.includes(this.proptext_to_id[name]) ){
+            if (name==="ptid" || name==="Ctrl" || columns.includes(this.proptext_to_id[name]) ){
                 col.visible(true);
             } else {
                 col.visible(false);
@@ -1532,10 +1533,10 @@ function compute_point(props, mode="POST"){
     props['id'] = get_substance();
 
     // TODO - Callbacks are hardcoded, keep or lose?
-    if (mode == "GET"){
+    if (mode === "GET"){
         $.get(requestroute, props, propResponseSuccess,dataType='json')
             .fail(propResponseFail);
-    } else if (mode == "POST") {
+    } else if (mode === "POST") {
         let postData = {state_input: props, units: get_units()};
         $.ajax({
             url: requestroute,
@@ -1551,12 +1552,13 @@ function compute_point(props, mode="POST"){
 
 /**
  * Async request for getting a state from the backend.
+ * @param callback - function handle to execute when complete
  * @param props - Dict with keys of property and numeric values
  * @param mode - GET/POST. Only POST can handle units with the request
  */
 function compute_auxline(callback, props={}, mode="POST"){
-    let requestroute = "";
-    if (Object.keys(props).length == 0) {
+    let requestroute;
+    if (Object.keys(props).length === 0) {
         requestroute = "/saturation";
     } else {
         requestroute = "/isoline"
@@ -1565,10 +1567,10 @@ function compute_auxline(callback, props={}, mode="POST"){
     // Add the substance ID to props always
     props['id'] = get_substance();
 
-    if (mode == "GET"){
+    if (mode === "GET"){
         $.get(requestroute, props, callback,dataType='json')
             .fail(propResponseFail);
-    } else if (mode == "POST") {
+    } else if (mode === "POST") {
         let postData = {state_input: props, units: get_units()};
         $.ajax({
             url: requestroute,
