@@ -893,21 +893,52 @@ class PlotView{
     TRACECOLORS = ['']
 
     constructor(divTarget) {
-        // TODO - plot quality
-        // TODO - move instantiation to JS
+        // TODO - plot prettiness
         this.dispprops = ['T','s','p','v'];
         this.dispisos = ['T', 'p', 'h'];
-        this.target = divTarget;
-        this.container = document.getElementById(divTarget);
+        this.target = $("#"+divTarget);
+        this.plot_div_name = "plot";
 
-        this.onChangeAxes = this.onChangeAxes.bind(this);
-        $("#yprop").on("change", this.onChangeAxes);
-        $("#xprop").on("change", this.onChangeAxes);
-        this.setAxes('s', 'T')
+        this.create_axis_selects();
+
+        // Create the div for the plot
+        let plot = $("<div/>").attr({id: this.plot_div_name});
+        this.target.append(plot);
+        this.plot = $("#"+this.plot_div_name, this.target);
 
         this.traces = [];
 
         this.init();
+    }
+
+    create_axis_selects(){
+        // Create the axis selector Buttons
+        let xaxis_defs = {id: 'xprop', def: 's', opts: ['T','v','h','s'], label: 'X Property'};
+        let yaxis_defs = {id: 'yprop', def: 'T', opts: ['T','p'], label: 'Y Property'};
+
+        this.onChangeAxes = this.onChangeAxes.bind(this);
+
+        // Create a div to put the buttons within
+        let btnholder = $("<div/>").attr({id: "buttons"});
+        [xaxis_defs, yaxis_defs].forEach((defaults)=>{
+            let label = $("<label>").text(defaults['label']).attr({labelfor: defaults['id']});
+            btnholder.append(label);
+
+            let sel = $("<select/>").attr({id: defaults['id'], name: defaults['id'], value: defaults['def']});
+            defaults['opts'].forEach((opt) =>{
+               let newopt = $("<option>").val(opt).text(opt);
+               sel.append(newopt);
+            });
+            sel.val(defaults['def']).change();
+            sel.on("change", this.onChangeAxes)
+            btnholder.append(sel);
+        });
+        this.target.append(btnholder);
+
+        // Set the button callbacks
+        this.xprop_sel = $("#"+xaxis_defs['id'], this.target);
+        this.yprop_sel = $("#"+yaxis_defs['id'], this.target);
+        this.setAxes(this.xprop_sel.val(), this.yprop_sel.val());
     }
 
     init(){
@@ -1024,7 +1055,7 @@ class PlotView{
             }
         });
         // Create the plot object
-        Plotly.newPlot(this.container, this.traces, this.layout);
+        Plotly.newPlot(this.plot.get()[0], this.traces, this.layout);
         this.setupPlotClickListener();
     }
 
@@ -1064,7 +1095,7 @@ class PlotView{
      * A listener for dealing with the user clicking to add a point
      */
     setupPlotClickListener(){
-        let myPlot = this.container;
+        let myPlot = this.plot.get()[0];
         let myPlotContainer = this;
         d3.select(".plotly").on('click', function(d, i) {
             let e = d3.event;
@@ -1119,7 +1150,7 @@ class PlotView{
 
 
     onChangeAxes(){
-        this.setAxes($('#xprop').val(), $('#yprop').val())
+        this.setAxes(this.xprop_sel.val(), this.yprop_sel.val())
         this.init();
         this.draw_auxlines(get_auxlines());
         this.updatePoints(get_points());
@@ -1185,7 +1216,7 @@ class PlotView{
                         customdata: [iso_update[prop]]  // Display their text
                     };
                 }
-                Plotly.restyle(this.container, update, [ind]);
+                Plotly.restyle(this.plot.get()[0], update, [ind]);
             }
         });
     }
@@ -1240,7 +1271,7 @@ class PlotView{
             }
 
             let ind = this.TRACEORDER.indexOf('user');
-            Plotly.restyle(this.container, update, [ind])
+            Plotly.restyle(this.plot.get()[0], update, [ind])
         }
     }
 }
@@ -1401,7 +1432,7 @@ $(document).ready(function(){
     isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T','d','p','s','h','x']);
     propEntryView = new PropEntryView("property_controls");
     tableView = new TableView('property_table');
-    plotView = new PlotView("plot");
+    plotView = new PlotView("plot_display");
 
     // getInfo is an async request, so use the callback to complete setup.
     getInfo((data)=>{

@@ -27,7 +27,7 @@
         completely reset all data. Air has some mild issues because igmix lags
         development on the backed.<br>
 
-            <!-- Control populated by JS -->
+        <!-- Control populated by JS -->
 
     </div>
 
@@ -67,30 +67,16 @@
         <!-- Table Inserted by JS -->
 
     </div>
-    <div>
+    <div id="plot_display" style="width: 600px;">
         <h3>Plot</h3>
         The plot responds to the points added to the table. It should display
         all the points that were added. It should also allow the user to click
         to add a point for substances (subject to the points being in range).
         Hover tooltip works with extra property info. Lots of prettification
         needed here.<br>
-        <label labelfor="xprop">X Property</label>
-        <select id="xprop" name="xprop" val="s">
-            <option value="p">p</option>
-            <option value="v">v</option>
-            <option value="s" selected>s</option>
-            <option value="h">h</option>
-        </select>
-        <label labelfor="yprop">Y Property</label>
-        <select id="yprop" name="yprop" val="T">
-            <option value="T" selected>T</option>
-            <option value="p">p</option>
-        </select>
-        <div id="plot" style="width:800px;height:600px;">
 
-            <!-- Will be filled in by JS -->
+        <!-- Plot inserted by JS -->
 
-        </div>
     </div>
 </div>
 </body>
