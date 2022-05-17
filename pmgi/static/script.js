@@ -468,7 +468,12 @@ class UnitFormView{
         this.button_revert_name = "unit_revert";
 
         // Create the hide button and assign its callback.
-        let hidebutton = $('<input/>').attr({type: 'button', id: this.button_hide_name, value: "Units"});
+        // let hidebutton = $('<input/>').attr({type: 'button', id: this.button_hide_name, value: "Units"});
+        let hidebutton = $("<button/>").attr({id: this.button_hide_name});
+        hidebutton.append($("<i class=\"fas fa-weight-hanging\"></i>"));
+        hidebutton.append("Units");
+        hidebutton.addClass("btn");  // Add css class
+
         this.target.append(hidebutton);
         this.button_hide = $('#'+this.button_hide_name, this.target);
         this.hide_onclick = this.hide_onclick.bind(this);
