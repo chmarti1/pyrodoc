@@ -128,14 +128,14 @@ In the data files, the ideal gas terms are contained in a dictionary called the 
 The residual (or real-fluid) portion of free energy attempts to account for everything that the ideal gas portion does not.  Many of these terms become especially important when the substance density is high, because intermolecular forces are specifically ignored in the ideal gas model.  The model is divided into three groups of terms,
 \begin{subequations}
 \begin{align}
-\alpha^r &= \alpha^r_0(\tau, \delta) + \alpha^r_1(\tau, \delta) + \alpha^r_2(\tau, \delta)
+\alpha^r &= \alpha^r_0(\tau, \delta) + \alpha^r_1(\tau, \delta) + \alpha^r_2(\tau, \delta)\label{eqn:mp1:ar}
 \end{align}
 Many of these terms are physically motivated, but that discussion is not included here.
 
 The first group of terms is a series of polynomials multiplied by exponentials of powers of density,
 \begin{align}
 \alpha^r_0 &= p_0(\tau, \delta) + \sum_{k=1}^K \exp\left(-\delta^k\right) p_k(\tau, \delta)\\
-& p_k = \sum_i c_i \tau^{a_i} \delta^{b_i}.\label{eqn:alpha:r0}
+& p_k = \sum_i c_i \tau^{a_i} \delta^{b_i}.\label{eqn:mp1:ar0}
 \end{align}
 While it is not explicitly forbidden, the $\delta$ exponent, $b$, is neither zero nor negative in these models, so $\alpha^r_0$ terms with the exponential multipliers vanish near $\delta \rightarrow 0$ and $\delta \rightarrow \infty$.  These terms model the complicated behaviors that occur near the phase change (when $\delta$ is on the order 1).
 
@@ -148,12 +148,12 @@ region at least as well as [competing models].'' \cite{setzmann:1991}
 The third group, $\alpha^r_2$, is a Gaussian centered on exactly the critical point, but the coefficient, $\Delta$, is a scaled distance from the critical point.  The term appears in a 1994 paper modeling carbon dioxide \cite{span:1994} and again in a 2014 revision to the properties of water and steam \cite{iapws:2014}, but in conspicuously few others.  While its formulation is not explained in detail in these sources, it allows for a more complicated shape from the term without the computational expense of additional polynomial terms.  It seems to have been designed to reduce the number of Gaussian terms required to produce the desired result at the critical point.
 
 \begin{align}
-\alpha^r_1 &= \sum_{l=0}^L c_l \delta^{d_l} \tau^{t_l} \exp\left( -a_l(\delta-\epsilon_l)^2 - b_l(\tau-\gamma_l)^2 \right)\label{eqn:alpha:r1}\\
-\alpha^r_2 &= \sum_{m=0}^M c_m \Delta_m{^{b_m}} \delta \exp\left(-C_m(\delta-1)^2 - D_m(\tau-1)^2 \right)\label{eqn:alpha:r2}\\
+\alpha^r_1 &= \sum_{l=0}^L c_l \delta^{d_l} \tau^{t_l} \exp\left( -a_l(\delta-\epsilon_l)^2 - b_l(\tau-\gamma_l)^2 \right)\label{eqn:mp1:ar1}\\
+\alpha^r_2 &= \sum_{m=0}^M c_m \Delta_m{^{b_m}} \delta \exp\left(-C_m(\delta-1)^2 - D_m(\tau-1)^2 \right)\label{eqn:mp1:ar2}\\
  &\Delta_m = \left[1-\tau + A_m\left((\delta-1)^2\right)^{1/2\beta_m} \right]^2 + B_m\left((\delta - 1)^2\right)^{a_m}.
 \end{align}
 \end{subequations}
-At first glance, these formulations appear to be an inefficient tangled mess of nested exponents.  However, quantities like $\tau-1$ and $\delta-1$ may be positive or negative, and the exponents are not integers.  It is numerically elegant to square these quantities (requiring just a multiplication operation) before raising them to decimal or fractional powers.
+At first glance, these formulations may appear to be an inefficient tangled mess of nested exponents.  However, quantities like $\tau-1$ and $\delta-1$ may be positive or negative, and the exponents are not integers.  It is numerically elegant to square these quantities (requiring just a multiplication operation) before raising them to decimal or fractional powers.
 
 In the data files, these terms are encoded in a format shown below.  The \texttt{coef0} member contains a list of 2D polynomial coefficients.  Each polynomial, $p_k$, corresponds to an exponential term, $\exp(-\delta^k)$.  The \texttt{coef1} and \texttt{coef2} members are nested lists with each containing the necessary coefficients and exponents to construct the terms of $\alpha^r_1$ and $\alpha^r_2$ respectively.  
 % This comment numbers the code columns.  There are 53 before a line overrun.
@@ -214,8 +214,85 @@ The polynomial, $\alpha^o_0(\tau)$, and its derivatives can be evaluated separat
 \end{align}
 \end{subequations}
 
-Derivatives of the residual portion in (\ref{eqn:mp1:ar}) can be calculated individually.  Much of $\alpha^r_0$ in (\ref{eqn:alpha:r0}) can be calculated trivially from the efficient derivatives of the polynomials. 
+Derivatives of the residual portion in (\ref{eqn:mp1:ar}) can be calculated individually.  Much of $\alpha^r_0$ in (\ref{eqn:mp1:ar0}) can be calculated trivially from the derivatives of the polynomials. 
+\begin{subequations}
+\begin{align}
+\alpha^r_{0,\tau} &= p_{0,\tau} + \sum_{k=1}^K \exp\left( -\delta^k \right) p_{k,\tau}\\
+\alpha^r_{0,\delta} &= p_{0,\delta} + \sum_{k=1}^K \exp\left(-\delta^k\right) \left(p_{k,\delta} - k \delta^{k-1} p_k\right)\\
+\alpha^r_{0,\tau\tau} &= p_{0,\tau\tau} + \sum_{k=1}^K \exp\left( -\delta^k \right) p_{k,\tau\tau}\\
+\alpha^r_{0,\tau\delta} &= p_{0,\tau\delta} + \sum_{k=1}^K \exp\left(-\delta^k\right) \left(p_{k,\tau\delta} - k \delta^{k-1} p_{k,\tau}\right)\\
+\alpha^r_{0,\delta\delta} &= p_{0,\delta\delta} + \sum_{k=1}^K \exp\left(-\delta^k\right) \left(p_{k,\delta\delta} -k(k-1) \delta^{k-2} p_{k} \right. \ldots\nonumber\\
+ &\left. \hspace{2em} - 2k\delta^{k-1}p_{k,\delta} +  k^2 \delta^{2(k-1)} p_k\right)
+\end{align}
+\end{subequations}
 
+Derivatives of the first Gaussian terms in (\ref{eqn:mp1:ar1}) are conveniently calculated as proportional to the terms themselves.  If each term were expressed as the polynomial term multiplier, $p_l$, and the Gaussian term, $g_l$, then $\alpha^r_1 = \sum_l p_l g_l$.  Derivatives on $\alpha^r_1$ can be conveniently constructed in terms of those intermediates.
+\begin{subequations}
+\begin{align}
+p_l &= c_l\ \tau^{t_l} \delta^{d_l}\\
+p_{l,\tau} &= t_l \frac{p_l}{\tau}\\
+p_{l,\delta} &= d_l \frac{p_l}{\delta}\\
+p_{l,\tau\tau} &= t_l(t_l-1) \frac{p_l}{\tau^2}\\
+p_{l,\tau\delta} &= t_l d_l \frac{p_l}{\tau\delta}\\
+p_{l,\delta\delta} &= d_l (d_l-1) \frac{p_l}{\delta^2}
+\end{align}
+\end{subequations}
+\begin{subequations}
+\begin{align}
+g_l &= \exp\left( -a_l(\delta-\epsilon_l)^2 - b_l (\tau-\gamma_l)^2 \right)\\
+g_{l,\tau} &= -2 b_l (\tau - \gamma_l)\ g_l\\
+g_{l,\delta} &= -2 a_l (\delta - \epsilon_l)\ g_l\\
+g_{l,\tau\tau} &= -2 b_l\ g_l - 2 b_l (\tau - \gamma_l)\ g_{l,\tau}\\
+g_{l,\tau\delta} &= -2 b_l (\tau - \gamma_l)\ g_{l,\delta} = -2 a_l (\delta - \epsilon_l)\ g_{l,\tau}\\
+g_{l,\delta\delta} &= -2 a_l\ g_l - 2 a_l (\delta - \epsilon_l)\ g_{l,\delta}
+\end{align}
+\end{subequations}
+
+\begin{subequations}
+\begin{align}
+\alpha^r_{1,\tau} &= \sum^L_{l=0} p_{l,\tau}\ g_l + p_l\ g_{l,\tau}\\
+\alpha^r_{1,\delta} &= \sum^L_{l=0} p_{l,\delta}\ g_l + p_l\ g_{l,\delta}\\
+\alpha^r_{1,\tau\tau} &= \sum^L_{l=0} p_{l,\tau\tau}\ g_l + 2 p_{l,\tau}\ g_{l,\tau} + p_l\ g_{l,\tau\tau}\\
+\alpha^r_{1,\tau\delta} &= \sum^L_{l=0} p_{l,\tau\delta}\ g_l + p_{l,\tau}\ g_{l,\delta} + p_{l,\delta}\ g_{l,\tau} + p_l\ g_{\tau\delta}
+\end{align}
+\end{subequations}
+
+This approach to evaluating derivatives in stages helps numerical efficiency, since there are obvious ways to make repeated use of intermediate values, but it also helps with the clarity of the code.  The same approach is even more valuable in the treatment of the second Gaussian terms in (\ref{eqn:mp1:ar2}).  First, we turn our attention to derivatives of the distance term, $\Delta$.  For ease of notation, we will omit the subscript, $m$, on all of the empirical coefficients.
+\begin{subequations}
+\begin{align}
+\Delta_\tau &= -2\left[ 1 - \tau + A\left((\delta-1)^2 \right)^{1/2\beta} \right]\\
+\Delta_\delta &= 2 \frac{A}{\beta} \left[ 1 - \tau + A\left((\delta-1)^2 \right)^{1/2\beta} \right] \left((\delta-1)^2 \right)^{1/2\beta - 1/2}\\
+\Delta_{\tau\tau} &= 2\\
+\Delta_{\tau\delta} &= 2\frac{A}{\beta}\left((\delta-1)^2 \right)^{1/2\beta - 1/2}\\
+\Delta_{\delta\delta} &= 2\left(\frac{A}{\beta}\right)^2 \left((\delta-1)^2\right)^{1/\beta-1} \ldots \nonumber\\
+& + 2\frac{A}{\beta}\left(\frac{1}{\beta} - 1\right) \left[ 1 - \tau + A\left((\delta-1)^2 \right)^{1/2\beta} \right] \left((\delta-1)^2 \right)^{1/2\beta - 1}
+\end{align}
+\end{subequations}
+
+Next, we will consider the exponential term separately,
+\begin{subequations}
+\begin{align}
+f(\tau, \delta) &= \exp(-C (\delta-1)^2 - D(\tau-1)^2)\\
+f_\tau &= -2D(\tau-1) f\\
+f_\delta &= -2C(\delta-1) f\\
+f_{\tau\tau} &= -2D f - 2D(\tau-1) f_\tau\\
+f_{\tau\delta} &= -2D(\tau-1) f_\delta = -2C(\delta-1) f_\tau\\
+f_{\delta\delta} &= -2C f - 2C(\delta-1) f_\delta
+\end{align}
+\end{subequations}
+
+Finally, the $\alpha_2^r$ derivatives may be constructed as
+\begin{subequations}
+\begin{align}
+\alpha^r_2 &= \Delta \delta f\\
+\alpha^r_{2,\tau} &= \Delta_\tau \delta f + \Delta \delta f_\tau\\
+\alpha^r_{2,\delta} &= \Delta_\delta \delta f + \Delta f + \Delta \delta f_\delta\\
+\alpha^r_{2,\tau\tau} &= \Delta_{\tau\tau} \delta f + 2 \Delta_\tau \delta f_\tau + \Delta \delta f_{\tau\tau}\\
+\alpha^r_{2,\tau\delta} &= \Delta_{\tau\delta} \delta f + \Delta_{\tau} f + \Delta_\tau \delta f_\delta + \ldots \nonumber\\
+ &\hspace{2em} + \Delta_\delta \delta f_\tau+ \Delta f_\tau + \Delta \delta f_{\tau\delta}\\
+\alpha^r_{2,\delta\delta} &= \Delta_{\delta\delta} \delta f + 2\Delta_\delta f + 2\Delta_\delta \delta f_\delta + 2\Delta f_\delta + \Delta \delta f_{\delta\delta}
+\end{align}
+\end{subequations}
 
 \section{Calculation of properties}\label{sec:mp1:properties}
 
@@ -276,6 +353,14 @@ Enthalpy is trivial to construct from (\ref{eqn:mp1:p}) and (\ref{eqn:mp1:e}).  
 \begin{align}
 \frac{h}{R T} &= \frac{e}{RT} + \frac{p}{\rho R T}\nonumber\\
  &= \tau \alpha_\tau + \delta \alpha_\delta.\label{eqn:mp1:h}
+\end{align}
+
+\subsection{Gibbs' free energy}\label{sec:mp1:g}
+
+Gibbs' energy is readily calculated from enthalpy and entropy; or from Helmholtz free energy.
+\begin{align}
+\frac{g}{R T} &= \frac{h}{RT} - \frac{s}{T} = \frac{a}{RT} + \frac{p}{\rho RT}\nonumber\\
+&= \alpha + \delta \alpha_\delta.
 \end{align}
 
 \subsection{Specific heats}\label{sec:mp1:c}
