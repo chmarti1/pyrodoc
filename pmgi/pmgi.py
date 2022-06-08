@@ -8,6 +8,26 @@ import sys
 
 __version__ = '0.0'
 
+# Comments from Chris:
+# 1) It looks like we really need a reliable test for whether a 
+# substance is a multi-phase model.  In the long term, I am considering
+# adding non-mp1 models, so we would really like this to be robust and
+# easy to tweak down the line.  I decided it was worth writing a helper
+# function called ismultiphase().
+#
+# 2) In the InfoRequest class, I have replaced the "prefix" key with 
+#    "collection".  This is to stay consistent with the nomenclature 
+#    used elsewhere - including in the search() documentation.
+#
+# 3) I rewrote the list_valid_substances method and shifted most of
+#    the functionality into methods of the pm.reg.__basedata__ class.
+#    Because these are at the lowest level, they are not class specific,
+#    and they can just be inherited by all substances.
+#
+# 4) I would recommend changing the behavior of list_valid_units() to 
+#    consistently return a dict of lists OR consistently return a list.
+#    I worry about JSON formats that can change depending on the query - 
+#    it's easier to write robust code when the format is always the same.
 
 # ### Helper functions
 def toarray(a):
@@ -16,14 +36,40 @@ def toarray(a):
     except ValueError:
         return np.asarray(a.split(','), dtype=float)
 
+def ismultiphase(subst):
+    """Test whether the PYroMat substance instance is a multi-phase model
+    :param subst: A PYroMat substance instance
+    :return True/False:
+"""
+    # Explicitly list the supported classes
+    # This was my favorite of a few candidate algorithms.  It is quick,
+    # it ensures that the instance will have the correct property 
+    # methods (which is really what you want to test for), and it will
+    # be immune from creating strange new substance models in the future.
+    testfor = ['mp1']
+    for thisclass in testfor:
+        if isinstance(subst, pm.reg.registry[thisclass]):
+            return True
+    return False
+    # There are a few other candidate algorithms we could consider:
+    # 1) We could test the substance's collection from its id string
+    #    This has advantages if we ever add ideal liquid, solid, or 
+    #    other substance collections.
+    # 2) We could test for a complete list of mandatory property methods
+    #    This would ensure compatibility with the algorithm, but it 
+    #    would be slower.
+    # 3) We could test for a single candidate property method (like ps)
+    #    This isn't bad, but it's prone to problems if we aren't careful
+    #    down the line.  However unlikely, it's possible that we'll make
+    #    a new substance model with ps() that has a different meaning.
 
 def compute_steamdome(subst, n=25):
     """
-    Compute a steam dome for a given substance
-    :param subst: A pyromat substance object
-    :param n: int, a number of points per half of the dome
-    :return (satLiqProps, satVapProps): a dict of satliq/satvap property arrays
-    """
+Compute a steam dome for a given substance
+:param subst: A pyromat substance object
+:param n: int, a number of points per half of the dome
+:return (satLiqProps, satVapProps): a dict of satliq/satvap property arrays
+"""
 
     if not hasattr(subst, 'ps'):
         raise pm.utility.PMParamError('Saturation states not available for '
@@ -53,14 +99,14 @@ def compute_steamdome(subst, n=25):
 
 def compute_sat_state(subst, **kwargs):
     """
-    Compute a state given any set of state properties
-    :param subst: A pyromat substance object
-    :param kwargs: The thermodynamic property at which to compute the states
-                        specified by name. e.g. compute_sat_state(water, T=300)
-    :return: (satLiqProps, satVapProps) - A full description of the states
-                including all valid properties.
-                Valid properties are: p,T,v,d,e,h,s,x
-    """
+Compute a state given any set of state properties
+:param subst: A pyromat substance object
+:param kwargs: The thermodynamic property at which to compute the states
+                    specified by name. e.g. compute_sat_state(water, T=300)
+:return: (satLiqProps, satVapProps) - A full description of the states
+            including all valid properties.
+            Valid properties are: p,T,v,d,e,h,s,x
+"""
 
     if not hasattr(subst, 'ps'):
         raise pm.utility.PMParamError('Saturation states not available for '
@@ -301,14 +347,14 @@ class PMGIRequest:
 
     def init_subst(self, idstr):
         """INIT_SUBST - Retrieve a PYroMat object and fail gracefully
-            getid(idstr)
+    getid(idstr)
 
-        Stores a PYroMat substance instance in the "s" member if successful.
-        If unsuccessful, error is set to True, and an appropriate message is
-        appended.
+Stores a PYroMat substance instance in the "s" member if successful.
+If unsuccessful, error is set to True, and an appropriate message is
+appended.
 
-        Returns False on success and True on failure.
-        """
+Returns False on success and True on failure.
+"""
         self.substance = pm.dat.data.get(idstr)
         if self.substance is None:
             self.out['error'] = True
@@ -318,25 +364,25 @@ class PMGIRequest:
         
     def require(self, types, mandatory):
         """REQUIRE - enforce rules about the request arguments
-        require(types, mandatory)
-    
-        TYPES       A dictionary of arguments and their types
-        MANDATORY   A list, set, or tuple of required argument names
+require(types, mandatory)
 
-        Each keyword in TYPES corresponds to an argument that is allowed.  The
-        corresponding value in the dictionary must be a class or callable that
-        will be used to condition the argument's value.  For example,
-        specifying:
-            types = {'teamname': str, 'players': int, 'color': str}
-        defines three optional arguments and their types.  More complicated
-        requirements or conditioning can be applied in the appropriate __init__
-        definition.
+TYPES       A dictionary of arguments and their types
+MANDATORY   A list, set, or tuple of required argument names
 
-        Once defined in TYPES, an argument can be made mandatory by including
-        its name in the MANDATORY list.
+Each keyword in TYPES corresponds to an argument that is allowed.  The
+corresponding value in the dictionary must be a class or callable that
+will be used to condition the argument's value.  For example,
+specifying:
+    types = {'teamname': str, 'players': int, 'color': str}
+defines three optional arguments and their types.  More complicated
+requirements or conditioning can be applied in the appropriate __init__
+definition.
 
-        Returns True if an error occurs and False otherwise.
-        """
+Once defined in TYPES, an argument can be made mandatory by including
+its name in the MANDATORY list.
+
+Returns True if an error occurs and False otherwise.
+"""
         mandatory = set(mandatory)
         # Loop through the items
         for name, value in self.args.items():
@@ -685,8 +731,8 @@ class SaturationRequest(PMGIRequest):
 
 class InfoRequest(PMGIRequest):
     """
-    This class will handle generic info requests about pyromat data
-    """
+This class will handle generic info requests about pyromat data
+"""
     _valid_unit_strs = ['energy', 'pressure', 'temperature', 'matter', 'volume']
 
     def __init__(self):
@@ -695,9 +741,9 @@ class InfoRequest(PMGIRequest):
 
     def process(self):
         """Process the request
-        This method is responsible for populating the "out" member dict with
-        correctly formatted data that can be returned as a JSON object.
-        """
+This method is responsible for populating the "out" member dict with
+correctly formatted data that can be returned as a JSON object.
+"""
         self.out['substances'] = InfoRequest.list_valid_substances()
         self.out['units'] = InfoRequest.get_units()
         self.out['valid_units'] = InfoRequest.list_valid_units()
@@ -732,30 +778,19 @@ class InfoRequest(PMGIRequest):
 
     @staticmethod
     def list_valid_substances(search_str=None):
-        proplist_out = ['T', 'p', 'd', 'v', 'e', 'h', 's', 'x',
-                        'cp', 'cv', 'gam']
-        proplist_in = ['T', 'p', 'd', 'v', 'e', 'h', 's', 'x']
         out = {}
         dat = pm.search(search_str)
         for subst in dat:
             key = subst.data['id']
-            out[key] = {}
-            out[key]['prefix'] = subst.data['id'].split('.')[0]
-            out[key]['id'] = subst.data['id']
-            out[key]['class'] = subst.data['class']
-            if 'names' in subst.data:
-                out[key]['names'] = subst.data['names']
-            else:
-                out[key]['names'] = []
-            out[key]['props'] = []
-            for prop in proplist_out:
-                if hasattr(subst, prop):
-                    out[key]['props'].append(prop)
-            out[key]['inputs'] = []
-            for prop in proplist_in:
-                if hasattr(subst, prop):
-                    out[key]['inputs'].append(prop)
-        return out
+            out[key] = {
+                'collection':subst.collection(),
+                'class':subst.pmclass(),
+                'names':subst.names(),
+                'casid':subst.casid(),
+                'inchi':subst.inchi(),
+                'mw':subst.mw(),
+                'atoms':subst.atoms()
+            }
 
     @staticmethod
     def list_valid_units(units=None):
