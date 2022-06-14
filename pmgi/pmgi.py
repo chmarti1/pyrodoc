@@ -28,6 +28,22 @@ __version__ = '0.0'
 #    consistently return a dict of lists OR consistently return a list.
 #    I worry about JSON formats that can change depending on the query - 
 #    it's easier to write robust code when the format is always the same.
+#
+# 5) I have moved most of the staticmethods to be global helper functions
+#    In many of these cases, that's how you appear to have been using 
+#    them.
+#
+# 6) The json_friendly function had some unhandled cases - the list case
+#    will not have an effect unless the elements of the lists are dicts.
+#    Lists of numpy arrays are not handled.
+#
+# 7) The clean_nan had a number of odd recursion behaviors.  As I tried 
+#    to think through how they "should" behave. I realized I couldn't
+#    come up with a case where recursion made sense.  I eliminated it.
+#
+# 8) In cases where you want to calculate the critical point, I 
+#    transitioned to density instead of pressure - it is faster and MUCH
+#    better numerically.
 
 # ### Helper functions
 def toarray(a):
@@ -63,6 +79,115 @@ def ismultiphase(subst):
     #    down the line.  However unlikely, it's possible that we'll make
     #    a new substance model with ps() that has a different meaning.
 
+
+
+
+def list_valid_substances(search_str=None):
+    """
+"""
+    out = {}
+    dat = pm.search(search_str)
+    for subst in dat:
+        key = subst.data['id']
+        out[key] = {
+            'collection':subst.collection(),
+            'class':subst.pmclass(),
+            'names':subst.names(),
+            'casid':subst.casid(),
+            'inchi':subst.inchi(),
+            'mw':subst.mw(),
+            'atoms':subst.atoms()
+        }
+
+def json_friendly(unfriendly):
+    """Clean up an output dictionary or list for output as JSON.
+    friendly = json_friendly(unfriendly)
+    
+This function recursively checks each value of the list or dict (and all
+child lists or dictionaries) for numpy data classes.  They are converted
+to lists in place or (if possible) they are converted to scalars.
+
+If the argument (unfriendly) is a list or dict, the same structure will
+be returned, but with the appropriate modifications made internally.
+If the argument is a numpy array, a list or scalar version will be 
+returned.  As a result, it is not necessary to catch the return value 
+unless a numpy array is passed explicitly.
+"""
+
+    # Handle numpy datatypes
+    if isinstance(unfriendly, np.ndarray):
+        if unfriendly.size == 1:
+            return np.asscalar(unfriendly)
+        return unfriendly.tolist()
+    # If this is a dict, recurse inside
+    elif isinstance(unfriendly, dict):
+        for name,value in unfriendly.items():
+            unfriendly[name] = json_friendly(value)
+    # If this is a list, recurse inside
+    elif isinstance(unfriendly, list):
+        for index,value in enumerate(unfriendly):
+            unfriendly[index] = json_friendly(value)
+    # Datatypes that aren't explicitly handled above are simply passed
+    # through with no modification
+    return unfriendly
+            
+
+def clean_nan(dirty):
+    """Clean out nan values from a computed dict in place. 
+    result = clean_nan( dirty )
+    
+The PMGI has a number of use cases where arrays of equal length are
+returned inside of a dictionary or list with the intention that they be 
+interpreted as varying together.  The PM property interface adds NaN 
+values at points that are out-of-bounds or otherwise illegal.  If any
+arrays are found to have NaN values, those and the corresponding values
+of all other arrays are removed.
+
+On success, returns the number of NaN values found. 
+
+If the arrays are found to have incompatible shapes, -1 is returned.
+"""
+
+    # Prepare an iterator for the dirty dataset
+    if isinstance(dirty, list):
+        iterator = enumerate(dirty)
+    elif isinstance(dirty, dict):
+        iterator = dirty.items()
+        
+    # We'll keep track of the keys that need to be changed using
+    # a "change_keys" list.
+    change_keys = []
+
+    # indices will eventually become a boolean array indicating which
+    # of the values should be eliminated.
+    indices = None
+    for key, value in iterator:
+        # If this is a numpy array, we need to check it
+        if isinstance(value, np.ndarray):
+            change_keys.append(key)
+            # If this is the first numpy array found, init indices
+            if indices is None:
+                indices = np.isnan(value)
+            # If there are already indices, verify the shape
+            elif indices.shape == value.shape:
+                indices = np.logical_or(indices, np.isnan(value))
+            else:
+                return -1
+
+    # There were no numpy arrays!
+    if indices is None:
+        return 0
+    
+    count = indices.sum()
+    # If necessary, go back and remove NaN entries
+    if count:
+        indices = np.logical_not(indices)
+        for key in change_keys:
+            dirty[key] = dirty[key][indices]
+    return count
+        
+
+
 def compute_steamdome(subst, n=25):
     """
 Compute a steam dome for a given substance
@@ -75,8 +200,8 @@ Compute a steam dome for a given substance
         raise pm.utility.PMParamError('Saturation states not available for '
                                       f'{subst}.')
 
-    Tc, pc = subst.critical()
-    critical = subst.state(T=Tc, p=pc)
+    Tc, pc, dc = subst.critical(density=True)
+    critical = subst.state(T=Tc, d=dc)
     Tmin = subst.triple()[0]
 
     # Find valid limits
@@ -331,6 +456,122 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
     return states
 
 
+
+###
+# Back-end helper/handler classes
+#   These are responsible for automating some of the back-end tedium 
+#   associated with HTTP error handling and 
+###
+
+class PMGIMessageHandler:
+    """The Message Handler tracks errors, warnings, and accumulates messages
+to the client machine that are registered throughout the request handling
+process.
+
+The PMGIMessageHandler class has three "private" attributes,
+    _errorflag :: a boolean indicating whether an error occurred.
+    _warnflag :: a boolean indicating whether a warning occurred.
+    _messagestr :: the message text accumulated throughout the process
+    
+Methods used to interact with the MessageHandler instance are:
+    error(message) :: Register an error with an appropriate message
+    warn(message) :: Register a warning with an appropriate message
+    message(message) :: Register a message without warning or error
+    
+Methods and functions may return a PMGIMessageHandler as part of their
+normal operation.  PMGIMessageHandler instances may be combined in order
+using addition or the incrementer,
+
+mh1 = PMGIMessageHandler()
+... some code that modifies mh1 ...
+mh2 = some_function_that_returns_mh()
+mh1 += mh2
+
+At the conclusion of this code, mh1 includes the messages, warning, and 
+error states from both the function and the prior code.
+"""
+    def __init__(self, copy=None):
+        self.clean()
+        if isinstance(copy, PMGIMessageHandler):
+            self._errorflag = bool(copy._errorflag)
+            self._warnflag = bool(copy._warnflag)
+            self._messagestr = str(copy._messagestr)
+        elif isinstance(copy, str):
+            self._messagestr = str(copy)
+        elif copy is not None:
+            raise Exception('A PMGIMessageHandler was initialized with a unhandled type: ' + repr(copy))
+
+    def clean(self):
+        """Clear the _errorflag, _warnflag, and _messagestr attributes
+    mh.clear()
+   
+Clear should be called after the messages have been handled.
+"""
+        self._errorflag = False
+        self._warnflag = False
+        self._messagestr = ''
+
+    def error(self, message, prefix = 'ERROR: ', newline=True):
+        """Register an error, adding a prefix to its message, and appending a newline
+    mh.error(message, prefix='ERROR: ', newline=True)
+    
+The message may be any string.  The prefix will be appended, so setting 
+it to an empty string disables this behavior.  A trailing newline is
+always appended unless newline is set to False.
+
+Calling this method sets the _errorflag to True.
+"""
+        self._errorflag = True
+        self.message(message=message, prefix=prefix, newline=newline)
+            
+    def warn(self, message, prefix = 'WARNING: ', newline=True):
+        """Register a warning, adding a prefix to its message, and appending a newline
+    mh.warn(message, prefix='WARN: ', newline=True)
+    
+The message may be any string.  The prefix will be appended, so setting 
+it to an empty string disables this behavior.  A trailing newline is
+always appended unless newline is set to False.
+
+Calling this method sets the _warnflag to True.
+"""
+        self._warnflag = True
+        self.message(message=message, prefix=prefix, newline=newline)
+        
+    def message(self, message, prefix='', newline=True):
+        """Register a message without raising an error or warning
+    mh.message(message, prefix='', newline=True)
+    
+The message method is like the error and warn methods, but there is no
+prefix by default, and the _errorflag and _warnflag attributes are not
+affected.
+"""
+        self._messagestr += prefix + message
+        if newline:
+            self._messagestr += '\n'
+    
+    def tojson(self):
+        """Convert the PMGIMessageHandler instance to dict ready for JSON encoding
+    out = mh.tojson()
+
+out = {'message':mh._messagestr, 'error':mh._errorflag, 'warn:mh._warnflag}
+"""
+        return {'message':self._messagestr, 'error':self._errorflag, 'warn':self._warnflag}
+
+    def __add__(self, other):
+        # Make a copy of self
+        out = PMGIMessageHandler(self)
+        # Use iadd to complete the addition
+        out += other
+
+    def __iadd__(self, other):
+        self._errorflag = self._errorflag or other._errorflag
+        self._warnflag = self._warnflag or other._warnflag
+        self._messagestr = self._messagestr + other._messagestr
+        
+    def __bool__(self):
+        return bool(self._errorflag)
+
+
 ###
 # Custom request processing classes
 #   These are designed to construct a JSON dictionary that will be used
@@ -339,35 +580,119 @@ def compute_iso_line(subst, n=25, scaling='linear', **kwargs):
 
 
 class PMGIRequest:
-    
-    def __init__(self):
-        self.args = {}
-        self.substance = None
-        self.out = {'error':False, 'message':''}
+    """The PYroMat Gateway Interface Request class
 
-    def init_subst(self, idstr):
-        """INIT_SUBST - Retrieve a PYroMat object and fail gracefully
-    getid(idstr)
+    pr = PMGIRequest( args )
 
-Stores a PYroMat substance instance in the "s" member if successful.
-If unsuccessful, error is set to True, and an appropriate message is
-appended.
+The PMGIRequest class is a parent for the individual request handlers.
+Handler instances are intended to manage the different kinds of requests
+that come to the gateway interface while gracefully checking arguments
+and failing gracefully with appropriate HTTP error conditions and 
+meaningful error messages.
 
-Returns False on success and True on failure.
+args is a dictionary of arguments passed either through a GET or POST
+interface and collected by the WSGI.  Since PMGIRequest is merely a 
+prototype for the individual request interfaces, it makes very few 
+assumptions about these arguments, but it (1) strips out all units-
+related arguments and (2) provides the require() method to allow its
+children to automatically test for argument requirements.
+
+Units can be configured either by passing a member dictionary named 
+'units' with all of the unit configuration inside or by passing 
+individual arguments with "short" unit specifiers.  For example, these
+are equivalent:
+
+args = {'units':{'temperature':'K', 'pressure':'bar'} ... }
+
+args = {'uT':'K', 'uP':'bar', ... }
+
+It is not legal to specify units in _both_ a units dictionary _and_ 
+short unit specifiers.  For a complete catalogue of valid unit settings,
+see the "valid_units" dictionary of a PMGIRequest instance.  For a 
+complete list of shortened unit specifiers, see the "short_units" 
+dictionary of a PMGIRequest instance.
+
+The PMGIRequest prototype includes the following attributes:
+
+mh      The PMGIMessageHandler instance that tracks errors, warnings, 
+        and messages to the UI.
+        
+units   A dictionary of unit settings to apply to PYroMat.
+
+
 """
-        self.substance = pm.dat.data.get(idstr)
-        if self.substance is None:
-            self.out['error'] = True
-            self.out['message'] += f'Failed to find substance id {idstr}\n'
-            return True
-        return False
+    def __init__(self, args):
+        # Initialize the four parts of the output
+        self.mh = PMGIMessageHandler()
+        self.units = {}
+        self.data = {}
+        self.args = dict(args)
+        
+        # Build legal unit dict
+        self.valid_units = {
+            'temperature' : list(pm.units.temperature.get()),
+            'energy' : list(pm.units.energy.get()),
+            'molar': list(pm.units.molar.get()),
+            'mass' : list(pm.units.mass.get()),
+            'matter' : list(pm.units.mass.get()) + list(pm.units.molar.get()),
+            'volume' : list(pm.units.volume.get()),
+            'pressure' : list(pm.units.pressure.get()),
+            'force' : list(pm.units.force.get()),
+            'length' : list(pm.units.length.get()),
+            'time' : list(pm.units.time.get())
+            }
+        # The short units map abbreviated unit strings intended for the
+        # GET interface
+        self.short_units = {
+            'uT': 'temperature',
+            'uE': 'energy',
+            'uMol': 'molar',
+            'uMas': 'mass',
+            'uM': 'matter',
+            'uV': 'volume',
+            'uP': 'pressure',
+            'uF': 'force',
+            'uL': 'length',
+            'uTim': 'time'
+        }
+
+        # Process any units specifiers - strip them from the args 
+        # dict as they are discovered.
+        # Look for a nested "units" dict
+        if 'units' in self.args:
+            # Pop out the units dictionary
+            self.units = self.args.pop('units')
+        # If the units dict was not found, look for any short unit 
+        # specifiers in the root arguments - probably for GET
+        else:
+            # We'll be changing the contents of args as we iterate, so 
+            # we need to iterate on the original args dictionary - not
+            # the attribute copy
+            for shortunit in args:
+                # If this is a short unit, pop it out of args
+                # and add its long version to the newunits dict
+                if shortunit in self.short_units:
+                    longunit = self.short_units[shortunit]
+                    self.units[longunit] = self.args.pop(shortunit)
+        
+        # Finally, test the units for correctness as we read them into
+        # the live units dict
+        for unit,value in self.units.items():
+            # Next, retrieve the legal values. If none are found, this 
+            # is not a valid unit specifier string.
+            legal_values = self.valid_units.get(unit)
+            if legal_values is None:
+                self.mh.error('Unit not recognized: ' + str(unit))
+            # Is the assigned unit legal?
+            elif value not in self.valid_units[unit]:
+                self.mh.error('Unit (' + str(unit) + ') was set to unrecognized value: ' + str(value))
         
     def require(self, types, mandatory):
         """REQUIRE - enforce rules about the request arguments
-require(types, mandatory)
+    require(types, mandatory)
 
-TYPES       A dictionary of arguments and their types
-MANDATORY   A list, set, or tuple of required argument names
+types       A dictionary of arguments and their types
+mandatory   A list, set, or tuple of required argument names
 
 Each keyword in TYPES corresponds to an argument that is allowed.  The
 corresponding value in the dictionary must be a class or callable that
@@ -375,114 +700,137 @@ will be used to condition the argument's value.  For example,
 specifying:
     types = {'teamname': str, 'players': int, 'color': str}
 defines three optional arguments and their types.  More complicated
-requirements or conditioning can be applied in the appropriate __init__
-definition.
+requirements or conditioning can be applied by assigning custom 
+types or functions instead of existing types.
 
 Once defined in TYPES, an argument can be made mandatory by including
 its name in the MANDATORY list.
 
-Returns True if an error occurs and False otherwise.
+Returns True if an error occurs and False otherwise.  Messages are 
+logged appropriately in the mh attribute.
 """
+        # Make a copy of the mandatory set.  We'll be keeping track!
         mandatory = set(mandatory)
         # Loop through the items
         for name, value in self.args.items():
             # Is this a recognized argument?
             if name not in types:
-                self.error(f'Unrecognized argument: {name}')
+                self.mh.error(f'Unrecognized argument: {name}')
                 return True
             # If the argument is known
             try:
                 self.args[name] = types[name](value)  # Cast to type
             except:
-                self.error(f'Invalid argument: {name}={value}')
+                self.mh.error(f'Invalid argument: {name}={value}')
                 return True
             # If the argument is mandatory, check it off the list
             if name in mandatory:
                 mandatory.remove(name)
         # Are there missing arguments?
         if mandatory:
-            self.error(f'Missing mandatory arguments:')
-            prefix = ' '
+            self.mh.error('Missing mandatory arguments: ', newline=False)
+            prefix = ''
             for name in mandatory:
-                self.warn(prefix + name, append_newline=False)
+                self.mh.message(name, prefix=prefix, newline=False)
                 prefix = ', '
-            self.warn('')
+            # Force a newline
+            self.mh.message('')
             return True
         return False
 
-    def error(self, message, append_newline=True):
-        """
-        Set flag for error and append an error message.
-        """
-        self.out['error'] = True
-        self.out['message'] += message
-        if append_newline:
-            self.out['message'] += "\n"
+    def process_units(self):
+        """Assign the units discovered in the arguments to PYroMat's settings
+    process_units()
+    
+Uses the dict stored in the units attribute to determine which (if any)
+units need to be changed from the default.  If units is empty, no changes
+are made.
 
-    def warn(self, message, append_newline=True):
-        """
-        Append warning messages.
-        """
-        self.out['message'] += message
-        if append_newline:
-            self.out['message'] += "\n"
+Units specified in the units dict are modified in the PYroMat system. 
+Other units found in the PMyroMat system are recorded in the units dict
+to record the system's units status.
 
-    @staticmethod
-    def json_friendly(somedict):
-        """
-        Clean up the out dictionary for output as JSON.
-        """
-
-        if isinstance(somedict, dict):
-            for name, value in somedict.items():
-                if isinstance(value, dict) or isinstance(value, list):
-                    PMGIRequest.json_friendly(value)
-                elif isinstance(value, np.ndarray):
-                    if value.size == 1:
-                        somedict[name] = np.asscalar(value)
-                    else:
-                        somedict[name] = value.tolist()
-        elif isinstance(somedict, list):
-            for item in somedict:
-                PMGIRequest.json_friendly(item)
-
-    @staticmethod
-    def clean_nan(somedict):
-        """
-        Clean out nan values from a computed dict in place. Requires a dict of np arrays of equal length
-        """
-
-        if not hasattr(somedict, 'items') and isinstance(somedict, list):
-            for item in somedict:
-                PMGIRequest.clean_nan(item)
-            return
-
-        indices = np.array([], dtype=bool)
-        for name, value in somedict.items():
-            if isinstance(value, np.ndarray):
-                if indices.size == 0:
-                    indices = np.isnan(value)
+Returns True in the event of an error.  On success, returns False.  
+"""
+        if self.mh:
+            self.mh.message('Unit processing aborted due to an error.')
+            return True
+        # Loop through all possible parameters, and only work on the 
+        # units.
+        for param in pm.config:
+            if param.startswith('unit_'):
+                unit = param[5:]
+                # If the unit was specified in the configuration
+                if unit in self.units:                    
+                    try:
+                        pm.config[param] = self.units[unit]
+                    except:
+                        self.mh.error('Failed to set the units as configured.')
+                        self.mh.message(repr(sys.exc_info()[1]))
+                        return True
+                # If it was not specified, return it to its default value
+                # and record it for the output record
                 else:
-                    indices = np.bitwise_or(indices, np.isnan(value))
-            elif isinstance(value, dict):
-                PMGIRequest.clean_nan(value)
+                    pm.config.restore_default(param)
+                    self.units[unit] = pm.config[param]
+        return False
 
-        if indices.any():
-            good = np.bitwise_not(indices)
-            for name in somedict:
-                somedict[name] = somedict[name][good]
 
+    def get_substance(self, idstr):
+        """Wrapper function for pm.get() that registers appropriate error messages
+    substance = get_substance(idstr)
+
+The idstr is the ID string used by get().
+"""
+        substance = None
+        try:
+            substance = pm.get(idstr)
+        except pm.utility.PMParamError:
+            self.mh.error('Substance not found: ' + str(idstr))
+        except:
+            self.mh.error('There was an unexpected error retrieving substance: ' + str(idstr))
+            self.mh.message(repr(sys.exc_info()[1]))
+        return substance
+        
+    def process(self):
+        """This is a prototype for a request process method.
+    pr.process()
+    
+The process method is responsible for populating the data attribute.
+"""
+        # If there was an error, abort
+        if self.mh:
+            self.mh.message('Aborted processing due to an error')
+            return True
+            
+        # The process method should usually process the units dict 
+        # before doing anything further
+        if self.process_units():
+            return True
+        
+        # interesting code for generating data here...
+        self.data = {}
+        
+        return False
+
+    def output(self):
+        """Generate the serializable output of the process request.
+"""
+        return {
+            'data':json_friendly(self.data), 
+            'message':self.mh.tojson(), 
+            'units':self.units,
+            'args':json_friendly(self.args)
+            }
 
 class PropertyRequest(PMGIRequest):
     """
     This class will handle requests for properties at a fixed state or states.
     """
-    def __init__(self, args, units=None):
+    def __init__(self, args):
         # Clean initialization
-        PMGIRequest.__init__(self)
+        PMGIRequest.__init__(self, args)
 
-        # Read in the arguments from raw
-        self.args = dict(args)
         # Process the arguments
         if self.require(
                 types={
@@ -499,16 +847,7 @@ class PropertyRequest(PMGIRequest):
                 mandatory=['id']):
             return
 
-        # Config the units
-        if units is not None:
-            try:
-                InfoRequest.set_units(units)
-            except pm.utility.PMParamError as e:
-                self.error(e.args[0])
 
-        # Retrieve the PM entry
-        if self.init_subst(self.args['id']):
-            return
 
     def process(self):
         """Process the request
@@ -516,27 +855,29 @@ class PropertyRequest(PMGIRequest):
         correctly formatted data that can be returned as a JSON object.
         """
         # If there was an error, abort the processing
-        if self.out['error']:
-            return
-        elif not isinstance(self.substance, pm.reg.__basedata__):
-            self.error('Substance data seems to be corrupt!  Halting.')
-            return
+        if self.mh:
+            self.mh.message('Processing aborted due to error.')
+            return True
 
-        #
-        # Case out whether to use ideal gas or multi-phase processing
-        #
-        if self.substance.data['id'].startswith('ig'):
-            self._ig_process()
-        elif self.substance.data['id'].startswith('mp'):
-            self._mp_process()
-        else:
-            self.error(f'Could not determine the collection for substance: '
-                       f'{self.substance.data["id"]}')
-            return
-
+        # Copy the args and pop out the id entry
+        # Everything that's left will be arguments to the state method
+        args = self.args.copy()
+        subst = self.get_substance(args.pop('id'))
+        if subst is None:
+            return True
+        
+        try:
+            self.data = subst.state(**args)
+        except pm.utility.PMParamError:
+            self.mh.error('Illegal parameter.')
+            self.mh.message(repr(sys.exc_info()[1]))
+            return True
+        
         # Finally, clean up the return parameters
-        PMGIRequest.clean_nan(self.out['data'])
-        PMGIRequest.json_friendly(self.out)
+        clean_nan(self.data)
+        json_friendly(self.data)
+        
+        return False
 
     def _ig_process(self):
         return self._mp_process()  # works for now
@@ -735,10 +1076,7 @@ This class will handle generic info requests about pyromat data
 """
     _valid_unit_strs = ['energy', 'pressure', 'temperature', 'matter', 'volume']
 
-    def __init__(self):
-        # Clean initialization
-        PMGIRequest.__init__(self)
-
+    
     def process(self):
         """Process the request
 This method is responsible for populating the "out" member dict with
@@ -754,69 +1092,6 @@ correctly formatted data that can be returned as a JSON object.
         # Finally, clean up the return parameters
         PMGIRequest.json_friendly(self.out)
 
-    @staticmethod
-    def set_units(units):
-        units = dict(units)
-
-        for name, value in units.items():
-            if name in InfoRequest._valid_unit_strs and \
-                    value in InfoRequest.list_valid_units(name):
-                pm.config['unit_'+name] = value
-            else:
-                raise pm.utility.PMParamError("Invalid unit specification:"
-                                              f"{name}={value}")
-
-    @staticmethod
-    def get_units():
-        out = {}
-        cfg = pm.config
-        for key in cfg.entries:
-            if key.startswith('unit') and \
-                    key.split('_')[1] in InfoRequest._valid_unit_strs:
-                out[key.split('_')[1]] = cfg[key]
-        return out
-
-    @staticmethod
-    def list_valid_substances(search_str=None):
-        out = {}
-        dat = pm.search(search_str)
-        for subst in dat:
-            key = subst.data['id']
-            out[key] = {
-                'collection':subst.collection(),
-                'class':subst.pmclass(),
-                'names':subst.names(),
-                'casid':subst.casid(),
-                'inchi':subst.inchi(),
-                'mw':subst.mw(),
-                'atoms':subst.atoms()
-            }
-
-    @staticmethod
-    def list_valid_units(units=None):
-        out = {}
-
-        if units is None:
-            units = InfoRequest._valid_unit_strs
-
-        if type(units) is str:
-            if units == 'matter':
-                mass = list(pm.units.mass.get())
-                molar = list(pm.units.molar.get())
-                out = mass + molar
-            else:
-                unitfun = getattr(pm.units, units)
-                out = list(unitfun.get())
-        else:
-            for unit in units:
-                if unit == 'matter':
-                    mass = list(pm.units.mass.get())
-                    molar = list(pm.units.molar.get())
-                    out[unit] = mass + molar
-                else:
-                    unitfun = getattr(pm.units, unit)
-                    out[unit] = list(unitfun.get())
-        return out
 
 
 ############################
@@ -833,23 +1108,14 @@ app = Flask(__name__)
 def pmgi():
     # Read in the request data to an args dict
     if request.method == 'POST':
-        jsondat = dict(request.json)
-        args = jsondat['state_input']
-        units = None
-        if 'units' in jsondat:
-            units = (jsondat['units'])
-        pr = PropertyRequest(args, units)
+        pr = PropertyRequest(request.json)
     elif request.method == 'GET':
-        args = dict(request.args)
-        pr = PropertyRequest(args)
+        pr = PropertyRequest(request.args)
 
+    pr.process_units()
     pr.process()
 
-    # Check for error and return code
-    if pr.out['error']:
-        return pr.out, 500
-    else:
-        return pr.out, 200
+    return pr.output(), 200
 
 
 # The saturation route computes saturation points or the steam dome
