@@ -830,22 +830,18 @@ class PropertyRequest(PMGIRequest):
     def __init__(self, args):
         # Clean initialization
         PMGIRequest.__init__(self, args)
-
         # Process the arguments
-        if self.require(
-                types={
-                    's': toarray,
-                    'h': toarray,
-                    'e': toarray,
-                    'T': toarray,
-                    'p': toarray,
-                    'd': toarray,
-                    'v': toarray,
-                    'x': toarray,
-                    'id': str
-                },
-                mandatory=['id']):
-            return
+        self.require( types={
+                's': toarray,
+                'h': toarray,
+                'e': toarray,
+                'T': toarray,
+                'p': toarray,
+                'd': toarray,
+                'v': toarray,
+                'x': toarray,
+                'id': str }, 
+                mandatory=['id'])
 
 
 
@@ -873,9 +869,10 @@ class PropertyRequest(PMGIRequest):
             self.mh.message(repr(sys.exc_info()[1]))
             return True
         
-        # Finally, clean up the return parameters
-        clean_nan(self.data)
-        json_friendly(self.data)
+        # Clean out-of-bounds data out of the results
+        count = clean_nan(self.data)
+        if count:
+            self.mh.warn('Encountered states that were out of bounds for this substance model.')
         
         return False
 
