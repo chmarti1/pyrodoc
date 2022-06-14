@@ -51,6 +51,11 @@ def toarray(a):
         return np.asarray(a, dtype=float)
     except ValueError:
         return np.asarray(a.split(','), dtype=float)
+        
+def tobool(a):
+    if a.lower() in ['0', 'f', 'false']:
+        return False
+    return True
 
 def ismultiphase(subst):
     """Test whether the PYroMat substance instance is a multi-phase model
@@ -81,23 +86,6 @@ def ismultiphase(subst):
 
 
 
-
-def list_valid_substances(search_str=None):
-    """
-"""
-    out = {}
-    dat = pm.search(search_str)
-    for subst in dat:
-        key = subst.data['id']
-        out[key] = {
-            'collection':subst.collection(),
-            'class':subst.pmclass(),
-            'names':subst.names(),
-            'casid':subst.casid(),
-            'inchi':subst.inchi(),
-            'mw':subst.mw(),
-            'atoms':subst.atoms()
-        }
 
 def json_friendly(unfriendly):
     """Clean up an output dictionary or list for output as JSON.
@@ -582,7 +570,7 @@ out = {'message':mh._messagestr, 'error':mh._errorflag, 'warn:mh._warnflag}
 class PMGIRequest:
     """The PYroMat Gateway Interface Request class
 
-    pr = PMGIRequest( args )
+    pr = PMGIRequest( request )
 
 The PMGIRequest class is a parent for the individual request handlers.
 Handler instances are intended to manage the different kinds of requests
@@ -590,43 +578,26 @@ that come to the gateway interface while gracefully checking arguments
 and failing gracefully with appropriate HTTP error conditions and 
 meaningful error messages.
 
-args is a dictionary of arguments passed either through a GET or POST
-interface and collected by the WSGI.  Since PMGIRequest is merely a 
+request is the Flask request instance being processed, from which an 
+arguments dictionary is constructed. Since PMGIRequest is merely a 
 prototype for the individual request interfaces, it makes very few 
 assumptions about these arguments, but it (1) strips out all units-
-related arguments and (2) provides the require() method to allow its
+related arguments and (2) provides the require() method to allow its 
 children to automatically test for argument requirements.
 
-Units can be configured either by passing a member dictionary named 
-'units' with all of the unit configuration inside or by passing 
-individual arguments with "short" unit specifiers.  For example, these
-are equivalent:
-
-args = {'units':{'temperature':'K', 'pressure':'bar'} ... }
-
-args = {'uT':'K', 'uP':'bar', ... }
-
-It is not legal to specify units in _both_ a units dictionary _and_ 
-short unit specifiers.  For a complete catalogue of valid unit settings,
-see the "valid_units" dictionary of a PMGIRequest instance.  For a 
-complete list of shortened unit specifiers, see the "short_units" 
-dictionary of a PMGIRequest instance.
-
-The PMGIRequest prototype includes the following attributes:
-
-mh      The PMGIMessageHandler instance that tracks errors, warnings, 
-        and messages to the UI.
-        
-units   A dictionary of unit settings to apply to PYroMat.
-
-
 """
-    def __init__(self, args):
+    def __init__(self, request):
         # Initialize the four parts of the output
         self.mh = PMGIMessageHandler()
         self.units = {}
         self.data = {}
-        self.args = dict(args)
+        # Read in the request data to an args dict
+        if request.method == 'POST':
+            self.args=dict(request.json)
+        elif request.method == 'GET':
+            self.args=dict(request.args)
+        else:
+            self.args={}
         
         # Build legal unit dict
         self.valid_units = {
@@ -662,13 +633,16 @@ units   A dictionary of unit settings to apply to PYroMat.
         if 'units' in self.args:
             # Pop out the units dictionary
             self.units = self.args.pop('units')
+
+            if not isinstance(self.units, dict):
+                self.mh.error('The units argument was not a dictionary.')
+                return True
         # If the units dict was not found, look for any short unit 
         # specifiers in the root arguments - probably for GET
         else:
             # We'll be changing the contents of args as we iterate, so 
-            # we need to iterate on the original args dictionary - not
-            # the attribute copy
-            for shortunit in args:
+            # we need to iterate on a copy of the argument keys
+            for shortunit in list(self.args.keys()):
                 # If this is a short unit, pop it out of args
                 # and add its long version to the newunits dict
                 if shortunit in self.short_units:
@@ -865,7 +839,7 @@ class PropertyRequest(PMGIRequest):
         try:
             self.data = subst.state(**args)
         except pm.utility.PMParamError:
-            self.mh.error('Illegal parameter.')
+            self.mh.error('Illegal parameters.')
             self.mh.message(repr(sys.exc_info()[1]))
             return True
         
@@ -875,33 +849,6 @@ class PropertyRequest(PMGIRequest):
             self.mh.warn('Encountered states that were out of bounds for this substance model.')
         
         return False
-
-    def _ig_process(self):
-        return self._mp_process()  # works for now
-
-    def _mp_process(self):
-        """_mp_process
-
-        The _mp_process and _ig_process methods are responsible for casing out
-        the different valid property combinations to calculate all the rest.
-        """
-        args = self.args.copy()
-        self.out['inputs'] = self.args
-        # Leave only the property arguments
-        args.pop('id')
-
-        try:
-            self.out['data'] = self.substance.state(**args)
-        except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e:
-            # Add in the error response from pyromat
-            self.error(e.args[0])
-            self.error('Args found:', append_newline=False)
-            prefix = '  '
-            for name in args:
-                self.warn(prefix + name, append_newline=False)
-                prefix = ', '
-            self.warn('')
-            return
 
 
 class IsolineRequest(PMGIRequest):
@@ -1071,23 +1018,44 @@ class InfoRequest(PMGIRequest):
     """
 This class will handle generic info requests about pyromat data
 """
-    _valid_unit_strs = ['energy', 'pressure', 'temperature', 'matter', 'volume']
 
+    def __init__(self, args):
+        PMGIRequest.__init__(self, args)
+        
+        self.require(types={
+            'substlist':tobool,
+            'unitslist':tobool}, mandatory=[])
     
     def process(self):
         """Process the request
 This method is responsible for populating the "out" member dict with
 correctly formatted data that can be returned as a JSON object.
 """
-        self.out['substances'] = InfoRequest.list_valid_substances()
-        self.out['units'] = InfoRequest.get_units()
-        self.out['valid_units'] = InfoRequest.list_valid_units()
-        # If there was an error, abort the processing
-        if self.out['error']:
-            return
-
-        # Finally, clean up the return parameters
-        PMGIRequest.json_friendly(self.out)
+        # If there was an error, abort
+        if self.mh:
+            self.mh.message('Aborted processing due to an error')
+            return True
+        
+        # Should we obtain the list of substances?
+        subst_flag = self.args.get('substlist')
+        subst_dict = {}
+        # If substances was not set or was set to True
+        if subst_flag is None or subst_flag:
+            for idstr,subst in pm.dat.data.items():
+                subst_dict[idstr] = {
+                        'cls':subst.pmclass(),
+                        'col':subst.collection(),
+                        'nam':subst.names(),
+                        'mw':subst.mw()}
+        self.data['substances'] = subst_dict
+        
+        # Should we obtain the list of valid units?
+        units_flag = self.args.get('unitslist')
+        units_dict = {}
+        if units_flag is None or units_flag:
+            units_dict = self.valid_units.copy()
+        self.data['units'] = units_dict
+        
 
 
 
@@ -1103,11 +1071,7 @@ app = Flask(__name__)
 # The root pmgi accepts property requests.
 @app.route('/', methods=['POST', 'GET'])
 def pmgi():
-    # Read in the request data to an args dict
-    if request.method == 'POST':
-        pr = PropertyRequest(request.json)
-    elif request.method == 'GET':
-        pr = PropertyRequest(request.args)
+
 
     pr.process_units()
     pr.process()
@@ -1177,12 +1141,10 @@ def get():
 # The info pmgi will return the results of queries (e.g. substance search)
 @app.route('/info', methods=['POST', 'GET'])
 def info():
-    ir = InfoRequest()
+    ir = InfoRequest(request)
     ir.process()
-    if ir.out['error']:
-        return ir.out, 500
-    else:
-        return ir.out, 200
+    return ir.output(), 200
+
 
 
 # Version is responsible for returning basic system information
