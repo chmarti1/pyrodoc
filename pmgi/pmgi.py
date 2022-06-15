@@ -1072,7 +1072,7 @@ app = Flask(__name__)
 @app.route('/', methods=['POST', 'GET'])
 def pmgi():
 
-
+    pr = PropertyRequest(request)
     pr.process_units()
     pr.process()
 
