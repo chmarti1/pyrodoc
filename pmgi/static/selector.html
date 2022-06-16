@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PYroMat Substance Selection</title>
+    <title>PYroMat | Substance Selection</title>
     <!-- Include the JQuery and DataTables library-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
@@ -20,13 +20,13 @@
         <tr>
             <td align='right'>MW:</td>
             <td>
-                <input type='number' id='mw_min' min=0. value='' size=10>(min) 
-                <input type='number' id='mw_max' min=0. value='' size=10>(max)</td>
+                <input type='number' id='filt_mw_min' min=0. value='' size=10>(min) 
+                <input type='number' id='filt_mw_max' min=0. value='' size=10>(max)</td>
         </tr>
         <tr>
             <td align='right'><label for='collection'>Collection:</label></td>
             <td>
-                <select id='collection' name='collection'>
+                <select id='filt_col' name='filt_col'>
                     <option value=''></option>
                     <option value='ig'>Ideal Gas</option>
                     <option value='mp'>Multi-Phase</option>
@@ -36,7 +36,7 @@
         <tr>
             <td align='right'><label for='class'>Class:</label></td>
             <td>
-                <select id='class' name='class'>
+                <select id='filt_cls' name='filt_cls'>
                     <option value=''></option>
                     <option value='ig'>ig</option>
                     <option value='ig2'>ig2</option>
@@ -46,7 +46,7 @@
             </td>
         </tr>
     </table>
-    <input type='button' id='update_button' onclick='update_filter();' value='Update'>
+    <input type='button' id='filt_update' onclick='update_filter();' value='Update'>
 </div>
 
 <div class=selector_class>
