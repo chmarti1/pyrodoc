@@ -1,49 +1,96 @@
 #!/usr/bin/python3
+"""PYroMat Gateway Interface module
+
+The PMGIRequest class is the parent of a number of child HTTP request
+handling classes.  The classes are initialized with a request object
+provided by the Flask package.  Request handling by any handler is done
+in three steps:
+
+(1) Initialization 
+gather arguments, check data types+mandatory, initialize the four
+result members: data, units, args, mh.  In this step, any units-related
+arguments in the request are stripped from the args dict and added to 
+the units dict with the resolved unit name (e.g. 'temperature' instead 
+of 'uT').  The remaining values in args will be used by process().
+    
+    rh = PropertyRequest(request)
+    rh.data     # Initialized to an empty dictionary
+    rh.units    # Loaded with any units found in the arguments
+    rh.args     # Loaded with any non-units arguments
+    rh.mh       # An initialized PMGIMessageHandler instance.
+
+(2) Process units
+Any units specified in the units dict are applied to the live PYroMat
+installation.  Any not specified are reset to their default values and
+recorded in the units dict, so all units will be reported every time.
+This is a separate step because it is not always necessary.  For example,
+informational calls have no need for units.
+    
+    rh.process_units()
+    rh.units    # is now fully populated with the current units.
+    rh.mh       # evaluates to True if an error occurred
+    
+(3) Process
+The process() method is where the core of the request handling code goes.
+This is where the relevant calculations are done.  Results should be
+stored in the data member so they will be found by the output step.
+
+    rh.process()
+    rh.data     # is now populated with the request results
+    rh.mh       # evaluates to True if an error occurred
+
+(4) Output
+The output() method assembles the contents of the data, units, args, and
+mh members into a JSON-friendly dict.  Output does NOT do additional 
+post-processing like eliminating NaN values.  If necessary, that must be
+handled in process().
+
+    out = rh.output()
+    # out now contains 'data', 'args', 'units', and 'message' entries
+
+** UNITS **
+In the initialization step, before the individual classes enforce their
+unique requirements on the arguments, the prototype initializer strips
+out any arguments that appear to be specifying a unit definition.
+
+The simplest of these is an argument called 'units' set to a dictionary 
+that may contain any of the keys found in the valid_units dict.  These
+are identical to the PYroMat config units, but with the leading 'unit_'
+stripped.  Their values may be any recognized unit for that setting.
+
+Because it requires a nested dict, this approach is probably only useful
+in POST requests.  For GET requests, units may be specified one-at-a-
+time using a shortened unit string.  A list of short unit specifiers
+and their corresponding value in the units dictionary is:
+
+    args    units
+    ---------------------
+    'uT'    'temperature'
+    'uE'    'energy'
+    'uMol'  'molar'
+    'uMas'  'mass'
+    'uM'    'matter'
+    'uV'    'volume'
+    'uP'    'pressure'
+    'uF'    'force'
+    'uL'    'length'
+    'uTim'  'time'
+    
+Any units specifiers that are omitted will be loaded with their default
+values when process_units() is executed.  If process_units() is not 
+called, the unit arguments are still separated out of the args dict, but
+they are ignored.
+"""
+
 import flask
 import pyromat as pm
 import numpy as np
-from flask import __version__ as flaskv
 from flask import Flask, request
 import sys
 
-__version__ = '0.0'
+__version__ = '0.1'
 
-# Comments from Chris:
-# 1) It looks like we really need a reliable test for whether a 
-# substance is a multi-phase model.  In the long term, I am considering
-# adding non-mp1 models, so we would really like this to be robust and
-# easy to tweak down the line.  I decided it was worth writing a helper
-# function called ismultiphase().
-#
-# 2) In the InfoRequest class, I have replaced the "prefix" key with 
-#    "collection".  This is to stay consistent with the nomenclature 
-#    used elsewhere - including in the search() documentation.
-#
-# 3) I rewrote the list_valid_substances method and shifted most of
-#    the functionality into methods of the pm.reg.__basedata__ class.
-#    Because these are at the lowest level, they are not class specific,
-#    and they can just be inherited by all substances.
-#
-# 4) I would recommend changing the behavior of list_valid_units() to 
-#    consistently return a dict of lists OR consistently return a list.
-#    I worry about JSON formats that can change depending on the query - 
-#    it's easier to write robust code when the format is always the same.
-#
-# 5) I have moved most of the staticmethods to be global helper functions
-#    In many of these cases, that's how you appear to have been using 
-#    them.
-#
-# 6) The json_friendly function had some unhandled cases - the list case
-#    will not have an effect unless the elements of the lists are dicts.
-#    Lists of numpy arrays are not handled.
-#
-# 7) The clean_nan had a number of odd recursion behaviors.  As I tried 
-#    to think through how they "should" behave. I realized I couldn't
-#    come up with a case where recursion made sense.  I eliminated it.
-#
-# 8) In cases where you want to calculate the critical point, I 
-#    transitioned to density instead of pressure - it is faster and MUCH
-#    better numerically.
+
 
 # ### Helper functions
 def toarray(a):
@@ -176,101 +223,18 @@ If the arrays are found to have incompatible shapes, -1 is returned.
         
 
 
-def compute_steamdome(subst, n=25):
-    """
-Compute a steam dome for a given substance
-:param subst: A pyromat substance object
-:param n: int, a number of points per half of the dome
-:return (satLiqProps, satVapProps): a dict of satliq/satvap property arrays
-"""
-
-    if not hasattr(subst, 'ps'):
-        raise pm.utility.PMParamError('Saturation states not available for '
-                                      f'{subst}.')
-
-    Tc, pc, dc = subst.critical(density=True)
-    critical = subst.state(T=Tc, d=dc)
-    Tmin = subst.triple()[0]
-
-    # Find valid limits
-    Teps = (Tc - Tmin) / 1000
-
-    line_T = np.linspace(Tmin, Tc - Teps, n).flatten()
-    # line_T = np.logspace(np.log10(Tmin), np.log10(Tc-Teps), n).flatten()
-
-    sll, svl = compute_sat_state(subst, T=line_T)
-
-    # Append the critical point to the end of both lines
-    satliq_states = {}
-    satvap_states = {}
-    for k in sll:
-        satliq_states[k] = np.append(sll[k], critical[k])
-        satvap_states[k] = np.append(svl[k], critical[k])
-
-    return satliq_states, satvap_states
-
-
-def compute_sat_state(subst, **kwargs):
-    """
-Compute a state given any set of state properties
-:param subst: A pyromat substance object
-:param kwargs: The thermodynamic property at which to compute the states
-                    specified by name. e.g. compute_sat_state(water, T=300)
-:return: (satLiqProps, satVapProps) - A full description of the states
-            including all valid properties.
-            Valid properties are: p,T,v,d,e,h,s,x
-"""
-
-    if not hasattr(subst, 'ps'):
-        raise pm.utility.PMParamError('Saturation states not available for '
-                                      f'{subst}.')
-
-    kwargs = {k.lower(): v for k, v in kwargs.items()}
-    if 'p' in kwargs:
-        ps = np.array(kwargs['p']).flatten()
-        Ts = subst.Ts(p=ps)
-    elif 't' in kwargs:
-        Ts = np.array(kwargs['t']).flatten()
-        ps = subst.ps(T=Ts)
-    else:
-        raise pm.utility.PMParamError('Saturation state computation not '
-                                      'supported for {}.'.format(kwargs.keys))
-
-    sf, sg = subst.ss(T=Ts)
-    hf, hg = subst.hs(T=Ts)
-    df, dg = subst.ds(T=Ts)
-    vf = 1/df
-    vg = 1/dg
-    ef, eg = subst.es(T=Ts)
-    xf = np.zeros_like(sf)
-    xg = np.ones_like(sg)
-    liq_state = {
-            'T': Ts,
-            'p': ps,
-            'd': df,
-            'v': vf,
-            'e': ef,
-            's': sf,
-            'h': hf,
-            'x': xf
-        }
-    vap_state = {
-            'T': Ts,
-            'p': ps,
-            'd': dg,
-            'v': vg,
-            'e': eg,
-            's': sg,
-            'h': hg,
-            'x': xg
-        }
-    return liq_state, vap_state
-
-
 def get_practical_limits(subst):
-
-    multiphase = hasattr(subst, 'ps')
-    if multiphase:
+    """Return practical temperature and pressure boundaries for a substance
+    Tmin,pmin,Tmax,pmax = get_practical_limits( subst )
+    
+Temeprature limits are always set based on the substance's Tlim() method,
+but ideal gas substance models have no explicit pressure limits, and
+most multi-phase minimum pressures are zero.  If the substance is a 
+multiphase instance with zero minimum pressure, 10% of the triple point
+is used.  Ideal gas models use the pressure at T=Tmin,d=0.01 and T=Tmax,
+d=1000.  
+"""
+    if ismultiphase(subst):
         pmin, pmax = subst.plim()
         Tt, pt = subst.triple()
         if pmin == 0:
@@ -855,9 +819,9 @@ class IsolineRequest(PMGIRequest):
     """
     This class will handle requests for an isoline
     """
-    def __init__(self, args, units=None):
+    def __init__(self, args):
         # Clean initialization
-        PMGIRequest.__init__(self)
+        PMGIRequest.__init__(self, args)
 
         # Read in the arguments from raw
         self.args = dict(args)
@@ -878,16 +842,6 @@ class IsolineRequest(PMGIRequest):
                 mandatory=['id']):
             return
 
-        # Config the units
-        if units is not None:
-            try:
-                InfoRequest.set_units(units)
-            except pm.utility.PMParamError as e:
-                self.error(e.args[0])
-
-        # Retrieve the PM entry
-        if self.init_subst(self.args['id']):
-            return
 
     def process(self):
         """Process the request
@@ -919,12 +873,9 @@ class SaturationRequest(PMGIRequest):
     """
     This class will handle requests for saturation properties.
     """
-    def __init__(self, args, units=None):
+    def __init__(self, request):
         # Clean initialization
-        PMGIRequest.__init__(self)
-
-        # Read in the arguments from raw
-        self.args = dict(args)
+        PMGIRequest.__init__(self, request)
         # Process the arguments
         if self.require(
                 types={
@@ -935,16 +886,6 @@ class SaturationRequest(PMGIRequest):
                 mandatory=['id']):
             return
 
-        # Config the units
-        if units is not None:
-            try:
-                InfoRequest.set_units(units)
-            except pm.utility.PMParamError as e:
-                self.error(e.args[0])
-
-        # Retrieve the PM entry
-        if self.init_subst(self.args['id']):
-            return
 
     def process(self):
         """Process the request
@@ -954,64 +895,72 @@ class SaturationRequest(PMGIRequest):
         If no property is specified, the entire steam dome will be returned
         """
         # If there was an error, abort the processing
-        if self.out['error']:
-            return
-        elif not isinstance(self.substance, pm.reg.__basedata__):
-            self.error('Substance data seems to be corrupt!  Halting.')
-            return
+        if self.mh:
+            self.mh.message('Processing aborted due to error.')
+            return True
 
-        if self.substance.data['id'].startswith('mp'):
-            if not ('p' in self.args or 'T' in self.args):
-                self._mp_steamdome_process()
-            else:
-                self._mp_process()
-        else:
-            self.error(f'Substance does not have saturation properties: '
-                       f'{self.substance.data["id"]}')
-            return
-
-        # Finally, clean up the return parameters
-        PMGIRequest.clean_nan(self.out['data']['liquid'])
-        PMGIRequest.clean_nan(self.out['data']['vapor'])
-        PMGIRequest.json_friendly(self.out)
-
-    def _mp_process(self):
-        """_mp_process
-
-        computes a full state of saturation properties
-        """
+        # Copy the args and pop out the id entry
+        # Everything that's left will be arguments to the state method
         args = self.args.copy()
-        self.out['inputs'] = self.args
-        # Leave only the property arguments
-        args.pop('id')
+        subst = self.get_substance(args.pop('id'))
+        # get_substance() handles error logging for us - we only need to
+        # return True if it fails.
+        if subst is None:
+            return True
+        # Throw an error if the substance is not multi-phase
+        if not ismultiphase(subst):
+            self.mh.error('Substance was not in the multi-phase collection: ' + repr(idstr))
+            return True
 
+        ## This segment of code is strictly responsible for generating
+        # an array of temperature values to use
+        
+        # If there are no arguments, then generate a default set of 
+        # values
+        if len(args) == 0:
+            Tc,pc = subst.critical()
+            Tt,pt = subst.triple()
+            ep = (Tc-Tt) * .001
+            Ts = np.linspace(Tt+ep, Tc-ep, 31)
+        # Test for over-defined states
+        elif len(args)>1:
+            self.mh.error('Saturation properties require only one argument.')
+            return True
+        # If T is specified, this is easy
+        elif 'T' in args:
+            Ts = args['T']
+        # If p is specified, we'll need to calculate T
+        elif 'p' in args:
+            try:
+                Ts = subst.Ts(p=args['p'])
+            except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e:
+                self.mh.error('Failed to obtain temperature at the pressure(s) provided.')
+                self.mh.message(repr(e))
+                return True
+        # This should never happen - fail loudly.
+        else:
+            self.mh.error('Unhandled SaturationRequest error! Please file a bug report.')
+            return True
+
+        # OK, we've got Ts - go calculate the state
         try:
-            liq, vap = compute_sat_state(self.substance, **args)
-            self.out['data'] = {}
-            self.out['data']['liquid'] = liq
-            self.out['data']['vapor'] = vap
+            dsL,dsV = subst.ds(T=Ts)
+            self.data['liquid'] = subst.state(T=Ts, d=dsL)
+            self.data['vapor'] = subst.state(T=Ts, d=dsV)
+            # Throw away the liquid pressure - it is not numerically correct.
+            self.data['liquid']['p'] = self.data['vapor']['p']
         except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e:
-            # Add in the error response from pyromat
-            self.error(e.args[0])
-            return
-
-    def _mp_steamdome_process(self):
-        """
-        _mp_steamdome_process
-
-        Compute the entire steam dome for the substance
-        """
-        try:
-            liq, vap = compute_steamdome(self.substance)
-
-            self.out['data'] = {}
-            self.out['data']['liquid'] = liq
-            self.out['data']['vapor'] = vap
-
-        except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e:
-            # Add in the error response from pyromat
-            self.error(e.args[0])
-            return
+            self.mh.error('Failed to evaluate saturation properties at the state(s) provided.')
+            self.mh.message(repr(e))
+            return True
+        
+        count = clean_nan(self.data['liquid']) \
+                + clean_nan(self.data['vapor'])
+        if count:
+            self.mh.warn('Encountered states that were out of bounds for this substance model.')
+        
+        return False
+        
 
 
 class InfoRequest(PMGIRequest):
@@ -1023,8 +972,9 @@ This class will handle generic info requests about pyromat data
         PMGIRequest.__init__(self, args)
         
         self.require(types={
-            'substlist':tobool,
-            'unitslist':tobool}, mandatory=[])
+            'substances':tobool,
+            'legalunits':tobool,
+            'versions':tobool}, mandatory=[])
     
     def process(self):
         """Process the request
@@ -1037,7 +987,7 @@ correctly formatted data that can be returned as a JSON object.
             return True
         
         # Should we obtain the list of substances?
-        subst_flag = self.args.get('substlist')
+        subst_flag = self.args.get('substances')
         subst_dict = {}
         # If substances was not set or was set to True
         if subst_flag is None or subst_flag:
@@ -1050,13 +1000,24 @@ correctly formatted data that can be returned as a JSON object.
         self.data['substances'] = subst_dict
         
         # Should we obtain the list of valid units?
-        units_flag = self.args.get('unitslist')
+        units_flag = self.args.get('legalunits')
         units_dict = {}
         if units_flag is None or units_flag:
             units_dict = self.valid_units.copy()
-        self.data['units'] = units_dict
+        self.data['legalunits'] = units_dict
         
-
+        # Should we obtain the version information?
+        version_flag = self.args.get('versions')
+        version_dict = {}
+        if version_flag is None or version_flag:
+            version_dict = {
+                'python': sys.version.split()[0],
+                'flask': flask.__version__,
+                'pyromat': pm.config['version'],
+                'pmgi': __version__,
+                'numpy': np.version.full_version,
+            }
+        self.data['versions'] = version_dict
 
 
 ############################
@@ -1068,9 +1029,22 @@ app = Flask(__name__)
 # will redirect here - to root.
 
 
+# Sitemap:
+# /state
+#   Return property information at a state or array of states
+#
+# /saturation
+#   Return property information along a saturation line
+#
+# /isoline
+#   Return property information while holding a single property constant
+#
+# /info
+#   Return meta information about the active installation of PYroMat
+
 # The root pmgi accepts property requests.
-@app.route('/', methods=['POST', 'GET'])
-def pmgi():
+@app.route('/state', methods=['POST', 'GET'])
+def state():
 
     pr = PropertyRequest(request)
     pr.process_units()
@@ -1082,25 +1056,12 @@ def pmgi():
 # The saturation route computes saturation points or the steam dome
 @app.route('/saturation', methods=['POST', 'GET'])
 def sat():
-    # Read in the request data to an args dict
-    if request.method == 'POST':
-        jsondat = dict(request.json)
-        args = jsondat['state_input']
-        units = None
-        if 'units' in jsondat:
-            units = (jsondat['units'])
-        sr = SaturationRequest(args, units)
-    elif request.method == 'GET':
-        args = dict(request.args)
-        sr = SaturationRequest(args)
-
+    
+    sr = SaturationRequest(request)
+    sr.process_units()
     sr.process()
+    return sr.output(), 200
 
-    # Check for error and return code
-    if sr.out['error']:
-        return sr.out, 500
-    else:
-        return sr.out, 200
 
 
 # The isoline route computes isolines
@@ -1127,16 +1088,6 @@ def iso():
         return isr.out, 200
 
 
-# The get pmgi returns substance metadata
-@app.route('/get', methods=['POST', 'GET'])
-def get():
-    out = {}
-    if request.method == 'POST':
-        pass
-    elif request.method == 'GET':
-        pass
-    return out
-
 
 # The info pmgi will return the results of queries (e.g. substance search)
 @app.route('/info', methods=['POST', 'GET'])
@@ -1145,21 +1096,6 @@ def info():
     ir.process()
     return ir.output(), 200
 
-
-
-# Version is responsible for returning basic system information
-# This will be important if users want to diagnose differences between
-# local pyromat behaviors and webserver responses.
-@app.route('/version')
-def meta():
-    out = {
-        'python': sys.version.split()[0],
-        'flask': flaskv,
-        'pyromat': pm.config['version'],
-        'pmgi': __version__,
-        'numpy': np.version.full_version,
-    }
-    return out
 
 
 # ##### DELETE ME FOR DEPLOY - ROUTE FOR SERVING STATIC HTML DURING DEV:

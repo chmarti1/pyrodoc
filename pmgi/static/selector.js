@@ -65,10 +65,10 @@ function filter(settings, data, dataIndex){
     let col = data[coli];
     let cls = data[clsi];
     
-    let mw_min = parseFloat(document.getElementById('mw_min').value);
-    let mw_max = parseFloat(document.getElementById('mw_max').value);
-    let col_ = document.getElementById('collection').value;
-    let cls_ = document.getElementById('class').value;
+    let mw_min = parseFloat(document.getElementById('filt_mw_min').value);
+    let mw_max = parseFloat(document.getElementById('filt_mw_max').value);
+    let col_ = document.getElementById('filt_col').value;
+    let cls_ = document.getElementById('filt_cls').value;
     
     return (isNaN(mw_min) || mw >= mw_min) && 
         (isNaN(mw_max) || mw <= mw_max) &&
@@ -99,6 +99,7 @@ function data_ready(){
     rowi = 0
     for (idstr in substances){
         subst = substances[idstr];
+        // Parse the name
         if (subst.nam.length>0){
             name = subst.nam[0];
         }else{
