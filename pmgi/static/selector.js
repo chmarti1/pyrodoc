@@ -14,26 +14,45 @@ var sTable;
 // Cookie management functions
 //**************
 
-// Set the cookie that remembers which idstring was selected
-function set_idstr(idstr){
+// Set a cookie value
+//      set_cookie(param,value)
+// This assigns a value to the string parameter name, param.  The cookie
+// expiration is not set.
+function set_cookie(param, value){
     // Set the cookie to expire in one hour
-    exp = new Date();
-    exp.setTime(exp.getTime() + 3600000);
-    document.cookie= 'idstr=' + idstr + ';expires=' + exp;
+    time = new Date();
+    time.setTime(time.getTime() + 3600000);
+    document.cookie= param + '=' + value;
 }
 
-// Retrieve the previously stored ID string value
-function get_idstr(){
+// Set a cookie with an expiration value
+//      set_cookie_exp(param,value,exp)
+// This assigns a value to the string parameter name, param.  The cookie
+// expiration is set to exp milliseconds from now.  To delete a cookie,
+// pass a negative value to exp
+function set_cookie_exp(param, value, exp){
+    // Set the cookie to expire in one hour
+    time = new Date();
+    time.setTime(time.getTime() + exp);
+    document.cookie= param + '=' + value + ';expires=' + time;
+}
+
+// GET_COOKIE
+//      get_cookie(param)
+// Recovers the value associated with a cookie with the string name, 
+// param.  If no cookie with a matching param name is found, an empty
+// string is returned.
+function get_cookie(param){
     let pairs = decodeURIComponent(document.cookie).split(';');
-    let declare, param, value;
+    let tparam, declare, value;
     // Loop over the parameter-value pairs
     for(declare of pairs){
         // Split by =
         pair = declare.split('=')
         if(pair.length == 2){
-            param = pair[0].trim();
+            tparam = pair[0].trim();
             value = pair[1].trim();
-            if(param=='idstr'){
+            if(tparam==param){
                 return value;
             }
         }
@@ -41,26 +60,48 @@ function get_idstr(){
     return '';
 }
 
-// Clear the cookie
-function del_idstr(){
-    // Set the cookie to expire in the past
-    document.cookie= 'idstr=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;'
-}
 
-function select(idstr){
+
+
+//**********
+// sel_XXX
+//
+//  These functions are for the selector page
+//**********
+
+// SEL_SELECT
+//      sel_select(idstr)
+// This function is called by clicking a substance selection link.  It
+// calls set_idstr() to set the idstr cookie before returning to the 
+// calling page.
+function sel_select(idstr){
     let selection = document.getElementById('selection');
-    set_idstr(idstr);
-    selection.innerHTML = get_idstr();
+    set_cookie('idstr',idstr);
+    selection.innerHTML = get_cookie('idstr');
 }
 
-
-function update_filter(){
+// SEL_UPDATE_FILTER
+//      sel_update_filter()
+// This is a wrapper function for sTable.draw(), which provides access
+// to the global sTable object.  This is the callback function to update
+// the selector table based on the filter.
+function sel_update_filter(){
     sTable.draw();
 }
 
+// SEL_FILTER
+//      sel_filter(settings, data, dataIndex)
 // The filter function is used to apply the filter settings to each row
-// It returns true when the row should be included.
-function filter(settings, data, dataIndex){
+// It returns true when the row should be included.  The template for
+// the filter function is specified by the DataTables interface.  The 
+// only argument used is data, which is an array of the row values, used
+// to apply the filter.
+//
+// When SEL_FILTER returns true, the row will be included by the filter.
+// When SEL_FILTER returns false, the row will be excluded by the 
+// filter.  The SEL_FILTER is applied as a callback to the DataTables in
+// the SEL_DATA_READY function.
+function sel_filter(settings, data, dataIndex){
     let mw = data[mwi];
     let col = data[coli];
     let cls = data[clsi];
@@ -76,9 +117,15 @@ function filter(settings, data, dataIndex){
         (cls_ == '' || cls == cls_);
 }
 
-// This callback function will be called when the PGMI interface returns
-// the list of substances.  It is used to build the table.
-function data_ready(){
+// SEL_DATA_READY
+//      sel_data_ready()
+// The SEL_DATA_READY function is the callback function for when the 
+// PMGI response comes back with the available substances.  It populates
+// the rows of the selector table row-by-row.
+//
+// SEL_DATA_READY is assigned as a callback to the sTable object in the
+// SEL_INIT function.
+function sel_data_ready(){
     // Parse the response and break it into its parts
     let response = JSON.parse(this.responseText);
     let data = response.data;
@@ -93,8 +140,6 @@ function data_ready(){
     let mesdiv = document.getElementById('message');
     mesdiv.innerHTML = message.message;
     
-
-    
     // Loop over each of the substances
     rowi = 0
     for (idstr in substances){
@@ -106,7 +151,7 @@ function data_ready(){
             name = '';
         }
         
-        idtag = '<a class="clickable" href=javascript:select("' + idstr + '")>' + idstr + '</a>'
+        idtag = '<a class="clickable" href=javascript:sel_select("' + idstr + '")>' + idstr + '</a>'
         
         // Add the row
         // ID, name, MW, collection, class
@@ -117,31 +162,31 @@ function data_ready(){
     // https://datatables.net/examples/plug-ins/range_filtering.html
     // Register the filter() function for selecting rows
     // This is JQuery obfuscation magic.
-    $.fn.dataTable.ext.search.push(filter);
+    $.fn.dataTable.ext.search.push(sel_filter);
     
     // Adjust the column sizes to match the window
     sTable.columns.adjust().draw()
 }
 
-// The init() function is responsible for executing an AJAX call
+// SEL_INIT
+//      sel_init()
+// The sel_init() function is responsible for executing an AJAX call
 // to the info interface to obtain the list of valid substances.  It
-// registers the data_read() function for callback when the data are
+// registers the sel_data_read() function for callback when the data are
 // ready for writing to the table.
-function init(){
+function sel_init(){
     let message = document.getElementById('message');
     let selection = document.getElementById('selection');
     const rqst = new XMLHttpRequest();
     
-    selection.innerHTML = get_idstr();
+    selection.innerHTML = get_cookie('idstr');
     message.innerHTML = 'Waiting for PMGI response...';
 
     // Request the data from the server
-    rqst.onload = data_ready;
+    rqst.onload = sel_data_ready;
     rqst.open('GET', 'http://127.0.0.1:5000/info');
     rqst.send();
 }
 
 
-// Register the initialization function
-window.onload = init;
 
