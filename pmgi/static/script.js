@@ -20,9 +20,7 @@ var sTable;
 // expiration is not set.
 function set_cookie(param, value){
     // Set the cookie to expire in one hour
-    time = new Date();
-    time.setTime(time.getTime() + 3600000);
-    document.cookie= param + '=' + value;
+    set_cookie_exp(param,value,3600000);
 }
 
 // Set a cookie with an expiration value
@@ -34,7 +32,7 @@ function set_cookie_exp(param, value, exp){
     // Set the cookie to expire in one hour
     time = new Date();
     time.setTime(time.getTime() + exp);
-    document.cookie= param + '=' + value + ';expires=' + time;
+    document.cookie= param + '=' + value + ';expires=' + time + ';path=/';
 }
 
 // GET_COOKIE
@@ -60,6 +58,10 @@ function get_cookie(param){
     return '';
 }
 
+function goto_selector(from){
+    set_cookie('from', from);
+    window.location.href = '/selector';
+}
 
 
 
@@ -75,9 +77,27 @@ function get_cookie(param){
 // calls set_idstr() to set the idstr cookie before returning to the 
 // calling page.
 function sel_select(idstr){
-    let selection = document.getElementById('selection');
+    let from = get_cookie('from');
+    set_cookie_exp('from','',-1);
     set_cookie('idstr',idstr);
-    selection.innerHTML = get_cookie('idstr');
+    document.getElementById('selection_id').innerHTML = get_cookie('idstr');
+    if (from.length > 0){
+        window.location = from;
+    }
+}
+
+
+function sel_cancel(){
+    let from = get_cookie('from');
+    set_cookie_exp('from','',-1);
+    if (from.length > 0){
+        window.location = from;
+    }
+}
+
+function sel_clear(){
+    set_cookie_exp('idstr', '', -1);
+    document.getElementById('selection_id').innerHTML = get_cookie('idstr');
 }
 
 // SEL_UPDATE_FILTER
@@ -168,6 +188,15 @@ function sel_data_ready(){
     sTable.columns.adjust().draw()
 }
 
+// This is a general purpose function that navigates to the selection 
+// after setting the "from" cookie.  From is used to navigate back to
+// the source page after having selected a substance.
+function selection_go(from){
+    set_cookie('from',from);
+    window.location = '/selector';
+}
+
+
 // SEL_INIT
 //      sel_init()
 // The sel_init() function is responsible for executing an AJAX call
@@ -175,11 +204,15 @@ function sel_data_ready(){
 // registers the sel_data_read() function for callback when the data are
 // ready for writing to the table.
 function sel_init(){
+    let from = get_cookie('from');
     let message = document.getElementById('message');
-    let selection = document.getElementById('selection');
     const rqst = new XMLHttpRequest();
     
-    selection.innerHTML = get_cookie('idstr');
+    document.getElementById('selection_id').innerHTML = get_cookie('idstr');
+    if (from.length==0){
+        document.getElementById('selection_cancel').disabled = true;
+    }
+
     message.innerHTML = 'Waiting for PMGI response...';
 
     // Request the data from the server
@@ -189,4 +222,79 @@ function sel_init(){
 }
 
 
+//**********
+// SUBST_XXX
+// Substance page functions
+//**********
 
+function subst_data_ready(){
+    // Parse the response and break it into its parts
+    let response = JSON.parse(this.responseText);
+    let data = response.data;
+    let substances = data.substances;
+    let message = response.message;
+    let args = response.args;
+    let units = response.units;
+    let formula = '';
+    let qty = 0;
+    let name, names='';
+    let critical='', triple='';
+    
+    document.getElementById('message').innerHTML = message.message;
+    
+    document.getElementById('subst_id').innerHTML = data['id'];
+    document.getElementById('subst_col').innerHTML = data['col'];
+    document.getElementById('subst_cls').innerHTML = data['cls'];
+    document.getElementById('subst_mw').innerHTML = data['mw'] + ' ' + units['mass'] + '/' + units['molar'];
+    document.getElementById('subst_inchi').innerHTML = data['inchi'];
+    document.getElementById('subst_cas').innerHTML = data['casid'];
+
+    for (atom in data['atoms']){
+        qty = data['atoms'][atom];
+        if (qty == 1){
+            formula += atom;
+        }else{
+            formula += atom + '<sub>' + qty + '</sub>';
+        }
+    }
+    document.getElementById('subst_form').innerHTML = formula;
+    
+    for (name of data['names']){
+        names += name + '<br>'
+    }
+    document.getElementById('subst_names').innerHTML = names;
+    document.getElementById('subst_doc').innerHTML = data['doc'];
+    
+    if (data['Tc'] != undefined){
+        critical += data['Tc'] + ' ' + units['temperature'] + '<br>'
+    }
+    if (data['pc'] != undefined){
+        critical += data['pc'] + ' ' + units['pressure'] + '<br>'
+    }
+    if (data['dc'] != undefined){
+        critical += data['dc'] + ' ' + units['matter'] + '/' + units['volume'] + '<br>'
+    }
+    document.getElementById('subst_crit').innerHTML = critical;
+    
+    if (data['Tt'] != undefined){
+        triple += data['Tt'] + ' ' + units['temperature'] + '<br>'
+    }
+    if (data['pt'] != undefined){
+        triple += data['pt'] + ' ' + units['pressure'] + '<br>'
+    }
+    document.getElementById('subst_triple').innerHTML = triple;
+}
+
+function subst_init(){
+    let message = document.getElementById('message');
+    let selection = document.getElementById('selection_id');
+    const rqst = new XMLHttpRequest();
+    let idstr = get_cookie('idstr');
+    selection.innerHTML = idstr;
+    message.innerHTML = 'Waiting for PMGI response...';
+
+    // Request the data from the server
+    rqst.onload = subst_data_ready;
+    rqst.open('GET', 'http://127.0.0.1:5000/subst?id=' + encodeURIComponent(idstr));
+    rqst.send();
+}

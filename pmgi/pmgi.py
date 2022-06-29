@@ -545,10 +545,86 @@ meaningful error messages.
 request is the Flask request instance being processed, from which an 
 arguments dictionary is constructed. Since PMGIRequest is merely a 
 prototype for the individual request interfaces, it makes very few 
-assumptions about these arguments, but it (1) strips out all units-
-related arguments and (2) provides the require() method to allow its 
-children to automatically test for argument requirements.
+assumptions about these arguments.
 
+The PMGIRequest and its children have four important attributes:
+    data    a dictionary containing JSON data resulting from the request
+    mh      a PMGIMessageHandler instance for the request
+    units   a dictionary containing units settings
+    args    a dictionary containing the request's parameters
+
+A request handling process should follow these steps:
+(1) Init
+    Each child class may define its own __init__ method, but it is 
+    recommended that the first line be a call to 
+    PMGIRequest.__init__(self, request).  This will automatically 
+    translate the GET/POST arguments into the args attribute dict, and it 
+    will automatically strip out units settings into the separate units
+    attribute dict.
+    
+    Unit settings are either contained in an explicit 'units' dict or
+    one-by-one in a "short" format.  Legal units classes and their 
+    supported values are enumerated in the legal_units attribute dict.
+    Their equivalent short form for explicit definition using the GET 
+    method are mapped in the short_units attribute.
+    
+    Next, each child class should make a call to the require() method as
+    a part of its own initialization.  This is where the child classes
+    assert the rules about which request parameters are allowed, 
+    required, and their datatypes are asserted.
+    
+    Finally, each unit class should take any special steps that are 
+    unique to its request.  Many classes will not need to do anything
+    additional.
+
+(2) Process Units
+    Not all child classes will need to perform this step, but calling
+    process_units() will assert any units settings found in the 
+    arguments.  See above for how units are specified.
+    
+    Specified units will be asserted in the PYroMat configuration 
+    system.  Unspecified units will be returned to their default and
+    written to the dictionary, so that they may be displayed by the live
+    page.
+    
+(3) Process
+    There is a generic process() method defined by the parent 
+    PMGIRequest prototype, but it does nothing.  Each child request 
+    handler should define its own process method, which is responsible
+    for populating the data attribute.
+    
+    The process() method is expected to write to the data or the mh 
+    attributes, but it may only read from the units and args attributes.
+    Messaging should be handled by the mh.error(), mh.warn(), 
+    and mh.message() methods.
+    
+    The get_substance() is a method provided by PMGIRequest that will
+    probably be helpful in this step.
+    
+(4) Output
+    The final output process should almost always be handled by the 
+    PMGIRequest.output() prototype method.  It assembles the data, args,
+    units, and mh attributes into a standard JSON-compatible dictionary 
+    and returns it.  Using the same output method for all classes 
+    ensures that the PMGI output will always adopt a standard form, so
+    custom output() methods should be avoided.
+    
+There are several methods that automate steps of this process.
+
+get_substance()
+    The get_substance() method is a wrapper around the PYroMat get() 
+    function, but it handles error logging in the mh attribute if a 
+    substance is not found or if some other error occurs.  Returns True
+    on failure and False on success.
+    
+output()
+    The output method automates step 4, and is described above and in 
+    its own in-line documentation.
+    
+process_units()
+    The process_units() method is designed to automate step 2, and is
+    described above.  It handles error logging and returns True on 
+    failure and False on success.
 """
     def __init__(self, request):
         # Initialize the four parts of the output
@@ -628,6 +704,12 @@ children to automatically test for argument requirements.
     def require(self, types, mandatory):
         """REQUIRE - enforce rules about the request arguments
     require(types, mandatory)
+
+The require() method is intended to be called in each child request
+class to enforce that all arguments are recognized, a valid datatype,
+and that all mandatory arguments are present.  This method writes to
+the class's mh attribute automatically if errors or warnings are 
+encountered.
 
 types       A dictionary of arguments and their types
 mandatory   A list, set, or tuple of required argument names
@@ -740,11 +822,6 @@ The process method is responsible for populating the data attribute.
         if self.mh:
             self.mh.message('Aborted processing due to an error')
             return True
-            
-        # The process method should usually process the units dict 
-        # before doing anything further
-        if self.process_units():
-            return True
         
         # interesting code for generating data here...
         self.data = {}
@@ -760,6 +837,49 @@ The process method is responsible for populating the data attribute.
             'units':self.units,
             'args':json_friendly(self.args)
             }
+
+class SubstanceRequest(PMGIRequest):
+    """This class handles substance metadata requests
+"""
+    def __init__(self, args):
+        PMGIRequest.__init__(self,args)
+        self.require( types={
+                'id': str},
+                mandatory=['id'])
+        
+    def process(self):
+        # If there was an error, abort the processing
+        if self.mh:
+            self.mh.message('Processing aborted due to error.')
+            return True
+
+        # Copy the args and pop out the id entry
+        # Everything that's left will be arguments to the state method
+        args = self.args.copy()
+        subst = self.get_substance(args.pop('id'))
+        if subst is None:
+            return True
+        
+        try:
+            self.data['id'] = subst.data['id']
+            self.data['mw'] = subst.mw()
+            self.data['names'] = subst.names()
+            self.data['col'] = subst.collection()
+            self.data['cls'] = subst.pmclass()
+            self.data['inchi'] = subst.inchi()
+            self.data['casid'] = subst.casid()
+            self.data['atoms'] = subst.atoms()
+            self.data['doc'] = subst.data.get('doc')
+            if self.data['cls'] in ['mp1']:
+                self.data['Tc'], self.data['pc'], self.data['dc'] = subst.critical(density=True)
+                self.data['Tt'], self.data['pt'] = subst.triple()
+            
+        except pm.utility.PMParamError:
+            self.mh.error('Failed to generate parameter set.')
+            self.mh.message(repr(sys.exc_info()[1]))
+            return True
+                
+        return False
 
 class PropertyRequest(PMGIRequest):
     """
@@ -780,8 +900,8 @@ class PropertyRequest(PMGIRequest):
                 'x': toarray,
                 'id': str }, 
                 mandatory=['id'])
-
-
+            
+        
 
     def process(self):
         """Process the request
@@ -803,15 +923,10 @@ class PropertyRequest(PMGIRequest):
         try:
             self.data = subst.state(**args)
         except pm.utility.PMParamError:
-            self.mh.error('Illegal parameters.')
+            self.mh.error('Failed to generate parameter set.')
             self.mh.message(repr(sys.exc_info()[1]))
             return True
-        
-        # Clean out-of-bounds data out of the results
-        count = clean_nan(self.data)
-        if count:
-            self.mh.warn('Encountered states that were out of bounds for this substance model.')
-        
+                
         return False
 
 
@@ -877,14 +992,13 @@ class SaturationRequest(PMGIRequest):
         # Clean initialization
         PMGIRequest.__init__(self, request)
         # Process the arguments
-        if self.require(
-                types={
-                    'T': toarray,
-                    'p': toarray,
-                    'id': str
-                },
-                mandatory=['id']):
-            return
+        self.require(
+            types={
+                'T': toarray,
+                'p': toarray,
+                'id': str
+            },
+            mandatory=['id'])
 
 
     def process(self):
@@ -1030,6 +1144,10 @@ app = Flask(__name__)
 
 
 # Sitemap:
+# /substance
+#
+#   Return meta information about a specific substance
+#
 # /state
 #   Return property information at a state or array of states
 #
@@ -1041,6 +1159,13 @@ app = Flask(__name__)
 #
 # /info
 #   Return meta information about the active installation of PYroMat
+
+@app.route('/subst', methods=['POST', 'GET'])
+def substance():
+    sr = SubstanceRequest(request)
+    sr.process_units()
+    sr.process()
+    return sr.output(), 200
 
 # The root pmgi accepts property requests.
 @app.route('/state', methods=['POST', 'GET'])
@@ -1055,7 +1180,7 @@ def state():
 
 # The saturation route computes saturation points or the steam dome
 @app.route('/saturation', methods=['POST', 'GET'])
-def sat():
+def saturation():
     
     sr = SaturationRequest(request)
     sr.process_units()
@@ -1066,7 +1191,7 @@ def sat():
 
 # The isoline route computes isolines
 @app.route('/isoline', methods=['POST', 'GET'])
-def iso():
+def isoline():
     # Read in the request data to an args dict
     if request.method == 'POST':
         jsondat = dict(request.json)
