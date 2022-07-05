@@ -28,7 +28,11 @@
 
 <div class="section">
     <p>
-    PYroMat provides thermodynamic properties for over 1,000 substances.  Fast and intuitive access to the properties of each substance comes from calling up objects.  Properties are calculated by object methods that support array-like objects as arguments.</p>
+    PYroMat provides thermodynamic properties for nearly 1,000 substances.  Fast and intuitive access to the properties of each substance comes from calling up objects.  Properties are calculated by object methods that support array-like objects as arguments.
+    </p>
+    <p>
+    If you want to calculate the properties of air, you load PYroMat, then, you ask for PYroMat's air model.  Then, you ask it whatever you want to know.
+    </p>
     <pre class="code">
 >>> import pyromat as pm
 >>> air = pm.get('ig.air')
@@ -47,21 +51,74 @@ array([1.39990859, 1.39519249, 1.38666408, 1.37575277])</pre>
         <li><span class="code">mw</span> Molecular weight</li>
         <li><span class="code">R</span> Ideal gas constant</li>
         <li><span class="code">s</span> Entropy</li>
+        <li><span class="code">v</span> Specific volume</li>
+        <li><span class="code">x</span> Quality</li>
     </ul>
     <p>
-    PYroMat includes an <span class=code>info()</span> function to help users find the substances they are looking for.  Users can search for substances by their collection ("ig" for ideal gas, "mp" for multi-phase), their name (e.g. "H2O"), or their atomic contents (e.g., "H" and "C" for hydrocarbons).   
+    As of version 2.2.0, PYroMat gives users lots of flexibility in how they define states.  For example, many of these properties may be passed interchangeably as arguments
+    </p>
+    <pre class="code">
+>>> h2o = pm.get('mp.H2O')
+>>> h = h2o.h(T=300,p=1.01325)
+>>> h2o.T(h=h,p=1.01325)
+array([299.99999892])
+>>> h2o.s(T=300, p=1.01325)
+array([0.39306625])
+>>> h2o.s(h=h, p=1.01325)
+array([0.39306624])</pre>
+    <p>
+    PYroMat includes the <span class=code>info()</span> and <span class=code>search()</span> functions to help users find the substances they need.  Users can search for substances by their collection ("ig" for ideal gas, "mp" for multi-phase), their name (e.g. "H2O", "water", or "R-134a"), or their atomic contents (e.g., "H" and "C" for hydrocarbons).   
     </p>
     <p>
     Since the property models are assembled from a number of sources, the <span class=code>info()</span> function can also be used to recall detailed documentation and cited sources for each substance.  Once you have imported PYroMat, just type 
     <pre class=code>
 import pyromat as pm
-help(pm.info)</pre> 
+help(pm.info)
+help(pm.search)</pre> 
 for more information. 
     </p>
     </div>
 
 <pre class=code>
->>> import pyromat as pm
+>>> pm.info('mp.C2H2F4')
+***
+Information summary for substance: "mp.C2H2F4"
+***
+
+    C H F 
+     2 2 4
+
+             Names : R-134a
+                     1,1,1,2-tetrafluoroethane
+                     Norfurane
+                     CF3CH2F
+                     Freon 134
+                     HFA-134a
+                     HFC-134a
+  Molecular Weight : 102.032
+        CAS number : 359-35-3
+      InChI string : InChI=1S/C2H2F4/c3-1(4)2(5)6/h1-2H
+        Data class : mp1
+       Loaded from : /usr/local/lib/python3.6/dist-packages/pyromat/data/mp/C2_H2_F4.hpd
+      Last updated : 17:01 July 5, 2022
+
+The PYroMat R134a multiphase data are adapted from [1]. The equation of
+state used to calculate most properties is their original work, but the
+saturation conditions are derived from Wagner [2].
+The data are implemented with the MP1 class. In-line help describes the
+available funcitons and their proper use.
+Adaptation to PYroMat was by Chris Martin in June 2018 thanks, in part, to
+a grant from Penn State's Open Education Resources Initiative.
+[1] R. Tilner-Roth and H. Baehr, An International Standard Formulation for
+the Thermodynamic Properties of Tetrafluoroethane (HFC-134a) for
+Temperatures from 170K to 455K and Pressure up to 70MPa, Journal of
+Physical and Chemical Reference Data, v23, pp 657, 1994. doi:
+10.1063/1.555958
+[2] W. Wagner, Eine mathematisch statistische Methode zum Aufstellen
+thermodynamischer Gleichungen-gezeigt am Beispiel der Dampfdruckkurve
+reiner fluider Stoffe. Fortschr.-Ber. VDI-Z, v3, n39. 1974.</pre>
+
+<pre class=code>
 >>> pm.info()
   PYroMat
 Thermodynamic computational tools for Python
@@ -1504,13 +1561,13 @@ version: 2.1.2
 
 <div id="contact">
 <hr>
-Authored By:<br>
+Contact:<br>
 Christopher R. Martin, Ph.D.<br>
 Associate Professor of Mechanical Engineering<br>
 The Pennsylvania State University, Altoona College<br>
 <a href="mailto:crm28@psu.edu">crm28@psu.edu</a><br>
 <br>
-&copy;2021 Released under the <a target="blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3 License</a>
+&copy;2022 Released under the <a target="blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3 License</a>
 </div>
 
 </body>
