@@ -7,14 +7,18 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
     <!-- This is the PMGI js script file-->
-    <script type="text/javascript" charset="utf8" src="../static/selector.js"></script>
+    <script type="text/javascript" charset="utf8" src="../static/script.js"></script>
 </head>
 <body>
 
 
-<div id='selection'>Selected ID will appear here.</div>
+<div id='selection'>
+    <button id='selection_cancel' onClick='sel_cancel();'>Cancel</button>
+    <button id='selection_clear' onClick='sel_clear();'>Clear</button>
+    <span id='selection_id'></span>
+</div>
 
-<div id='message'>Message text...</div>
+<div id='message'>Sending the PMGI request...</div>
 
 
 <div id='filter_div'>
@@ -49,7 +53,7 @@
             </td>
         </tr>
     </table>
-    <input type='button' id='filt_update' onclick='update_filter();' value='Update'>
+    <input type='button' id='filt_update' onclick='sel_update_filter();' value='Update'>
 </div>
 
 <div class=selector_class>
@@ -66,6 +70,12 @@
 
 </table>
 </div>
+
+<script>
+    // When the page is done loading, use the selector init function
+    // to load PMGI data into the table.
+    window.onload=sel_init;
+</script>
 
 </body>
 </html>

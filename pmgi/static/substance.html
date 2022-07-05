@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PYroMat | Substance Summary</title>
+    <!-- Include the JQuery and DataTables library-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
+    <!-- This is the PMGI js script file-->
+    <script type="text/javascript" charset="utf8" src="../static/script.js"></script>
+</head>
+<body>
+
+<div id='selection'>
+    <button id='selection_go' onClick='selection_go("/substance");'>Change Selection</button>
+    <span id='selection_id'></span>
+</div>
+
+<div id='message'>Waiting on subst_init...</div>
+
+<table id='subst_table'>
+    <tbody>
+        <tr>
+            <td>Substance ID:</td>
+            <td><div id='subst_id'></div></td>
+        </tr>
+        <tr>
+            <td>PYroMat Collection:</td>
+            <td><div id='subst_col'></div></td>
+        </tr>
+        <tr>
+            <td>PYroMat Class:</td>
+            <td><div id='subst_cls'></div></td>
+        </tr>
+        <tr>
+            <td>Formula:</td>
+            <td><div id='subst_form'></div></td>
+        </tr>
+        <tr>
+            <td>Molecular Weight:</td>
+            <td><div id='subst_mw'></div></td>
+        </tr>
+        <tr>
+            <td>InChI:</td>
+            <td><div id='subst_inchi'></div></td>
+        </tr>
+        <tr>
+            <td>CAS:</td>
+            <td><div id='subst_cas'></div></td>
+        </tr>
+        <tr>
+            <td>Names:</td>
+            <td><div id='subst_names'></div></td>
+        </tr>
+        <tr>
+            <td>Critical Point:</td>
+            <td><div id='subst_crit'></div></td>
+        </tr>
+        <tr>
+            <td>Triple Point:</td>
+            <td><div id='subst_triple'></div></td>
+        </tr>
+    </tbody>
+</table>
+<div id='subst_doc'></div>
+
+<script>
+    // When the page is done loading, use the substance init function
+    // to load PMGI data into the table.
+    window.onload=subst_init;
+</script>
+
+</body>
+</html>
