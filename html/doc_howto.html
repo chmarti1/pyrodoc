@@ -32,9 +32,9 @@
     <div class="toc0"><a href="#cycle">Cycle analysis</a></div>
     <div class="toc1"><a href="#cycle_brayton">Brayton cycle</a></div>
     <div class="toc1"><a href="#cycle_rankine">Rankine cycle</a></div>
-    <div class="toc0"><a href="#steam">Steam</a></div>
-    <div class="toc1"><a href="#steam_xin">Using quality in properties</a></div>
-    <div class="toc1"><a href="#steam_xout">Retrieving quality from properties</a></div>
+    <div class="toc0"><a href="#mp">Multi-phase</a></div>
+    <div class="toc1"><a href="#mp_xin">Using quality in properties</a></div>
+    <div class="toc1"><a href="#mp_xout">Retrieving quality from properties</a></div>
     <div class="toc0"><a  href="#plot">Plotting</a></div>
     <div class="toc1"><a href="#plot_surf">Surface plots</a></div>    
     <div class="toc0"><a href="#faq">FAQ</a></div>
@@ -119,13 +119,13 @@
     <img class="figure" src="./fig/rankine_ts.png"></img>
 </div>
 
-<h3 class="subtitle" id="steam">Steam</h3>
+<h3 class="subtitle" id="mp">Multi-phase</h3>
 <div class="section">
     <p>
-    For working with multi-phase substances like steam, it is sometimes important to calculate properties that are "under the dome."  There is a discontinuity in fluid properties at a phase change.  For example, at 1 atmosphere, the enthalpy of steam jumps from about 419kJ/kg to about 2,676kJ/kg.  In theory, there is no form of water possesses 1,500kJ/kg at atmospheric pressure, but a mixture of vapor and liquid does.  The percent by mass of that mixture made up of vapor is called quality, and it is denoted with an "x."
+    For working with multi-phase substances like steam/water, it is sometimes important to calculate properties that are "under the dome."  There is a discontinuity in fluid properties at a phase change.  For example, at 1 atmosphere, the enthalpy of steam jumps from about 419kJ/kg to about 2,676kJ/kg.  In theory, there is no form of water possesses 1,500kJ/kg at atmospheric pressure, but a mixture of vapor and liquid does.  The percent by mass of that mixture made up of vapor is called quality, and it is denoted with an "x."
     </p>
     
-    <h3 id="steam_xin">Using quality in properties</h3>
+    <h3 id="mp_xin">Using quality in properties</h3>
     <p>
     Instead of the typical temperature and pressure call signature, quality can be an argument to steam's properties.  Note that when quality is specified, the state must be on the saturation curve.  Specifying pressure or temperature has the same effect.
     </p>
@@ -145,16 +145,34 @@
 array([  951.80502462,  1154.31670956,  1356.82839449,  1559.34007943,
         1761.85176437])</pre>
     
-    <h3 id="steam_xout">Retrieving quality from properties</h3>
+    <h3 id="mp_xout">Retrieving quality from properties</h3>
     <p>
-    The inverse properties also support quality.  There is an optional keyword parameter called "quality" that, if set to "True," prompts <span class="code">h_T</span> and <span class="code">s_T</span> to return both temperature and quality.  Here, we get the saturation temperature, pressure, and liquid/vapor enthalpies all in one command.  Then, <span class="code">T_h</span> reports that at 9.32041bar, water with 2000kJ/kg is at 450 Kelvin and has 0.618 quality.
+    It is also possible to obtain quality while going backwards from this process.  There is an optional keyword parameter called "quality" that, if set to "True," prompts property methods to return both temperature and quality.  Here, we obtain the saturation temperature, pressure, and liquid/vapor enthalpies all in one command.  Then, <span class="code">T</span> reports that at 9.32041bar, water with 2000kJ/kg is at 450 Kelvin and has 0.618 quality.
     </p>
     <pre class="code">
 >>> H2O.hs(T=450.,tp=True)
 (450.0, 9.3204107913593361, 749.29333968000344, 2774.4101890593283)
->>> H2O.T_h(h = 2000., p=9.32041, quality=True)
+>>> H2O.T(h = 2000., p=9.32041, quality=True)
 (array(449.9999963649258), array(0.6175972852487263))</pre>
 
+    <h3 id="mp_sat">Working with saturation properties</h3>
+    <p>
+    Saturation properties are the properties of the liquid and vapor along the saturation line.  There are special methods set asside specifically for calculating the saturation properties.  Most of them accept <i>either</i> temperature <i>or</i> pressure to specify the location on the saturation curve, and return a result in a tuple pair.  For example, this code calculates the liquid and vapor density and then enthalpy.
+    </p>
+    <pre class="code">
+>>> H2O.ds(T=450.)
+(array([890.34372544]), array([4.81191942]))
+>>> H2O.hs(T=450.)
+(array([749.17150636]), array([2774.44153121]))</pre>
+
+    <p>
+    This same behavior is exhibited by other saturation methods, but <span class="code">Ts</span>, and <span class="code">ps</span> are exceptions.  They only return one value, and they only accept one another as arguments.
+    </p>
+    <pre class="code">
+>>> H2O.ps(T=450.)
+9.322032148068905
+>>> H2O.Ts(p=9.322032148068905)
+array([450.])</pre>
 </div>
 
 <h3 class="subtitle" id="plot">Plotting</h3>
@@ -190,7 +208,7 @@ array([  951.80502462,  1154.31670956,  1356.82839449,  1559.34007943,
     Short answer: It isn't just water; there are several substances represented in both the multi-phase and ideal gas collections. They are two different models created for two different purposes.
     </p>
     <p>
-    It would seem like you could get everything you needed from the multi-phase version right?  After all, the multi-phase collection water covers both liquid AND gas.  Look more carefully, though; the upper temperature limit on multiphase water is 2,273.15K (2,000<sup>o</sup>C).  Not bad, but the ideal gas data go all the way up to 6,000K.  On the other hand, ideal gas water only supports temperatures down to 500K.
+    It would seem like you could get everything you needed from the multi-phase version right?  After all, the multi-phase collection water covers both liquid AND gas.  Look more carefully, though; the upper temperature limit on multiphase water is 2,273.15K (2,000<sup>o</sup>C).  Not bad, but the ideal gas data go all the way up to 6,000K.  On the other hand, at lower temperatures, the ideal gas model will only be valid when the pressure is very low.
     </p>
     <p>
     These drastic differences illustrate the different purposes for which these data sets were created.  The ideal gas collection was created primarily for reaction modeling.  Water is a primary combustion product, in that role it usually shows up at high temperatures, and the ideal gas assumption gets sketchy around the boiling point anyway.  Meanwhile, the multi-phase collection is primarily useful for cycle modeling, and doesn't adhere to the NIST-JANAF enthalpy conventions.
@@ -228,7 +246,7 @@ array(2.2905867790156145)</pre>
 
     <h3 id="faq_units">What unit system does PYroMat use?</h3>
     <p>
-    PYroMat defaults to kJ, kg, Kelvin, and bar.  But, all units are configurable using <a href="./doc_api.html#if_config">PYroMat's configuration system</a>.
+    PYroMat defaults to kJ, kg, Kelvin, and bar.  But, all units are configurable using <a href="./doc_intro.html#units">PYroMat's configuration system</a>.
     </p>
     <p>
     To know how an individual property is being reported, each method comes with in-line documentation that tells you what units that method uses.  For example, densities use <span class="code">unit_matter/unit_volume</span>.  To check PYroMat's current settings, just type <span class="code">pm.config</span> to print a summary of the current settings.
@@ -237,7 +255,7 @@ array(2.2905867790156145)</pre>
 
 <div id="contact">
 <hr>
-Authored By:<br>
+Contact:<br>
 Christopher R. Martin, Ph.D.<br>
 Associate Professor of Mechanical Engineering<br>
 The Pennsylvania State University, Altoona College<br>

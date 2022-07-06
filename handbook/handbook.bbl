@@ -32,6 +32,10 @@ M.~DeBroglie, R.~Vieweg, G.~Zickner, U.~Stille, E.~Padelt, and E.~Blechschmidt,
   ``Resolution4: Definition of the standard atmosphere,'' in {\em Proceedings
   of the 10th CGPM}, (Paris), 1954.
 
+\bibitem{si:2019}
+B.~Inglis, J.~Ulrich, and M.~Milton, {\em The International System of Units}.
+\newblock Creative Commons: BIPM, 9th~ed., 2019.
+
 \bibitem{nist:sp811}
 A.~Thompson and B.~N. Taylor, ``Guide for the use of the international system
   of units,'' Tech. Rep. SP811, NIST, Gaithersburg, MD 20899, Mar 2008.
@@ -46,6 +50,10 @@ K.~Butcher, L.~Crown, and E.~J. Gentry, ``The international system of units
   (si) - conversion factors for general use,'' Tech. Rep. SP1038, Weights and
   Measures Division, {NIST}, May 2006.
 
+\bibitem{crc}
+J.~R. Rumble, {\em CRC Handbook of Chemistry and Physics}.
+\newblock Boca Raton, FL: Taylor and Francis, 98th~ed., 2018.
+
 \bibitem{nist:webbook}
 National Institute for Standards and Technology, https://webbook.nist.gov/.
 \newblock accessed: Jun, 2021.
@@ -54,6 +62,18 @@ National Institute for Standards and Technology, https://webbook.nist.gov/.
 B.~J. {McBride}, S.~Gordon, and M.~A. Reno, ``Coefficients for calculating
   thermodynamic and transport properties of individual species,'' Tech. Rep.
   4513, NASA, 1993.
+
+\bibitem{stewart:1991}
+R.~B. Stewart, R.~T. Jacobsen, and W.~Wagner, ``Thermodynamic properties of
+  oxygen from the triple point to 300 k with pressures to 80 mpa,'' {\em
+  Journal of Physical and Chemical Reference Data}, vol.~20, no.~5, p.~917,
+  1991.
+
+\bibitem{setzmann:1991}
+U.~Setzmann and W.~Wagner, ``A new equation of state and tables of
+  thermodynamic properties for methane convering the range from the melting
+  line to 625 k at pressures up to 1000 k,'' {\em Journal of Physical and
+  Chemical Reference Data}, vol.~20, p.~1061, 1991.
 
 \bibitem{span:2003:1}
 R.~Span and W.~Wagner, ``Equations of state for technical applications. i.
@@ -71,17 +91,25 @@ R.~Span and W.~Wagner, ``Equations of state for technical applications. iii.
   results for polar fluids,'' {\em International Journal of Thermophysics},
   vol.~24, no.~1, pp.~111--162, 2003.
 
-\bibitem{tegeler:1999}
-C.~Tegeler, R.~Span, and W.~Wagner, ``A new equation of state for argon
-  covering the fluid region for temperatures form the metling line to 700 k at
-  pressures up to 1000 mpa,'' {\em Journal of Physical and Chemical Reference
-  Data}, vol.~28, p.~779, 1999.
+\bibitem{refprop}
+REFPROP, Software, https://www.nist.gov/srd/refprop.
 
 \bibitem{span:1994}
 R.~Span and W.~Wagner, ``A new equation of state for carbon dioxide covering
   the fluid region from the triple-point temperature to 1100 k at pressures up
   to 800 mpa,'' {\em Journal of Physical and Chemical Reference Data}, vol.~25,
   p.~1509, 1994.
+
+\bibitem{iapws:2014}
+T.~Petrova, ``Revised release on the iapws formulation 1995 for the
+  thermodynamic properties of ordinary water substance for general and
+  scientific use,'' tech. rep., 2014.
+
+\bibitem{tegeler:1999}
+C.~Tegeler, R.~Span, and W.~Wagner, ``A new equation of state for argon
+  covering the fluid region for temperatures form the metling line to 700 k at
+  pressures up to 1000 mpa,'' {\em Journal of Physical and Chemical Reference
+  Data}, vol.~28, p.~779, 1999.
 
 \bibitem{richardson:2013}
 I.~A. Richardson, J.~W. Leachman, and E.~W. Lemmon, ``Fundamental equation of
@@ -100,11 +128,6 @@ R.~Span, E.~W. Lemmon, R.~T. Jacobsen, W.~Wagner, and A.~Yokozeki, ``A
   fortemperatures from 63.151 to 1000 k andpressures to 2200 mpa,'' {\em
   Journal of Physical and Chemica Reference Data}, vol.~29, no.~6,
   pp.~1361--1433, 2000.
-
-\bibitem{iapws:2014}
-T.~Petrova, ``Revised release on the iapws formulation 1995 for the
-  thermodynamic properties of ordinary water substance for general and
-  scientific use,'' tech. rep., 2014.
 
 \bibitem{piao:1998}
 C.-C. Piao and M.~Noguchi, ``An interntional standard equation of state for

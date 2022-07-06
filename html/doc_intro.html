@@ -32,6 +32,7 @@
     <div class="toc0"><a href=#get>Getting objects</a></div>
     <div class="toc0"><a href=#data>Retrieving properties</a></div>
     <div class="toc0"><a href=#help>Navigating in-line help</a></div>
+    <div class="toc0"><a href=#search>Searching for substances</a></div>
     <div class="toc0"><a href=#units>Working with units</a></div>
     <div class="toc0"><a href=#arrays>Working with arrays</a></div>
 
@@ -57,7 +58,7 @@
 >>> O2 = pm.get('ig.O2')
 >>> CO2 = pm.get('ig.CO2')</pre>
     <p>
-    The argument to the <span class="code">get</span> function is the species ID.  It is comprised of two parts: the chemical compound, e.g. "N2," and the data <a href="./doc_api.html#ig">collection</a> to which it belongs, "ig," for "ideal gas."
+    The argument to the <span class="code">get</span> function is the species ID.  It is comprised of two parts: the chemical compound, e.g. "N2," and the data <a href="./doc_api.html#ig">collection</a> to which it belongs.  So far, there are only two collections: "ig" for ideal gas and "mp" for multi-phase.
     </p>
 </div>
 
@@ -77,21 +78,25 @@ array(6.839762903237966)</pre>
     But wait!  Enthalpy and entropy are functions of temperature and pressure!
     </p>
     <p>
-    All properties accept <a href="https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments">keyword arguments</a> that allow users to define the state in terms of a set of primary properties.  For ideal gases, that means temperature, <span class="code">T</span>, pressure, <span class="code">p</span>, or density, <span class="code">d</span>.  For a multi-phase mixture, users can also specify quality, <span class="code">x</span>.
+    All properties accept <a href="https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments">keyword arguments</a> that allow users to define the state in terms of almost any two properties.  For ideal gases, that includes, temperature, pressure, entropy, enthalpy, density, and specific volume.  For multi-phase substances, that includes quality as well.
     </p>
     <p>
     The command-line examples below all return the enthalpy of diatomic nitrogen at 496.5K and 3bar, but using different approaches to calling the enthalpy function.
     </p>
     <pre class="code">
->>> N2.h(T=496.5, p=3.)     # keywords T and p **best**
+>>> N2.h(T=496.5, p=3.)     # keywords T and p **fastest**
 array([207.43528961])
->>> N2.h(T=496.5)           # p reverts to its default
+>>> N2.h(T=496.5)           # p reverts to its default 1.01325
 array([207.43528961])
 >>> N2.h(496.5, 3.)         # T and p as ordered args
 array([207.43528961])
 >>> N2.h(496.5)             # p reverts to its default
 array([207.43528961])
->>> N2.h(T=496.5, d=2.0358) # density instead of pressure
+>>> d = N2.d(T=496.5, p=3.)
+>>> N2.h(T=496.5, d=d)      # density instead of pressure
+array([207.43528961])       # **fastest for multi-phase**
+>>> s = N2.s(T=496.5,p=3.)
+>>> N2.h(s=s, p=3.)         # entropy and pressure **slowest**
 array([207.43528961])</pre>
     <p>
 In general, PYroMat is intended to be used with keywords and values specified, but it is also designed to do its best to interpret your meaning when you leave things out.  In the above examples, when the keywords are missing or when one of the properties is missing, the method reverted to defaults.  When no keywords are specified, PYroMat assumes you are working in temperature and pressure <span class="code">(T,p)</span> tuples.  When one (or both) is omitted, it reverts to a default values (see the Configuration chapter of the <a href="pdf/handbook.pdf">PYroMat Handbook</a> for more information).
@@ -99,6 +104,13 @@ In general, PYroMat is intended to be used with keywords and values specified, b
     <p>
     This is a good point to note that the <span class="code">h()</span> method returns a Numpy array instead of an ordinary float.  All properties accept array-like arguments to temperature and pressure.  PYroMat uses Numpy's <a href="https://docs.scipy.org/doc/numpy-1.13.0/user/basics.broadcasting.html" target="blank">array broadcasting rules</a> for operating on bulk data.  This can come in handy for simulations where T and p might be big <a href=#arrays>multi-dimensional arrays</a> in time and space.
     </p>
+    <pre class="code">
+>>> N2.s(T=[300,400,500,600], p=1.5)
+array([6.72596156, 7.02564504, 7.25995304, 7.45405736])</pre>
+    <p>
+    For more information, use the in-line help <span class="code">help(N2)</span> or <span class="code">help(N2.h)</span>, visit the <a href="./features.html">Features</a> page, see the <a href="pdf/handbook.pdf">User and Developer's Handbook</a>, or use the <span class="code">pm.info()</span> function.
+    </p>
+
 </div>
 
 <h3 class="subtitle" id="help">In-line documentation</h3>
@@ -108,18 +120,29 @@ In general, PYroMat is intended to be used with keywords and values specified, b
     </p>
     <pre class="code">
 >>> help(N2)
+Help on ig2 in module builtins object:
 
-Help on ig in module __builtin__ object:
-
-class ig(pyromat.reg.__basedata__)
- |  Ideal gas class using the Shomate equation of state.
+class ig2(pyromat.reg.__basedata__)
+ |  ig2(data)
+ |  
+ |  Ideal gas class using the NASA polynomial equation of state.
  |  This class exposes properties through member methods.  All property 
- |  functions accept temperature in PYroMat's unit_temperature and 
- |  pressure in PYroMat's unit_pressure.  The following are the member 
+ |  methods accept any two of temperature, pressure, or density.  By default
+ |  if no keywords are given, the argument order is (temperature,pressure).
+ |  If one or both of the properties is missing, the defaults will be 
+ |  applied instead, starting with temperature (config['def_T']) and then
+ |  pressure, (config['def_p']).
+ |  
+ |  There are basic state methods that allow the calculation of any one
+ |  in terms of the other two:
+ |    T()  temperature      (unit_temperature)
+ |    p()  pressure         (unit_pressure)
+ |    d()  density          (unit_matter / unit_volume)
+ |  
+ |  The following are the member 
  |  methods and their unit conventions:
  |    cp() spec. heat       (unit_energy / unit_temperature / unit_matter)
  |    cv() spec. heat       (unit_energy / unit_temperature / unit_matter)
- |    d()  density          (unit_matter / unit_volume)
  |    e()  internal energy  (unit_energy / unit_matter)
  |    h()  enthalpy         (unit_energy / unit_matter)
  |    gam()  spec. heat ratio (dless)
@@ -130,40 +153,158 @@ class ig(pyromat.reg.__basedata__)
  |  There are also routines to invert properties; e.g. calculating 
  |  temperature from enthalpy or from entropy and pressure.
  |    T_h()  temperature from enthalpy
- |    T_d()  temperature from density and pressure
  |    T_s()  temperature from entropy and pressure
  |    p_s()  pressure from entropy and temperature
- |    p_d()  pressure from density and temperature
  |  
  |  Some meta-data on the species can be obtained using methods
- |    Tlim() a two-element array with the min,max temperatures supported by
- |           the data set.
- |    contents()  returns a dictionary with a key entry for each atom in
- |                the chemical formula and the corresponding integer 
- |                quantity of each.
+ |    Tlim()    a two-element array with the min,max temperatures 
+ |              supported by the data set.
+ |    atoms()   returns a dictionary with a key entry for each atom in
+ |              the chemical formula and the corresponding integer 
+ |              quantity of each.
+ |                
+ |  For more information on any of these methods, access the in-line 
+ |  documentation using Python's built-in "help()" function.
  |  
 :</pre>
 
     <pre class="code">
 >>> help(N2.h)
-
 Help on method h:
 
-h(self, T=None, p=None, hf=True) method of __builtin__.ig instance
+h(*varg, **kwarg) method of builtins.ig2 instance
     Enthalpy
-        h(T,p)
-    Both arguments are optional, and will default to 'def_T' and 'def_p'
-    configuration parameters if they are left undefined.  Ideal gas enthalpy
-    is not actually a function of p, but it is permitted as an argument 
-    for cross-compatibility between species' function calls.
+        h(...)
     
-    There is an optional parameter, hf, that is a boolean indicating whether
-    the enthalpy of formation should be included in the enthalpy.  If hf is
-    false, h() will calculate the enthalpy to be zero a T=298.15K
+    All ideal gas properties accept two other properties as flexible inputs
+    Below are the recognized keywords, their meaning, and the config entries
+    that determine their units.
+        T   temperature         unit_temperature
+        p   pressure            unit_pressure
+        d   density             unit_matter / unit_volume
+        v   specific volume     unit_volume / unit_matter
+        e   internal energy     unit_energy / unit_matter
+        h   enthalpy            unit_energy / unit_matter
+        s   entropy             unit_energy / unit_matter / unit_temperature
     
-    Accepts unit_temperature
-            unit_pressure
-    Returns unit_energy / unit_matter</pre>
+    If no keywords are specified, the positional arguments are interpreted
+    as (T,p).  To configure their defaults, use the def_T and def_p config
+    entries.
+    
+    Returns enthalpy in unit_energy / unit_matter
+</pre>
+</div>
+
+<h3 class="subtitle" id="search">Searching for substances</h3>
+<div class="section">
+    <p>
+    The <span class="code">info</span> and <span class="code">search</span> functions are powerful tools for finding what you need inside of PYroMat.  <span class="code">search</span> accepts a series of arguments to help users narrow down PYroMat's collection of substances.  For example,
+    </p>
+    <pre class="code">
+>>> import pyromat as pm
+>>> pm.search('water')
+{&lt;ig2, ig.H2S>, &lt;ig2, ig.CHN>, &lt;ig, ig.BrH>, &lt;ig2, ig.H2O>, &lt;ig, ig.ClH>, &lt;mp1, mp.H2O>, &lt;ig, ig.DHO>}
+>>> pm.search(name='water')     # This is equivalent.</pre>
+    <p>
+    In the above example, the "name" argument allowed us to search for substances that contained the string "water" in any of their common names <i>or</i> somewhere in their ID string.  The result came back as a Python set containing all of the substance instances matching the search criteria.
+    </p>
+    <p>  
+    The search function can do more than just look at a substance's name.  Users can also specify the collection (<span class="code">'ig'</span> or <span class="code">'mp'</span>), the PYroMat class, the CAS identifier string, the InChI identifier string, or the molecular makeup of the substance.  Any of these can be combined 
+    </p>
+    <pre class="code">
+>>> pm.search(collection='ig', pmclass='igmix')     # Class AND collection
+{&lt;igmix, ig.air>, &lt;igmix, ig.f5>, &lt;igmix, ig.h35>}
+>>> pm.search(inchi = 'InChI=1S/H2O/h1H2')          # Inchi string
+{&lt;ig2, ig.H2O>, &lt;mp1, mp.H2O>}
+>>> pm.search(contains='C')     # All substances with carbon in their formula
+... huge set ...
+>>> pm.search(contains={'C':2}) # All substances with precisely two carbon
+{&lt;ig2, ig.C2H4O2>, &lt;ig2, ig.C2H4O4>, &lt;ig2, ig.C2H5>, &lt;ig2, ig.C2H6>, &lt;ig2, ig.C2H6N2>, &lt;ig2, ig.C2H6O>, ...
+>>> pm.search(contains={'C':2, 'Cl':None})  # Precisely two carbon and any clorine
+{&lt;ig2, ig.C2HCl>, &lt;ig2, ig.C2Cl6>, &lt;ig2, ig.C2Cl4>, &lt;ig2, ig.C2Cl2>}</pre>
+    <p>
+    It is also possible to build multi-step "and" and "or" operations with searches.  In an "and" operation between two searches, the conditions specified in both searches must be true for all returned values.  If the results of a previous search is passed to the <span class="code">members</span> keyword of a search, that set (and not the set of all PYroMat substances) will be searched.  This has the effect of producing an "and" operation between the two searches.
+    <pre class="code">
+>>> result = pm.search(contains='C')
+>>> pm.search(contains='D', members=result)                             # Returns substances with carbon and deuterium
+{&lt;ig2, ig.C6D6>, &lt;ig2, ig.C6D5>, &lt;ig2, ig.C12D10>, &lt;ig2, ig.C12D9>}     
+>>> pm.search(contains={'Br':1}).union( pm.search(contains={'Hg':1}))   # One bromine OR one mercury
+{&lt;ig, ig.BrF5&gt;, &lt;ig2, ig.Br&gt;, &lt;ig2, ig.HBr&gt;, &lt;ig, ig.BrF5S&gt;, &lt;ig, ig.CBrN&gt;, &lt;ig, ig.BrH&gt;, &lt;ig, ig.BBrCl&gt;, ...
+    </pre>
+    <p>
+    In the second example above, we have combined two searches using the set's <span class="code">union</span> method.  This just combines them (while eliminating redundant entries) in an "or" operation.  These, and the other built-in Python set operations allow users to construct searches with arbitrary complexity.
+    </p>
+    <p>
+    Finally, once we have a search we are happy with, we may want to display the results more elegantly than just seeing a set of the substance IDs.  The <span class="code">info</span> function accepts these search result sets as an argument, and it displays a table of the results.  When it is called with no arguments, it merely displays a table of all the substances supported by PYroMat.  Alternately, the <span class="code">info</span> function also accepts all the same arguments as  <span class="code">search</span>, so if you want, you can just let  <span class="code">info</span> perform the search for you.
+    </p>
+    <pre class="code">
+>>> pm.info(name='water')
+  PYroMat
+Thermodynamic computational tools for Python
+version: 2.2.0
+------------------------------------------------------------------------
+ ID     : class : name              : properties
+------------------------------------------------------------------------
+ ig.BrH :  ig   : Hydrogen bromide  : T p d v cp cv gam e h s mw R    
+ ig.CHN :  ig2  : Hydrogen cyanide  : T p d v cp cv gam e h s mw R    
+ ig.ClH :  ig   : Hydrogen chloride : T p d v cp cv gam e h s mw R    
+ ig.DHO :  ig   : Water-d           : T p d v cp cv gam e h s mw R    
+ ig.H2O :  ig2  : Water             : T p d v cp cv gam e h s mw R    
+ ig.H2S :  ig2  : Hydrogen sulfide  : T p d v cp cv gam e h s mw R    
+ mp.H2O :  mp1  : Water             : T p d v cp cv gam e h s mw R  
+
+>>> pm.info(pm.search(inchi = 'InChI=1S/H2O/h1H2'))
+  PYroMat
+Thermodynamic computational tools for Python
+version: 2.2.0
+------------------------------------------------------------
+ ID     : class : name  : properties
+------------------------------------------------------------
+ ig.H2O :  ig2  : Water : T p d v cp cv gam e h s mw R    
+ mp.H2O :  mp1  : Water : T p d v cp cv gam e h s mw R   
+    </pre>
+    <p>
+    If an exact match with a substance ID string is found, or if the search results only contain a single substance, detailed information is printed on that substance instead of the table.
+    </p>
+    <pre class="code">
+>>> pm.info('mp.C2H2F4')    # pm.info(name='R-134a') also works
+***
+Information summary for substance: "mp.C2H2F4"
+***
+
+    C H F 
+     2 2 4
+
+             Names : R-134a
+                     1,1,1,2-tetrafluoroethane
+                     Norfurane
+                     CF3CH2F
+                     Freon 134
+                     HFA-134a
+                     HFC-134a
+  Molecular Weight : 102.032
+        CAS number : 359-35-3
+      InChI string : InChI=1S/C2H2F4/c3-1(4)2(5)6/h1-2H
+        Data class : mp1
+       Loaded from : /home/chris/Documents/pyromat/src/pyromat/data/mp/C2_H2_F4.hpd
+      Last updated : 12:18 June 30, 2022
+
+The PYroMat R134a multiphase data are adapted from [1]. The equation of
+state used to calculate most properties is their original work, but the
+saturation conditions are derived from Wagner [2].
+The data are implemented with the MP1 class. In-line help describes the
+available funcitons and their proper use.
+Adaptation to PYroMat was by Chris Martin in June 2018 thanks, in part, to
+a grant from Penn State's Open Education Resources Initiative.
+[1] R. Tilner-Roth and H. Baehr, An International Standard Formulation for
+the Thermodynamic Properties of Tetrafluoroethane (HFC-134a) for
+Temperatures from 170K to 455K and Pressure up to 70MPa, Journal of
+Physical and Chemical Reference Data, v23, pp 657, 1994. doi:
+10.1063/1.555958
+[2] W. Wagner, Eine mathematisch statistische Methode zum Aufstellen
+thermodynamischer Gleichungen-gezeigt am Beispiel der Dampfdruckkurve
+reiner fluider Stoffe. Fortschr.-Ber. VDI-Z, v3, n39. 1974.
+</pre>
 </div>
 
 <h3 class="subtitle" id="units">Working with units</h3>
@@ -276,13 +417,13 @@ array([ 40.5,  50. ])</pre>
 
 <div id="contact">
 <hr>
-Authored By:<br>
+Contact:<br>
 Christopher R. Martin, Ph.D.<br>
 Associate Professor of Mechanical Engineering<br>
 The Pennsylvania State University, Altoona College<br>
 <a href="mailto:crm28@psu.edu">crm28@psu.edu</a><br>
 <br>
-&copy;2021 Released under the <a target="blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3 License</a>
+&copy;2022 Released under the <a target="blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3 License</a>
 </div>
 
 </div>
