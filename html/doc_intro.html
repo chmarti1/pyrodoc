@@ -58,7 +58,7 @@
 >>> O2 = pm.get('ig.O2')
 >>> CO2 = pm.get('ig.CO2')</pre>
     <p>
-    The argument to the <span class="code">get</span> function is the species ID.  It is comprised of two parts: the chemical compound, e.g. "N2," and the data <a href="./doc_api.html#ig">collection</a> to which it belongs.  So far, there are only two collections: "ig" for ideal gas and "mp" for multi-phase.
+    The argument to the <span class="code">get</span> function is the species ID.  It is comprised of two parts: the chemical compound, e.g. "N2," and the data collection to which it belongs.  So far, there are only two collections: "ig" for ideal gas and "mp" for multi-phase.  The collection helps organize the PYroMat substance models by their capabilities.  For example, there is a "ig.N2" and a "mp.N2" found in PYroMat.  The first is an ideal gas model, and the second is a multi-phase model for cryogenic nitrogen - same substance, but different model.
     </p>
 </div>
 
