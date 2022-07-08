@@ -2,7 +2,7 @@
         "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-    <title>Home | PYroMat</title>
+    <title>Introduction | PYroMat</title>
     <link rel="stylesheet" type="text/css" href="pyromat.css">
     <meta name="description" content="Thermodynamic Properties in Python">
     <meta name="keywords" content="python,thermodynamic,properties,cycle,engine,refrigeration">
@@ -29,7 +29,7 @@
 <div class=section>
 
     <div class="toc0"><a href=#import>Importing the package</a></div>
-    <div class="toc0"><a href=#get>Getting objects</a></div>
+    <div class="toc0"><a href=#get>Retrieving substance objects</a></div>
     <div class="toc0"><a href=#data>Retrieving properties</a></div>
     <div class="toc0"><a href=#help>Navigating in-line help</a></div>
     <div class="toc0"><a href=#search>Searching for substances</a></div>
@@ -48,17 +48,20 @@
 >>> import pyromat as pm</pre>
 </div>
 
-<h3 class="subtitle" id="get">Getting objects</h3>
+<h3 class="subtitle" id="get">Retrieving substance objects</h3>
 <div class="section">
     <p>
-    Once PYroMat (<span class="code">pm</span> for short) is imported, the <span class="code">get</span> function will retrieve objects that represent individual species.  For example, let's look at diatomic nitrogen, oxygen, and carbon dioxide.
+    Once PYroMat (<span class="code">pm</span> for short) is imported, the <span class="code">get</span> function will retrieve objects that represent individual substances.  For example, let's look at diatomic nitrogen, oxygen, and carbon dioxide.
     </p>
     <pre class="code">
 >>> N2 = pm.get('ig.N2')
 >>> O2 = pm.get('ig.O2')
 >>> CO2 = pm.get('ig.CO2')</pre>
     <p>
-    The argument to the <span class="code">get</span> function is the species ID.  It is comprised of two parts: the chemical compound, e.g. "N2," and the data collection to which it belongs.  So far, there are only two collections: "ig" for ideal gas and "mp" for multi-phase.  The collection helps organize the PYroMat substance models by their capabilities.  For example, there is a "ig.N2" and a "mp.N2" found in PYroMat.  The first is an ideal gas model, and the second is a multi-phase model for cryogenic nitrogen - same substance, but different model.
+    The argument to the <span class="code">get</span> function is the species ID.  It is comprised of two parts: the chemical compound expressed in <a href="https://en.wikipedia.org/wiki/Chemical_formula#Hill_system">Hill notation</a> (e.g. "N2") and the data collection to which it belongs (e.g. "ig" for ideal gas).  So far, there are only two collections: "ig" for ideal gas and "mp" for multi-phase.  The collection helps organize the PYroMat substance models by their capabilities.  For example, there is a "ig.N2" and a "mp.N2" found in PYroMat.  The first is an ideal gas model, and the second is a multi-phase model for cryogenic nitrogen - same substance, but different model.
+    </p>
+    <p>
+    Of course, the problem, here, is that the <span class="code">get</span> function requires users to already know the substance ID string that they are looking for.  What if users want to <a href=#search>browse or search for substances?</a>  Never fear; read on.
     </p>
 </div>
 
@@ -80,6 +83,95 @@ array(6.839762903237966)</pre>
     <p>
     All properties accept <a href="https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments">keyword arguments</a> that allow users to define the state in terms of almost any two properties.  For ideal gases, that includes, temperature, pressure, entropy, enthalpy, density, and specific volume.  For multi-phase substances, that includes quality as well.
     </p>
+    <p>
+    The table below lists the available properties of the PYroMat substances.  Those marked with an asterisk (*) can be accepted as keyword arguments to define the state.
+    </p>
+    <table class="texttable">
+        <thead>
+            <tr>
+                <th>Python</th>
+                <th>Property</th>
+                <th>Units</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="code">cp</span></td>
+                <td>Const. pressure specific heat</td>
+                <td><span class="code">unit_energy / unit_matter / unit_temperature</span></td>
+            </tr>
+            <tr>
+                <td><span class="code">cv</span></td>
+                <td>Const. volume specific heat</td>
+                <td><span class="code">unit_energy / unit_matter / unit_temperature</span></td>
+            </tr>
+            <tr>
+                <td><span class="code">d</span>*</td>
+                <td>Density</td>
+                <td><span class="code">unit_matter / unit_volume</span></td>
+            </tr>
+            <tr>
+                <td><span class="code">e</span>*</td>
+                <td>Internal energy</td>
+                <td><span class="code">unit_energy / unit_matter</span></td>
+            </tr>
+            <tr>
+                <td><span class="code">gam</span></td>
+                <td>Specific heat ratio</td>
+                <td>Dimensionless.</td>
+            </tr>
+            <tr>
+                <td><span class="code">h</span>*</td>
+                <td>Enthalpy</td>
+                <td><span class="code">unit_energy / unit_matter</span></td>
+            </tr>
+            <tr>
+                <td><span class="code">mw</span></td>
+                <td>Molecular weight</td>
+                <td><span class="code">unit_mass / unit_molar</span></td>
+            </tr>
+            <tr>
+                <td><span class="code">p</span>*</td>
+                <td>Pressure</td>
+                <td><span class="code">unit_pressure</span></td>
+            </tr>
+            <tr>
+                <td><span class="code">R</span></td>
+                <td>Ideal gas constant</td>
+                <td><span class="code">unit_energy / unit_matter / unit_temperature</span></td>
+            </tr>
+            <tr>
+                <td><span class="code">s</span>*</td>
+                <td>Entropy</td>
+                <td><span class="code">unit_energy / unit_matter / unit_temperature</span></td>
+            </tr>
+            <tr>
+                <td><span class="code">T</span>*</td>
+                <td>Temperature</td>
+                <td><span class="code">unit_temperature</span></td>
+            </tr>
+            <tr>
+                <td><span class="code">v</span>*</td>
+                <td>Specific volume</td>
+                <td><span class="code">unit_volume / unit_matter</span></td>
+            </tr>
+            <tr>
+                <td><span class="code">x</span>*</td>
+                <td>Quality (mp)</td>
+                <td>Dimensionless.</td>
+            </tr>
+            <tr>
+                <td><span class="code">X</span></td>
+                <td>Mole fraction (igmix)</td>
+                <td>Dimensionless.</td>
+            </tr>
+            <tr>
+                <td><span class="code">Y</span></td>
+                <td>Mass fractions (igmix)</td>
+                <td>Dimensionless.</td>
+            </tr>
+        </tbody>
+    </table>
     <p>
     The command-line examples below all return the enthalpy of diatomic nitrogen at 496.5K and 3bar, but using different approaches to calling the enthalpy function.
     </p>
@@ -123,40 +215,40 @@ array([6.72596156, 7.02564504, 7.25995304, 7.45405736])</pre>
 Help on ig2 in module builtins object:
 
 class ig2(pyromat.reg.__basedata__)
- |  ig2(data)
- |  
  |  Ideal gas class using the NASA polynomial equation of state.
- |  This class exposes properties through member methods.  All property 
- |  methods accept any two of temperature, pressure, or density.  By default
- |  if no keywords are given, the argument order is (temperature,pressure).
- |  If one or both of the properties is missing, the defaults will be 
- |  applied instead, starting with temperature (config['def_T']) and then
- |  pressure, (config['def_p']).
- |  
- |  There are basic state methods that allow the calculation of any one
- |  in terms of the other two:
+ |      
+ |  ** Available Properties **
+ |  IG has property methods:
  |    T()  temperature      (unit_temperature)
  |    p()  pressure         (unit_pressure)
  |    d()  density          (unit_matter / unit_volume)
- |  
- |  The following are the member 
- |  methods and their unit conventions:
+ |    v()  specific volume  (unit_volume / unit_matter)
  |    cp() spec. heat       (unit_energy / unit_temperature / unit_matter)
  |    cv() spec. heat       (unit_energy / unit_temperature / unit_matter)
+ |    gam()  spec. heat ratio (dless)
  |    e()  internal energy  (unit_energy / unit_matter)
  |    h()  enthalpy         (unit_energy / unit_matter)
- |    gam()  spec. heat ratio (dless)
- |    mw() molecular weight (unit_mass / unit_molar)
- |    R()  gas constant     (unit_energy / unit_temperature / unit_matter)
  |    s()  entropy          (unit_energy / unit_temperature / unit_matter)
+ |    state()       Calculates all properties!
  |  
- |  There are also routines to invert properties; e.g. calculating 
- |  temperature from enthalpy or from entropy and pressure.
- |    T_h()  temperature from enthalpy
- |    T_s()  temperature from entropy and pressure
- |    p_s()  pressure from entropy and temperature
+ |  These accept any of the following keyword arguments: T, p, d, v, e, h, s
+ |    h(T=452.)
+ |    h(d=1.3, p=3.4)
+ |    h(s=6.2, p=3.4)
  |  
- |  Some meta-data on the species can be obtained using methods
+ |  In the back end, most properties require only temperature except entropy,
+ |  which requires temperature and pressure.  When other properties are given,
+ |  temperature is needed, so additional calculations are necessary.  In the 
+ |  worst case, specifying entropy, enthalpy, or internal energy even requires
+ |  iteration.  For performance, once temperature and pressure become available,
+ |  they should always be used.  For enthalpy, pressure is not needed, so it 
+ |  may be omitted with no ill effect.  
+ |  
+ |  ** Other Properties **
+ |  There are some properties that do not depend on the state; they only need
+ |  to be converted to the relevant unit system.
+ |    mw()      molecular weight (unit_mass / unit_molar)
+ |    R()       gas constant
  |    Tlim()    a two-element array with the min,max temperatures 
  |              supported by the data set.
  |    atoms()   returns a dictionary with a key entry for each atom in
@@ -165,7 +257,6 @@ class ig2(pyromat.reg.__basedata__)
  |                
  |  For more information on any of these methods, access the in-line 
  |  documentation using Python's built-in "help()" function.
- |  
 :</pre>
 
     <pre class="code">
@@ -226,10 +317,10 @@ h(*varg, **kwarg) method of builtins.ig2 instance
     It is also possible to build multi-step "and" and "or" operations with searches.  In an "and" operation between two searches, the conditions specified in both searches must be true for all returned values.  If the results of a previous search is passed to the <span class="code">members</span> keyword of a search, that set (and not the set of all PYroMat substances) will be searched.  This has the effect of producing an "and" operation between the two searches.
     <pre class="code">
 >>> result = pm.search(contains='C')
->>> pm.search(contains='D', members=result)                             # Returns substances with carbon and deuterium
+>>> pm.search(contains='D', members=result)                   # Returns substances with carbon and deuterium
 {&lt;ig2, ig.C6D6>, &lt;ig2, ig.C6D5>, &lt;ig2, ig.C12D10>, &lt;ig2, ig.C12D9>}     
 >>> pm.search(contains={'Br':1}).union( pm.search(contains={'Hg':1}))   # One bromine OR one mercury
-{&lt;ig, ig.BrF5&gt;, &lt;ig2, ig.Br&gt;, &lt;ig2, ig.HBr&gt;, &lt;ig, ig.BrF5S&gt;, &lt;ig, ig.CBrN&gt;, &lt;ig, ig.BrH&gt;, &lt;ig, ig.BBrCl&gt;, ...
+{&lt;ig, ig.BrF5&gt;, &lt;ig2, ig.Br&gt;, &lt;ig2, ig.HBr&gt;, &lt;ig, ig.BrF5S&gt;, &lt;ig, ig.CBrN&gt;, &lt;ig, ig.BrH&gt;, &lt;ig, ...
     </pre>
     <p>
     In the second example above, we have combined two searches using the set's <span class="code">union</span> method.  This just combines them (while eliminating redundant entries) in an "or" operation.  These, and the other built-in Python set operations allow users to construct searches with arbitrary complexity.

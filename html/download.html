@@ -35,7 +35,7 @@
     <div class="toc0"><a href="#sourceforge">Sourceforge</a></div>
 
     <p>
-    PYroMat supports both Python 2 and Python 3.
+    PYroMat has historically supported both Python 2 and 3, but support for Python 2 has stopped as of version 2.2.0.
     </p>
     <p>
     If you are having problems with installation, take a look at the <a href="doc_howto.html#install">installation FAQ</a>.
@@ -50,10 +50,11 @@
     The PYroMat package index can be found at <a href="https://pypi.org/project/PYroMat/">https://pypi.org/project/PYroMat/</a>.  If you already have <a href="https://pypi.org/project/pip/">pip</a> installed, you can download and install PYroMat with a single command.  If you don't, have pip installed, see <a href="doc_howto.html#install_pip">this FAQ</a>.  
     </p>
     <p>
-    To install PYroMat using pip, run the following command as an administrator:
+    To install PYroMat using pip, run the following command:
     <div class="code">
     $ python -m pip install pyromat
     </div>
+    Be aware that on most systems, this will only install PYroMat for your user.  If you want it to be installed on the global system for all users, you will need to run the command as an administrator.  This is often discouraged these days because system-wide package handlers are often upset with this kind of behavior.
     </p>
     <p>
     To upgrade from an older version
@@ -63,10 +64,11 @@
     </p>
     <p>
     On Windows systems, users simply need to right click the command propt icon and select "run as administrator" for the commands to have global effect.  On a Linux or MacOS system, the Python Package Authority has historically recommended
-    </p>
     <div class="code">
     $ sudo -H python -m pip install pyromat
     </div>
+    but this is discouraged these days.  Personally, I still use this approach when installing PYroMat on most of my machines, and I have yet to regret it.
+    </p>
     <p>
     On many Linux systems, Python 2 is still the default interpreter, so some users may want to specify Python 3.  On the most popular Linux flavors, the following will work:
     </p>
@@ -131,7 +133,7 @@ $ python setup.py install</pre>
 
 <div id="contact">
 <hr>
-Authored By:<br>
+Contact:<br>
 Christopher R. Martin, Ph.D.<br>
 Associate Professor of Mechanical Engineering<br>
 The Pennsylvania State University, Altoona College<br>

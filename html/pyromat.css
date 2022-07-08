@@ -154,7 +154,6 @@ a:hover {
 }
 
 
-
  /* Page Layout
  * There are three primary areas in the body; the menu, content, and 
  * contact.  The menu is a statically located frame at the left-hand
@@ -289,7 +288,19 @@ li.menuitem a:hover{
 }
 
 
+/* Table properties
+ */
 
+table.texttable {
+    border: 2px solid black;
+    border-radius: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+td {
+    padding: 10px;
+}
 
 
 /* Live formatting rules
