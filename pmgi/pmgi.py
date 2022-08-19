@@ -1023,7 +1023,7 @@ class SaturationRequest(PMGIRequest):
             return True
         # Throw an error if the substance is not multi-phase
         if not ismultiphase(subst):
-            self.mh.error('Substance was not in the multi-phase collection: ' + repr(idstr))
+            self.mh.error('Substance was not in the multi-phase collection: ' + repr(subst))
             return True
 
         ## This segment of code is strictly responsible for generating
@@ -1218,6 +1218,7 @@ def isoline():
 @app.route('/info', methods=['POST', 'GET'])
 def info():
     ir = InfoRequest(request)
+    ir.process_units()
     ir.process()
     return ir.output(), 200
 
@@ -1230,6 +1231,8 @@ def info():
 def render_static(page_name):
     # if not app.debug:
     #     flask.abort(404)
+    import os
+    app.static_folder = os.path.join(os.path.split(app.static_folder)[0], "static_joe")
     return app.send_static_file('%s.html' % page_name)
 
 
