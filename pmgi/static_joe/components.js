@@ -60,7 +60,8 @@ class PointModel extends Subject{
     static EVENT_AUXLINE_DELETE = 'auxline_del'; // data will be the id of the deleted line
 
     DEFAULT_SUB_SHORTLIST=["mp.H2O","mp.C2H2F4","ig.air","ig.O2", "ig.N2"];
-    DEFAULT_PROP_SHORTLIST=["T","p","v","e","h","s","x"];
+    DEFAULT_PROP_OUT_SHORTLIST=["T","p","v","d","e","h","s","x","cp","cv","gam"];
+    DEFAULT_PROP_IN_SHORTLIST=["T","p","v","d","e","h","s","x"];
     DEFAULT_SUBSTANCE = 'mp.H2O';
     INIT_PT_ID = 1;
     INIT_AUX_ID = 1;
@@ -230,10 +231,21 @@ class PointModel extends Subject{
      */
     get_output_properties(){
         if (this.valid_substances != null && this.substance != null) {
-            return [...this.valid_substances[this.substance]['props']]
+            if (this.substance.startsWith('ig')){
+                let props = [...this.DEFAULT_PROP_OUT_SHORTLIST];
+                props.splice(props.indexOf('x'), 1);
+                return props
+            } else {
+                return [...this.DEFAULT_PROP_OUT_SHORTLIST];
+            }
         } else {
             return [];
         }
+//        if (this.valid_substances != null && this.substance != null) {
+//            return [...this.valid_substances[this.substance]['props']]
+//        } else {
+//            return [];
+//        }
     }
 
     /**
@@ -242,10 +254,21 @@ class PointModel extends Subject{
      */
     get_input_properties(){
         if (this.valid_substances != null && this.substance != null) {
-            return this.valid_substances[this.substance]['inputs'];
+            if (this.substance.startsWith('ig')){
+                let props = [...this.DEFAULT_PROP_IN_SHORTLIST]
+                props.splice(props.indexOf('x'), 1);
+                return props
+            } else {
+                return this.DEFAULT_PROP_IN_SHORTLIST;
+            }
         } else {
             return [];
         }
+//        if (this.valid_substances != null && this.substance != null) {
+//            return this.valid_substances[this.substance]['inputs'];
+//        } else {
+//            return [];
+//        }
     }
 
     /**

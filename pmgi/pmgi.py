@@ -152,7 +152,24 @@ unless a numpy array is passed explicitly.
     # Handle numpy datatypes
     if isinstance(unfriendly, np.ndarray):
         if unfriendly.size == 1:
-            return np.asscalar(unfriendly)
+            if np.isinf(unfriendly):
+                return "inf"
+            elif np.isnan(unfriendly):
+                return "nan"
+            else:
+                return np.asscalar(unfriendly)
+        if any(np.isinf(unfriendly)):
+            bad = np.isinf(unfriendly)
+            lst = unfriendly.tolist()
+            for i in np.where(bad)[0]:
+                lst[i] = "inf"
+            return lst
+        if any(np.isnan(unfriendly)):
+            bad = np.isnan(unfriendly)
+            lst = unfriendly.tolist()
+            for i in np.where(bad)[0]:
+                lst[i] = "nan"
+            return lst
         return unfriendly.tolist()
     # If this is a dict, recurse inside
     elif isinstance(unfriendly, dict):
@@ -167,7 +184,7 @@ unless a numpy array is passed explicitly.
     return unfriendly
             
 
-def clean_nan(dirty):
+def clean_nan(dirty, ignore=["cp","cv","gam"]):
     """Clean out nan values from a computed dict in place. 
     result = clean_nan( dirty )
     
@@ -176,7 +193,7 @@ returned inside of a dictionary or list with the intention that they be
 interpreted as varying together.  The PM property interface adds NaN 
 values at points that are out-of-bounds or otherwise illegal.  If any
 arrays are found to have NaN values, those and the corresponding values
-of all other arrays are removed.
+of all other arrays are removed. A list of ignored keys can be supplied.
 
 On success, returns the number of NaN values found. 
 
@@ -200,6 +217,9 @@ If the arrays are found to have incompatible shapes, -1 is returned.
         # If this is a numpy array, we need to check it
         if isinstance(value, np.ndarray):
             change_keys.append(key)
+            ## If key in the ignore list, skip checking for nan
+            if key in ignore:
+                continue
             # If this is the first numpy array found, init indices
             if indices is None:
                 indices = np.isnan(value)
@@ -841,6 +861,9 @@ The process method is responsible for populating the data attribute.
 class SubstanceRequest(PMGIRequest):
     """This class handles substance metadata requests
 """
+    inprops = ['e', 'h', 's', 'T', 'p', 'd', 'v', 'x']
+    outprops = inprops + ['cp', 'cv', 'gam']
+
     def __init__(self, args):
         PMGIRequest.__init__(self,args)
         self.require( types={
@@ -873,7 +896,15 @@ class SubstanceRequest(PMGIRequest):
             if self.data['cls'] in ['mp1']:
                 self.data['Tc'], self.data['pc'], self.data['dc'] = subst.critical(density=True)
                 self.data['Tt'], self.data['pt'] = subst.triple()
-            
+
+            self.data['inprops'] = self.inprops
+            self.data['outprops'] = self.outprops
+            for prop in self.outprops:
+                if not hasattr(subst, prop):
+                    self.data['outprops'].remove(prop)
+                    if prop in self.data['inprops']:
+                        self.data['inprops'].remove(prop)
+
         except pm.utility.PMParamError:
             self.mh.error('Failed to generate parameter set.')
             self.mh.message(repr(sys.exc_info()[1]))
@@ -938,25 +969,18 @@ class IsolineRequest(PMGIRequest):
         # Clean initialization
         PMGIRequest.__init__(self, args)
 
-        # Read in the arguments from raw
-        self.args = dict(args)
-        # Process the arguments
-        if self.require(
-                types={
-                    's': toarray,
-                    'h': toarray,
-                    'e': toarray,
-                    'T': toarray,
-                    'p': toarray,
-                    'd': toarray,
-                    'v': toarray,
-                    'x': toarray,
-                    'default': str,
-                    'id': str
-                },
-                mandatory=['id']):
-            return
-
+        self.require( types={
+                's': toarray,
+                'h': toarray,
+                'e': toarray,
+                'T': toarray,
+                'p': toarray,
+                'd': toarray,
+                'v': toarray,
+                'x': toarray,
+                'default': str,
+                'id': str },
+                mandatory=['id'])
 
     def process(self):
         """Process the request
@@ -964,24 +988,27 @@ class IsolineRequest(PMGIRequest):
         correctly formatted data that can be returned as a JSON object.
         """
         # If there was an error, abort the processing
-        if self.out['error']:
-            return
-        elif not isinstance(self.substance, pm.reg.__basedata__):
-            self.error('Substance data seems to be corrupt!  Halting.')
-            return
+        if self.mh:
+            self.mh.message('Processing aborted due to error.')
+            return True
 
         args = self.args.copy()
-        self.out['inputs'] = self.args
         # Leave only the property arguments
-        args.pop('id')
+        subst = self.get_substance(args.pop('id'))
+        if subst is None:
+            return True
 
         try:
-            self.out['data'] = compute_iso_line(self.substance, n=50, **args)
-            PMGIRequest.clean_nan(self.out['data'])
-            PMGIRequest.json_friendly(self.out)
+            self.data['data'] = compute_iso_line(subst, n=50, **args)
+            if isinstance(self.data['data'], list):
+                for row in self.data['data']:
+                    clean_nan(row)  # TODO Kludge clean_nan not working on list
+            else:
+                clean_nan(self.data['data'])
         except (pm.utility.PMParamError, pm.utility.PMAnalysisError) as e:
-            self.error(e.args[0])
-        # Finally, clean up the return parameters
+            self.mh.error('Failed to generate isoline.')
+            self.mh.message(repr(sys.exc_info()[1]))
+            return True
 
 
 class SaturationRequest(PMGIRequest):
@@ -1188,30 +1215,14 @@ def saturation():
     return sr.output(), 200
 
 
-
 # The isoline route computes isolines
 @app.route('/isoline', methods=['POST', 'GET'])
 def isoline():
     # Read in the request data to an args dict
-    if request.method == 'POST':
-        jsondat = dict(request.json)
-        args = jsondat['state_input']
-        units = None
-        if 'units' in jsondat:
-            units = (jsondat['units'])
-        isr = IsolineRequest(args, units)
-    elif request.method == 'GET':
-        args = dict(request.args)
-        isr = IsolineRequest(args)
-
+    isr = IsolineRequest(request)
+    isr.process_units()
     isr.process()
-
-    # Check for error and return code
-    if isr.out['error']:
-        return isr.out, 500
-    else:
-        return isr.out, 200
-
+    return isr.output(), 200
 
 
 # The info pmgi will return the results of queries (e.g. substance search)

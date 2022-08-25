@@ -78,7 +78,7 @@ $(document).ready(function(){
         plotView.init();
         unitFormView.init(get_valid_units(), get_units());
         substanceFormView.init(get_valid_substances(), get_substance(), get_display_substances());
-        propChooserView.init(get_output_properties(), pointModel.DEFAULT_PROP_SHORTLIST);
+        propChooserView.init(get_output_properties(), pointModel.DEFAULT_PROP_OUT_SHORTLIST);
         isolineChooserView.init(get_output_properties(), ['T','p','x']);
         propEntryView.init(get_input_properties(), get_unit_strings());
     });
@@ -144,7 +144,7 @@ function calc_auxline(){
         });
 
         compute_auxline((data)=>{
-            data.data.forEach((line)=>{
+            data.data.data.forEach((line)=>{
                 pointModel.add_auxline('x', line, 'global');
             });
         },{'x': 0, 'default': true});
@@ -156,7 +156,7 @@ function calc_auxline(){
         compute_args[prop_val] = 0;
         compute_args["default"] = true;
         compute_auxline((data)=>{
-            data.data.forEach((line)=>{
+            data.data.data.forEach((line)=>{
                 pointModel.add_auxline(prop_val, line, 'global');
             });
         },compute_args);
@@ -197,17 +197,22 @@ function set_units(units){
  * @param mode - GET/POST. Only POST can handle units with the request
  */
 function compute_point(props, mode="POST"){
-    let requestroute = "/";
+    let requestroute = "/state";
 
     // Add the substance ID to props always
     props['id'] = get_substance();
 
     // TODO - Callbacks are hardcoded, keep or lose?
     if (mode === "GET"){
-        $.get(requestroute, props, propResponseSuccess,dataType='json')
-            .fail(propResponseFail);
+        $.get(
+            requestroute,
+            props,
+            propResponseSuccess,
+            dataType='json');
     } else if (mode === "POST") {
-        let postData = {state_input: props, units: get_units()};
+        // Build the data request
+        let postData = Object.assign({}, props); // clone it
+        postData.units = get_units();  // add the units on
         $.ajax({
             url: requestroute,
             type: "POST",
@@ -215,7 +220,6 @@ function compute_point(props, mode="POST"){
             dataType: "json",
             contentType: 'application/json; charset=utf-8',
             success: propResponseSuccess,
-            error: propResponseFail
         });
     }
 }
@@ -238,18 +242,17 @@ function compute_auxline(callback, props={}, mode="POST"){
     props['id'] = get_substance();
 
     if (mode === "GET"){
-        $.get(requestroute, props, callback,dataType='json')
-            .fail(propResponseFail);
+        $.get(requestroute, props, callback,dataType='json');
     } else if (mode === "POST") {
-        let postData = {state_input: props, units: get_units()};
+        let postData = Object.assign({}, props); // clone it
+        postData.units = get_units();  // add the units on
         $.ajax({
             url: requestroute,
             type: "POST",
             data: JSON.stringify(postData),
             dataType: "json",
             contentType: 'application/json; charset=utf-8',
-            success: callback,
-            error: propResponseFail
+            success: callback
         });
     }
 }
@@ -262,8 +265,8 @@ function getInfo(callback){
     // Get all the PM info.
     $.get("/info",
         callback,
-        dataType='json')  // Data type of the response.
-        .fail(propResponseFail);  // What to do if it doesn't work
+        dataType='json');  // Data type of the response.
+
 }
 
 /**
@@ -272,20 +275,6 @@ function getInfo(callback){
  */
 function propResponseSuccess(data){
     add_point(data.data);
-}
-
-/**
- * Callback for when a flask request fails
- * @param data
- */
-function propResponseFail(data){
-    // TODO better error handling?
-    try {
-        let resp = JSON.parse(data.responseText);
-        alert(resp.message);
-    } catch (error) {
-        alert("An unhandled error occurred: " + data.responseText);
-    }
 }
 
 
