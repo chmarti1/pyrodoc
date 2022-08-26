@@ -48,7 +48,7 @@ class Subject {
  * Class to hold data about the thermodynamic substance including a list of
  * values that has been computed
  */
-class PointModel extends Subject{
+class DataModel extends Subject{
     // Several event IDs thrown by this
     static EVENT_UNIT = 'unit'; // Data will be get_unit()
     static EVENT_SUBSTANCE = 'substance'; // Data will be get_substance()
@@ -102,7 +102,7 @@ class PointModel extends Subject{
         this.aux_lines = {}
         this.aux_lines['global'] = []
 
-        this.notify(this, PointModel.EVENT_INIT_AUXLINE, null);
+        this.notify(this, DataModel.EVENT_INIT_AUXLINE, null);
     }
 
     /**
@@ -123,7 +123,7 @@ class PointModel extends Subject{
         this.aux_lines = {};
         this.aux_lines['global'] = gl;
 
-        this.notify(this, PointModel.EVENT_INIT_POINTS, null);
+        this.notify(this, DataModel.EVENT_INIT_POINTS, null);
     }
 
     /**
@@ -136,7 +136,7 @@ class PointModel extends Subject{
         // Reset everything
         this.init_auxlines();
         this.init_points();
-        this.notify(this, PointModel.EVENT_UNIT, this.get_units())
+        this.notify(this, DataModel.EVENT_UNIT, this.get_units())
     }
 
     /**
@@ -150,7 +150,7 @@ class PointModel extends Subject{
         this.substance = substance;
         this.init_auxlines();
         this.init_points();
-        this.notify(this, PointModel.EVENT_SUBSTANCE, this.get_substance())
+        this.notify(this, DataModel.EVENT_SUBSTANCE, this.get_substance())
     }
 
     /**
@@ -329,7 +329,7 @@ class PointModel extends Subject{
         }
         // Increment the id and notify
         this.point_id++;
-        this.notify(this, PointModel.EVENT_POINT_ADD, pt);
+        this.notify(this, DataModel.EVENT_POINT_ADD, pt);
     }
 
     /**
@@ -348,7 +348,7 @@ class PointModel extends Subject{
         if (this.points['ptid'].length === 0){
             this.init_points();
         } else {
-            this.notify(this, PointModel.EVENT_POINT_DELETE, id);
+            this.notify(this, DataModel.EVENT_POINT_DELETE, id);
         }
     }
 
@@ -366,7 +366,7 @@ class PointModel extends Subject{
         let line = {'type': type, 'id': this.aux_id, 'data': data};
         this.aux_id++;
         this.aux_lines[parent].push(line);
-        this.notify(this, PointModel.EVENT_AUXLINE_ADD, line);
+        this.notify(this, DataModel.EVENT_AUXLINE_ADD, line);
     }
 
     /**
@@ -377,7 +377,7 @@ class PointModel extends Subject{
         // Make sure we've computed auxlines for this point first
         if (id in this.aux_lines){
             delete this.aux_lines[id];
-            this.notify(this, PointModel.EVENT_AUXLINE_DELETE, id);
+            this.notify(this, DataModel.EVENT_AUXLINE_DELETE, id);
         }
     }
 }
@@ -402,7 +402,7 @@ class SubstanceFormView{
     }
 
     update(source, event, data){
-        if (event === PointModel.EVENT_SUBSTANCE){
+        if (event === DataModel.EVENT_SUBSTANCE){
             this.set_value(data);  // Set the current value to the model's state
         }
     }
@@ -502,7 +502,7 @@ class UnitFormView{
 
 
     update(source, event, data){
-        if (event === PointModel.EVENT_UNIT){
+        if (event === DataModel.EVENT_UNIT){
             this.set_values(data);
         }
     }
@@ -626,10 +626,10 @@ class PropEntryView{
     }
 
     update(source, event, data){
-        if (event === PointModel.EVENT_SUBSTANCE) {
+        if (event === DataModel.EVENT_SUBSTANCE) {
             let prop_vals = this.get_values();  // Retain values
             this.init(get_input_properties(), get_unit_strings(), prop_vals);
-        } else if (event === PointModel.EVENT_UNIT) {
+        } else if (event === DataModel.EVENT_UNIT) {
             this.init(get_input_properties(), get_unit_strings());
         }
     }
@@ -762,7 +762,7 @@ class PropChooserView extends Subject{
 
 
     update(source, event, data) {
-        if (event === PointModel.EVENT_SUBSTANCE) {
+        if (event === DataModel.EVENT_SUBSTANCE) {
             let disp_props = this.get_checkbox_values();
             this.init(source.get_output_properties(), disp_props);
         }
@@ -1135,9 +1135,9 @@ class PlotView{
     }
 
     update(source, event, data){
-        if (event === PointModel.EVENT_POINT_ADD || event === PointModel.EVENT_POINT_DELETE){
+        if (event === DataModel.EVENT_POINT_ADD || event === DataModel.EVENT_POINT_DELETE){
             this.updatePoints(source.get_points());
-        } else if (event === PointModel.EVENT_INIT_POINTS || event === PointModel.EVENT_UNIT) {
+        } else if (event === DataModel.EVENT_INIT_POINTS || event === DataModel.EVENT_UNIT) {
             this.init();
             this.draw_auxlines(source.get_auxlines());
         } else if (event === PropChooserView.EVENT_PROPERTY_VISIBILITY) {
@@ -1146,7 +1146,7 @@ class PlotView{
         } else if (event === PropChooserView.EVENT_ISOLINE_VISIBILITY){
             this.dispisos = data;
             this.draw_auxlines(get_auxlines());
-        } else if (event === PointModel.EVENT_AUXLINE_ADD) {
+        } else if (event === DataModel.EVENT_AUXLINE_ADD) {
             this.draw_auxlines(source.get_auxlines());
         }
     }
@@ -1350,9 +1350,9 @@ class TableView{
     }
 
     update(source, event, data){
-        if (event === PointModel.EVENT_POINT_ADD || event === PointModel.EVENT_POINT_DELETE){
+        if (event === DataModel.EVENT_POINT_ADD || event === DataModel.EVENT_POINT_DELETE){
             this.updatePoints(source.get_points());
-        } else if (event === PointModel.EVENT_INIT_POINTS) {
+        } else if (event === DataModel.EVENT_INIT_POINTS) {
             this.init(get_output_properties());
         } else if (event === PropChooserView.EVENT_PROPERTY_VISIBILITY) {
             this.columnVisibility(data);

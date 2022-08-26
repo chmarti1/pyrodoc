@@ -40,19 +40,19 @@ var pointModel;
 
 
 // Execute when the page loads
-$(document).ready(function(){
+function init_page() {
     // Instantiate classes with their targets
-    pointModel = new PointModel();
+    pointModel = new DataModel();
     unitFormView = new UnitFormView('unit_controls');
     substanceFormView = new SubstanceFormView('substance_controls');
     propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY);
-    isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T','d','p','s','h','x']);
+    isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T', 'd', 'p', 's', 'h', 'x']);
     propEntryView = new PropEntryView("property_controls");
     tableView = new TableView('property_table');
     plotView = new PlotView("plot_display");
 
     // getInfo is an async request, so use the callback to complete setup.
-    getInfo((data)=>{
+    getInfo((data) => {
         // Get the general info data, assign to model
         pointModel.init_info(data.data.legalunits, data.data.substances);
         set_units(data.units);
@@ -79,10 +79,10 @@ $(document).ready(function(){
         unitFormView.init(get_valid_units(), get_units());
         substanceFormView.init(get_valid_substances(), get_substance(), get_display_substances());
         propChooserView.init(get_output_properties(), pointModel.DEFAULT_PROP_OUT_SHORTLIST);
-        isolineChooserView.init(get_output_properties(), ['T','p','x']);
+        isolineChooserView.init(get_output_properties(), ['T', 'p', 'x']);
         propEntryView.init(get_input_properties(), get_unit_strings());
     });
-});
+}
 
 
 // Passthrough controller functions that get/set on behalf of the model
