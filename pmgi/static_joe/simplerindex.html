@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.11.0.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+
+    <!--    My Custom Codes     -->
+    <link rel="stylesheet" type="text/css" href="../static/style.css">
+    <script src="../static/cookies.js" type="text/javascript"></script>
+    <script src="../static/simplercomponents.js" type="text/javascript"></script>
+    <script src="../static/simplerscript.js" type="text/javascript"></script>
+
+</head>
+<body>
+<div id="controls">
+
+    <div id="substance_controls">
+        <h3>Substance Selection</h3>
+        User can select a substance via this menu. It will open a new page that
+        allows the user to select the item via cookie, and then brings the
+        user back here.<br>
+        <button id='selection_go' onClick='selection_go("/simplerindex");'>Change Selection</button>
+        <br>
+        Active Substance: <span id='selection_id'></span>
+
+
+    </div>
+
+    <div id="unit_controls">
+        <h3>Unit Selection</h3>
+        User can click to show/hide unit selection menu. Units are set using an
+        apply/revert modality because multiple of them can be set at once. Changing
+        the units resets everything. Units only work when using POST.<br>
+
+        <!--  Will be filled in by JS -->
+    </div>
+
+
+    <div id="property_controls">
+        <h3>Property Input</h3>
+        This is where the user can input property data, using whatever units have been
+        apply'd. Only two properties can be specified at one time. Adjusts visible
+        for mp substances vs. ideal gases. Button submits HTTP POST request.<br>
+
+        <!-- Control Inserted by JS -->
+
+    </div>
+</div>
+
+<div id="outputs">
+    <div id="property_selection">
+        <h3>Property Display Selection</h3>
+        User can specify which properties should be shown in the table. Expand
+        and adjust the checkboxes as desired.<br>
+
+        <!-- Control Inserted by JS -->
+
+    </div>
+    <div id="isoline_selection">
+        <h3>Isoline Display Selection</h3>
+        User can specify which isobars should be shown in the plot. Expand
+        and adjust the checkboxes as desired.<br>
+
+        <!-- Control Inserted by JS -->
+
+    </div>
+    <div id="property_table" style="width:864px;">
+        <h3>Property Table</h3>
+        Most interactivity provided by Datatables. Should be responsive to which
+        properties are checked in the property selection. Lots of cleanup and display
+        optimization is needed here, but the basic functionality exists. Prettify!<br>
+
+        <!-- Table Inserted by JS -->
+
+    </div>
+    <div id="plot_display" style="width: 600px;">
+        <h3>Plot</h3>
+        The plot responds to the points added to the table. It should display
+        all the points that were added. It should also allow the user to click
+        to add a point for substances (subject to the points being in range).
+        Hover tooltip works with extra property info. Lots of prettification
+        needed here.<br>
+
+        <!-- Plot inserted by JS -->
+
+    </div>
+</div>
+
+<script>
+  window.onload = init_page;
+</script>
+
+</body>
+</html>

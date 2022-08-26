@@ -21,7 +21,7 @@ function set_cookie_exp(param, value, exp){
     // Set the cookie to expire in one hour
     time = new Date();
     time.setTime(time.getTime() + exp);
-    document.cookie= param + '=' + value + ';expires=' + time + ';path=/';
+    document.cookie= param + '=' + value + ';expires=' + time + ';path=/'+';SameSite=Lax';
 }
 
 // GET_COOKIE
