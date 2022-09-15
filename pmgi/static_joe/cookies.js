@@ -9,7 +9,7 @@
 // expiration is not set.
 function set_cookie(param, value){
     // Set the cookie to expire in one hour
-    set_cookie_exp(param,value,3600000);
+    set_cookie_exp(param, value,3600000);
 }
 
 // Set a cookie with an expiration value
@@ -21,7 +21,9 @@ function set_cookie_exp(param, value, exp){
     // Set the cookie to expire in one hour
     time = new Date();
     time.setTime(time.getTime() + exp);
-    document.cookie= param + '=' + value + ';expires=' + time + ';path=/'+';SameSite=Lax';
+    cookiestr = param + '=' + value + ';expires=' + time.toGMTString() + ';path=/'+';SameSite=Lax';
+    document.cookie= cookiestr;
+
 }
 
 // GET_COOKIE
