@@ -177,6 +177,7 @@ function compute_auxline(callback, props={}, mode="POST"){
 
 
 function init_page(){
+    $('#modalbkg').load("../static/modal_substance.html")
     let selection = document.getElementById('selection_id');
     substanceID = get_cookie('idstr');
     selection.innerHTML = substanceID;
@@ -184,6 +185,7 @@ function init_page(){
         // Begin overall initialization
         init_units();
     }
+    sel_init();
 }
 
 

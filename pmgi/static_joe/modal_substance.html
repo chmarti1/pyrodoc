@@ -1,0 +1,55 @@
+<div id="selectormodal" class="modal-content">
+    <div id='selection'>
+            <button id='selection_cancel' onClick='sel_cancel();'>Cancel</button>
+    </div>
+
+    <div id='filter_div'>
+        <h3>Filters</h3>
+        <table id='filter_tab'>
+            <tr>
+                <td align='right'>MW:</td>
+                <td>
+                    <input type='number' id='filt_mw_min' min=0. value='' size=10>(min)
+                    <input type='number' id='filt_mw_max' min=0. value='' size=10>(max)</td>
+            </tr>
+            <tr>
+                <td align='right'><label for='collection'>Collection:</label></td>
+                <td>
+                    <select id='filt_col' name='filt_col'>
+                        <option value=''></option>
+                        <option value='ig'>Ideal Gas</option>
+                        <option value='mp'>Multi-Phase</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align='right'><label for='class'>Class:</label></td>
+                <td>
+                    <select id='filt_cls' name='filt_cls'>
+                        <option value=''></option>
+                        <option value='ig'>ig</option>
+                        <option value='ig2'>ig2</option>
+                        <option value='igmix'>igmix</option>
+                        <option value='mp1'>mp1</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <input type='button' id='filt_update' onclick='sel_update_filter();' value='Update'>
+    </div>
+
+    <div class=selector_class>
+        <table id='selector_table' class=display>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>MW</th>
+                    <th>Collection</th>
+                    <th>Class</th>
+                </tr>
+            </thead>
+
+        </table>
+    </div>
+</div>

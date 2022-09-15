@@ -7,13 +7,13 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <script src="https://cdn.plot.ly/plotly-2.11.0.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
 
     <script src="../static/cookies.js" type="text/javascript"></script>
     <script src="../static/nselector.js" type="text/javascript"></script>
     <script src="../static/nindex.js" type="text/javascript"></script>
-    <!--<script src="../static/modal.js" type="text/javascript"></script>-->
-
-    <script src="../static/unitspicker.js" type="text/javascript"></script>
+    <script src="../static/ncomponents.js" type="text/javascript"></script>
 
     <link rel="stylesheet" type="text/css" href="../static/style.css">
 
@@ -32,6 +32,53 @@
 <div id="modal_unitspicker" class="modal"><div id="modal_unitspicker_content" class="modal-content"></div></div>
 
 <h1>Value Controls</h1>
+
+  <div id="property_controls">
+        <h3>Property Input</h3>
+        This is where the user can input property data, using whatever units have been
+        apply'd. Only two properties can be specified at one time. Adjusts visible
+        for mp substances vs. ideal gases. Button submits HTTP POST request.<br>
+
+        <!-- Control Inserted by JS -->
+
+  </div>
+
+<div id="property_selection">
+        <h3>Property Display Selection</h3>
+        User can specify which properties should be shown in the table. Expand
+        and adjust the checkboxes as desired.<br>
+
+        <!-- Control Inserted by JS -->
+
+    </div>
+    <div id="isoline_selection">
+        <h3>Isoline Display Selection</h3>
+        User can specify which isobars should be shown in the plot. Expand
+        and adjust the checkboxes as desired.<br>
+
+        <!-- Control Inserted by JS -->
+
+    </div>
+    <div id="property_table" style="width:864px;">
+        <h3>Property Table</h3>
+        Most interactivity provided by Datatables. Should be responsive to which
+        properties are checked in the property selection. Lots of cleanup and display
+        optimization is needed here, but the basic functionality exists. Prettify!<br>
+
+        <!-- Table Inserted by JS -->
+
+    </div>
+    <div id="plot_display" style="width: 600px;">
+        <h3>Plot</h3>
+        The plot responds to the points added to the table. It should display
+        all the points that were added. It should also allow the user to click
+        to add a point for substances (subject to the points being in range).
+        Hover tooltip works with extra property info. Lots of prettification
+        needed here.<br>
+
+        <!-- Plot inserted by JS -->
+
+    </div>
 
 </body>
 
