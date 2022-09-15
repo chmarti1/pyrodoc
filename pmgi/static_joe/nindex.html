@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rewrite of PyroMat Demo</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+
+    <script src="../static/cookies.js" type="text/javascript"></script>
+    <script src="../static/nselector.js" type="text/javascript"></script>
+    <script src="../static/nindex.js" type="text/javascript"></script>
+    <!--<script src="../static/modal.js" type="text/javascript"></script>-->
+
+    <script src="../static/unitspicker.js" type="text/javascript"></script>
+
+    <link rel="stylesheet" type="text/css" href="../static/style.css">
+
+
+</head>
+<h1>Header Controls</h1>
+<body>
+<button onclick="onclick_changesubstance()">Change Substance</button><br>
+<label>Current Substance: </label><label id="sub_string"></label>
+
+<br><br>
+<button onclick="onclick_changeunits()">Change Units</button><br>
+<label>Current Units: </label><label id="unit_string"></label>
+
+<div id="modal_substancepicker" class="modal"></div>
+<div id="modal_unitspicker" class="modal"><div id="modal_unitspicker_content" class="modal-content"></div></div>
+
+<h1>Value Controls</h1>
+
+</body>
+
+</html>
