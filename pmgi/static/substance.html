@@ -7,16 +7,19 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
     <!-- This is the PMGI js script file-->
-    <script type="text/javascript" charset="utf8" src="pointcalc.js"></script>
+    <script type="text/javascript" charset="utf8" src="../static/substance.js"></script>
+    <script type="text/javascript" charset="utf8" src="../static/cookies.js"></script>
+    <script type="text/javascript" charset="utf8" src="../static/selector.js"></script>
+    <link rel="stylesheet" type="text/css" href="../static/style.css">
 </head>
 <body>
 
 <div id='selection'>
-    <button id='selection_go' onClick='selection_go("/substance");'>Change Selection</button>
-    <span id='selection_id'></span>
+    <button onclick="onclick_changesubstance()">Change Substance</button><br>
+    <label>Current Substance: </label><label id="sub_string"></label>
+    <div id="modal_substancepicker" class="modal"></div>
 </div>
 
-<div id='message'>Waiting on subst_init...</div>
 
 <table id='subst_table'>
     <tbody>
@@ -63,12 +66,6 @@
     </tbody>
 </table>
 <div id='subst_doc'></div>
-
-<script>
-    // When the page is done loading, use the substance init function
-    // to load PMGI data into the table.
-    window.onload=subst_init;
-</script>
 
 </body>
 </html>
