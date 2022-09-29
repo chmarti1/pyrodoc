@@ -363,7 +363,7 @@ class DataModel extends Subject{
  */
 class UnitFormView{
 
-    constructor(htmlTargetDiv, html, valid_units, currentval, defaultval, set_callback, cancel_callback, postinit=null) {
+    constructor(htmlTargetDiv, html, valid_units, currentval, defaultval, set_callback, cancel_callback) {
         this.change_units_callback = set_callback;
         this.currentval = currentval;
         this.defaultval = defaultval;
@@ -402,9 +402,6 @@ class UnitFormView{
 
             this.init(valid_units, this.currentval);
 
-            if (postinit !== null){
-                postinit();
-            }
         });
     }
 

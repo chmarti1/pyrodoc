@@ -12,59 +12,77 @@ var isolineChooserView;
 var plotView;
 var tableView;
 
+var substancePicker;
+
+
 // document.ready()
 $(function(){
-    let subid = config_substance();
-    dataModel = new DataModel(subid);
 
-    // ajax operation, so allow program flow to continue afterward
-    async_info_request(()=>{
-        config_units(()=>{
-            config_modal_subsel();
-
-            calc_auxline();
-
-            propEntryView = new PropEntryView("property_controls",
-                                                dataModel.get_input_properties(),
-                                                unitModel.get_units_for_prop(dataModel.get_input_properties()),
-                                                compute_point);
-
-
-            propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY);
-            isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T', 'd', 'p', 's', 'h', 'x']);
-            propChooserView.init(dataModel.get_output_properties(), dataModel.DEFAULT_PROP_OUT_SHORTLIST);
-            isolineChooserView.init(dataModel.get_output_properties(), ['T', 'p', 'x']);
-
-
-
-            plotView = new PlotView("plot_display", dataModel, unitModel.get_units_for_prop, compute_point);
-            dataModel.addListener(plotView);
-            propChooserView.addListener(plotView);
-            isolineChooserView.addListener(plotView);
-            plotView.init();
-
-
-            // Assign views to listen to the main model
-            tableView = new TableView('property_table', dataModel, unitModel.get_units_for_prop);
-            dataModel.addListener(tableView);
-            propChooserView.addListener(tableView);
-            tableView.init(dataModel.get_output_properties());
-
+    // Check if the infodata has been created. If not, get it from ajax and reload
+    infodata = localStorage.getItem("infodata");
+    if (infodata === null){
+        ajax_info((data)=>{
+            localStorage.setItem("infodata", JSON.stringify(data));
+            infodata = data;
+            init();
         });
-
-
-    });
+    } else {
+        infodata = JSON.parse(infodata);
+        init();
+    }
 });
 
+function init(){
+    // Infodata has now been initialized
 
-function config_modal_subsel(){
-    $("#modal_substancepicker").load("../static/modal_substance.html", ()=>{
-        sel_data_ready(infodata.data);
-    });
+    let subid = load_substance_choice();
+    let units = load_units_choice();
 
+    dataModel = new DataModel(subid);
+    unitModel = new UnitModel(infodata.data.legalunits, units);
+
+    substancePicker = new ModalSubstancePicker('modal_substancepicker',
+        '../static/modal_substance.html',
+        infodata.data.substances);
+
+    unitPickerView = new UnitFormView('modal_unitspicker_content',
+        "../static/unitspicker.html",
+        infodata.data.legalunits,
+        units,
+        infodata.units,
+        apply_units,
+        onclick_changeunits);
+
+
+    calc_auxline();
+
+    propEntryView = new PropEntryView("property_controls",
+        dataModel.get_input_properties(),
+        unitModel.get_units_for_prop(dataModel.get_input_properties()),
+        compute_point);
+
+
+    propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY);
+    isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T', 'd', 'p', 's', 'h', 'x']);
+    propChooserView.init(dataModel.get_output_properties(), dataModel.DEFAULT_PROP_OUT_SHORTLIST);
+    isolineChooserView.init(dataModel.get_output_properties(), ['T', 'p', 'x']);
+
+
+    plotView = new PlotView("plot_display", dataModel, unitModel.get_units_for_prop, compute_point);
+    dataModel.addListener(plotView);
+    propChooserView.addListener(plotView);
+    isolineChooserView.addListener(plotView);
+    plotView.init();
+
+
+    // Assign views to listen to the main model
+    tableView = new TableView('property_table', dataModel, unitModel.get_units_for_prop);
+    dataModel.addListener(tableView);
+    propChooserView.addListener(tableView);
+    tableView.init(dataModel.get_output_properties());
 }
 
-function config_substance(){
+function load_substance_choice(){
     let sub = get_cookie("idstr");
     if (sub === ""){
         change_substance(DEFAULT_IDSTR);
@@ -73,42 +91,27 @@ function config_substance(){
     }
     return sub;
 }
-function config_units(and_then){
+function load_units_choice() {
     let actual = get_cookie("units");
 
     // If the unit data isn't set, initialize it.
-    if (actual === ""){
+    if (actual === "") {
         change_units(infodata.units);
     } else {
         actual = JSON.parse(actual);
+        display_units(actual);
     }
-    unitPickerView = new UnitFormView('modal_unitspicker_content',
-                                            "../static/unitspicker.html",
-                                            infodata.data.legalunits,
-                                            actual,
-                                            infodata.units,
-                                            apply_units,
-                                            onclick_changeunits,
-                                            and_then);
-    unitModel = new UnitModel(infodata.data.legalunits, actual);
-    display_units(actual);
+    return actual;
 }
+
 
 function apply_units(units){
     $('#modal_unitspicker').toggle();
     change_units(units)
 }
 
-function async_info_request(and_then){
-    // Make an async call to get the unit data
-    return ajax_info((data) =>{
-        infodata = data;
-        and_then();
-    });
-}
-
 function onclick_changesubstance(){
-    $('#modal_substancepicker').toggle();
+    substancePicker.toggle();
 }
 
 
@@ -201,7 +204,7 @@ function compute_auxline(callback, props={}, mode="POST"){
         $.get(requestroute, props, callback,dataType='json');
     } else if (mode === "POST") {
         let postData = Object.assign({}, props); // clone it
-        postData.units = unitPickerView.get_values();  // add the units on
+        postData.units = unitModel.get_units();  // add the units on
         $.ajax({
             url: requestroute,
             type: "POST",
@@ -229,7 +232,7 @@ function compute_point(props){
 
     // Build the data request
     let postData = Object.assign({}, props); // clone it
-    postData.units = unitPickerView.get_values();  // add the units on
+    postData.units = unitModel.get_units();  // add the units on
     $.ajax({
         url: requestroute,
         type: "POST",
