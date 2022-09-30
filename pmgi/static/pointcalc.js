@@ -45,7 +45,7 @@ function init(){
         '../static/modal_substance.html',
         infodata.data.substances);
 
-    unitPickerView = new UnitFormView('modal_unitspicker_content',
+    unitPickerView = new UnitFormView('modal_unitspicker',
         "../static/unitspicker.html",
         infodata.data.legalunits,
         units,
