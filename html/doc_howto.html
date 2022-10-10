@@ -150,8 +150,6 @@ array([  951.80502462,  1154.31670956,  1356.82839449,  1559.34007943,
     It is also possible to obtain quality while going backwards from this process.  There is an optional keyword parameter called "quality" that, if set to "True," prompts property methods to return both temperature and quality.  Here, we obtain the saturation temperature, pressure, and liquid/vapor enthalpies all in one command.  Then, <span class="code">T</span> reports that at 9.32041bar, water with 2000kJ/kg is at 450 Kelvin and has 0.618 quality.
     </p>
     <pre class="code">
->>> H2O.hs(T=450.,tp=True)
-(450.0, 9.3204107913593361, 749.29333968000344, 2774.4101890593283)
 >>> H2O.T(h = 2000., p=9.32041, quality=True)
 (array(449.9999963649258), array(0.6175972852487263))</pre>
 
