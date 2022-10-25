@@ -1,15 +1,4 @@
-select {
-  border: 1px solid #999;
-  color: #1c87c9;
-  border-radius: 5px;
-}
-
-select option {
-  background-color: #bd7963;
-  color: #ff0800;
-}
-
-button {
+button, input[type=button] {
   background-color: var(--pyro-gray, gray);
   border: 3px solid var(--pyro-black, black);
   color: var(--pyro-black, black);
@@ -20,9 +9,40 @@ button {
   margin: 6px;
 }
 
-button:hover {
+button:hover, input[type=button]:hover {
   border: 3px solid var(--pyro-orange, black);
   color: var(--pyro-orange, black);
+}
+
+.plot-wrapper{
+  margin: auto;
+  width: 100%;
+  align-content: center;
+  overflow: auto;
+}
+.property-controls{
+  width: 35%;
+  float:left;
+  border: 3px solid var(--pyro-black, black);
+  border-radius: 10px;
+  padding-right: 0px;
+}
+.property-controls table td{
+  padding: 5px 0px 0px 5px;
+  text-align:right;
+}
+
+.plot-display{
+  width: 60%;
+  float:right;
+  height: auto;
+  border: 3px solid var(--pyro-black, black);
+  border-radius: 10px;
+}
+.sec-title{
+  font-family: Arial, sans-serif;
+  text-align: center;
+  font-size: 16pt;
 }
 
 /* The Modal (background) */

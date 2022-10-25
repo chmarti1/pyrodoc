@@ -149,7 +149,8 @@ class DataModel extends Subject{
     static EVENT_AUXLINE_ADD = 'auxline_add'; // data will be the added line
     static EVENT_AUXLINE_DELETE = 'auxline_del'; // data will be the id of the deleted line
 
-    DEFAULT_PROP_OUT_SHORTLIST=["T","p","v","d","e","h","s","x","cp","cv","gam"];
+    ALL_PROPS = ["T","p","v","d","e","h","s","x","cp","cv","gam"];
+    DEFAULT_PROP_OUT_SHORTLIST=["T","p","v","d","e","h","s","x"];
     DEFAULT_PROP_IN_SHORTLIST=["T","p","v","d","e","h","s","x"];
     INIT_PT_ID = 1;
     INIT_AUX_ID = 1;
@@ -201,11 +202,11 @@ class DataModel extends Subject{
      */
     get_output_properties(){
         if (this.substance.startsWith('ig')){
-            let props = [...this.DEFAULT_PROP_OUT_SHORTLIST];
+            let props = [...this.ALL_PROPS];
             props.splice(props.indexOf('x'), 1);
             return props
         } else {
-            return [...this.DEFAULT_PROP_OUT_SHORTLIST];
+            return [...this.ALL_PROPS];
         }
     }
 
@@ -272,6 +273,9 @@ class DataModel extends Subject{
      *                  the point for internal tracking.
      */
     add_point(point){
+        if (Object.keys(point).length == 0){
+            return;
+        }
         let pt = Object.assign({}, point);  // Copy object
         pt['ptid'] = this.point_id;  // Append the id to the point
 
@@ -365,6 +369,7 @@ class PropEntryView{
         this.prop_table_name = "propinput";
         this.prop_form_name = "propform";
         this.post_button_name = "post_props";
+        this.layout = "col";  // "row" or "col"
 
         this.props = input_properties;
         this.compute_callback = compute_callback;
@@ -404,27 +409,45 @@ class PropEntryView{
         // Always start from scratch
         this.prop_table.empty();
 
-        // Build a header
-        let head = "<thead><tr>"
-        props.forEach((prop) => {
-            if (units != null){
-                prop = prop + " (" + units[prop] +")";
-            }
-            head = head + "<th>" + prop + "</th>";
-        });
-        head = head + "</tr></thead>";
+        if (this.layout === "row"){
+            // Build a header
+            let head = "<thead><tr>"
+            props.forEach((prop) => {
+                if (units != null) {
+                    prop = prop + " (" + units[prop] + ")";
+                }
+                head = head + "<th>" + prop + "</th>";
+            });
+            head = head + "</tr></thead>";
 
-        this.prop_table.append(head);
+            this.prop_table.append(head);
 
-        // Build each input box
-        let tr = $("<tr>")
-        props.forEach((prop) => {
-            let td = $("<td>");
-            // Use string formatting to prevent insanity
-            let inputbox = `<input type="text" propvalue="${prop}" id="${prop}_input" name="${prop}_input">`;
-            tr.append(td.append(inputbox));
-        });
-        this.prop_table.append(tr);
+            // Build each input box
+            let tr = $("<tr>")
+            props.forEach((prop) => {
+                let td = $("<td>");
+                // Use string formatting to prevent insanity
+                let inputbox = `<input type="text" propvalue="${prop}" id="${prop}_input" name="${prop}_input">`;
+                tr.append(td.append(inputbox));
+            });
+            this.prop_table.append(tr);
+        } else if (this.layout === "col"){
+            props.forEach((prop) => {
+                let tr = $("<tr>");
+                let lbl = $("<td>");
+                let proplbl = prop;
+                if (units != null) {
+                    proplbl = proplbl + " (" + units[prop] + "):";
+                }
+                tr.append(lbl.append(proplbl));
+                let td = $("<td>");
+                // Use string formatting to prevent insanity
+                let inputbox = `<input type="text" propvalue="${prop}" id="${prop}_input" name="${prop}_input">`;
+                tr.append(td.append(inputbox));
+                this.prop_table.append(tr);
+            });
+
+        }
     }
 
     /**
@@ -758,7 +781,7 @@ class PlotView{
             }
         });
         // Create the plot object
-        Plotly.newPlot(this.plot.get()[0], this.traces, this.layout);
+        Plotly.newPlot(this.plot.get()[0], this.traces, this.layout, {responsive: true});
         this.setupPlotClickListener();
     }
 
@@ -790,7 +813,8 @@ class PlotView{
                 type: y_scale,
                 autorange: true
             },
-            margin: { t: 0 }
+            margin: { t: 0 },
+            showlegend: false
         };
     }
 

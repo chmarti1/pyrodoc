@@ -66,9 +66,6 @@ function init(){
 
     propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY);
     isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T', 'd', 'p', 's', 'h', 'x']);
-    propChooserView.init(dataModel.get_output_properties(), dataModel.DEFAULT_PROP_OUT_SHORTLIST);
-    isolineChooserView.init(dataModel.get_output_properties(), ['T', 'p', 'x']);
-
 
     plotView = new PlotView("plot_display", dataModel, unitModel.get_units_for_prop, compute_point);
     dataModel.addListener(plotView);
@@ -76,12 +73,16 @@ function init(){
     isolineChooserView.addListener(plotView);
     plotView.init();
 
-
     // Assign views to listen to the main model
     tableView = new TableView('property_table', dataModel, unitModel.get_units_for_prop);
     dataModel.addListener(tableView);
     propChooserView.addListener(tableView);
     tableView.init(dataModel.get_output_properties());
+
+    propChooserView.init(dataModel.get_output_properties(), dataModel.DEFAULT_PROP_OUT_SHORTLIST);
+    isolineChooserView.init(dataModel.get_output_properties(), ['T', 'p', 'x']);
+
+
 }
 
 function load_substance_choice(){

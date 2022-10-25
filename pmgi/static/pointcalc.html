@@ -22,6 +22,16 @@
 </head>
 
 <body>
+<ul id='menulist'>
+    <li class='icon'><a href='index.html'><img src='fig/PYro_iBlack_Small.png' width=110px></img></a></li>
+    <li class="menuitem"><a href="./about.html">About</a></li>
+    <li class="menuitem"><a href="./features.html">Features</a></li>
+    <li class="menuitem"><a href="./download.html">Download</a></li>
+    <li class="menuitem"><a href="./documentation.html">Docs</a></li>
+    <li class="menuitem"><a href="./live/index.html">Live</a></li>
+</ul>
+
+<div id="content">
     <div class="title">
         <h1>Property Calculator</h1>
     </div>
@@ -46,17 +56,22 @@
 <div id="modal_substancepicker"></div>
 <div id="modal_unitspicker"></div>
 
-<h1>Value Controls</h1>
 
-  <div id="property_controls">
-        <h3>Property Input</h3>
-        This is where the user can input property data, using whatever units have been
-        apply'd. Only two properties can be specified at one time. Adjusts visible
-        for mp substances vs. ideal gases. Button submits HTTP POST request.<br>
+    <div class="plot-wrapper">
+        <div id="property_controls" class="property-controls">
+            <h3 class="sec-title">Property Input</h3>
 
-        <!-- Control Inserted by JS -->
+            <!-- Control Inserted by JS -->
 
-  </div>
+        </div>
+        <div id="plot_display" class="plot-display">
+            <h3 class="sec-title">Plot</h3>
+
+            <!-- Plot inserted by JS -->
+
+        </div>
+        <br style="clear:both" />
+    </div>
 
 <div id="property_selection">
         <h3>Property Display Selection</h3>
@@ -83,18 +98,8 @@
         <!-- Table Inserted by JS -->
 
     </div>
-    <div id="plot_display" style="width: 600px;">
-        <h3>Plot</h3>
-        The plot responds to the points added to the table. It should display
-        all the points that were added. It should also allow the user to click
-        to add a point for substances (subject to the points being in range).
-        Hover tooltip works with extra property info. Lots of prettification
-        needed here.<br>
 
-        <!-- Plot inserted by JS -->
-
-    </div>
-
+</div>
 </body>
 
 </html>
