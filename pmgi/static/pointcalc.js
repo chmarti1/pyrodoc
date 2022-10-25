@@ -243,7 +243,11 @@ function compute_point(props){
         dataType: "json",
         contentType: 'application/json; charset=utf-8',
         success: (data) =>{
+            if (data.message.error){
+                alert(data.message.message);
+            } else {
                 dataModel.add_point(data.data);
+            }
         },
     });
 }

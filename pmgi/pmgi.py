@@ -959,7 +959,7 @@ class PropertyRequest(PMGIRequest):
 
         try:
             self.data = subst.state(**args)
-        except pm.utility.PMParamError:
+        except (pm.utility.PMParamError, pm.utility.PMAnalysisError):
             self.mh.error('Failed to generate parameter set.')
             self.mh.message(repr(sys.exc_info()[1]))
             return True

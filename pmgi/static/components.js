@@ -1016,7 +1016,7 @@ class TableView{
         this.target = $("#"+divTarget);
 
         // create a <table> within the div that we'll operate on
-        this.tabletarget = $("<table id='proptable'></table>");
+        this.tabletarget = $("<table id='proptable' width='100%'></table>");
         this.target.append(this.tabletarget);
 
         this.proptext_to_id = {};
@@ -1078,7 +1078,7 @@ class TableView{
         }
 
         // Redraw
-        this.table.clear().draw();
+        this.table.columns.adjust().draw();
     }
 
     update(source, event, data){
