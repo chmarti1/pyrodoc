@@ -38,6 +38,8 @@ function init(){
     let subid = load_substance_choice();
     let units = load_units_choice();
 
+    $("#substance_title").text("Substance: "+subid);
+
     dataModel = new DataModel(subid);
     unitModel = new UnitModel(infodata.data.legalunits, units);
 

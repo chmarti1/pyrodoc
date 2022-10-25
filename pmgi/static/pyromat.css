@@ -1,0 +1,373 @@
+/* Define a standard color scheme
+ * pyro-black and pyro-orange correspond to the colors used in the icons
+ */
+:root{
+    --pyro-orange: #ef5423;
+    --pyro-black: #000000;
+    --pyro-gray: #f0f0f0;
+}
+
+
+
+
+
+.section {
+    margin: 0px 30px 0px 30px;
+    text-align:justify;
+}
+
+
+/* Section header font definitions
+ *  Use the "title" or "subtitle" class to encase in a boarder
+ */
+h1 {
+    font-size: 24pt;
+    font-family:sans-serif;
+}
+
+h2 {
+    font-size: 24pt;
+    font-family:sans-serif;
+}
+
+/* Start with some generic formatting for text elements
+ */
+
+/* Defines the rounded corner boarders used for the page title and the
+ * subtitles.  The title is intended to be placed prominently at the top
+ * of the page.  The subtitle can be used to call out prominent sections
+ * but should be used sparingly.
+ *
+ * Taglines are variants of the subtitle class that are used primarily
+ * for the little promotional blurbs on the home screen.
+ */
+.title {
+    text-align:center;
+    /* background-color: var(--pyro-black, black); */
+    /* background-color: #00005f; */
+    background-color: white;
+    border: 3px solid var(--pyro-black, black);
+    border-radius: 40px;
+    /* color: white; */
+    color: black;
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    margin: 0px 0px 50px 0px;
+}
+
+.subtitle {
+    text-align:center;
+    border: 3px solid var(--pyro-black, black);
+    border-radius: 40px;
+    color: var(--pyro-black, black);
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.tagline {
+    text-align:center;
+    font-family:sans;
+    font-size:18px;
+    margin:auto;
+    margin-top:100px;
+    margin-bottom:100px;
+    border:1px solid black;
+    border-radius:10px;
+    padding:10px;
+    width:350px;
+}
+
+
+.toc0 {
+    margin-top:5px;
+    text-align:left;
+    position: relative;
+    left: 10px;
+    color: var(--pyro-black, black);
+    font-family: serif;
+    font-weight: bold;
+    padding: 2px;
+}
+
+.toc1 {
+    text-align:left;
+    position: relative;
+    left: 30px;
+    color: var(--pyro-black, black);
+    font-family: serif;
+    padding: 2px;
+}
+
+.toc2 {
+    text-align:left;
+    position: relative;
+    left: 50px;
+    color: var(--pyro-black, black);
+    font-family: serif;
+    padding: 2px;
+}
+
+.code {
+    /*background-color: #ffeebb;*/
+    background-color: var(--pyro-gray, gray);
+    margin-top:5;
+    margin-bottom:5;
+    padding: 10px;
+    font-family:Monospace;
+    color: black;
+}
+
+.verse {
+    position:static;
+    margin:auto;
+    text-align:center;
+    font-family:serif;
+}
+
+span.code{
+    /*background-color: #ffeebb;*/
+    background-color: var(--pyro-gray, gray);
+    margin-top:0;
+    margin-bottom:0;
+    padding: 3px;
+    font-family:Monospace;
+    color: black;
+}
+
+.figure{
+    width: 90%;
+    text-align:center;
+    position:static;
+}
+
+
+a:link, a:visited, a:active {
+    color:inherit;
+    text-decoration:underline;
+}
+
+a:hover {
+    color:var(--pyro-orange, orange);
+    text-decoration:underline;
+}
+
+
+ /* Page Layout
+ * There are three primary areas in the body; the menu, content, and
+ * contact.  The menu is a statically located frame at the left-hand
+ * side of the page, the content is a scrollable area with controlled
+ * width.  The contact is a footer at the bottom of the content
+ * separated by a horizontal rule.
+ */
+
+/*  Default screen layout assumes a narrow screen.
+ * it will probably print well too.
+ */
+body {
+    margin: 0 0 0 0;
+}
+
+#content {
+    width:90%;
+    text-align:justify;
+    line-height: 1.5;
+    position:static;
+    padding:0 0 0 0;
+    margin:10px 10px 0 10px;
+    border:none;
+}
+
+#contact {
+    text-align:center;
+    font-size:80%;
+    border:none;
+    width:95%;
+}
+/* REMINDER... this is the NARROW layout
+ */
+#menulist {
+    list-style-type: none;
+    font-family:Arial,sans-serif;
+    font-size:18px;
+    padding: 10px;
+    margin: 0;
+    width: 100%;
+    position: static;
+    top: 0;left:0;
+    background-color:black;
+    color:white;
+}
+li.icon {
+    display:inline;
+    text-align:left;
+    padding:10px;
+}
+li.menuitem {
+    display:inline;
+    color:white;
+    text-align:right;
+    color:white;
+}
+li.menuitem a{
+    color:white;
+    text-decoration:none;
+    margin:5px;
+    padding:5px;
+}
+li.menuitem a:hover{
+    background-color:#777;
+    color:white;
+}
+
+/* If the screen is wide, then we can use a more spacious layout.
+ */
+@media screen and (min-width: 1030px) {
+
+    /* Page Layout
+     * There are three primary areas in the body; the menu, content, and
+     * contact.  The menu is a statically located frame at the left-hand
+     * side of the page, the content is a scrollable area with controlled
+     * width.  The contact is a footer at the bottom of the content
+     * separated by a horizontal rule.
+     */
+    body {
+        margin-top: 0px;
+    }
+
+    #content {
+        width:850px;
+        text-align:justify;
+        position:absolute;
+        top:0;
+        left:150px;
+        padding:0;
+        margin:10px;
+        border:none;
+    }
+
+    #contact {
+        text-align:center;
+        font-size:80%;
+        border:none;
+        width:100%;
+    }
+    /* REMINDER... this is the WIDE layout
+     */
+    #menulist {
+        list-style-type: none;
+        font-family:sans-serif;
+        font-size:18px;
+        padding: 0;
+        margin: 0;
+        position: fixed;
+        width: 150px;
+        height: 100%;
+        top: 0; left: 0;
+        background-color:black;
+        color:white;
+    }
+    li.icon {
+        display:block;
+        text-align:left;
+        padding-left:20px;
+    }
+    li.menuitem {
+        color:white;
+        text-align:right;
+        color:white;
+    }
+    li.menuitem a{
+        color:white;
+        display:block;
+        text-decoration:none;
+        margin:5px;
+        padding:5px;
+    }
+}
+
+
+/* Table properties
+ */
+
+table.texttable {
+    border: 2px solid black;
+    border-radius: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+td {
+    padding: 10px;
+}
+
+
+/* Live formatting rules
+ *
+ */
+
+.lcol {
+    width:300px;
+    float:left;
+}
+
+.rcol {
+    width:300px;
+    float:right;
+}
+
+.error {
+    background-color: red;
+    color: white;
+    font-family:sans-serif;
+    font-size: 14pt;
+    text-align:center;
+}
+
+tr, th{
+    padding:10px;
+    text-align:center;
+}
+
+th {
+    text-align: center;
+    font-weight: bold;
+    font-size: 12pt;
+}
+tr.trU {
+    text-align: center;
+    font-size: 10pt;
+}
+tr.trE {
+    font-size: 10pt;
+}
+td.tdC {
+    text-align: center;
+    padding: 2px 15px 2px 15px;
+}
+td.tdR {
+    text-align: right;
+    padding: 2px 15px 2px 15px;
+}
+td.tdL {
+    text-align: left;
+    padding: 2px 15px 2px 15px;
+}
+td.tdDL {
+    text-align: right;
+    padding: 2px 0px 2px 15px;
+}
+td.tdDR {
+    text-align: left;
+    padding: 2px 15px 2px 0px;
+}
+#sec1 {
+    width: 800px;
+    font-size: 12pt;
+    text-align: left;
+}
+#sec2 {
+    width: 800px;
+}
+
