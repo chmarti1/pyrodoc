@@ -15,58 +15,75 @@
 </head>
 <body>
 
-<div id='selection'>
-    <button onclick="onclick_changesubstance()">Change Substance</button><br>
-    <label>Current Substance: </label><label id="sub_string"></label>
-    <div id="modal_substancepicker" class="modal"></div>
+<ul id='menulist'>
+    <li class='icon'><a href='index.html'><img src='fig/PYro_iBlack_Small.png' width=110px></img></a></li>
+    <li class="menuitem"><a href="./about.html">About</a></li>
+    <li class="menuitem"><a href="./features.html">Features</a></li>
+    <li class="menuitem"><a href="./download.html">Download</a></li>
+    <li class="menuitem"><a href="./documentation.html">Docs</a></li>
+    <li class="menuitem"><a href="./live/index.html">Live</a></li>
+</ul>
+
+<div id="content">
+    <div class="title">
+        <h1>Property Calculator</h1>
+    </div>
+
+    <div id="modal_substancepicker"></div>
+    <div id="modal_unitspicker"></div>
+
+    <div id='selection'>
+        <h3 id="substance_title" class="subtitle">Substance: </h3>
+        <button onclick="onclick_changesubstance()">Change Substance</button><br>
+
+
+        <table id='subst_table'>
+            <tbody>
+                <tr>
+                    <td>Substance ID:</td>
+                    <td><div id='subst_id'></div></td>
+                </tr>
+                <tr>
+                    <td>PYroMat Collection:</td>
+                    <td><div id='subst_col'></div></td>
+                </tr>
+                <tr>
+                    <td>PYroMat Class:</td>
+                    <td><div id='subst_cls'></div></td>
+                </tr>
+                <tr>
+                    <td>Formula:</td>
+                    <td><div id='subst_form'></div></td>
+                </tr>
+                <tr>
+                    <td>Molecular Weight:</td>
+                    <td><div id='subst_mw'></div></td>
+                </tr>
+                <tr>
+                    <td>InChI:</td>
+                    <td><div id='subst_inchi'></div></td>
+                </tr>
+                <tr>
+                    <td>CAS:</td>
+                    <td><div id='subst_cas'></div></td>
+                </tr>
+                <tr>
+                    <td>Names:</td>
+                    <td><div id='subst_names'></div></td>
+                </tr>
+                <tr>
+                    <td>Critical Point:</td>
+                    <td><div id='subst_crit'></div></td>
+                </tr>
+                <tr>
+                    <td>Triple Point:</td>
+                    <td><div id='subst_triple'></div></td>
+                </tr>
+            </tbody>
+        </table>
+        <div id='subst_doc'></div>
+
+    </div>
 </div>
-
-
-<table id='subst_table'>
-    <tbody>
-        <tr>
-            <td>Substance ID:</td>
-            <td><div id='subst_id'></div></td>
-        </tr>
-        <tr>
-            <td>PYroMat Collection:</td>
-            <td><div id='subst_col'></div></td>
-        </tr>
-        <tr>
-            <td>PYroMat Class:</td>
-            <td><div id='subst_cls'></div></td>
-        </tr>
-        <tr>
-            <td>Formula:</td>
-            <td><div id='subst_form'></div></td>
-        </tr>
-        <tr>
-            <td>Molecular Weight:</td>
-            <td><div id='subst_mw'></div></td>
-        </tr>
-        <tr>
-            <td>InChI:</td>
-            <td><div id='subst_inchi'></div></td>
-        </tr>
-        <tr>
-            <td>CAS:</td>
-            <td><div id='subst_cas'></div></td>
-        </tr>
-        <tr>
-            <td>Names:</td>
-            <td><div id='subst_names'></div></td>
-        </tr>
-        <tr>
-            <td>Critical Point:</td>
-            <td><div id='subst_crit'></div></td>
-        </tr>
-        <tr>
-            <td>Triple Point:</td>
-            <td><div id='subst_triple'></div></td>
-        </tr>
-    </tbody>
-</table>
-<div id='subst_doc'></div>
-
 </body>
 </html>

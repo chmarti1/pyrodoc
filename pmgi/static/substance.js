@@ -1,37 +1,35 @@
 var infodata
-var substdata
+var substancePicker
 
 $(function() {
-    let subid = config_substance();
-    async_info_request(()=>{
-        config_modal_subsel();
-        async_subst_request(subid, ()=>{
-            subst_data_ready();
+
+
+    // Check if the infodata has been created. If not, get it from ajax and reload
+    infodata = localStorage.getItem("infodata");
+    if (infodata === null){
+        ajax_info((data)=>{
+            localStorage.setItem("infodata", JSON.stringify(data));
+            infodata = data;
+            init();
         });
-    });
+    } else {
+        infodata = JSON.parse(infodata);
+        init();
+    }
 });
 
+function init(){
 
-function async_info_request(and_then){
-    // Make an async call to get the unit data
-    return ajax_info((data) =>{
-        infodata = data;
-        and_then();
-    });
-}
+    let subid = load_substance_choice();
 
-function config_modal_subsel(){
-    $("#modal_substancepicker").load("../static/modal_substance.html", ()=>{
-        sel_data_ready(infodata.data);
+    substancePicker = new ModalSubstancePicker('modal_substancepicker',
+    '../static/modal_substance.html',
+    infodata.data.substances);
+    ajax_subst(subid, (data)=>{
+        subst_data_ready(data);
     });
-}
 
-function async_subst_request(id, and_then){
-    // Make an async call to get the unit data
-    return ajax_subst(id, (data) =>{
-        substdata = data;
-        and_then();
-    });
+
 }
 
 function ajax_info(callback){
@@ -52,7 +50,7 @@ function ajax_subst(id, callback){
 // Substance page functions
 //**********
 
-function subst_data_ready(){
+function subst_data_ready(substdata){
     // Parse the response and break it into its parts
     let data = substdata.data;
     let units = substdata.units;
@@ -106,12 +104,12 @@ function subst_data_ready(){
 }
 
 
-
 function onclick_changesubstance(){
-    $('#modal_substancepicker').toggle();
+    substancePicker.toggle();
 }
 
-function config_substance(){
+
+function load_substance_choice(){
     let sub = get_cookie("idstr");
     if (sub === ""){
         change_substance(DEFAULT_IDSTR);
@@ -122,8 +120,9 @@ function config_substance(){
 }
 
 function display_substance(sub){
-    $("#sub_string").text(sub);
+    $("#substance_title").text("Substance: "+sub);
 }
+
 function change_substance(substance){
     set_cookie("idstr", substance);
     location.reload();
