@@ -153,6 +153,9 @@ class UnitFormView{
 
 }
 
+// Messing with the layout of the DataTable
+//https://stackoverflow.com/questions/38602873/datatables-button-and-search-box-position
+
 class ModalSubstancePicker{
     static EVENT_CANCEL = "msp_cancel";
     static EVENT_APPLY = "msp_apply";
