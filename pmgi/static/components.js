@@ -491,27 +491,16 @@ class PropChooserView extends Subject{
         this.shortlist = shortlist;
 
         this.target_name = target_div_id;
-        this.hide_checks_name = "propchoice_hide";
         this.prop_checks_name = "propchecks";
 
         // Initialize selectors for the components that make up this control
         this.target = $("#" + this.target_name);
-
-        // Create the show/hide button
-        let hidebutton = $('<input/>').attr({type: 'button', id: this.hide_checks_name, value: "Show Props"});
-        this.target.append(hidebutton);
-        // Get its selector
-        this.hide_checks = $('#'+this.hide_checks_name, this.target);
 
         // Create a <ul> to hold the checklist
         let checklist = $('<ul/>').attr({id: this.prop_checks_name, style: "display: none"});
         this.target.append(checklist);
         // Get its selector
         this.prop_checks = $('#'+this.prop_checks_name, this.target);
-
-        this.hide_checks.on("click", () =>{
-            this.prop_checks.toggle();  // Toggle visibility of checklist
-        });
 
         // Since these will be used as callbacks, they need to be bound
         this.checkbox_onchange = this.checkbox_onchange.bind(this);
@@ -595,6 +584,10 @@ class PropChooserView extends Subject{
                 box.checked = false;
             }
         });
+    }
+
+    toggle(){
+        this.prop_checks.toggle();
     }
 }
 

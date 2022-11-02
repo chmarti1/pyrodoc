@@ -122,6 +122,14 @@ function onclick_changeunits(){
     unitPickerView.toggle();
 }
 
+function onclick_isoline_checks(){
+    isolineChooserView.toggle();
+}
+
+function onclick_tableprop_checks(){
+    propChooserView.toggle();
+}
+
 function change_substance(substance){
     set_cookie("idstr", substance);
     location.reload();
