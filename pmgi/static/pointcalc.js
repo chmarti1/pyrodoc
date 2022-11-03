@@ -8,12 +8,13 @@ var unitPickerView;
 
 var propEntryView;
 var propChooserView;
-var isolineChooserView;
 var plotView;
 var tableView;
 
 var substancePicker;
 
+
+var plotControls;
 
 // document.ready()
 $(function(){
@@ -64,13 +65,14 @@ function init(){
         compute_point);
 
 
-    propChooserView = new PropChooserView("property_selection", PropChooserView.EVENT_PROPERTY_VISIBILITY);
-    isolineChooserView = new PropChooserView("isoline_selection", PropChooserView.EVENT_ISOLINE_VISIBILITY, ['T', 'd', 'p', 's', 'h', 'x']);
+    propChooserView = new PropChooserView($("#property_selection"), PropChooserView.EVENT_PROPERTY_VISIBILITY);
+
+    plotControls = new PlotControls($("#plot_controls"), "../static/plot_options.html", true);
 
     plotView = new PlotView("plot_display", dataModel, unitModel.get_units_for_prop, compute_point);
     dataModel.addListener(plotView);
     propChooserView.addListener(plotView);
-    isolineChooserView.addListener(plotView);
+    plotControls.addListener(plotView);
     plotView.init();
 
     // Assign views to listen to the main model
@@ -80,7 +82,7 @@ function init(){
     tableView.init(dataModel.get_output_properties());
 
     propChooserView.init(dataModel.get_output_properties(), dataModel.DEFAULT_PROP_OUT_SHORTLIST);
-    isolineChooserView.init(dataModel.get_output_properties(), ['T', 'p', 'x']);
+    plotControls.init(dataModel.get_output_properties());
 
 
 }
@@ -122,8 +124,8 @@ function onclick_changeunits(){
     unitPickerView.toggle();
 }
 
-function onclick_isoline_checks(){
-    isolineChooserView.toggle();
+function onclick_showplotcontrols(){
+    plotControls.toggle();
 }
 
 function onclick_tableprop_checks(){

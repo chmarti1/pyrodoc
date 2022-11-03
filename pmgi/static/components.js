@@ -357,7 +357,127 @@ class DataModel extends Subject{
 // * VIEWS
 // *********************************************
 
+class ObservableDropdown extends Subject{
+    static EVENT_DROPDOWN_CHANGE = 'newdropdown';
+    constructor(target_sel, event_type, labeltxt, entries, defval) {
+        super();
+        this.event_type = event_type;
 
+        this.target = target_sel;
+
+
+
+        this.onChange = this.onChange.bind(this);
+
+        // Create a div to put the buttons within
+        let subdiv = $("<div></div>");
+        let label = $("<label>").text(labeltxt).attr({labelfor: labeltxt+"_sel"});
+        let sel = $("<select/>").attr({id: labeltxt+"_sel", value: defval});
+        entries.forEach((opt) =>{
+           let newopt = $("<option>").val(opt).text(opt);
+           sel.append(newopt);
+        });
+        sel.val(defval).change();
+        sel.on("change", this.onChange)
+        subdiv.append(label);
+        subdiv.append(sel);
+        this.sel = sel;
+        this.target.append(subdiv);
+    }
+
+    getValue(){
+        return this.sel.val();
+    }
+
+    onChange(){
+        this.notify(this, ObservableDropdown.EVENT_DROPDOWN_CHANGE, this.getValue());
+    }
+}
+
+class PlotControls extends Subject{
+    static EVENT_ISOLINE_VISIBILITY = 'isoline_change';
+    static EVENT_AXIS_UPDATE = 'plot_axis_change';
+    static EVENT_SUBCOMPONENT_ISOLINE = 'subcom_isoline_change';
+
+    def_iso = ['T','p','h'];
+    def_x = 's';
+    def_y = 'T';
+
+    isoopts = ['T','p','h','d','s','x'];
+    xopts = ['T', 's', 'v', 'h'];
+    yopts = ['T', 'p'];
+
+    xsel;
+    ysel;
+    checks;
+
+    html_init = false;
+    data_init = false;
+    constructor(target_sel, html, start_hidden=true, isoopts=null, xopts=null, yopts=null) {
+        super();
+
+        if (isoopts){
+            this.isoopts = isoopts;
+        }
+        if (xopts){
+            this.xopts = xopts;
+        }
+        if (yopts){
+            this.yopts = yopts;
+        }
+
+        this.$outer = target_sel;
+
+        this.$inner = $("<div></div>");
+        this.$outer.append(this.$inner);
+
+        if (start_hidden){
+            this.toggle();
+        }
+
+        this.$inner.load(html, ()=> {
+            let $checks = $("#checkboxes", this.$inner);
+            let $xsel = $("#xdropdown", this.$inner);
+            let $ysel = $("#ydropdown", this.$inner);
+
+            this.checks = new PropChooserView($checks, PlotControls.EVENT_SUBCOMPONENT_ISOLINE, this.isoopts, start_hidden=false);
+            this.xsel = new ObservableDropdown($xsel, ObservableDropdown.EVENT_DROPDOWN_CHANGE, "X Axis: ", this.xopts, this.def_x);
+            this.ysel = new ObservableDropdown($ysel, ObservableDropdown.EVENT_DROPDOWN_CHANGE, "Y Axis: ", this.yopts, this.def_y);
+
+            this.xsel.addListener(this);
+            this.ysel.addListener(this);
+            this.checks.addListener(this);
+
+            this.html_init = true;
+            if (this.data_init){
+                this.init(this.temp);
+            }
+        });
+
+    }
+
+    init(isoline_properties){
+        if (this.html_init){
+            this.checks.init(isoline_properties, this.def_iso);
+            this.temp = null;
+        } else {
+            this.temp = isoline_properties;
+        }
+        this.data_init = true;
+    }
+
+    update(source, event, data){
+        if (event === ObservableDropdown.EVENT_DROPDOWN_CHANGE) {
+            this.notify(this, PlotControls.EVENT_AXIS_UPDATE, [this.xsel.getValue(), this.ysel.getValue()]);
+        } else if (event === PlotControls.EVENT_SUBCOMPONENT_ISOLINE){
+            this.notify(this, PlotControls.EVENT_ISOLINE_VISIBILITY, data);
+        }
+    }
+
+    toggle(){
+        this.$outer.toggle();
+    }
+}
 
 
 /**
@@ -485,25 +605,28 @@ class PropEntryView{
 class PropChooserView extends Subject{
     static EVENT_PROPERTY_VISIBILITY = 'propvis'; // When the checkboxes change
     static EVENT_ISOLINE_VISIBILITY = 'isolinevis'; // When the checkboxes change
-    constructor(target_div_id, event_type, shortlist = null) {
+    constructor(target_selector, event_type, shortlist = null, start_hidden=true) {
         super();
         this.event_type = event_type;
         this.shortlist = shortlist;
 
-        this.target_name = target_div_id;
         this.prop_checks_name = "propchecks";
 
         // Initialize selectors for the components that make up this control
-        this.target = $("#" + this.target_name);
+        this.$outer = target_selector;
 
         // Create a <ul> to hold the checklist
-        let checklist = $('<ul/>').attr({id: this.prop_checks_name, style: "display: none"});
-        this.target.append(checklist);
+        let checklist = $('<ul/>').attr({id: this.prop_checks_name});
+        this.$outer.append(checklist);
         // Get its selector
-        this.prop_checks = $('#'+this.prop_checks_name, this.target);
+        this.prop_checks = $('#'+this.prop_checks_name, this.$outer);
 
         // Since these will be used as callbacks, they need to be bound
         this.checkbox_onchange = this.checkbox_onchange.bind(this);
+
+        if (start_hidden){
+            this.toggle();
+        }
     }
 
 
@@ -587,7 +710,7 @@ class PropChooserView extends Subject{
     }
 
     toggle(){
-        this.prop_checks.toggle();
+        this.$outer.toggle();
     }
 }
 
@@ -614,7 +737,8 @@ class PlotView{
         this.target = $("#"+divTarget);
         this.plot_div_name = "plot";
 
-        this.create_axis_selects();
+        this.x_prop = "s";
+        this.y_prop = "T";
 
         // Create the div for the plot
         let plot = $("<div/>").attr({id: this.plot_div_name});
@@ -628,36 +752,6 @@ class PlotView{
         this.datasource = datasource;
 
         this.init();
-    }
-
-    create_axis_selects(){
-        // Create the axis selector Buttons
-        let xaxis_defs = {id: 'xprop', def: 's', opts: ['T','v','h','s'], label: 'X Property'};
-        let yaxis_defs = {id: 'yprop', def: 'T', opts: ['T','p'], label: 'Y Property'};
-
-        this.onChangeAxes = this.onChangeAxes.bind(this);
-
-        // Create a div to put the buttons within
-        let btnholder = $("<div/>").attr({id: "buttons"});
-        [xaxis_defs, yaxis_defs].forEach((defaults)=>{
-            let label = $("<label>").text(defaults['label']).attr({labelfor: defaults['id']});
-            btnholder.append(label);
-
-            let sel = $("<select/>").attr({id: defaults['id'], name: defaults['id'], value: defaults['def']});
-            defaults['opts'].forEach((opt) =>{
-               let newopt = $("<option>").val(opt).text(opt);
-               sel.append(newopt);
-            });
-            sel.val(defaults['def']).change();
-            sel.on("change", this.onChangeAxes)
-            btnholder.append(sel);
-        });
-        this.target.append(btnholder);
-
-        // Set the button callbacks
-        this.xprop_sel = $("#"+xaxis_defs['id'], this.target);
-        this.yprop_sel = $("#"+yaxis_defs['id'], this.target);
-        this.setAxes(this.xprop_sel.val(), this.yprop_sel.val());
     }
 
     init(){
@@ -708,7 +802,7 @@ class PlotView{
             y: [],
             mode: 'lines',
             type: 'scatter',
-            name: 'isolines p',
+            name: 'isolines T',
             hovertemplate: "<b>Isotherm</b><br>"+
                 "T: %{customdata:#.4g}",
             showlegend: false,
@@ -863,25 +957,23 @@ class PlotView{
         } else if (event === PropChooserView.EVENT_PROPERTY_VISIBILITY) {
             this.dispprops = data;
             this.updatePoints(this.datasource.get_points());
-        } else if (event === PropChooserView.EVENT_ISOLINE_VISIBILITY){
+        } else if (event === PlotControls.EVENT_ISOLINE_VISIBILITY){
             this.dispisos = data;
             this.draw_auxlines(this.datasource.get_auxlines());
         } else if (event === DataModel.EVENT_AUXLINE_ADD) {
             this.draw_auxlines(source.get_auxlines());
+        } else if (event === PlotControls.EVENT_AXIS_UPDATE) {
+            let [xprop, yprop] = data;
+            this.setAxes(xprop, yprop);
         }
-    }
-
-
-    onChangeAxes(){
-        this.setAxes(this.xprop_sel.val(), this.yprop_sel.val())
-        this.init();
-        this.draw_auxlines(this.datasource.get_auxlines());
-        this.updatePoints(this.datasource.get_points());
     }
 
     setAxes(xprop, yprop){
         this.x_prop = xprop;
         this.y_prop = yprop;
+        this.init();
+        this.draw_auxlines(this.datasource.get_auxlines());
+        this.updatePoints(this.datasource.get_points());
     }
 
 
