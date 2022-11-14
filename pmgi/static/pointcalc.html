@@ -2,34 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Rewrite of PyroMat Demo</title>
+    <title>Property Calculator | PYroMat</title>
 
+    <!-- Added to allow for live menu change. JB-->
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
     <script src="https://cdn.plot.ly/plotly-2.11.0.min.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-
     <script src="../static/cookies.js" type="text/javascript"></script>
     <script src="../static/modal_substance.js" type="text/javascript"></script>
     <script src="../static/pointcalc.js" type="text/javascript"></script>
     <script src="../static/components.js" type="text/javascript"></script>
 
+    <!-- Added to allow for gear icons. JB-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="../static/pyromat.css">
     <link rel="stylesheet" type="text/css" href="../static/pyromat_live.css">
-
-
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
 </head>
 
 <body>
-<ul id='menulist'>
-    <li class='icon'><a href='index.html'><img src='fig/PYro_iBlack_Small.png' width=110px></img></a></li>
-    <li class="menuitem"><a href="./about.html">About</a></li>
-    <li class="menuitem"><a href="./features.html">Features</a></li>
-    <li class="menuitem"><a href="./download.html">Download</a></li>
-    <li class="menuitem"><a href="./documentation.html">Docs</a></li>
-    <li class="menuitem"><a href="./live/index.html">Live</a></li>
-</ul>
+
+<!-- This menu list is what shoud be placed on each calculator page so user can easily navigate between them. JB -->
+<div class="verticalnav">
+    <img src="http://www.pyromat.org/fig/PYro_iBlack_Small.png" style="width:110px; padding-left: 20px; padding-top: 10px;"><br><br>
+    <a href="http://www.pyromat.org/about.html">About</a>
+    <a href="http://www.pyromat.org/features.html">Features</a>
+    <a href="http://www.pyromat.org/download.html">Download</a>
+    <a href="http://www.pyromat.org/documentation.html">Docs</a>
+    <a href="#" class="live-btn">Live</a>
+    <ul>
+        <ul class="live-show">
+        <a href="../substance/" style="margin-top: -15px;">Substance Property Form</a>
+        <a href="../pointcalc/">Property Calculator</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/idealgasdata.py">Ideal Gas Calculator</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/satdata.py">Saturation Properties</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/pointdata.py">Single Point Property Data</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/propdiags.py">Property Diagrams</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/rankine.py">The Rankine Cycle</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/rankinesh.py">The Rankine Cycle with Super Heat</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/rankinedesign.py">Rankine Cycle Design Project</a>
+        </ul>
+    </ul>
+</div>
+
+  <!--This JavaScript function allows the "Live" button to work. JB-->
+<script>
+    $('.live-btn').click(function(){
+      $('div ul .live-show').toggleClass("show");
+    });
+</script>
 
 <div id="content">
     <div class="title">
@@ -37,61 +60,56 @@
     </div>
     <div class="section">
         <p>
-            This page can be used to compute thermodynamic properties.
+            This page can be used to compute thermodynamic properties.<br>
+            Use the gear icons to toggle settings.
         </p>
     </div>
-    <h3 id="substance_title" class="subtitle">Substance: </h3>
-    <div class="section">
-        <button onclick="onclick_changesubstance()">Change Substance</button>
-        <button onclick="onclick_changeunits()">Change Units</button>
-        <br>
-        <br>
-        <label>Current Substance: </label><label id="sub_string"></label>
-        <br>
-        <label>Current Units: </label><label id="unit_string"></label>
+
+    <!-- Current Substance Chosen: JB-->
+    <div class="subtitle">
+        <b>Current Substance Chosen: <label id="sub_string"></label></b>
+        <gearbutton class="gearbutton" title="Change substance." onclick="onclick_changesubstance()"><i class="fa fa-cog"></i></gearbutton>
     </div>
 
-    <br><br>
-
-    <div id="modal_substancepicker"></div>
-    <div id="modal_unitspicker"></div>
-
+    <div id="modal_substancepicker" class="window1">
+    </div>
 
     <div class="plot-wrapper">
+
+        <!-- (1) For the Property Input(property_controls), it would be best to increase the size and stretch downward the elements so it matches in height next to the Plot.
+        I already made the box the proper height so just the elements need to be adjusted. JB-->
+        <!-- Property Input JB-->
         <div id="property_controls" class="property-controls">
-            <h3 class="sec-title">Property Input</h3>
-
-            <!-- Control Inserted by JS -->
-
+            <h3 class="sec-title">Property Input
+            <gearbutton class="gearbutton" title="Change the units for selected substance." onclick="onclick_changeunits()"><i class="fa fa-cog"></i></gearbutton></h3>
         </div>
+        <div id="modal_unitspicker" class="window2">
+        </div>
+
+        <!-- Plot JB-->
         <div id="plot_display" class="plot-display">
+            <h3 class="sec-title">Plot
+                <gearbutton class="gearbutton" title="Displays selected isobars in plot and chooses X or Y axis units." onclick="onclick_showplotcontrols()"><i class="fa fa-cog"></i></gearbutton>
+            </h3>
 
-            <h3 class="sec-title">Plot</h3>
-                <button onclick="onclick_showplotcontrols()">Show Plot Controls</button>
-                <div id="plot_controls"></div>
-
-            <!-- Plot inserted by JS -->
-
+            <!-- (2) For the Plot(plot_controls), I have linked the gear icon to the plot toggle functions, however,
+            the function should bring a modal window like the other gear icons do that shows the elements so the Plot position does not become distorted. JB-->
+            <div id="plot_controls" class="window3">
+            </div>
         </div>
-        <br style="clear:both" />
     </div>
-    <h3 class="subtitle">Data Output</h3>
-    <button onclick="onclick_tableprop_checks()">Show Table Prop Controls</button>
-    <div id="property_selection">
 
-        <!-- Control Inserted by JS -->
+    <!-- Property Tables JB-->
+    <h3 class="subtitle">Propery Tables
+        <gearbutton class="gearbutton" title="Displays data selected from Plot and Inputs." onclick="onclick_tableprop_checks()"><i class="fa fa-cog"></i></gearbutton>
+    </h3>
 
+    <!-- (3) For the Property Table(property_selection), I have linked the gear icon to the table toggle functions, however,
+    the function should bring a modal window like the other gear icons do that shows the elements so the Property Table position does not become distorted JB-->
+    <div id="property_selection" class="window4">
     </div>
     <div id="property_table">
-        <!-- Table Inserted by JS -->
-
     </div>
-
-
-
-
-
 </div>
 </body>
-
 </html>

@@ -8,7 +8,7 @@
  */
 class UnitFormView{
 
-    constructor(htmlTargetDiv, html, valid_units, currentval, defaultval, set_callback, cancel_callback) {
+    constructor(target_sel, html, valid_units, currentval, defaultval, set_callback, cancel_callback) {
         this.change_units_callback = set_callback;
         this.currentval = currentval;
         this.defaultval = defaultval;
@@ -21,7 +21,7 @@ class UnitFormView{
         this.button_cancel_name = "unit_cancel";
 
         // Select the target div and load the html
-        this.$outer = $('#'+htmlTargetDiv);
+        this.$outer = target_sel;
         this.$outer.addClass("modal");
 
         this.$inner = $("<div></div>");

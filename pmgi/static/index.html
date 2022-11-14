@@ -2,26 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Live Nav | PYroMat</title>
-    <link rel="stylesheet" type="text/css" href="../static/pyromat.css">
     <meta name="description" content="Live Page Navigation">
     <meta name="keywords" content="python,thermodynamic,properties,cycle,engine,refrigeration">
+    <title>Home | PYroMat</title>
+
+    <!-- Added to allow for live menu change. JB -->
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../static/pyromat.css">
 </head>
 <body>
+
+<!-- This menu list is what shoud be placed on each calculator page so user can easily navigate between them. JB -->
+<div class="verticalnav">
+    <img src="http://www.pyromat.org/fig/PYro_iBlack_Small.png" style="width:110px; padding-left: 20px; padding-top: 10px;"><br><br>
+    <a href="http://www.pyromat.org/about.html">About</a>
+    <a href="http://www.pyromat.org/features.html">Features</a>
+    <a href="http://www.pyromat.org/download.html">Download</a>
+    <a href="http://www.pyromat.org/documentation.html">Docs</a>
+    <a href="#" class="live-btn">Live</a>
+    <ul>
+        <ul class="live-show">
+        <a href="../substance/" style="margin-top: -15px;">Substance Property Form</a>
+        <a href="../pointcalc/">Property Calculator</a> 
+        <a href="http://www.pyromat.org/cgi-bin/live/idealgasdata.py">Ideal Gas Calculator</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/satdata.py">Saturation Properties</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/pointdata.py">Single Point Property Data</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/propdiags.py">Property Diagrams</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/rankine.py">The Rankine Cycle</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/rankinesh.py">The Rankine Cycle with Super Heat</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/rankinedesign.py">Rankine Cycle Design Project</a>
+    </ul>
+</div>
+
+  <!--This JavaScript function allows the "Live" button to work. JB-->
+<script>
+    $('.live-btn').click(function(){
+      $('div ul .live-show').toggleClass("show");
+    });
+</script>
+
 <div id="content">
     <div class="title">
         <h1>Interactive Pages</h1>
     </div>
     <div class="section">
         <p>
-            We developed some JS driven interactive pages!
+            We developed some JS driven interactive pages!<br>
+            Click the "Live" button to access various calculators.
         </p>
-    </div>
-
-    <h3 class="subtitle">Live Pages</h3>
-    <div class="section">
-        <div class="toc0"><a href="../substance/">Substance Form</a></div>
-        <div class="toc0"><a href="../pointcalc/">Property Calculator</a></div>
     </div>
 </div>
 </body>

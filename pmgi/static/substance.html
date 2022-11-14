@@ -1,32 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PYroMat | Substance Summary</title>
+    <title>Substance Property Form | PYroMat</title>
+
+    <!-- Added to allow for live menu change. JB-->
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
     <!-- Include the JQuery and DataTables library-->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>    
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
     <!-- This is the PMGI js script file-->
     <script type="text/javascript" charset="utf8" src="../static/substance.js"></script>
     <script type="text/javascript" charset="utf8" src="../static/cookies.js"></script>
     <script type="text/javascript" charset="utf8" src="../static/modal_substance.js"></script>
+
     <link rel="stylesheet" type="text/css" href="../static/pyromat.css">
     <link rel="stylesheet" type="text/css" href="../static/pyromat_live.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
 </head>
 <body>
 
-<ul id='menulist'>
-    <li class='icon'><a href='index.html'><img src='fig/PYro_iBlack_Small.png' width=110px></img></a></li>
-    <li class="menuitem"><a href="./about.html">About</a></li>
-    <li class="menuitem"><a href="./features.html">Features</a></li>
-    <li class="menuitem"><a href="./download.html">Download</a></li>
-    <li class="menuitem"><a href="./documentation.html">Docs</a></li>
-    <li class="menuitem"><a href="./live/index.html">Live</a></li>
-</ul>
+<!-- This menu list is what shoud be placed on each calculator page so user can easily navigate between them. JB -->
+<div class="verticalnav">
+    <img src="http://www.pyromat.org/fig/PYro_iBlack_Small.png" style="width:110px; padding-left: 20px; padding-top: 10px;"><br><br>
+    <a href="http://www.pyromat.org/about.html">About</a>
+    <a href="http://www.pyromat.org/features.html">Features</a>
+    <a href="http://www.pyromat.org/download.html">Download</a>
+    <a href="http://www.pyromat.org/documentation.html">Docs</a>
+    <a href="#" class="live-btn">Live</a>
+    <ul>
+        <ul class="live-show">
+        <a href="../substance/" style="margin-top: -15px;">Substance Property Form</a>
+        <a href="../pointcalc/">Property Calculator</a> 
+        <a href="http://www.pyromat.org/cgi-bin/live/idealgasdata.py">Ideal Gas Calculator</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/satdata.py">Saturation Properties</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/pointdata.py">Single Point Property Data</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/propdiags.py">Property Diagrams</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/rankine.py">The Rankine Cycle</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/rankinesh.py">The Rankine Cycle with Super Heat</a>
+        <a href="http://www.pyromat.org/cgi-bin/live/rankinedesign.py">Rankine Cycle Design Project</a>
+    </ul>
+</div>
+
+  <!--This JavaScript function allows the "Live" button to work. JB-->
+<script>
+    $('.live-btn').click(function(){
+      $('div ul .live-show').toggleClass("show");
+    });
+</script>
 
 <div id="content">
     <div class="title">
-        <h1>Property Calculator</h1>
+        <h1>Substance Property Form</h1>
     </div>
 
     <div id="modal_substancepicker"></div>
@@ -35,7 +59,6 @@
     <div id='selection'>
         <h3 id="substance_title" class="subtitle">Substance: </h3>
         <button onclick="onclick_changesubstance()">Change Substance</button><br>
-
 
         <table id='subst_table'>
             <tbody>

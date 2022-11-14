@@ -7,15 +7,10 @@
     --pyro-gray: #f0f0f0;
 }
 
-
-
-
-
 .section {
     margin: 0px 30px 0px 30px;
     text-align:justify;
 }
-
 
 /* Section header font definitions
  *  Use the "title" or "subtitle" class to encase in a boarder
@@ -64,6 +59,7 @@ h2 {
     padding: 10px;
     margin-top: 50px;
     margin-bottom: 50px;
+    font-size: 20px;
 }
 
 .tagline {
@@ -371,3 +367,62 @@ td.tdDR {
     width: 800px;
 }
 
+/* New Attributes JB */
+/* Vertical Menu Attributes JB */
+.verticalnav {
+    height: 100%;
+    width: 150px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: black;
+    overflow-x: hidden;
+}
+
+.verticalnav a {
+    padding: 6px 10px 8px 8px;
+    text-decoration: none;
+    font-size: 18px;
+    text-align: right;
+    color:white;
+    display: block;
+    font-family: Arial, sans-serif;
+}
+
+.verticalnav a:hover {
+    background-color: grey;
+}
+
+div ul {
+    padding: 0;
+    list-style-type: none;
+}
+
+div ul ul a {
+    float: right;
+    font-size: 18px;
+    border-left: 5px solid #ef5423;  
+    border-top: 3px solid rgba(255,255,255,0.1);
+    border-bottom: 3px solid rgba(255,255,255,0.05);
+}
+
+div ul ul{
+    position: static;
+    display: none;
+}
+
+div ul .live-show.show{
+    display: block;
+}
+
+/* Gear Button Attributes JB */
+.gearbutton {
+    background-color: white;
+    border: none;
+    color: black;
+    padding: 8px 8px;
+    font-size: 20px;
+    cursor: pointer;
+    overflow:hidden;
+}

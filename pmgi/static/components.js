@@ -426,12 +426,15 @@ class PlotControls extends Subject{
             this.yopts = yopts;
         }
 
+        // Select the target div and load the html
         this.$outer = target_sel;
+        this.$outer.addClass("modal");
 
         this.$inner = $("<div></div>");
+        this.$inner.addClass("modal-content");
         this.$outer.append(this.$inner);
 
-        if (start_hidden){
+        if (!start_hidden){
             this.toggle();
         }
 
@@ -614,17 +617,25 @@ class PropChooserView extends Subject{
 
         // Initialize selectors for the components that make up this control
         this.$outer = target_selector;
+        this.$outer.addClass("modal")
+
+        this.$inner = $("<div></div>");
+        this.$inner.addClass("modal-content");
+        this.$outer.append(this.$inner);
+
 
         // Create a <ul> to hold the checklist
         let checklist = $('<ul/>').attr({id: this.prop_checks_name});
-        this.$outer.append(checklist);
+
+        this.$inner.append(checklist);
+
         // Get its selector
         this.prop_checks = $('#'+this.prop_checks_name, this.$outer);
 
         // Since these will be used as callbacks, they need to be bound
         this.checkbox_onchange = this.checkbox_onchange.bind(this);
 
-        if (start_hidden){
+        if (!start_hidden){
             this.toggle();
         }
     }
