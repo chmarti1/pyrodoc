@@ -2,15 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="Live Page Navigation">
-    <meta name="keywords" content="python,thermodynamic,properties,cycle,engine,refrigeration">
-    <title>Home | PYroMat</title>
+    <title>Property Calculator | PYroMat</title>
 
-    <!-- Added to allow for live menu change. JB -->
     <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.11.0.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="../static/cookies.js" type="text/javascript"></script>
+    <script src="../static/modal_substance.js" type="text/javascript"></script>
+    <script src="../static/pointcalc.js" type="text/javascript"></script>
+    <script src="../static/components.js" type="text/javascript"></script>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="../static/pyromat.css">
+    <link rel="stylesheet" type="text/css" href="../static/pyromat_live.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
 </head>
+
 <body>
 
 <!-- This menu list is what shoud be placed on each calculator page so user can easily navigate between them. JB -->
@@ -24,7 +33,7 @@
     <ul>
         <ul class="live-show">
         <a href="../substance/" style="margin-top: -15px;">Substance Property Form</a>
-        <a href="../pointcalc/">Property Calculator</a> 
+        <a href="../pointcalc/">Property Calculator</a>
         <a href="http://www.pyromat.org/cgi-bin/live/idealgasdata.py">Ideal Gas Calculator</a>
         <a href="http://www.pyromat.org/cgi-bin/live/satdata.py">Saturation Properties</a>
         <a href="http://www.pyromat.org/cgi-bin/live/pointdata.py">Single Point Property Data</a>
@@ -32,6 +41,7 @@
         <a href="http://www.pyromat.org/cgi-bin/live/rankine.py">The Rankine Cycle</a>
         <a href="http://www.pyromat.org/cgi-bin/live/rankinesh.py">The Rankine Cycle with Super Heat</a>
         <a href="http://www.pyromat.org/cgi-bin/live/rankinedesign.py">Rankine Cycle Design Project</a>
+        </ul>
     </ul>
 </div>
 
@@ -44,13 +54,53 @@
 
 <div id="content">
     <div class="title">
-        <h1>Interactive Pages</h1>
+        <h1>Property Calculator</h1>
     </div>
     <div class="section">
         <p>
-            We developed some JS driven interactive pages!<br>
-            Click the "Live" button to access various calculators.
+            This page can be used to compute thermodynamic properties.<br>
+            Use the gear icons to toggle settings.
         </p>
+    </div>
+
+    <!-- Current Substance Chosen: JB-->
+    <div class="subtitle">
+        <b>Current Substance Chosen: <label id="sub_string"></label></b>
+        <gearbutton class="gearbutton" title="Change substance." onclick="onclick_changesubstance()"><i class="fa fa-cog"></i></gearbutton>
+    </div>
+
+    <div id="modal_substancepicker" class="window1">
+    </div>
+
+    <div class="plot-wrapper">
+
+        <!-- Property Input JB-->
+        <div id="property_controls" class="property-controls">
+            <h3 class="sec-title">Property Input
+            <gearbutton class="gearbutton" title="Change the units for selected substance." onclick="onclick_changeunits()"><i class="fa fa-cog"></i></gearbutton></h3>
+        </div>
+        <div id="modal_unitspicker" class="window2">
+        </div>
+
+        <!-- Plot JB-->
+        <div id="plot_display" class="plot-display">
+            <h3 class="sec-title">Plot
+                <gearbutton class="gearbutton" title="Displays selected isobars in plot and chooses X or Y axis units." onclick="onclick_showplotcontrols()"><i class="fa fa-cog"></i></gearbutton>
+            </h3>
+        </div>
+
+        <div id="plot_controls" class="window3">
+        </div>
+    </div>
+
+    <!-- Property Tables JB-->
+    <h3 class="subtitle">Propery Tables
+        <gearbutton class="gearbutton" title="Displays data selected from Plot and Inputs." onclick="onclick_tableprop_checks()"><i class="fa fa-cog"></i></gearbutton>
+    </h3>
+
+    <div id="property_selection_outer" class="window4">
+    </div>
+    <div id="property_table">
     </div>
 </div>
 </body>

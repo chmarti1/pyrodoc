@@ -65,7 +65,7 @@ function init(){
         compute_point);
 
 
-    propChooserView = new PropChooserView($("#property_selection"), PropChooserView.EVENT_PROPERTY_VISIBILITY);
+    propChooserView = new PropChooserView($("#property_selection_outer"), PropChooserView.EVENT_PROPERTY_VISIBILITY);
 
     plotControls = new PlotControls($("#plot_controls"), "../static/plot_options.html", true);
 

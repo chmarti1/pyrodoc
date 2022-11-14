@@ -617,10 +617,8 @@ class PropChooserView extends Subject{
 
         // Initialize selectors for the components that make up this control
         this.$outer = target_selector;
-        this.$outer.addClass("modal")
 
         this.$inner = $("<div></div>");
-        this.$inner.addClass("modal-content");
         this.$outer.append(this.$inner);
 
 
@@ -635,7 +633,7 @@ class PropChooserView extends Subject{
         // Since these will be used as callbacks, they need to be bound
         this.checkbox_onchange = this.checkbox_onchange.bind(this);
 
-        if (!start_hidden){
+        if (start_hidden){
             this.toggle();
         }
     }
