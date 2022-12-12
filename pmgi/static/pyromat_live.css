@@ -90,6 +90,16 @@ button:hover, input[type=button]:hover {
   background-color: grey;
 }
 
+.verticalnav b {
+  padding: 6px 10px 8px 8px;
+  text-decoration: none;
+  font-size: 18px;
+  text-align: right;
+  color:white;
+  display: block;
+  font-family: Arial, sans-serif;
+}
+
 div ul {
   padding: 0;
   list-style-type: none;
@@ -120,7 +130,7 @@ div ul .live-show.show{
   padding: 8px 8px;
   font-size: 20px;
   cursor: pointer;
-  overflow:hidden;
+  overflow: hidden;
 }
 
 /* Window Frame Main Attributes JB*/
@@ -146,7 +156,7 @@ div ul .live-show.show{
 
 /*Current Substance Chosen Gearbutton Window Attributes JB*/
 .window1 {
-  margin: 305px 615px;
+  margin: 345px 0px;
   width: 1000px;
   height: 1000px;
   overflow: auto;
