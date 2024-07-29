@@ -356,7 +356,7 @@ This identity may be applied to internal energy, enthalpy, entropy, and all the 
 \begin{align}
 e(T) &= \sum y_i e_i(T)\\
 h(T) &= \sum y_i h_i(T)\\
-s(T,p) &= \sum y_i s_i(T,p)
+s(T,p) &= \sum y_i s_i(T,p_i)
 \end{align}
 \end{subequations}
 and
@@ -364,7 +364,7 @@ and
 \begin{align}
 \overline{e}(T) &= \sum \chi_i \overline{e}_i(T)\\
 \overline{h}(T) &= \sum \chi_i \overline{h}_i(T)\\
-\overline{s}(T,p) &= \sum \chi_i \overline{s}_i(T,p).
+\overline{s}(T,p) &= \sum \chi_i \overline{s}_i(T,p_i).
 \end{align}
 \end{subequations}
 
@@ -522,27 +522,29 @@ Section \ref{sec:ig:mix} already shows how properties of a mixture can be calcul
 
 When calculating in molar units,
 \begin{align*}
-\overline{s}(T,p) &= \sum \chi_i\ \overline{s}^\circ_i(T) - \sum \chi_i R_u \ln\left(\frac{p}{p^\circ_i}\right)
+\overline{s}(T,p) &= \sum \chi_i \overline{s}(T, p_i)\\
+ &=\sum \chi_i\ \overline{s}^\circ_i(T) - \sum \chi_i R_u \ln\left(\frac{p \chi_i}{p^\circ_i}\right),
 \end{align*}
-Note that in this formulation, the constituents are not required to have the same reference pressure.  This can be dealt with by calculating an effective mixture reference pressure.  
-\begin{align*}
-\sum \chi_i \ln\left(\frac{p}{p^\circ_i}\right) &= \sum \chi_i \left( \ln p - \ln p^\circ_i \right)\\
-&= \ln p - \sum \chi_i \ln p^\circ_i\\
-&= \ln \left(\frac{p}{p^\circ_{mix}}\right)
-\end{align*}
-when
-\begin{align}
-p^\circ_{mix} = \exp\left(\sum \chi_i \ln p^\circ_i \right).
-\end{align}
-This is a log-weighted average of the constituent reference pressures.  In the event that they are all the same, the mixture reference pressure is also the same.
+where $p_i$ is the partial pressure of constituent $i$ and $p^\circ_i$ is the reference pressure of constituent $i$.
 
-It is less direct, but the same equivalent reference pressure can be derived from the mass-unit properties as well.  So,
-\begin{subequations}
+The partial pressure is merely $p \chi_i$, but the reference pressure for each substance may vary depending on the data source.  We deal with this in the following way.
+\begin{align*}
+\sum \chi_i \ln\left(\frac{p \chi_i}{p^\circ_i}\right) &= \sum \chi_i \left( \ln p + \ln \chi_i - \ln p^\circ_i \right)\\
+&= \left( \ln p - \sum \chi_i \ln p^\circ_i\right) + \sum \chi_i \ln \chi_i
+\end{align*}
+When
 \begin{align}
-s(T,p) &= \sum \chi_i \overline{s}^\circ_i(T) - R \ln\left(\frac{p}{p^\circ_{mix}}\right)\\
-\overline{s}(T,p) &= \sum \chi_i \overline{s}^\circ_i(T) - R_u \ln\left(\frac{p}{p^\circ_{mix}}\right)
+p^\circ_\mathrm{mix} &= \exp\left(\sum \chi_i \ln p^\circ_i \right)\\
+s_\mathrm{mix} &= -R_u \sum \chi_i \ln \chi_i,
 \end{align}
-\end{subequations}
+the enthalpy is calculated by
+\begin{align*}
+\overline{s}(T,p) &= \overline{s}_\mathrm{mix} + \sum \chi_i\ \overline{s}^\circ_i(T) - R_u \ln\left( \frac{p}{p^\circ_\mathrm{mix}} \right),
+\end{align*}
+
+The new reference pressure, $p^\circ_\mathrm{mix}$, is a log-weighted average of the constituent reference pressures.  In the event that they are all the same, the mixture reference pressure is also the same.  
+
+Neither a function of temperature nor pressure, the entropy of mixing, $\overline{s_\mathrm{mix}}$, is a constant that represents the entropy created by dispersing constituent gases into one another.  Note that it is added to the entropy that would be calculated from the pure constituents.
 
 \begin{table}
 \centering
