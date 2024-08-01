@@ -2,7 +2,7 @@
         "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-    <title>Home | PYroMat</title>
+    <title>HowTo+FAQ | PYroMat</title>
     <link rel="stylesheet" type="text/css" href="pyromat.css">
     <meta name="description" content="Thermodynamic Properties in Python">
     <meta name="keywords" content="python,thermodynamic,properties,cycle,engine,refrigeration">
@@ -32,6 +32,7 @@
     <div class="toc0"><a href="#cycle">Cycle analysis</a></div>
     <div class="toc1"><a href="#cycle_brayton">Brayton cycle</a></div>
     <div class="toc1"><a href="#cycle_rankine">Rankine cycle</a></div>
+    <div class="toc1"><a href="#cycle_custom">Custom inversion</a></div>
     <div class="toc0"><a href="#mp">Multi-phase</a></div>
     <div class="toc1"><a href="#mp_xin">Using quality in properties</a></div>
     <div class="toc1"><a href="#mp_xout">Retrieving quality from properties</a></div>
@@ -41,6 +42,7 @@
     <div class="toc1"><a href="#faq_redundant">Why two H<sub>2</sub>O entries?</a></div>
     <div class="toc1"><a href="#faq_inconsistent">PYroMat disagrees with my table.  Is that an error?</a></div>
     <div class="toc1"><a href="#faq_units">What unit system does PYroMat use?</a>
+    <div class="toc1"><a href="#faq_params">Why doesn't PYroMat calculate property "x" from properties "y" and "z"?</a></div>
 </div>
 
 <h3 class="subtitle" id="install">Installation questions</h3>
@@ -117,6 +119,34 @@
     <a href="./src/rankine.py">Source</a><br>
     <img class="figure" src="./fig/rankine_pv.png"></img>
     <img class="figure" src="./fig/rankine_ts.png"></img>
+
+
+    <h3 id="cycle_custom">Custom inverse routines</h3>
+    <p>
+    Sometimes, there are cycles that demand determining the thermodynamic state from a combination of properties that PYroMat doesn't seem support.  First, read <a href="#faq_params">this FAQ</a> to make sure there isn't already a good solution in place - the majority of property combinations are already supported.
+    </p>
+    <p>
+    I have had users ask for <span class="code">T(h,x)</span> before, and that's a perfectly reasonable question.  As I discuss in the <a href="#faq_params">FAQ</a> (please do read this first), I can't include that in the package, but in some applications, it still makes sense to write code that calculates it.
+    </p>
+    <p>
+    For most users, if you really need to, I recommend that you use a function in the <a href="https://docs.scipy.org/doc/scipy/reference/optimize.html">Scipy optimize module</a> to numerically invert one of PYroMat's builtin properties.  Here is an example implementation of an inverse code for <span class="code">T(h,x)</span> that demonstrates how it can work, how it can be confused (with an initial guess at 600 K), and even how it can break when provided with a careless initial guess (at 575 K).
+    </p>
+    <a href="./src/inverse.py">Source</a>
+    <pre class="code">
+$ ./inverse.py
+Units are as currently configured in pm.config
+True T        :  450.0
+Quality       :  0.85
+Enthalpy      :  [2470.65102748]
+T(h,x)        :  [450.]
+T(h,x,T0=600) :  [612.25939454]
+Traceback (most recent call last):
+  File "./inverse.py", line 52, in <module>
+    ...</pre>
+    <p>
+    As a rule, users should avoid these kinds of solutions.  Built-in solutions are designed and tested for numerical stability, carry multi-dimensional array support, and are designed to minimize computational overhead (as much as is practical in plain Python).
+    </p>
+    
 </div>
 
 <h3 class="subtitle" id="mp">Multi-phase</h3>
@@ -249,6 +279,118 @@ array(2.2905867790156145)</pre>
     <p>
     To know how an individual property is being reported, each method comes with in-line documentation that tells you what units that method uses.  For example, densities use <span class="code">unit_matter/unit_volume</span>.  To check PYroMat's current settings, just type <span class="code">pm.config</span> to print a summary of the current settings.
     </p>
+
+    <h3 id="faq_params">Why doesn't PYroMat calculate property "x" from properties "y" and "z"?</h3>
+    <p>
+    Over the years, I've received countless permutations on this question, so I'll do my best to deal with them all.  For example:
+    </p>
+    <ul>
+        <li>How does PYroMat deal with "inverse" properties?</li>
+        <li>Why does PYroMat only accept certain combinations of property arguments?</li>
+        <li>I'm analyzing thermodynamic cycle X. Why can't I specify properties Y and Z together?</li>
+        <li>Why can't I use properties like enthalpy to calculate the saturation state?</li>
+        <li>Why can't I use enthalpy (or entropy) and quality to calculate the state?</li>
+        <li>...</li>
+    </ul>
+    <p>
+    These are legitimate questions, the answer isn't usually obvious, and not every thermodynamics class talks about the kinds of edge cases we're exploring here.  So, this group of questions deserves its own FAQ.
+    </p>
+    <p>
+    New users may not be aware that PYroMat properties <a href="doc_intro.html#help" >accept almost any combination of properties</a>.  For example, the underlying ideal gas models provide enthalpy as a polynomial on temperature, so how do users calculate temperature if they know enthalpy?  No problem; users can just call the temperature method and pass enthalpy as the argument.  In this example, water has a temperature 453.0 K when it has an enthalpy of 1,000 kJ/kg/K.
+    </p>
+    <pre class="code">
+>>> import pyromat as pm
+>>> H2O = pm.get('mp.H2O')
+>>> H2O.T(h=1000, p=10)
+array([453.02797055])</pre>
+    <p>
+    This has obvious benefits for cycle analysis, but it raises the question: "can I supply any two properties I want?"  Almost but not quite.  The tables below list all property combinations accepted by the multi-phase and ideal gas classes in version 2.4.5.
+    </p>
+    <table class="disptable">
+    <caption>
+        v2.4.5 multiphase property argument combinations.<br>
+        <span style="font-size:small"> *=supported, X=invalid, o=not supported</span>
+    </caption>
+    <tr>
+        <td> </td><td>T</td><td>p</td><td>d</td><td>v</td><td>x</td><td>h</td><td>e</td><td>s</td>
+    </tr>
+    <tr>
+        <td>T</td><td>X</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>p</td><td>*</td><td>X</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>d</td><td>*</td><td>*</td><td>X</td><td>X</td><td>X</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>v</td><td>*</td><td>*</td><td>X</td><td>X</td><td>X</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>x</td><td>*</td><td>*</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td>
+    </tr>
+    <tr>
+        <td>h</td><td>*</td><td>*</td><td>*</td><td>*</td><td>X</td><td>X</td><td>o</td><td>o</td>
+    </tr>
+    <tr>
+        <td>e</td><td>*</td><td>*</td><td>*</td><td>*</td><td>X</td><td>o</td><td>X</td><td>o</td>
+    </tr>
+    <tr>
+        <td>s</td><td>*</td><td>*</td><td>*</td><td>*</td><td>X</td><td>o</td><td>o</td><td>X</td>
+    </tr>
+    </table>
+
+    <table class="disptable">
+    <caption>
+        v2.4.5 ideal gas property argument combinations. <br>
+        <span style="font-size:small"> *=supported, X=invalid, o=not supported</span>
+    </caption>
+    <tr>
+        <td> </td><td>T</td><td>p</td><td>d</td><td>v</td><td>h</td><td>e</td><td>s</td>
+    </tr>
+    <tr>
+        <td>T</td><td>X</td><td>*</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td>
+    </tr>
+    <tr>
+        <td>p</td><td>*</td><td>X</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>d</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>v</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>h</td><td>X</td><td>*</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td>
+    </tr>
+    <tr>
+        <td>e</td><td>X</td><td>*</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td>
+    </tr>
+    <tr>
+        <td>s</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>X</td>
+    </tr>
+    </table>
+
+    <p>
+    There are many combinations of properties that are not theoretically valid; <span class=code>(T,T)</span> obviously, <span class=code>(d,v)</span> since they are equivalent, and quality with any property other than temperature or pressure.  That last one isn't obviously flawed, and there are applications where this actually comes in handy (like refrigeration), so why is it "invalid?"
+    </p>
+    <p>
+    The figure below shows the enthalpy of steam plotted against temperature for various qualities.  In general, it is not even theoretically correct to write <span class=code>T(h,x)</span> because that curve does not form a function; multiple values of temperature give the same enthalpy for a given quality.  The same kind of problem occurs for all properties written with respect to quality.  Is this just nitpicking?  Unfortunately this detail matters a great deal, because that same problem will cause code to give <a href="#cycle_custom">inconsistent results or even crash</a>.
+    </p>
+    <img class="figure" src="./fig/hTx.png"></img>
+    <p>
+    The PYroMat verteran reading this might already know that the saturation properties (<span class=code>Ts()</span>, <span class=code>ps()</span>, <span class=code>ds()</span>, <span class=code>hs()</span>, ...) are much pickier about the arguments they accept than the rest of the package.  This is for the same reasons.
+    </p>
+    <p>
+    Note that temperature in combination with enthalpy or internal energy are supported by the multiphase class, but they are really only valid for the liquid phase.  In an ideal gas, enthalpy and energy are <i>only</i> functions of temperature, so specifying them together is redundant.  In multi-phase models, that manifests in an impractically numerically stiff problem that is unlikely to ever converge to a useful value when working with a vapor.  In the liquid phase, however, it is perfectly fine.
+    </p>
+    <p>
+    If you have a case that isn't supported by PYroMat natively, that isn't the end of the story.  See this <a href="#cycle_custom">howto article</a> for an example for writing your own "inverse" algorithm.  Hopefully, this will make you aware of some of the numerical pitfalls awaiting you.
+    </p>
+    <p>
+  The only valid property combinations that are not supported by the version 2.4.5 multiphase class are marked with a o, but these special cases <i>are</i> supported by the version 2.4.5 ideal gas classes.  Specifying entropy and any other non-primary property requires iteration in multiple dimensions over functions with discontinuities and singularities.  This functionality is likely to be included one day, but not today.
+    </p>
+
 </div>
 
 <div id="contact">
@@ -259,7 +401,7 @@ Associate Professor of Mechanical Engineering<br>
 The Pennsylvania State University, Altoona College<br>
 <a href="mailto:crm28@psu.edu">crm28@psu.edu</a><br>
 <br>
-&copy;2021 Released under the <a target="blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3 License</a>
+&copy;2024 Released under the <a target="blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3 License</a>
 </div>
 
 
