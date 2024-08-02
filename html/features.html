@@ -27,6 +27,15 @@
 </div>
 
 <div class="section">
+    <div class="toc0"><a href="#pythonic">Pythonic array support</a></div>
+    <div class="toc0"><a href="#properties">Wide range of properties</a></div>
+    <div class="toc0"><a href="#interface">Intuitive flexible interface</a></div>
+    <div class="toc0"><a href="#speed">Methods for faster performance</a></div>
+</div>
+
+<h3 class=subtitle id=pythonic>Pythonic array support</h3>
+
+<div class="section">
     <p>
     PYroMat provides thermodynamic properties for nearly 1,000 substances.  Fast and intuitive access to the properties of each substance comes from calling up objects.  Properties are calculated by object methods that support array-like objects as arguments.
     </p>
@@ -38,6 +47,10 @@
 >>> air = pm.get('ig.air')
 >>> air.gam(T=[300, 400, 500, 600])
 array([1.39990859, 1.39519249, 1.38666408, 1.37575277])</pre>
+</div>
+
+<h3 class=subtitle id=properties>Wide range of properties</h3>
+<div class="section">
     <p>
     PYroMat has property models for ideal gases, ideal gas mixtures, and multi-phase (liquid/vapor) pure substances.  The properties provided include 
     </p>
@@ -66,9 +79,86 @@ array([299.99999892])
 array([0.39306625])
 >>> h2o.s(h=h, p=1.01325)
 array([0.39306624])</pre>
+</div>
+
+<h3 class=subtitle id=interface>Intuitive flexible interface</h3>
+<div class=section>
     <p>
+    As of version 2.4.5, properties in the multi-phase and ideal gas classes accept arguments in combinations shown in the tables below.  Valid argument combinations are makred with *, invalid combinations are marked with X, and unsupported valid combinations are marked with o.  There is a <a href="./doc_howto.html#faq_params">FAQ article</a> gives a detailed explanation for why some combinations are invalid, and why some combinations aren't supported.
+    </p>
+    <table class="disptable" style="width:400px" id="argtab">
+    <caption>
+        v2.4.5 multiphase property argument combinations.<br>
+        <span style="font-size:small"> *=supported, X=invalid, o=not supported</span>
+    </caption>
+    <tr>
+        <td> </td><td>T</td><td>p</td><td>d</td><td>v</td><td>x</td><td>h</td><td>e</td><td>s</td>
+    </tr>
+    <tr>
+        <td>T</td><td>X</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>p</td><td>*</td><td>X</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>d</td><td>*</td><td>*</td><td>X</td><td>X</td><td>X</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>v</td><td>*</td><td>*</td><td>X</td><td>X</td><td>X</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>x</td><td>*</td><td>*</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td>
+    </tr>
+    <tr>
+        <td>h</td><td>*</td><td>*</td><td>*</td><td>*</td><td>X</td><td>X</td><td>o</td><td>o</td>
+    </tr>
+    <tr>
+        <td>e</td><td>*</td><td>*</td><td>*</td><td>*</td><td>X</td><td>o</td><td>X</td><td>o</td>
+    </tr>
+    <tr>
+        <td>s</td><td>*</td><td>*</td><td>*</td><td>*</td><td>X</td><td>o</td><td>o</td><td>X</td>
+    </tr>
+    </table>
+
+    <table class="disptable" style="width:400px">
+    <caption>
+        v2.4.5 ideal gas property argument combinations. <br>
+        <span style="font-size:small"> *=supported, X=invalid, o=not supported</span>
+    </caption>
+    <tr>
+        <td> </td><td>T</td><td>p</td><td>d</td><td>v</td><td>h</td><td>e</td><td>s</td>
+    </tr>
+    <tr>
+        <td>T</td><td>X</td><td>*</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td>
+    </tr>
+    <tr>
+        <td>p</td><td>*</td><td>X</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>d</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>v</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td><td>*</td><td>*</td>
+    </tr>
+    <tr>
+        <td>h</td><td>X</td><td>*</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td>
+    </tr>
+    <tr>
+        <td>e</td><td>X</td><td>*</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td>
+    </tr>
+    <tr>
+        <td>s</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>X</td>
+    </tr>
+    </table>
+</div>
+
+<h3 class=subtitle id=speed>Methods for faster performance</h3>
+<div class=section>
     <p>
-    To calculate lots of properties all at once, it is far more efficient to use the new <span class="code">state</span> method implemented in version 2.2.0.  This approach returns a dictionary with just about all the properties a user could want.
+    PYroMat is written in pure Python, and it is specifically designed to take full advantage of the back-end speedups that come from vectorization.  It seems unlikely that Python will ever be as fast as a compiled code written for a similar task.  However, when code is written to take appropriate advantage of the powerful compiled back-end tools in Python's many pacakges, it is astonishing how close we can come.
+    </p>
+    <p>
+    For example, to calculate lots of properties all at once, it is far more efficient to use the <span class="code">state</span> method implemented in version 2.2.0.  This method returns a dictionary with just about all the properties a user could want.
     </p>
     <pre class="code">
 >>> h2o.state(T=300, p=1.01325)
@@ -86,6 +176,25 @@ array([0.39306624])</pre>
     'v': array([0.00100345])
 }
 </pre>
+    <p>
+    Though most users will never need to be aware of it, the back-end is written to parallelize arrays with Numpy's compiled back end.  Many of the complaints about Python's slower performance stem from a failure to benefit appropriately from these powerful speedups.  
+    </p>
+    <pre class="code">
+>>> setupstr = """import pyromat as pm
+... import numpy as np
+... h2o = pm.get('mp.H2O')
+... N = 100
+... T=np.linspace(300,1000,N)
+... p=np.linspace(0.1,10,N)"""
+>>> teststr = """h2o.h(T=T,p=p)"""
+>>> timeit.timeit(teststr, setupstr,number=100)/100
+0.07836129026953131
+</pre>
+
+    <table class=displaytable style="width:300">
+    <th><td>N</td><td>Time (ms)</td></th>
+    <tr><td>100</td><td>
+    </table>
     <p>
     PYroMat includes the <span class=code>info()</span> and <span class=code>search()</span> functions to help users find the substances they need.  Users can search for substances by their collection ("ig" for ideal gas, "mp" for multi-phase), their name (e.g. "H2O", "water", or "R-134a"), or their atomic contents (e.g., "H" and "C" for hydrocarbons).   
     </p>
