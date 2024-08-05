@@ -22,7 +22,7 @@ In the author's opinion, contemporary undergraduate texts on thermodynamics do t
 \begin{table}
 \centering
 \caption{Thermodynamic properties, their symbols, and their unit systems}\label{tab:properties}
-\begin{tabular}{cccl}
+\begin{tabular}{|cccl|}
 \hline
 Symbol & In-Code & Units & Description\\
 \hline
@@ -34,7 +34,10 @@ $x$ & \verb|x| & - & Quality\\
 $R$ & \verb|R| & E / M / T & Ideal gas constant\\
 $W$ & \verb|mw| & Ma / Mo & Molecular weight\\
 \hline
+$a$ & \verb|a| & L / t & Speed of sound\\
 $e$ & \verb|e| & E / M & Internal energy\\
+$f$ & \verb|e| & E / M & Free (Helmholtz) energy\\
+$g$ & \verb|e| & E / M & Gibbs energy\\
 $h$ & \verb|h| & E / M & Enthalpy\\
 $s$ & \verb|s| & E / M / T & Entropy\\
 \hline
@@ -65,11 +68,11 @@ V & \verb|unit_volume| & m$^3$ & Volume\\
 \end{tabular}
 \end{table}
 
+In theory, thermodynamics can make equal use of almost any pair of properties to discover the others, and as of version 2.2.0, \PM\ is quite flexible about which two are used.  While this kind of convenience is part of the purpose of a high-level software tool, users may notice that some combinations are faster than others, some produce more numerical inaccuracies than others, and some are simply not possible.
+
 \subsection{Basic Properties}\label{sec:intro:basic}
 
-The theory of thermodynamics can make equal use of any pair of properties to discover the others, and as of version 2.2.0, \PM\ is quite flexible about which two are used.  While this kind of convenience is part of the purpose of a high-level software tool, users may notice that some combinations are faster than others, and some produce more numerical inaccuracies than others.
-
-In general, users will see the best performance when other properties are calculated in terms of the \emph{basic properties}:
+Users will see better performance when the state is specified with \emph{basic properties}:
 \begin{itemize}
 \item temperature, $T$,
 \item pressure, $p$,
@@ -77,7 +80,7 @@ In general, users will see the best performance when other properties are calcul
 \item specific volume, $v$,
 \item quality, $x$.
 \end{itemize}
-States may always be defined in terms of any pair of these with little additional computational cost.
+Except for quality, the state of any substance may always be specified with any two basic properties, and a basic property may be paired with any non-basic property.
 
 Other properties, like 
 \begin{itemize}
@@ -85,7 +88,52 @@ Other properties, like
 \item enthalpy, $h$, 
 \item entropy, $s$,
 \end{itemize}
-can also be used to specify the thermodynamic state, but the user should be aware of their limitations.  These may only be given one-at-a-time (i.e. they must be paired with a basic property), and specifying them forces \PM\ to use a slower back-end algorithm with inherent numerical precision limitations.  For example, as of version 2.2.0, specifying entropy and enthalpy together is not supported by any of the property methods.  
+can also be used to specify the thermodynamic state, but the user should be aware of their limitations.  Specifying them forces \PM\ to use a slower back-end algorithm with inherent numerical precision limitations.  There may also be some limitation on how these properties are combined.
+
+Tables \ref{tab:props:ig} and \ref{tab:props:mp} show which property combinations are allowed to be combined to define the thermodynamic state.  Combinations are marked with ``X'' when they would either be self-contradictory or redundant.  Every combination along the diagonal is obviously redundant, but simultaneously specifying specific volume and density is also redundant.  Specifying enthalpy, internal energy, and temperature of an ideal gas is also redundant, so these combinations are ``invalid.''
+
+In Table \ref{tab:props:mp}, quality, $x$, is listed as being invalid in combination with any property that is not temperature or pressure, but the reason is less obvious than in the ideal gas cases.  For example, it is not at all redundant to specify an enthalpy and a quality.  However, for many qualities, there are multiple states that give the same enthalpy, so, for example, \texttt{T(h,x)}, is not theoretically even a function.  In more practical terms, the algorithm would converge to inconsistent results, and may even diverge due to singularities in the iteration.
+
+Meanwhile, combinations of enthalpy, entropy, and internal energy are not supported purely for pragmatic reason.  The multi-dimensional iteration that results is easy to implement for specific cases, but it presents significant stability challenges in the general case.  There are plans to include this functionality in the future, but only when codes can be shown to deliver garanteed convergence over the entire domain.
+
+\begin{table}
+\centering
+\caption{Property combinations that are supported by ideal gas classes in version 2.4.5.  \checkmark = supported, X = not valid, o = not supported.}\label{tab:props:ig}
+\begin{tabular}{|c|cccc|ccc|}
+\hline
+  & \texttt{T} & \texttt{p} & \texttt{d} & \texttt{v} & \texttt{h} & \texttt{e} & \texttt{s}\\
+\hline  %  & T   p   d   v   h   e   s
+\texttt{T} & X & \checkmark & \checkmark & \checkmark & X & X & \checkmark\\
+\texttt{p} & \checkmark & X & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark\\
+\texttt{d} & \checkmark & \checkmark & X & X & \checkmark & \checkmark & \checkmark\\
+\texttt{v} & \checkmark & \checkmark & X & X & \checkmark & \checkmark & \checkmark\\
+\hline
+\texttt{h} & X & \checkmark & \checkmark & \checkmark & X & X & \checkmark\\
+\texttt{e} & X & \checkmark & \checkmark & \checkmark & X & X & \checkmark\\
+\texttt{s} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & X\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}
+\centering
+\caption{Property combinations that are supported by the multi-phase class in version 2.4.5.  \checkmark = supported, X = not valid, o = not supported.}\label{tab:props:mp}
+\begin{tabular}{|c|ccccc|ccc|}
+\hline
+  & \texttt{T} & \texttt{p} & \texttt{d} & \texttt{v} & \texttt{x} & \texttt{h} & \texttt{e} & \texttt{s}\\
+\hline  %  & T   p   d   v   h   e   s
+\texttt{T} & X & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark\\
+\texttt{p} & \checkmark & X & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark\\
+\texttt{d} & \checkmark & \checkmark & X & X & X & \checkmark & \checkmark & \checkmark\\
+\texttt{v} & \checkmark & \checkmark & X & X & X & \checkmark & \checkmark & \checkmark\\
+\texttt{x} & \checkmark & \checkmark & X & X & X & X & X & X \\
+\hline
+\texttt{h} & \checkmark & \checkmark & \checkmark & \checkmark & X & X & o & o\\
+\texttt{e} & \checkmark & \checkmark & \checkmark & \checkmark & X & o & X & o\\
+\texttt{s} & \checkmark & \checkmark & \checkmark & \checkmark & X & o & o & X\\
+\hline
+\end{tabular}
+\end{table}
 
 \subsection{Primary Properties}\label{sec:intro:primary}
 
@@ -229,6 +277,22 @@ T \d s &= \d e + p\d v\label{eqn:intro:ds1}\\
 Just like with temperature, there is a parallel (mathematically consistent) definition of entropy from statistical mechanics.  Boltzmann found that Entropy can also be calculated from the probability of the substance obtaining a thermodynamically equivalent state.  The probability of gas molecules spontaneously exhibiting a specific set of positions and velocities is astronomically low, but there is an emense quantity of dissimilar positions and velocities that would give the gas precisely the same temperature, internal energy, pressure, density, and other properties.  Meanwhile, the probability that gas molecules will spontaneously assemble themselves into a highly ordered crystal is astronomically low.  When that probability is very high, so is the entropy.  When that probability is very low, so is the entropy.
 
 Just like internal energy, it is theoretically possible to tally all of the possible states and calculate the probability of each, but that task is neither practical nor necessary.  Instead, it is convenient to define the entropy as zero at some reference state and then deal merely in changes in entropy as defined by (\ref{eqn:intro:s}).  In the case of ideal gases, the entropy is known to be precisely zero at absolute zero temperature, but some multi-phase models (like water) set entropy (and internal energy) of the liquid phase to zero at the triple point.
+
+\subsection{Free (Helmholtz) energy}
+
+The free energy is witten in terms of internal energy and entropy,
+\begin{align}
+f = e - Ts \label{eqn:intro:f}.
+\end{align}
+While free energy has long been used as a tool for calculating the mechanical work available from a substance at a given temperature, modern equation-of-state substance models use $f$ as the property from which all others are calculated.
+
+\subsection{Gibbs Energy}
+
+The Gibbs energy is written in terms of enthalpy and entropy,
+\begin{align}
+g = h - Ts \label{eqn:intro:g}.
+\end{align}
+It is also easily related to the Helholtz free energy in much the same way as internal energy and enthalpy $g = f + p/\rho$.  Gibbs energy is most commonly used in chemical or phase change equilibrium calculations.
 
 \subsection{Specific Heats, $c_p$ $c_v$}\label{sec:intro:c}
 
