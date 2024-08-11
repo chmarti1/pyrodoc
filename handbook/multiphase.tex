@@ -12,12 +12,12 @@ It is possible that future releases of \PM\ may include other formulations, but 
 
 The models supported by the \texttt{mp1} class have explicit formulations for the Holmholtz free energy (or simply free energy) in terms of temperature and density, and all other properties are calculated from that formulation.  Free energy is defined as
 \begin{align}
-a(T,\rho) &\equiv e(T,\rho) - T s(T,\rho)\\
+f(T,\rho) &\equiv e(T,\rho) - T s(T,\rho)\\
  &= h - \frac{p}{\rho} - T s.
 \end{align}
 By constructing the formulation from a bank of terms inspired by theoretical formulae for the intermolecular forces, there is greater hope of reducing the number of terms needed. 
 
-The formulation that we describe in this chapter is sometimes referred to as a ``Span and Wagner'' fit for Helmholtz free energy.  Though some version of the approach had already been applied successfully to specific substances over a decade earlier \cite{stewart:1991, setzmann:1991}, the need for a form that a code could apply generically to many substances prompted Span and Wagner's three-part 2003 paper defending its broad use for thermodynamic properties of fluids \cite{span:2003:1, span:2003:2, span:2003:3}.  An expanding body of papers by Span, Wagner, Lemon, Jacobsen, and others a library of formulations for substances that use a standard bank of terms to construct the free energy equation.
+The formulation that we describe in this chapter is sometimes referred to as a ``Span and Wagner'' fit for Helmholtz free energy.  Though some version of the approach had already been applied successfully to specific substances over a decade earlier \cite{stewart:1991, setzmann:1991}, the need for a form that a code could apply generically to many substances prompted Span and Wagner's three-part 2003 paper defending its broad use for thermodynamic properties of fluids \cite{span:2003:1, span:2003:2, span:2003:3}.  Papers by Span, Wagner, Lemon, Jacobsen, and others for an expanding library of formulations for substances that use a standard bank of terms to construct the free energy equation.
 
 In its independent implementation of this model, \PM\ is a modest open-source Pythonic alternative to REFPROP \cite{refprop}, the NIST code widely adopted for implementing these general forms.
 
@@ -28,7 +28,7 @@ It is generally sound practice to nondimensionalize formulae in all but the most
 All of the substance models in the first multi-phase class use
 \begin{subequations}
 \begin{align}
-\alpha(\tau,\delta) &= \frac{a(T,\rho)}{R T}\\
+\alpha(\tau,\delta) &= \frac{f(T,\rho)}{R T}\\
 \tau &= \frac{T_c}{T}\\
 \delta &= \frac{\rho}{\rho_c}.
 \end{align}
@@ -305,33 +305,33 @@ T\d s &= \d e - \frac{p}{\rho^2} \d \rho\label{eqn:mp1:law1}.
 
 By definition,
 \begin{align}
-a &= e - Ts \label{eqn:mp1:a}.
+f &= e - Ts \label{eqn:mp1:f}.
 \end{align}
 Its derivatives with respect to temperature and density may be simplified with some help from (\ref{eqn:mp1:law1}),
 \begin{align}
-\left(\frac{\partial a}{\partial T}\right)_\rho &= \left(\frac{\partial e}{\partial T}\right)_\rho - s - T \left(\frac{\partial s}{\partial T}\right)_\rho &=& \ -s\label{eqn:mp1:at}\\
-\left(\frac{\partial a}{\partial \rho}\right)_T &= \left(\frac{\partial e}{\partial \rho}\right)_T - T \left(\frac{\partial s}{\partial \rho}\right)_T &=& \ \frac{p}{\rho^2} \label{eqn:mp1:ad}.
+\left(\frac{\partial f}{\partial T}\right)_\rho &= \left(\frac{\partial e}{\partial T}\right)_\rho - s - T \left(\frac{\partial s}{\partial T}\right)_\rho &=& \ -s\label{eqn:mp1:ft}\\
+\left(\frac{\partial f}{\partial \rho}\right)_T &= \left(\frac{\partial e}{\partial \rho}\right)_T - T \left(\frac{\partial s}{\partial \rho}\right)_T &=& \ \frac{p}{\rho^2} \label{eqn:mp1:fd}.
 \end{align}
 
 The properties below are calculated in a dimensionless form.  In this way, this document is relieved from needing to be sensitive to units -- including molar versus mass. 
  
 \subsection{Pressure}\label{sec:mp1:p}
 
-The pressure (and compressibility factor) can be calculated explicitly from (\ref{eqn:mp1:ad}),
+The pressure (and compressibility factor) can be calculated explicitly from (\ref{eqn:mp1:fd}),
 \begin{align}
-\frac{p}{\rho R T} &=  \frac{\rho}{R T}\left(\frac{\partial a}{\partial \rho}\right)_T\nonumber\\
+\frac{p}{\rho R T} &=  \frac{\rho}{R T}\left(\frac{\partial f}{\partial \rho}\right)_T\nonumber\\
 &= \delta \alpha_\delta\label{eqn:mp1:p}.
 \end{align}
 
 \subsection{Entropy}\label{sec:mp1:s}
 
-Entropy appears explicitly in (\ref{eqn:mp1:at}), so it only needs to be transformed into terms of $\alpha$.  First, it is helpful to observe that derivatives with respect to temperature may be transposed into derivatives with respect to $\tau$ 
+Entropy appears explicitly in (\ref{eqn:mp1:ft}), so it only needs to be transformed into terms of $\alpha$.  First, it is helpful to observe that derivatives with respect to temperature may be transposed into derivatives with respect to $\tau$ 
 \begin{align}
 \frac{\partial}{\partial T} = -\frac{\tau}{T} \frac{\partial}{\partial \tau}.\nonumber
 \end{align}
 Therefore, 
 \begin{align}
-s &= -\left(\frac{\partial a}{\partial T}\right)_\rho \nonumber\\
+s &= -\left(\frac{\partial f}{\partial T}\right)_\rho \nonumber\\
 &= -\frac{\partial}{\partial T} R T \alpha\nonumber\\
 &= -R \alpha + R \tau \alpha_\tau
 \end{align}
@@ -342,9 +342,9 @@ So, normalized by $R$, entropy is
 
 \subsection{Internal energy}\label{sec:mp1:e}
 
-Internal energy can be calculated in terms of $a$ and $s$ from (\ref{eqn:mp1:a}) and (\ref{eqn:mp1:s}),
+Internal energy can be calculated in terms of $a$ and $s$ from (\ref{eqn:mp1:f}) and (\ref{eqn:mp1:s}),
 \begin{align}
-\frac{e}{R T} &= \frac{a}{RT} + \frac{s}{R} \vspace{2em} =\ \tau \alpha_\tau\label{eqn:mp1:e}.
+\frac{e}{R T} &= \frac{f}{RT} + \frac{s}{R} \vspace{2em} =\ \tau \alpha_\tau\label{eqn:mp1:e}.
 \end{align}
 
 \subsection{Enthalpy}\label{sec:mp1:h}
@@ -355,11 +355,11 @@ Enthalpy is trivial to construct from (\ref{eqn:mp1:p}) and (\ref{eqn:mp1:e}).  
  &= \tau \alpha_\tau + \delta \alpha_\delta.\label{eqn:mp1:h}
 \end{align}
 
-\subsection{Gibbs' free energy}\label{sec:mp1:g}
+\subsection{Gibbs free energy}\label{sec:mp1:g}
 
 Gibbs' energy is readily calculated from enthalpy and entropy; or from Helmholtz free energy.
 \begin{align}
-\frac{g}{R T} &= \frac{h}{RT} - \frac{s}{T} = \frac{a}{RT} + \frac{p}{\rho RT}\nonumber\\
+\frac{g}{R T} &= \frac{h}{RT} - \frac{s}{R} = \frac{a}{RT} + \frac{p}{\rho RT}\nonumber\\
 &= \alpha + \delta \alpha_\delta.
 \end{align}
 
@@ -397,11 +397,11 @@ The first term (the derivative of interneral energy with respect to temperature)
 c_p &= c_v - T\left(\frac{\partial s}{\partial \rho}\right)_T \frac{ \left(\frac{\partial p}{\partial T}\right)_\rho }{ \left(\frac{\partial p}{\partial \rho}\right)_T }.
 \end{align*}
 
-Finally, this is in a form that can be conveniently substituted for free energy.  Using (\ref{eqn:mp1:at}) and (\ref{eqn:mp1:ad}),
+Finally, this is in a form that can be conveniently substituted for free energy.  Using (\ref{eqn:mp1:ft}) and (\ref{eqn:mp1:fd}),
 \begin{align*}
-\left(\frac{\partial s}{\partial \rho}\right)_T &= - \frac{\partial^2 a}{\partial T \partial \rho} = - \frac{R}{\rho}\left( \delta \alpha_\delta - \tau \delta \alpha_{\tau\delta} \right)\\
-\left(\frac{\partial p}{\partial T}\right)_\rho &= \rho^2 \frac{\partial^2 a}{\partial T \partial \rho} = R \rho \left( \delta \alpha_\delta - \tau \delta \alpha_{\tau\delta} \right)\\
-\left(\frac{\partial p}{\partial \rho}\right)_T &= 2 \rho \left(\frac{\partial a}{\partial \rho}\right)_T + \rho^2 \left(\frac{\partial^2 a}{\partial \rho^2}\right)_T \ldots\\
+\left(\frac{\partial s}{\partial \rho}\right)_T &= - \frac{\partial^2 f}{\partial T \partial \rho} = - \frac{R}{\rho}\left( \delta \alpha_\delta - \tau \delta \alpha_{\tau\delta} \right)\\
+\left(\frac{\partial p}{\partial T}\right)_\rho &= \rho^2 \frac{\partial^2 f}{\partial T \partial \rho} = R \rho \left( \delta \alpha_\delta - \tau \delta \alpha_{\tau\delta} \right)\\
+\left(\frac{\partial p}{\partial \rho}\right)_T &= 2 \rho \left(\frac{\partial f}{\partial \rho}\right)_T + \rho^2 \left(\frac{\partial^2 a}{\partial \rho^2}\right)_T \ldots\\
  &= RT \left( 2\delta \alpha_\delta + \delta^2 \alpha_{\delta\delta} \right)
 \end{align*}
 So, 
@@ -409,11 +409,56 @@ So,
 \frac{c_p}{R} = \frac{c_v}{R} + \frac{\left(\delta \alpha_\delta - \tau \delta \alpha_{\tau\delta} \right)^2}{2\delta \alpha_\delta + \delta^2\alpha_{\delta\delta}}
 \end{align}
 
+
+\subsection{Speed of sound}
+
+From its definition in Section \ref{sec:intro:a}, we write a dimensionless speed of sound
+\begin{align}
+\frac{a^2}{R T} &= \frac{1}{RT} \left(\frac{\partial p}{\partial \rho}\right)_s\nonumber\\
+  &= \frac{1}{RT} \left(\frac{\partial p}{\partial \rho}\right)_T + \frac{1}{RT} \left(\frac{\partial p}{\partial T}\right)_\rho\left(\frac{\partial T}{\partial \rho}\right)_s. \label{eqn:mp1:a0}
+\end{align}
+
+The first term is obtained by differentiating (\ref{eqn:mp1:p}) with respect to density, producing
+\begin{align}
+\frac{1}{RT} \left(\frac{\partial p}{\partial \rho}\right)_T &= 2 \delta \alpha_\delta + \delta^2 \alpha_{\delta\delta}
+\end{align}
+
+The second term in (\ref{eqn:mp1:a0}), we further sub-divide into two parts.  The first part is also obtained by differentiating (\ref{eqn:mp1:p}), giving
+\begin{align}
+\left(\frac{\partial p}{\partial T}\right)_\rho = \rho R (\delta \alpha_\delta - \tau \delta \alpha_{\tau \delta}).
+\end{align}
+The second part involves the heating of the substance due to its isentropic compression.  For this, we turn to 
+\begin{align*}
+0 = T \d s = \d e - \frac{p}{\rho^2}\d \rho.
+\end{align*}
+When we substitute (\ref{eqn:mp1:e}) for $e$ and (\ref{eqn:mp1:p}) for $p/\rho$, we obtain
+\begin{align*}
+0 &= -R \tau^2 \alpha_{\tau\tau} \d T + \frac{R T_c}{\rho_c} \alpha_{\tau\delta} \d \rho - \frac{RT}{\rho} \delta \alpha_\delta \d \rho
+\end{align*}
+Solving for $\d T / \d \rho$, we obtain
+\begin{align}
+\left(\frac{\partial T}{\partial \rho}\right)_s = -\frac{T}{\rho}\frac{\delta\alpha_\delta - \tau\delta\alpha_{\tau\delta}}{\tau^2 \alpha_{\tau\tau}}
+\end{align}
+
+Finally, the dimensionless speed of sound is
+\begin{align}
+\frac{a^2}{RT} &= 2\delta \alpha_\delta + \delta^2 \alpha_{\delta\delta} - \frac{(\delta \alpha_\delta - \tau\delta \alpha_{\tau\delta})^2}{\tau^2\alpha_{\tau\tau}}.\label{eqn:mp1:a}
+\end{align}
+
 \subsection{Liquid-vapor line}
 
-Technically, the Maxwell conditions for phase equilibrium provide enough information for an algorithm to iteratively calculate the temperature and densities (and all other properties) from these properties.  However, the process is sufficiently numerically expensive to demand the use of additional empirical curves so the saturation line can be efficiently calculated.  This means that there are tiny numerical discrepancies between the saturation properties and the \emph{actual} saturation properties that one would predict using the Maxwell criteria.  
+A detailed formulation for pressure and Gibbs energy over a domain gives enough information to calculate saturated states between liquid and vapor using the Maxwell criteria.  At a given temperature, $T$, the Gibbs energy and pressure are equal for the liquid and vapor densities.  So,
+\begin{subequations}
+\begin{align}
+g(T,\rho_L) &= g(T,\rho_V)\\
+p(T,\rho_L) &= p(T,\rho_V).
+\end{align}
+\end{subequations}
+For Newton-like numerical iteration algorithms, it is essential to provide reasonable initial guesses for $\rho_L$ and $\rho_V$.  Careless guesses can simply result in $\rho_L = \rho_V$, which is a classic example of a computer solution being \emph{not wrong} but not helpful.  The worst case, especially problematic near the critical point, is convergence failure.
 
-Formulae are provided for
+Many original sources for equation-of-state models include polynomial fits for saturation properties that are so accurate, they can even be implemented without applying the Maxwell criteria.  When these are used as initial guesses, the Maxwell criteria are simply used to ``polish'' the solution to agree more precisely with the equation of state.  As of version 2.4.5, an inner routine, \texttt{\_ds()}, is provided that implements the Maxwell criterion, but saturation property methods do not yet implement it.  At the time of this writing, it is planned to transition in version 2.4.6.
+
+In many sources, formulae are provided for
 \begin{itemize}
 \item liquid saturation density given temperature,
 \item vapor saturation density given temperature,

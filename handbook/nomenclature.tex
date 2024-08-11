@@ -1,4 +1,5 @@
-\section*{Foreword}
+\section*{Foreword}\label{sec:foreword}
+\addcontentsline{toc}{chapter}{\nameref{sec:foreword}}
 
 Because this book is long and has never been professionally edited, it suffers from the kinds of typos and errata that plague any work of its size.  That said, I have taken some pains to be certain that the information is accurate.  Still, errors do creep in.
 
@@ -10,9 +11,14 @@ Corrections in the Second Edition:
 Changes in the Third Edition:
 \begin{enumerate}
 \item Originally, the entropy of mixing was not calculated in the \texttt{igmix} class, and it was given no discussion in this handbook. The treatment in Chapter \ref{ch:ig} (specifically Sections \ref{sec:ig:mix} and \ref{sec:ig:igmix} now correctly treats the entropy of mixing.
+\item $f$ was adopted for Helmholtz free energy.  In Chapter \ref{ch:mp}, $a$ was replaced with $f$. Added Section \ref{sec:intro:f}.
+\item $g$ was adopted for Gibbs energy.  Added Section \ref{sec:intro:g}.
+\item $a$ was adopted for speed of sound.  Added Section \ref{sec:intro:a}.
+\item A number of minor corrections (e.g. typos, grammar, style) were made throughout.
 \end{enumerate}
 
-\section*{Nomenclature}
+\section*{Nomenclature}\label{sec:nom}
+\addcontentsline{toc}{chapter}{\nameref{sec:nom}}
 
 These variables and units are restricted to derivations in this document.  Because \PM\ has a user-configurable unit system, any of these may be expressed in alternate units.  
 
@@ -57,6 +63,8 @@ $\alpha$ & $f / RT$ & ND Free energy\\
 $\delta$ & $\rho/\rho_c$ & ND Density\\
 $\tau$ & $T_c / T$ & ND Temperature\\
 $\gamma$ & $c_p / c_v$ & Sp. heat ratio\\
+$y_i$ & $m_i / m$ & Mass fraction\\
+$\chi_i$ & $N_i / N$ & Mole fraction\\
 $\pi$ & $p / p_c$ & ND Pressure\\
 \hline
 \end{tabular}
@@ -69,12 +77,13 @@ The following are subscripts used throughout the document.
 \hline
 Symb. & Description\\
 \hline
-$_c$ & Critical point\\
-$_f$ & Formation property (e.g. enthalpy of formation)\\
-$_p$ & Constant-pressure (sp.heat)\\
-$_t$ & Triple point\\
-$_v$ & Constant-volume (sp.heat)\\
-$^\circ$ & Property at reference pressure\\
+$x_c$ & Critical point\\
+$x_f$ & Formation property (e.g. enthalpy of formation)\\
+$x_p$ & Constant-pressure (sp.heat)\\
+$x_t$ & Triple point\\
+$x_v$ & Constant-volume (sp.heat)\\
+$x^\circ$ & Property at reference pressure\\
+$\overline{x}$ & Property in molar or number units\\
 \hline
 \end{tabular}
 

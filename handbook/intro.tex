@@ -245,15 +245,13 @@ It is a matter of convenience for engineers and physicists that deal with fluid 
 \begin{align}
 h \equiv e + pv = e + \frac{p}{\rho}.\label{eqn:intro:h}
 \end{align}
-This term appears naturally when energy balances are applied to open systems (ones where flow is moving through the system).  Internal energy accounts for all of the energy stored by the molecules in a fluid, and enthalpy additionally includes the fluid's capacity to do mechanical work as it flows.
+Of course, most processes aren't \emph{actually} isobaric, so extra terms will tend to appear in energy balances (like $\d h - v \d p$).
 
-Of course, most processes aren't \emph{actually} isobaric, so extra terms will tend to appear (like $\d h - v \d p$), but that is a discussion for later.
+Enthalpy is most commonly used in the analysis of any flowing fluid such as in heat exchangers, combustors and burners, chemical reactors, compressors, turbines, valves, etc...  Even though internal energy might be argued to be more ``fundamental,'' enthalpy is usually tabulated instead because of its widespread use.
 
-Enthalpy is most commonly used in the analysis of any flowing fluid such as in heat exchangers, combustors and burners, chemical reactors, compressors, turbines, valves, etc...  Even though it is derived from a property that might be argued to be more ``fundamental,'' enthalpy is usually tabulated as a primary property because it is so useful.
+Since internal energy and enthalpy are related, their reference states \emph{must} be consistent with one another.  By tradition in both the NIST-JANAF and NASA data sets, the enthalpy of a substance is defined at 298.15 K and 1 bar, and values at other conditions are calculated from specific heat and the physics of ideal gases.  Since the \PM\ multi-phase models permit only pure substances, their reference states do not need to be interchangeable.  By tradition, the internal energy and entropy of these substances are defined as zero for the liquid at the triple point.
 
-Just like internal energy, a substance's enthalpy is defined relative to an arbitrary reference state.  However, since internal energy and enthalpy share a common definition, their reference states \emph{must} be consistent with one another.  Furthermore, for any data set intended for the analysis of chemical reactions, the enthalpies of chemically related species (such as H$_2$, O$_2$, and H$_2$O) \emph{must} be defined consistently so that the changes in molecule internal energy due to chemical reaction can be properly accounted for.  As a result, there are certain \emph{reference species} for which arbitrary reference state enthalpies are selected.  
-
-Since the \PM\ multi-phase models permit only pure substances, they do not need rigorously defined reference states.  However, the ideal gas models are defined with this in mind to permit chemical action.  See the ideal gas chapter (Chapter \ref{ch:ig}) for a detailed discussion on the enthalpy of formation.
+See the ideal gas (Chapter \ref{ch:ig}) and multi-phase (Chapter \ref{ch:mp}) chapters for more information on how the reference states are handled.
 
 \subsection{Entropy, $s$}\label{sec:intro:s}
 
@@ -270,29 +268,67 @@ The first law would be satisfied by any cycle where the work and heat transfer m
 
 From the first law of thermodynamics, $\delta q = \d e + p \d v$, and we have a way to calculate entropy from the other properties
 \begin{align}
-T \d s &= \d e + p\d v\label{eqn:intro:ds1}\\
+T \d s &\equals_{rev.} \d e + p\d v\label{eqn:intro:ds1}\\
  &= \d h - v \d p\label{eqn:intro:ds2}
 \end{align}
+This calculation is performed by putting the substance through a hypothetical reversible process in which there is neither chemical reaction, nor field work (e.g. gravitational or electrical).
 
-Just like with temperature, there is a parallel (mathematically consistent) definition of entropy from statistical mechanics.  Boltzmann found that Entropy can also be calculated from the probability of the substance obtaining a thermodynamically equivalent state.  The probability of gas molecules spontaneously exhibiting a specific set of positions and velocities is astronomically low, but there is an emense quantity of dissimilar positions and velocities that would give the gas precisely the same temperature, internal energy, pressure, density, and other properties.  Meanwhile, the probability that gas molecules will spontaneously assemble themselves into a highly ordered crystal is astronomically low.  When that probability is very high, so is the entropy.  When that probability is very low, so is the entropy.
+Just like with temperature, there is a parallel (mathematically consistent) definition of entropy from statistical mechanics.  The above definition of entropy had long been in use, when Boltzmann found that Entropy can also be calculated from the probability of the substance obtaining a thermodynamically equivalent state.  The probability of gas molecules spontaneously exhibiting a specific set of positions and velocities is astronomically low, but there is an immense quantity of dissimilar positions and velocities that would give the gas precisely the same temperature, internal energy, pressure, density, and other properties.  For a given volume populated with a given substance with a given number of molecules with a given amount of total energy, how numerous are those states in comparison with all the other possible states?
+
+Entropy is high when the number of equivalent states is high.  Entropy is low when the number of equivalent states is low.  The idea was fiercely resisted when Boltzmann and his contemporaries first argued it.  From one point of view, it is astonishing that the idea was first discovered by brilliant insight \emph{without} statistics.
 
 Just like internal energy, it is theoretically possible to tally all of the possible states and calculate the probability of each, but that task is neither practical nor necessary.  Instead, it is convenient to define the entropy as zero at some reference state and then deal merely in changes in entropy as defined by (\ref{eqn:intro:s}).  In the case of ideal gases, the entropy is known to be precisely zero at absolute zero temperature, but some multi-phase models (like water) set entropy (and internal energy) of the liquid phase to zero at the triple point.
 
-\subsection{Free (Helmholtz) energy}
+\subsection{Free (Helmholtz) energy, $f$}\label{sec:intro:f}
 
-The free energy is witten in terms of internal energy and entropy,
+The free energy is written in terms of internal energy and entropy,
 \begin{align}
-f = e - Ts \label{eqn:intro:f}.
+f \defas e - Ts \label{eqn:intro:f}.
 \end{align}
 While free energy has long been used as a tool for calculating the mechanical work available from a substance at a given temperature, modern equation-of-state substance models use $f$ as the property from which all others are calculated.
 
-\subsection{Gibbs Energy}
+There is tremendous potential for confusion, because various authors have also referred to Gibbs energy as ``free energy.''  Here, we strictly reserve that phrase to refer to $e - Ts$.
 
-The Gibbs energy is written in terms of enthalpy and entropy,
+Sources can be found using $a$, $\phi$, $\alpha$, and many other characters to represent free energy.  We adopt $f$ for its relationship to the word ``free,'' and to reserve these variables for other uses.
+
+
+\subsection{Gibbs energy, $g$}\label{sec:intro:g}
+
+The Gibbs energy is defined as,
 \begin{align}
-g = h - Ts \label{eqn:intro:g}.
+g &\defas e + \frac{p}{\rho} - Ts\label{eqn:intro:g}\\
+ &=  h - Ts\nonumber\\
+ &= f + \frac{p}{\rho}\nonumber.
 \end{align}
-It is also easily related to the Helholtz free energy in much the same way as internal energy and enthalpy $g = f + p/\rho$.  Gibbs energy is most commonly used in chemical or phase change equilibrium calculations.
+It has historically been called \emph{free enthalpy} or Gibbs free energy as well.  Here, we adopt the recommendations of the IUPAC and refer to it simply as \emph{Gibbs energy}.
+
+Its use is primarily in systems with chemical or phase reactions.  In these applications, properties are written in terms of the \emph{chemical potential}, $\mu_i$, which is the contribution of each constituent to the internal energy,
+\begin{align*}
+\d e &= T \d s - p \d v + \sum_i \mu_i \d y_i\\
+\d \overline{e} &= T \d \overline{s} - p \d \overline{v} + \sum_i \overline{\mu}_i \d \chi_i.
+\end{align*}
+It bears mentioning that these potentials can be related to the enthalpies of formation and reference entropies of the pure constituents.
+
+Here, chemical reactions or phase transitions cause changes in the mass fractions, $y_i$, or mole fractions, $\chi_i$, which can consume or release energy.  So, for a hypothetical reaction with constant entropy and volume,
+\begin{align}
+\mu_i = \left(\frac{\partial e}{\partial y_i}\right)_{s,v}.
+\end{align}
+However, specifying properties in terms of volume and entropy in a reacting experiment is not particularly practical.  Examining chemical potential in terms of enthalpy merely transposes the expression into constant entropy and pressure.
+
+However, when we examine the differential of $g$,
+\begin{align*}
+\d g &= (\d e) + (p\d v + v \d p) - (T \d s + s \d T),
+\end{align*}
+and substitute to find the chemical potentials,
+\begin{align*}
+\d g - (p \d v + v \d p) + (T \d s + s \d T) &= T \d s - p \d v + \sum_i \mu_i \d y_i\\
+\d g &= v \d p - s \d T + \sum_i \mu_i \d y_i.
+\end{align*}
+Temperature and pressure are among the most commonly specified properties when performing thermodynamic calculations, so it is extremely convenient to write the chemical potential in terms of Gibbs energy,
+\begin{align}
+\mu_i = \left(\frac{\partial g}{\partial y_i}\right)_{T,p}.
+\end{align}
+In fact, in the special case of ideal gas mixtures, $g = \sum y_i g_i(T,p_i)$, so $\mu_i = g_i(T,p_i)$.
 
 \subsection{Specific Heats, $c_p$ $c_v$}\label{sec:intro:c}
 
@@ -339,6 +375,23 @@ c_p &\equiv \left(\frac{\delta q}{\delta T}\right)_p = \left( \frac{\partial h}{
 \end{align}
 
 
+\subsection{Speed of sound, $a$}\label{sec:intro:a}
+
+Like specific heats, the speed of sound is the property of a substance that can be measured in the laboratory to high precision, making it a valuable tool.  Pressure wave propagation in a substance obeys the equation,
+\begin{align}
+\frac{\partial^2 p}{\partial t^2} + \left( \frac{\partial p}{\partial \rho} \right)_s \frac{\partial^2 p}{\partial x^2} = 0.\label{eqn:intro:wave}
+\end{align}
+A wave with wavenumber, $k$, propagating at constant speed, $a$, might take the form
+\begin{align*}
+p = \sin\Big(k (x + a t)\Big).
+\end{align*}
+This satisfies (\ref{eqn:intro:wave}) only when
+\begin{align}
+a^2 \defas \left( \frac{\partial p}{\partial \rho} \right)_s.\label{eqn:intro:sound}
+\end{align}
+So, wave speed in a substance is the square root of the isentropic rise in pressure with increasing density.  
+
+Wave speed is usually denoted with the variable, $c$, which we reserve for specific heats.  Authors can be found using $w$ and $a$, and we have selected the latter.  
 
 %
 % 

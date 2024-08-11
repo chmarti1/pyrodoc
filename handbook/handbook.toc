@@ -1,3 +1,5 @@
+\contentsline {chapter}{\nameref {sec:foreword}}{5}{section*.2}
+\contentsline {chapter}{\nameref {sec:nom}}{5}{section*.3}
 \contentsline {chapter}{\numberline {1}Introduction}{8}{chapter.1}
 \contentsline {section}{\numberline {1.1}The Properties}{9}{section.1.1}
 \contentsline {subsection}{\numberline {1.1.1}Basic Properties}{11}{subsection.1.1.1}
@@ -9,98 +11,101 @@
 \contentsline {subsection}{\numberline {1.1.7}Internal Energy, $e$}{17}{subsection.1.1.7}
 \contentsline {subsection}{\numberline {1.1.8}Enthalpy, $h$}{18}{subsection.1.1.8}
 \contentsline {subsection}{\numberline {1.1.9}Entropy, $s$}{19}{subsection.1.1.9}
-\contentsline {subsection}{\numberline {1.1.10}Free (Helmholtz) energy}{20}{subsection.1.1.10}
-\contentsline {subsection}{\numberline {1.1.11}Gibbs Energy}{21}{subsection.1.1.11}
-\contentsline {subsection}{\numberline {1.1.12}Specific Heats, $c_p$ $c_v$}{21}{subsection.1.1.12}
-\contentsline {chapter}{\numberline {2}Getting started}{23}{chapter.2}
-\contentsline {section}{\numberline {2.1}Installation}{23}{section.2.1}
-\contentsline {subsection}{\numberline {2.1.1}Prerequisites}{23}{subsection.2.1.1}
-\contentsline {subsection}{\numberline {2.1.2}Installation with \texttt {pip}}{24}{subsection.2.1.2}
-\contentsline {subsection}{\numberline {2.1.3}Manual installation with \texttt {git}}{25}{subsection.2.1.3}
-\contentsline {subsection}{\numberline {2.1.4}Manual installation from Sourceforge}{26}{subsection.2.1.4}
-\contentsline {section}{\numberline {2.2}Using PYroMat}{26}{section.2.2}
-\contentsline {subsection}{\numberline {2.2.1}Importing}{27}{subsection.2.2.1}
-\contentsline {subsection}{\numberline {2.2.2}Retrieving substance data}{27}{subsection.2.2.2}
-\contentsline {subsection}{\numberline {2.2.3}Searching for substances with \texttt {search()}}{28}{subsection.2.2.3}
-\contentsline {subsection}{\numberline {2.2.4}Finding substances with \texttt {info()}}{29}{subsection.2.2.4}
-\contentsline {subsection}{\numberline {2.2.5}In-line documentation}{30}{subsection.2.2.5}
-\contentsline {section}{\numberline {2.3}Property interface}{31}{section.2.3}
-\contentsline {subsection}{\numberline {2.3.1}Property method arguments}{31}{subsection.2.3.1}
-\contentsline {subsection}{\numberline {2.3.2}Default values}{32}{subsection.2.3.2}
-\contentsline {subsection}{\numberline {2.3.3}Inverse methods}{33}{subsection.2.3.3}
-\contentsline {subsection}{\numberline {2.3.4}Tips and tricks}{34}{subsection.2.3.4}
-\contentsline {chapter}{\numberline {3}Configuration}{36}{chapter.3}
-\contentsline {section}{\numberline {3.1}The \texttt {pm.config} instance}{36}{section.3.1}
-\contentsline {subsection}{\numberline {3.1.1}Making temporary changes to \texttt {config}}{38}{subsection.3.1.1}
-\contentsline {section}{\numberline {3.2}Configuration files}{39}{section.3.2}
-\contentsline {chapter}{\numberline {4}Units}{42}{chapter.4}
-\contentsline {section}{\numberline {4.1}Unit definitions}{42}{section.4.1}
-\contentsline {section}{\numberline {4.2}Setup}{44}{section.4.2}
-\contentsline {section}{\numberline {4.3}Constants}{45}{section.4.3}
-\contentsline {section}{\numberline {4.4}\texttt {Conversion} Class}{47}{section.4.4}
-\contentsline {section}{\numberline {4.5}Fundamental Units}{48}{section.4.5}
-\contentsline {subsection}{\numberline {4.5.1}Time}{48}{subsection.4.5.1}
-\contentsline {subsection}{\numberline {4.5.2}Length}{49}{subsection.4.5.2}
-\contentsline {subsection}{\numberline {4.5.3}Mass and Weight}{50}{subsection.4.5.3}
-\contentsline {subsection}{\numberline {4.5.4}Molar}{53}{subsection.4.5.4}
-\contentsline {subsection}{\numberline {4.5.5}Matter}{55}{subsection.4.5.5}
-\contentsline {subsection}{\numberline {4.5.6}Temperature}{57}{subsection.4.5.6}
-\contentsline {section}{\numberline {4.6}Derived Units}{59}{section.4.6}
-\contentsline {subsection}{\numberline {4.6.1}Force}{59}{subsection.4.6.1}
-\contentsline {subsection}{\numberline {4.6.2}Energy}{60}{subsection.4.6.2}
-\contentsline {subsection}{\numberline {4.6.3}Pressure}{61}{subsection.4.6.3}
-\contentsline {subsection}{\numberline {4.6.4}Volume}{63}{subsection.4.6.4}
-\contentsline {chapter}{\numberline {5}The PYroMat\ modules}{66}{chapter.5}
-\contentsline {section}{\numberline {5.1}The class registry module, \texttt {reg}}{66}{section.5.1}
-\contentsline {section}{\numberline {5.2}The data module, \texttt {dat}}{67}{section.5.2}
-\contentsline {subsection}{\numberline {5.2.1}The \texttt {load()} function}{67}{subsection.5.2.1}
-\contentsline {subsection}{\numberline {5.2.2}Data files}{69}{subsection.5.2.2}
-\contentsline {subsection}{\numberline {5.2.3}Tools for working with data files}{69}{subsection.5.2.3}
-\contentsline {section}{\numberline {5.3}The utility module, \texttt {utility}}{70}{section.5.3}
-\contentsline {subsection}{\numberline {5.3.1}PYroMat\ error types}{70}{subsection.5.3.1}
-\contentsline {subsection}{\numberline {5.3.2}Redundancy tools}{70}{subsection.5.3.2}
-\contentsline {subsection}{\numberline {5.3.3}Other tools}{72}{subsection.5.3.3}
-\contentsline {chapter}{\numberline {6}Ideal Gases}{73}{chapter.6}
-\contentsline {section}{\numberline {6.1}Properties of ideal gases}{74}{section.6.1}
-\contentsline {subsection}{\numberline {6.1.1}Ideal gas law}{74}{subsection.6.1.1}
-\contentsline {subsection}{\numberline {6.1.2}Internal energy}{77}{subsection.6.1.2}
-\contentsline {subsection}{\numberline {6.1.3}Enthalpy}{79}{subsection.6.1.3}
-\contentsline {subsection}{\numberline {6.1.4}Specific heats}{79}{subsection.6.1.4}
-\contentsline {subsection}{\numberline {6.1.5}Entropy and enthalpy revisited}{81}{subsection.6.1.5}
-\contentsline {subsection}{\numberline {6.1.6}Other properties}{82}{subsection.6.1.6}
-\contentsline {subsection}{\numberline {6.1.7}Enthalpy of formation}{83}{subsection.6.1.7}
-\contentsline {subsection}{\numberline {6.1.8}Properties of mixtures}{85}{subsection.6.1.8}
-\contentsline {section}{\numberline {6.2}The ideal gas collection}{90}{section.6.2}
-\contentsline {subsection}{\numberline {6.2.1}The Shomate equation: \texttt {ig}}{90}{subsection.6.2.1}
-\contentsline {subsection}{\numberline {6.2.2}The NASA polynomial: \texttt {ig2}}{92}{subsection.6.2.2}
-\contentsline {subsection}{\numberline {6.2.3}The ideal gas mixture: \texttt {igmix}}{95}{subsection.6.2.3}
-\contentsline {chapter}{\numberline {7}Multi-phase substance models}{98}{chapter.7}
-\contentsline {section}{\numberline {7.1}General formulation for \texttt {mp1}}{99}{section.7.1}
-\contentsline {subsection}{\numberline {7.1.1}Nondimensionalization}{100}{subsection.7.1.1}
-\contentsline {subsection}{\numberline {7.1.2}Ideal gas portion of free energy}{100}{subsection.7.1.2}
-\contentsline {subsection}{\numberline {7.1.3}Residual portion of free energy}{104}{subsection.7.1.3}
-\contentsline {subsection}{\numberline {7.1.4}Derivatives of free energy}{107}{subsection.7.1.4}
-\contentsline {section}{\numberline {7.2}Calculation of properties}{111}{section.7.2}
-\contentsline {subsection}{\numberline {7.2.1}Pressure}{111}{subsection.7.2.1}
-\contentsline {subsection}{\numberline {7.2.2}Entropy}{112}{subsection.7.2.2}
-\contentsline {subsection}{\numberline {7.2.3}Internal energy}{112}{subsection.7.2.3}
-\contentsline {subsection}{\numberline {7.2.4}Enthalpy}{112}{subsection.7.2.4}
-\contentsline {subsection}{\numberline {7.2.5}Gibbs' free energy}{113}{subsection.7.2.5}
-\contentsline {subsection}{\numberline {7.2.6}Specific heats}{113}{subsection.7.2.6}
-\contentsline {subsection}{\numberline {7.2.7}Liquid-vapor line}{115}{subsection.7.2.7}
-\contentsline {section}{\numberline {7.3}Sources implemented}{117}{section.7.3}
-\contentsline {chapter}{\numberline {8}Numerical routines}{118}{chapter.8}
-\contentsline {section}{\numberline {8.1}Polynomials of two variables}{119}{section.8.1}
-\contentsline {subsection}{\numberline {8.1.1}Modifying polynomials for non-integer and negative powers}{119}{subsection.8.1.1}
-\contentsline {subsection}{\numberline {8.1.2}Representation of polynomials in data}{122}{subsection.8.1.2}
-\contentsline {subsection}{\numberline {8.1.3}Efficient evaluation of the polynomial}{122}{subsection.8.1.3}
-\contentsline {subsection}{\numberline {8.1.4}Efficient evaluation of derivatives}{124}{subsection.8.1.4}
-\contentsline {subsection}{\numberline {8.1.5}Implementation of the algorithm}{125}{subsection.8.1.5}
-\contentsline {section}{\numberline {8.2}Polynomials in one dimension}{126}{section.8.2}
-\contentsline {section}{\numberline {8.3}Iteration with \texttt {iter1}}{128}{section.8.3}
-\contentsline {section}{\numberline {8.4}Iteration with \texttt {hybrid1}}{131}{section.8.4}
-\contentsline {subsection}{\numberline {8.4.1}Bisection iteration}{131}{subsection.8.4.1}
-\contentsline {subsection}{\numberline {8.4.2}The \texttt {hybrid1} candidates}{133}{subsection.8.4.2}
-\contentsline {subsection}{\numberline {8.4.3}Standard candidate selection}{135}{subsection.8.4.3}
-\contentsline {subsection}{\numberline {8.4.4}Paranoid candidate selection}{135}{subsection.8.4.4}
-\contentsline {chapter}{Bibliography}{140}{algorithm.6}
+\contentsline {subsection}{\numberline {1.1.10}Free (Helmholtz) energy, $f$}{20}{subsection.1.1.10}
+\contentsline {subsection}{\numberline {1.1.11}Gibbs energy, $g$}{21}{subsection.1.1.11}
+\contentsline {subsection}{\numberline {1.1.12}Specific Heats, $c_p$ $c_v$}{22}{subsection.1.1.12}
+\contentsline {subsection}{\numberline {1.1.13}Speed of sound, $a$}{24}{subsection.1.1.13}
+\contentsline {chapter}{\numberline {2}Getting started}{25}{chapter.2}
+\contentsline {section}{\numberline {2.1}Installation}{25}{section.2.1}
+\contentsline {subsection}{\numberline {2.1.1}Prerequisites}{25}{subsection.2.1.1}
+\contentsline {subsection}{\numberline {2.1.2}Installation with \texttt {pip}}{26}{subsection.2.1.2}
+\contentsline {subsection}{\numberline {2.1.3}Manual installation with \texttt {git}}{27}{subsection.2.1.3}
+\contentsline {subsection}{\numberline {2.1.4}Manual installation from Sourceforge}{28}{subsection.2.1.4}
+\contentsline {section}{\numberline {2.2}Using PYroMat}{28}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Importing}{29}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Retrieving substance data}{29}{subsection.2.2.2}
+\contentsline {subsection}{\numberline {2.2.3}Searching for substances with \texttt {search()}}{30}{subsection.2.2.3}
+\contentsline {subsection}{\numberline {2.2.4}Finding substances with \texttt {info()}}{31}{subsection.2.2.4}
+\contentsline {subsection}{\numberline {2.2.5}In-line documentation}{32}{subsection.2.2.5}
+\contentsline {section}{\numberline {2.3}Property interface}{33}{section.2.3}
+\contentsline {subsection}{\numberline {2.3.1}Property method arguments}{33}{subsection.2.3.1}
+\contentsline {subsection}{\numberline {2.3.2}Default values}{34}{subsection.2.3.2}
+\contentsline {subsection}{\numberline {2.3.3}Inverse methods}{35}{subsection.2.3.3}
+\contentsline {subsection}{\numberline {2.3.4}Tips and tricks}{36}{subsection.2.3.4}
+\contentsline {chapter}{\numberline {3}Configuration}{38}{chapter.3}
+\contentsline {section}{\numberline {3.1}The \texttt {pm.config} instance}{38}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}Making temporary changes to \texttt {config}}{40}{subsection.3.1.1}
+\contentsline {section}{\numberline {3.2}Configuration files}{41}{section.3.2}
+\contentsline {chapter}{\numberline {4}Units}{44}{chapter.4}
+\contentsline {section}{\numberline {4.1}Unit definitions}{44}{section.4.1}
+\contentsline {section}{\numberline {4.2}Setup}{46}{section.4.2}
+\contentsline {section}{\numberline {4.3}Constants}{47}{section.4.3}
+\contentsline {section}{\numberline {4.4}\texttt {Conversion} Class}{49}{section.4.4}
+\contentsline {section}{\numberline {4.5}Fundamental Units}{50}{section.4.5}
+\contentsline {subsection}{\numberline {4.5.1}Time}{50}{subsection.4.5.1}
+\contentsline {subsection}{\numberline {4.5.2}Length}{51}{subsection.4.5.2}
+\contentsline {subsection}{\numberline {4.5.3}Mass and Weight}{52}{subsection.4.5.3}
+\contentsline {subsection}{\numberline {4.5.4}Molar}{55}{subsection.4.5.4}
+\contentsline {subsection}{\numberline {4.5.5}Matter}{57}{subsection.4.5.5}
+\contentsline {subsection}{\numberline {4.5.6}Temperature}{59}{subsection.4.5.6}
+\contentsline {section}{\numberline {4.6}Derived Units}{61}{section.4.6}
+\contentsline {subsection}{\numberline {4.6.1}Force}{61}{subsection.4.6.1}
+\contentsline {subsection}{\numberline {4.6.2}Energy}{62}{subsection.4.6.2}
+\contentsline {subsection}{\numberline {4.6.3}Pressure}{63}{subsection.4.6.3}
+\contentsline {subsection}{\numberline {4.6.4}Volume}{65}{subsection.4.6.4}
+\contentsline {chapter}{\numberline {5}The PYroMat\ modules}{68}{chapter.5}
+\contentsline {section}{\numberline {5.1}The class registry module, \texttt {reg}}{68}{section.5.1}
+\contentsline {section}{\numberline {5.2}The data module, \texttt {dat}}{69}{section.5.2}
+\contentsline {subsection}{\numberline {5.2.1}The \texttt {load()} function}{69}{subsection.5.2.1}
+\contentsline {subsection}{\numberline {5.2.2}Data files}{71}{subsection.5.2.2}
+\contentsline {subsection}{\numberline {5.2.3}Tools for working with data files}{71}{subsection.5.2.3}
+\contentsline {section}{\numberline {5.3}The utility module, \texttt {utility}}{72}{section.5.3}
+\contentsline {subsection}{\numberline {5.3.1}PYroMat\ error types}{72}{subsection.5.3.1}
+\contentsline {subsection}{\numberline {5.3.2}Redundancy tools}{72}{subsection.5.3.2}
+\contentsline {subsection}{\numberline {5.3.3}Other tools}{74}{subsection.5.3.3}
+\contentsline {chapter}{\numberline {6}Ideal Gases}{75}{chapter.6}
+\contentsline {section}{\numberline {6.1}Properties of ideal gases}{76}{section.6.1}
+\contentsline {subsection}{\numberline {6.1.1}Ideal gas law}{76}{subsection.6.1.1}
+\contentsline {subsection}{\numberline {6.1.2}Internal energy}{79}{subsection.6.1.2}
+\contentsline {subsection}{\numberline {6.1.3}Enthalpy}{81}{subsection.6.1.3}
+\contentsline {subsection}{\numberline {6.1.4}Specific heats}{81}{subsection.6.1.4}
+\contentsline {subsection}{\numberline {6.1.5}Entropy and enthalpy revisited}{83}{subsection.6.1.5}
+\contentsline {subsection}{\numberline {6.1.6}Formation properties}{85}{subsection.6.1.6}
+\contentsline {subsection}{\numberline {6.1.7}Speed of sound}{88}{subsection.6.1.7}
+\contentsline {subsection}{\numberline {6.1.8}Other properties}{88}{subsection.6.1.8}
+\contentsline {subsection}{\numberline {6.1.9}Properties of mixtures}{89}{subsection.6.1.9}
+\contentsline {section}{\numberline {6.2}The ideal gas collection}{93}{section.6.2}
+\contentsline {subsection}{\numberline {6.2.1}The Shomate equation: \texttt {ig}}{94}{subsection.6.2.1}
+\contentsline {subsection}{\numberline {6.2.2}The NASA polynomial: \texttt {ig2}}{96}{subsection.6.2.2}
+\contentsline {subsection}{\numberline {6.2.3}The ideal gas mixture: \texttt {igmix}}{98}{subsection.6.2.3}
+\contentsline {chapter}{\numberline {7}Multi-phase substance models}{101}{chapter.7}
+\contentsline {section}{\numberline {7.1}General formulation for \texttt {mp1}}{102}{section.7.1}
+\contentsline {subsection}{\numberline {7.1.1}Nondimensionalization}{103}{subsection.7.1.1}
+\contentsline {subsection}{\numberline {7.1.2}Ideal gas portion of free energy}{103}{subsection.7.1.2}
+\contentsline {subsection}{\numberline {7.1.3}Residual portion of free energy}{107}{subsection.7.1.3}
+\contentsline {subsection}{\numberline {7.1.4}Derivatives of free energy}{110}{subsection.7.1.4}
+\contentsline {section}{\numberline {7.2}Calculation of properties}{114}{section.7.2}
+\contentsline {subsection}{\numberline {7.2.1}Pressure}{114}{subsection.7.2.1}
+\contentsline {subsection}{\numberline {7.2.2}Entropy}{115}{subsection.7.2.2}
+\contentsline {subsection}{\numberline {7.2.3}Internal energy}{115}{subsection.7.2.3}
+\contentsline {subsection}{\numberline {7.2.4}Enthalpy}{115}{subsection.7.2.4}
+\contentsline {subsection}{\numberline {7.2.5}Gibbs free energy}{116}{subsection.7.2.5}
+\contentsline {subsection}{\numberline {7.2.6}Specific heats}{116}{subsection.7.2.6}
+\contentsline {subsection}{\numberline {7.2.7}Speed of sound}{118}{subsection.7.2.7}
+\contentsline {subsection}{\numberline {7.2.8}Liquid-vapor line}{119}{subsection.7.2.8}
+\contentsline {section}{\numberline {7.3}Sources implemented}{121}{section.7.3}
+\contentsline {chapter}{\numberline {8}Numerical routines}{123}{chapter.8}
+\contentsline {section}{\numberline {8.1}Polynomials of two variables}{124}{section.8.1}
+\contentsline {subsection}{\numberline {8.1.1}Modifying polynomials for non-integer and negative powers}{124}{subsection.8.1.1}
+\contentsline {subsection}{\numberline {8.1.2}Representation of polynomials in data}{127}{subsection.8.1.2}
+\contentsline {subsection}{\numberline {8.1.3}Efficient evaluation of the polynomial}{127}{subsection.8.1.3}
+\contentsline {subsection}{\numberline {8.1.4}Efficient evaluation of derivatives}{129}{subsection.8.1.4}
+\contentsline {subsection}{\numberline {8.1.5}Implementation of the algorithm}{130}{subsection.8.1.5}
+\contentsline {section}{\numberline {8.2}Polynomials in one dimension}{131}{section.8.2}
+\contentsline {section}{\numberline {8.3}Iteration with \texttt {iter1}}{133}{section.8.3}
+\contentsline {section}{\numberline {8.4}Iteration with \texttt {hybrid1}}{136}{section.8.4}
+\contentsline {subsection}{\numberline {8.4.1}Bisection iteration}{136}{subsection.8.4.1}
+\contentsline {subsection}{\numberline {8.4.2}The \texttt {hybrid1} candidates}{138}{subsection.8.4.2}
+\contentsline {subsection}{\numberline {8.4.3}Standard candidate selection}{140}{subsection.8.4.3}
+\contentsline {subsection}{\numberline {8.4.4}Paranoid candidate selection}{140}{subsection.8.4.4}
+\contentsline {chapter}{Bibliography}{145}{algorithm.6}
