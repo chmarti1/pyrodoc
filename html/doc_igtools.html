@@ -23,38 +23,124 @@
 
 <div id="content">
 <div class="title">
-<h1>PYroMat Tutorial</h1>
+<h1>The IGTools Module</h1>
 </div>
 
 <div class=section>
     <p>
-    The IGTools module is a set of tools built on top of the standard PYroMat package, providing advanced functionality for working with gases.  First added in version 2.4.5, the <span class=code>IGTMix</span> class allows users to dynamically construct mixtures of gases at the command line.
+    The IgtMix class instances allow users to dynamically define mixtures of
+component ideal gases with a flexible interface convenient for the 
+command line and scripts alike.  IgtMix instances have property methods 
+just like the rest of the PYroMat classes, but the total quanitity 
+(the extent) of the mixture is specified.  Therefore, properties are
+calculate in total and not per unit metter (not intensive).
+    </p>
+    <p>
+    In this example, we quickly compute the enthalpy of a mixture 35% 
+hydrogen and balance argon by volume.
+    </p>
+    <pre class=code>
+>>> mymix = IgtMix('0.35 H2 + .65 Ar', units='kmol')
+>>> mymix.h(T=300)
+array([43.67153007])
+</pre>
+</div>
+
+<div class=section>
+    <div class="toc0"><a href=#methods>Table of methods</a></div>
+    <div class="toc0"><a href=#intro>Introduction to IgtMix</a></div>
+        <div class="toc1"><a href=#defining>Defining a mixture</a></div>
+        <div class="toc1"><a href=#substance>Specifying substances</a></div>
+        <div class="toc1"><a href=#arithmetic>Arithmetic with mixtures</a></div>
+        <div class="toc1"><a href=#units>Quantities and units</a></div>
+        <div class="toc1"><a href=#indexing>Arrays and indexing</a></div>
+        <div class="toc1"><a href=#iterating>Iterating</a></div>
+    <div class="toc0"><a href=#igtmix>The IgtMix class</a></div>
+        <div class="toc1"><a href=#init>Initializers</a></div>
+        <div class="toc1"><a href=#properties>Property Methods</a></div>
+        <div class="toc1"><a href=#mix>Mixture Methods</a></div>
+        <div class="toc1"><a href=#array>Array Methods</a></div>
+
+</div>
+
+<h3 class=subtitle id=methods>Table of methods</h3>
+<div class=section>
+    <p>
+    IgtMix instances provide the same properties as the core PYroMat classes
+    </p>
+    <table class=texttable>
+        <tr><td><a href=#properties class=code>cp()</a></td> <td>spec. heat</td> <td>(unit_energy / unit_temperature)</td></tr>
+        <tr><td><a href=#properties class=code>cv()</a></td> <td>spec. heat</td> <td>(unit_energy / unit_temperature)</td></tr>
+        <tr><td><a href=#properties class=code>d()</a></td> <td>density</td> <td>(unit_matter / unit_volume)</td></tr>
+        <tr><td><a href=#properties class=code>e()</a></td> <td>internal energy</td> <td>(unit_energy)</td></tr>
+        <tr><td><a href=#properties class=code>f()</a></td> <td>free energy</td> <td>(unit_energy)</td></tr>
+        <tr><td><a href=#properties class=code>g()</a></td> <td>Gibbs energy</td> <td>(unit_energy)</td></tr>
+        <tr><td><a href=#properties class=code>gam()</a></td> <td>spec. heat ratio</td> <td>(dless)</td></tr>
+        <tr><td><a href=#properties class=code>h()</a></td> <td>enthalpy</td> <td>(unit_energy)</td></tr>
+        <tr><td><a href=#properties class=code>mw()</a></td> <td>molecular weight</td> <td>(unit_mass / unit_molar)</td></tr>
+        <tr><td><a href=#properties class=code>T()</a></td> <td>temperature</td> <td>(unit_temperature)</td></tr>
+        <tr><td><a href=#properties class=code>p()</a></td> <td>pressure</td> <td>(unit_pressure)</td></tr>
+        <tr><td><a href=#properties class=code>R()</a></td> <td>gas constant</td> <td>(unit_energy / unit_matter / unit_temperature)</td></tr>
+        <tr><td><a href=#properties class=code>s()</a></td> <td>entropy</td> <td>(unit_energy / unit_temperature)</td></tr>
+        <tr><td><a href=#properties class=code>v()</a></td> <td>specific volume</td> <td>(unit_volume / unit_matter)</td></tr>
+    </table>
+    <p>
+    There is not currently a state() method, but there are plans to add one.
+    </p>
+    <p>
+    For information about the mixture, see:
+    </p>
+    <table class=texttable>
+        <tr><td><a href=#atoms class=code>atoms()</a></td> <td>qty. of each element</td> <td>(unit_molar)</td></tr>
+        <tr><td><a href=#mass class=code>mass()</a></td> <td>total mass</td> <td>(unit_mass)</td></tr>
+        <tr><td><a href=#mass class=code>molar()</a></td> <td>total number of moles</td> <td>(unit_molar)</td></tr>
+        <tr><td><a href=#tlim class=code>Tlim()</a></td> <td>lower & upper limits</td> <td>(unit_temperature)</td></tr>
+        <tr><td><a href=#x class=code>X()</a></td> <td>mole fractions</td> <td>(dless)</td></tr>
+        <tr><td><a href=#y class=code>Y()</a></td> <td>mass fractions</td> <td>(dless)</td></tr>
+    </table>
+    <p>
+    To operate on the mixture like a Numpy array, see:
+    </p>
+    <table class=texttable>
+        <tr><td><a href=#insert class=code>insert()</a></td> <td>Add a new substance</td></tr>
+        <tr><td><a href=#nsubst class=code>nsubst()</a></td> <td>Number of substances in the mixture</td></tr>
+        <tr><td><a href=#ndim class=code>ndim()</a></td> <td>Mixture array dimension</td></tr>
+        <tr><td><a href=#remove class=code>remove()</a></td> <td>Remove a substance</td></tr>
+        <tr><td><a href=#reshape class=code>reshape()</a></td> <td>Change the mixture array's shape</td></tr>
+        <tr><td><a href=#shape class=code>shape()</a></td> <td>Mixture array shape</td></tr>
+    </table>
+    <p>
+    See also the indexing features described below.
+    </p>
+    <p>
+    To convert to other data types, see
+    </p>
+    <table class=texttable>
+        <tr><td><a href=#cp class=code>todict()</a></td> <td>A dictionary with keys=subst, values=quantities</td></tr>
+        <tr><td><a href=#cp class=code>toigmix()</a></td> <td>List of igmix instances</td></tr>
+        <tr><td><a href=#cp class=code>tolist()</a></td> <td>Return a list of the substances</td></tr>
+    </table>
+    <p>
+    There is also <a href=#fromigmix class=code>fromigmix()</a> function.
     </p>
 </div>
 
-<div class=section>
-
-    <div class="toc0"><a href=#intro>Introduction to IGTMix</a></div>
-        <div class="toc1"><a href=#defmix>Defining a mixture</a></div>
-    <div class="toc0"><a href=#igtmix>The IGTMix class</a></div>
-
-</div>
-
-<h3 class=subtitle id=intro>Introduction to IGTMix</h3>
+<h3 class=subtitle id=intro>Introduction to IgtMix</h3>
 <div class=section>
     <p>
-    The IGTMix class instances allow users to dynamically define mixtures of component ideal gases with a flexible interface convenient for the command line and scripts alike.  IGTMix instances have property methods just like the rest of the PYroMat classes.  Even though the extent of IGTMix instances is provided, the properties are still evaluated intensively.  
+    The IgtMix class instances allow users to dynamically define mixtures of component ideal gases with a flexible interface convenient for the command line and scripts alike.  IgtMix instances have property methods just like the rest of the PYroMat classes.  Even though the extent of IgtMix instances is provided, the properties are still evaluated intensively.  
     </p>
     <p>
 In this example, we quickly compute the enthalpy of a mixture 35% hydrogen and balance argon by volume.
     </p>
     <pre class=code>
->>> mymix = IGTMix('0.35 H2 + .65 Ar', units='kmol')
+>>> mymix = IgtMix('0.35 H2 + .65 Ar', units='kmol')
 >>> mymix.h(T=300)
 array([43.67153007])
 </pre>
 
-    <h3 id=defmix>Defining a mixture</h3>
+    <hr>
+    <h3 id=defining>Defining a mixture</h3>
     <p>
     There are six ways to define a mixture:
     </p>
@@ -66,10 +152,10 @@ specified with or without their 'ig.' collection prefix.  All whitespace
 is ignored.  
     </p>
     <pre class=code>
->>> mymix = IGTMix('10 ig.N2')
->>> mymix = igt.IGTMix('2.4 N2 + Ar', units='kmol')
+>>> mymix = IgtMix('10 ig.N2')
+>>> mymix = igt.IgtMix('2.4 N2 + Ar', units='kmol')
 >>> print(mymix)
-[2.4]N2 + [1.]Ar  (kmol)
+[2.4]N2 + [1.]Ar
 </pre>
     <p>
     <i>NOTE:</i> This method cannot be used to specify an ion like 'Ne+'. Instead,
@@ -79,7 +165,7 @@ use the dictionary or list methods below.
     <b>(2) From keyword arguments:</b> Keyword arguments accept abbreviated substance ID strings as keywords.  These are the full substance ID strings with the <span class=code>ig.</span> prefix omitted.
     </p>
     <pre class=code>
->>> air = IGTMix(N2=0.76, O2=0.23, Ar=0.01)
+>>> air = IgtMix(N2=0.76, O2=0.23, Ar=0.01)
     </pre>
     <p>
     <i>NOTE:</i> This method cannot be used to specify an ion like 'Ne+'. Instead,
@@ -89,7 +175,7 @@ use the dictionary or list methods below.
     <b>(3) A list of constituents with no quantities:</b> This assigns zero matter to each mixture.  Then, users are free to modify the mixture contents by indexing.
     </p>
     <pre class=code>
->>> mymix = IGTMix(['ig.N2', 'ig.O2', 'ig.Ar'])
+>>> mymix = IgtMix(['ig.N2', 'ig.O2', 'ig.Ar'])
 >>> mymix['N2'] = 0.76
 >>> mymix['O2'] = 0.23
 >>> mymix['Ar'] = 0.01
@@ -98,20 +184,20 @@ use the dictionary or list methods below.
     <b>(4) A dictionary of constituents with their quantities as values:</b> Dictionary keys are interpreted to be substance identifiers, and the corresponding values are interpreted as quantities.
     </p>
     <pre class=code>
->>> air = IGTMix({'ig.N2':0.76, 'ig.O2':0.23, 'ig.Ar':.01})
+>>> air = IgtMix({'ig.N2':0.76, 'ig.O2':0.23, 'ig.Ar':.01})
 </pre>
     <p>
-    <b>(5) Algebraicaly:</b> IGTMix instances can be combined with each other using addition and multiplication at the command line.
+    <b>(5) Algebraicaly:</b> IgtMix instances can be combined with each other using addition and multiplication at the command line.
     </p>
     <pre class=code>
->>> air = IGTMix('.76 N2 + .23 O2 + .01 Ar')
->>> fuel = IGTMix('.23 CH4 + .44 C3H8')
+>>> air = IgtMix('.76 N2 + .23 O2 + .01 Ar')
+>>> fuel = IgtMix('.23 CH4 + .44 C3H8')
 >>> reactants = air + 0.4*fuel
 >>> print(reactants)
-[0.76]N2 + [0.23]O2 + [0.01]Ar + [0.092]CH4 + [0.176]C3H8  (kmol)
+[0.76]N2 + [0.23]O2 + [0.01]Ar + [0.092]CH4 + [0.176]C3H8
 </pre>
     <p>
-    Any other data type in addition with an IGTMix is interpreted as a mixture definition as well.  For example,
+    Any other data type in addition with an IgtMix is interpreted as a mixture definition as well.  For example,
     </p>
     <pre class=code>
 >>> reactants = '.76 N2 + .23 O2 + .01 Ar' + 0.4*fuel       # String
@@ -119,167 +205,421 @@ use the dictionary or list methods below.
 >>> mymix = pm.get('ig.H2O') + 0.4 * air                    # Pure substance
 </pre>
     <p>
-    <b>(6) From an existing igmix instance:</b> The <span class=code>fromigmix()</span> function converts the PYroMat <span class=code>igmix</span> instances into <span class=code>IGTMix</span> instances.
+    <b>(6) From an existing igmix instance:</b> The <span class=code>fromigmix()</span> function converts the PYroMat <span class=code>igmix</span> instances into <span class=code>IgtMix</span> instances.
     <pre class=code>
 >>> air = fromigmix(pm.get('ig.air'))
 >>> print(air)
-[0.00935019]Ar + [0.00031401]CO2 + [0.78085562]N2 + [0.20948019]O2  (kmol)
+[0.00935019]Ar + [0.00031401]CO2 + [0.78085562]N2 + [0.20948019]O2
 </pre>
-    <p>    
-This is a useful trick if users want to make quick changes to an existing mixture.  When the <span class=code>fromigmix()</span> function is used, the igmix instance is split into its constituent gases to form the <span class=code>IGTMix</span> instance, so the example above results in a mixture with argon, carbon dioxide, nitrogen, and oxygen.  If an igmix instance is passed directly to the IGTMix class, it is treated the same as any other constituent gas, so the example below produces a mixture that only has one gas component.
+    <p>
+This is a useful trick if users want to make quick changes to an existing mixture.  When the <span class=code>fromigmix()</span> function is used, the igmix instance is split into its constituent gases to form the <span class=code>IgtMix</span> instance, so the example above results in a mixture with argon, carbon dioxide, nitrogen, and oxygen.  If an igmix instance is passed directly to the IgtMix class, it is treated the same as any other constituent gas, so the example below produces a mixture that only has one gas component.
     </p>
     <pre class=code>
->>> air = igt.IGTMix(pm.get('ig.air'))
+>>> air = igt.IgtMix(pm.get('ig.air'))
 >>> print(air)
-[1.]air  (kmol)
+[1.]air
 </pre>
 
-<h3>SPECIFYING SUBSTANCES</h3>
+    <hr>
+    <h3 id=substance>Specifying substances</h3>
     <p>
 In the examples above, constituent gases can be identified three ways:
     <ol>
         <li>By their full substance ID string
             <pre class=code>
->>> mymix = IGTMix('ig.N2')
+>>> mymix = IgtMix('ig.N2')
 </pre></li>
         <li>By their abbreviated substance ID string (with no leading ig.)
             <pre class=code>
->>> mymix = IGTMix('N2')
+>>> mymix = IgtMix('N2')
 </pre></li>
         <li> Or by their full data instance
             <pre class=code>
 >>> n2 = pm.get('ig.N2')
->>> mymix = IGTMix(n2)
+>>> mymix = IgtMix(n2)
 </pre></li>
     </ol>
-    
-Any of these -- 'N2', 'ig.N2', or pm.get('ig.N2') -- may be used as the
-substance identifier in the mixture list or dictionary methods above.
+    <p>
+    Any of these (<span class=code>'N2'</span>, <span class=code>'ig.N2'</span>, or <span class=code>pm.get('ig.N2')</span>) may be used as the substance identifier in the mixture list or dictionary methods above.
+    </p>
 
-** ALGEBRA WITH MIXTURES **
-
-Because mixtures work in absolute quantities (as opposed to mass or 
+    <hr>
+    <h3 id=arithmetic>Arithmetic with mixtures</h3>
+    <p>
+    Because mixtures work in absolute quantities (as opposed to mass or 
 mole fractions), they can be incrased, decreased, subtracted from, or
 added to using basic math operations at the command line.  In this 
-example, mix3 has 1kmol of water, 2kmol carbon dioxide, and 2kmol each
+example, mix3 has 1 kmol of water, 2 kmol carbon dioxide, and 2 kmol each
 of nitrogen and argon.
-
-    pm.config['unit_matter'] = 'kmol'
-    mix1 = IGTMix({'H2O':2, 'CO2':4})
-    mix2 = IGTMix({'N2':1, 'Ar':1})
-    mix3 = 0.5*mix1 + 2*mix2
-
-The addition algorithm attempts to convert non-IGTMix instances to 
-IGTMix instances.  That means that strings, lists, dictionaries, and
+    </p>
+    <pre class=code>
+>>> pm.config['unit_matter'] = 'kmol'
+>>> mix1 = IgtMix({'H2O':2, 'CO2':4})
+>>> mix2 = IgtMix({'N2':1, 'Ar':1})
+>>> mix3 = 0.5*mix1 + 2*mix2
+</pre>
+    <p>
+    Addition and subtraction attempt to convert non-IgtMix instances to 
+IgtMix instances.  That means that strings, lists, dictionaries, and
 ordinary PYroMat instances may be folded into mixtures using plain 
-command-line algebra.
-
-    mix4 = mix2 + '0.5 CO'
-    mix5 = mix2 + pm.get('ig.H2O')
-    mix6 = mix2 + {'H2O':[0.5,0.12], 'C2H2':0.8}
-
-The last examples shows how mixture arrays can be defined.  Array broad-
-casting is inherently supported, so even though H2O was the only 
+command-line arithmetic.
+    </p>
+    <pre class=code>
+>>> mix4 = mix2 + '0.5 CO'
+>>> mix5 = mix2 + pm.get('ig.H2O')
+>>> mix6 = mix2 + {'H2O':[0.5,0.12], 'C2H2':0.8}
+</pre>
+    <p>
+    The last examples show how mixture arrays can be defined.  Array broadcasting 
+is inherently supported, so even though H2O was the only 
 substance with multiple values, all other values are broadcast,
+    </p>
+    <pre class=code>
+>>> print(mix6)
+N2   : array([1., 1.])
+Ar   : array([1., 1.])
+H2O  : array([0.5 , 0.12])
+C2H2 : array([0.8, 0.8])
+</pre>
 
-    print(mix6)
-        (kmol)
-        N2   : array([1., 1.])
-        Ar   : array([1., 1.])
-        H2O  : array([0.5 , 0.12])
-        C2H2 : array([0.8, 0.8])
-
-** QUANTITIES AND UNTIS **
-
-When an IGTMix instance is initialized, the quantities are interpreted
+    <hr>
+    <h3 id=units>Quantities and units</h3>
+    <p>
+    When an IgtMix instance is initialized, the quantities are interpreted
 in PYroMat's currently configured 'unit_matter' unless the behavior is
 overridden by the optional units keyword.
-    pm.config['unit_matter'] = 'kg'
-    mymix = IGTMix({'H2O':5.2, 'CO2':4.7}, units='kmol')
+    </p>
+    <pre class=code>
+>>> pm.config['unit_matter'] = 'kg'
+>>> mymix = IgtMix({'H2O':5.2, 'CO2':4.7}, units='kmol')
+</pre>
+    <p>
+    Changes to the 'unit_matter' configuration parameter do not affect the
+mixture's definition.  Instead, it only changes the way the mixture's 
+quantities are represented in a print() operation.
+    </p>
 
-Changes to the 'unit_matter' configuration parameter do not affect the
-mixture.  To change the mixture's units and automatically convert the
-mixture quantities, use the set_units() method.
-
-When math operations are performed between mixtures of dissimilar units,
-the results are automatically calculated in terms of the units of the 
-first (left-hand-side) mixture.
-
-** ARRAYS AND INDEXING **
-
-Quantities are always handled as arrays, so a single IGTMix instance can
+    <hr>
+    <h3 id=indexing>Arrays and indexing</h3>
+    <p>
+    Quantities are always handled as arrays, so a single IgtMix instance can
 actually manage arrays of mixtures with an arbitrary shape.  In this 
 example the mixture instance is an array of mixtures of neon, its 
 first ion, and the free electron.
-
-    x = np.linspace(0,1,11)
-    mymix = IGTMix{{'Ne':1-x, 'Ne+':x, 'e':x}, units='kmol')
-    print(mymix)
-(kmol)
+    </p>
+    <pre class=code>
+>>> x = np.linspace(0,1,11)
+>>> mymix = IgtMix{{'Ne':1-x, 'Ne+':x, 'e':x}, units='kmol')
+>>> print(mymix)
 Ne  : array([1. , 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0. ])
 Ne+ : array([0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1. ])
 e-  : array([0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1. ])
-
-The shape() method returns a tuple like Numpy's shape attribute, but
+    </pre>
+    <p>
+    The <span class=code><a href=#shape>shape()</a></span> method returns a tuple like Numpy's shape attribute, but
 it describes only the array of mixtures.  It excludes the axis with the
 constituent substances.  To obtain the number of substances, use the 
-nsubst() method.
-
-    mymix.shape()
-        (11,)
-    mymix.nsubst()
-        3
-
-See also reshape().
-
-IGTMix instances may be indexed like a normal Numpy array, but with the
+<span class=code><a href=#nsubst>nsubst()</a></span> method.
+    <pre class=code>
+>>> mymix.shape()
+(11,)
+>>> mymix.nsubst()
+3
+    </pre>
+    <p>
+    To change the shape of the array, see <span class=code><a href=#reshape>reshape()</a></span>.
+    </p>
+    <p>
+    IgtMix instances may be indexed like a normal Numpy array, but with the
 special rule that the first dimension of the array is always indexed by
 a substance ID.  From the example above,
+    </p>
+    <pre class=code>
+>>> mymix['Ne']
+array([1. , 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0. ])
+>>> mymix['Ne',4]
+0.6</pre>
+    <p>
+    When the first index is a slice, the value returned is a sub-mixture
+instead of an array.
+    </p>
+    <pre class=code>
+>>> print(mymix[:,4])
+0.6Ne + 0.4Ne+ + 0.4e- (kmol)
+>>> print(mymix[:,3:6])
+Ne  : array([0.7 , 0.65, 0.5 ])
+Ne+ : array([0.3 , 0.35, 0.5 ])
+e-  : array([0.3 , 0.35, 0.5 ])</pre>
+    <p>
+    Assignment works as well.  The example below overwrites the fifth mixture.
+    </p>
+    <pre class=code>
+>>> mymix[:,4] = {'Ne':0.65, 'Ne+':0.35, 'e':0.35}
+>>> print(mymix)
+Ne  : array([1.  , 0.9 , 0.8 , 0.7 , 0.65, 0.5 , 0.4 , 0.3 , ...
+Ne+ : array([0.  , 0.1 , 0.2 , 0.3 , 0.35, 0.5 , 0.6 , 0.7 , ...
+e-  : array([0.  , 0.1 , 0.2 , 0.3 , 0.35, 0.5 , 0.6 , 0.7 , ...</pre>
 
-    mymix['Ne']
-        array([1. , 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0. ])
-    mymix['Ne',4]
-        0.6
-
-When the first index is a slice, the value returned is a sub-mixture
-instead of an array
-
-    print(mymix[:,4])
-        0.6Ne + 0.4Ne+ + 0.4e- (kmol)
-    print(mymix[:,3:6])
-        (kmol)
-        Ne  : array([0.7 , 0.65, 0.5 ])
-        Ne+ : array([0.3 , 0.35, 0.5 ])
-        e-  : array([0.3 , 0.35, 0.5 ])
-
-Assignment works as well.  The example below overwrites the fifth mix-
-ture.
-
-    mymix[:,4] = {'Ne':0.65, 'Ne+':0.35, 'e':0.35}
-    print(mymix)
-        (kmol)
-        Ne  : array([1.  , 0.9 , 0.8 , 0.7 , 0.65, 0.5 , 0.4 , 0.3 , ...
-        Ne+ : array([0.  , 0.1 , 0.2 , 0.3 , 0.35, 0.5 , 0.6 , 0.7 , ...
-        e-  : array([0.  , 0.1 , 0.2 , 0.3 , 0.35, 0.5 , 0.6 , 0.7 , ...
-
-** ITERATING **
-
-IGTMix instances act much like an ordered dictionary with PYroMat ideal
+    <hr>
+    <h3 id=iterating> Iterating </h3>
+    <p>
+    IgtMix instances act much like an ordered dictionary with PYroMat ideal
 gas class isntances as keys and quantitiy arrays as values.  The items() 
 method allows simultaneous iteration over the substances and quantities.
-
-    for subst,qty in mymix.items():
-        # subst is now a PYroMat substance instance
-        # qty is now a Numpy array of the substance's quantity
-        
-    for subst in mymix:
-        # subst is now a PYroMat substance instance
+    </p>
+    <pre class=code>
+>>> for subst,qty in mymix.items():
+...     # subst is now a PYroMat substance instance
+...     # qty is now a Numpy array of the substance's quantity
+     
+>>> for subst in mymix:
+...     # subst is now a PYroMat substance instance</pre>
 </div>
 
-<h3 class=subtitle id=intro>The IGTMix class</h3>
-<div class=seciton>
+<h3 class=subtitle id=intro>The IgtMix class</h3>
+<div class=section>
+    <h3 id=init>Initializers</h3>
+    <p>
+    Instances of the <span class=code>IgtMix</span> class are created by the class initializer or by the <span class=code>fromigmix()</span> function.  The class initializer signature appears
+    </p>
+    <pre class=code>
+<b>IgtMix</b>(contents=<b>None</b>, units=<b>None</b>, ...)</pre>
+    <p>
+    Called with no arguments, this creates an empty mixture - one with no substances.  It can be expanded later using the other class methods.  The <span class=code>contents</span> keyword contains a string, list, dictionary, PYroMat substance, or another <span class=code>IgtMix</span> instance.  See the <a href=#defining>examples above</a> for usage.
+    </p>
+    <p>
+    Any other keyword arguments are interpreted as string substance identifiers, and the corresponding values are interpreted as quantities.
+    </p>
+
+    <hr>
+    <h3 id=properties>Property Methods</h3>
+    <p>
+    The <span class=code>IgtMix</span> class calculates properties <i>extensively</i>, (as opposed to <i>intensively</i>, which is how the internal PYroMat classes work).  That means that energies and enthalpy are calculated in absolute energy units (as opposed to energy per unit matter).  This is true of all properties with only a few exceptions (like molecular weight and gas constant).
+    </p>
+    <p>
+    <a href=#methods>Properties</a> all have the call signature
+    </p>
+
+    <pre class=code>
+IgtMix.<b>__property__</b>(...)</pre>
+
+    <div class=section>
+        <p>
+        where "__property__" is the appropriate property name (e.g. <span class=code>cp</span>, <span class=code>s</span>, <span class=code>h</span>, etc...).  Like the other PYroMat ideal gas classes, <span class=code>IgtMix</span> parse many combinations of properties to determine the thermodynamic state.  However, these must be specified in extensive units.  The table below shows the property combinations that are (and are not) supported by the property methods.
+        </p>
+        <table class="disptable" style="width:400px">
+        <caption>
+            Supported IgtMix property argument combinations <br>
+            <span style="font-size:small"> *=supported, X=invalid, o=not supported</span>
+        </caption>
+        <tr>
+            <td> </td><td>T</td><td>p</td><td>d</td><td>v</td><td>h</td><td>e</td><td>s</td>
+        </tr>
+        <tr>
+            <td>T</td><td>X</td><td>*</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td>
+        </tr>
+        <tr>
+            <td>p</td><td>*</td><td>X</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td>
+        </tr>
+        <tr>
+            <td>d</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td><td>*</td><td>*</td>
+        </tr>
+        <tr>
+            <td>v</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td><td>*</td><td>*</td>
+        </tr>
+        <tr>
+            <td>h</td><td>X</td><td>*</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td>
+        </tr>
+        <tr>
+            <td>e</td><td>X</td><td>*</td><td>*</td><td>*</td><td>X</td><td>X</td><td>*</td>
+        </tr>
+        <tr>
+            <td>s</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>X</td>
+        </tr>
+        </table>
+        <p>
+        For example, the example below calculate the constant-pressure specific heat of a mixture with entropy and pressure specified in units <span class=code>unit_energy</span>/<span class=code>unit_temperature</span> and  <span class=code>unit_pressure</span> respectively.
+        </p>
+        <pre class=code>
+>>> m.cp(s=3.24, p=.05)</pre>
+
+    </div>
+
+    <hr>
+    <h3 id=mix>Mixture methods</h3>
+    <pre id=atoms class=code>
+IgtMix.<b>atoms</b>()</pre>
+    <div class=section>
+        <p>
+        Returns a dictionary containing the number of each atom present in the mixture.  The keys of the dictionary are the element string, and the values are the quantity arrays expressed in <span class=code>unit_molar</span>.  For example,
+        </p>
+        <pre class=code>
+>>> pm.config['unit_matter'] = 'kmol'
+>>> m = igt.IgtMix('H2O + 5C2H2')
+>>> m.atoms()
+{'H': array([12.]), 'O': array([1.]), 'C': array([10.])}</pre>
+    <p>
+    <i>NOTE:</i> Many users may be in the habit of setting the 'unit_matter' 
+without updating 'unit_molar' or 'unit_mass' accordingly.  
+This will yield confusing results!
+    </p>
+    </div>
+
+    <pre class=code id=mass>
+mas = IgtMix.<b>mass</b>()
+mol = IgtMix.<b>molar</b>()</pre>
+    <div class=section>
+        <p>
+        Calculates the total mixture quantities in <span class=code>unit_mass</span> and <span class=code>unit_molar</span> units respectively.  These represent the <i>extent</i> of the mixture by
+the sum of all mass or moles of all substances in the mixture.  Both methods always return an array with the same shape as the mixture array.  
+        </p>
+        <p>
+        <i>NOTE:</i> Many users may be in the habit
+of setting the 'unit_matter' setting without updating 'unit_molar' or 
+'unit_mass' accordingly.  This will yield confusing results!
+        </p>
+    </div>
+
+    <pre class=code id=tlim>
+Tmin, Tmax = IgtMix.<b>Tlim</b>()</pre>
+    <div class=section>
+        <p>
+        Returns a tuple containing the lower and upper temperature limits for the mixture in <span class=code>unit_temperature</span>.  The upper and lower temperature limits are established from the 
+temperature limits of the constituent substances.  The range reported
+is the widest over which all constituents report valid data.
+        </p>
+    </div>
+
+    <pre class=code id=x>
+X = IgtMix.<b>X</b>()
+Y = IgtMix.<b>Y</b>()</pre>
+    <div class=section>
+        <p>
+        The <span class=code>X()</span> and <span class=code>Y()</span> methods return dictionaries containing
+the mole and mass fractions of the constituents.  The substance ID strings are the dictionary keys, and the values are arrays with the same shape as the mixture shape.  For example,
+        </p>
+        <pre class=code id=x>
+m = igt.IgtMix('4.5 O2 + 2 N2', units='kmol')
+>>> m.X()
+{'ig.O2': array([0.69230769]), 'ig.N2': array([0.30769231])}
+>>> m.Y()
+{'ig.O2': array([0.7198954]), 'ig.N2': array([0.2801046])}
+</pre>
+        <p>
+        Note that these dictionaries can be passed directly to the <span class=code>IgtMix</span> initializer to create a new mixture with an extent of exactly one unit molar or unit mass.  This is equivalent to making the properties evaluate intensively.
+        </p>
+    </div>
+
+    <hr>
+    <h3 class=array>Array methods</h3>
     
-</div>
+    <pre class=code id=insert>IgtMix.<b>insert</b>(sid, qty, units=<b>None</b>)</pre>
+    <div class=section>
+        <p>
+        Inserts a new substance into the mixture.  If the quantity or units are not specified, they default to zero and the current <span class=code>unit_matter</span>.  Returns nothing.
+        </p>
+        <table>
+            <tr><td><span class=code>sid</span></td><td align=left>Substance identifier [string or ig instance] (mandatory)</td></tr>
+            <tr><td><span class=code>qty</span></td><td align=left>Quantity [scalar or array-like] (default=0)</td></tr>
+            <tr><td><span class=code>units</span></td><td align=left>Quantity unit matter [string] (default=None)</td></tr>
+        </table>
+        <pre class=code>
+>>> m = IgtMix('2 N2')
+>>> m.insert('O2', [0,1])
+>>> print(m)
+N2 : array([2., 2.])
+O2 : array([0., 1.])</pre>
+    </div>
+
+    <pre class=code id=nsubst>n = IgtMix.<b>nsubst</b>()</pre>
+    <div class=section>
+        <p>
+        Returns the integer number of substances currently in the mixture.
+        </p>
+        <pre class=code>
+>>> m = IgtMix('3 C3H8 + 4.7 CH4')
+>>> m.nsubst()
+2</pre>
+    </div>
+
+    <pre class=code id=ndim>n = IgtMix.<b>ndim</b>()</pre>
+    <div class=section>
+        <p>
+        Returns the integer number of dimensions in the mixture array.  This is equivalent to <span class=code>len(m.shape())</span>.
+        </p>
+        <pre class=code>
+>>> m = IgtMix({'C2H2':[[0, 0.1],[0, 0.1]], 'C3H8':[[0,0],[0.1,0.1]]})
+>>> print(m)
+C2H2 : array([[0. , 0.1],
+       [0. , 0.1]])
+C3H8 : array([[0. , 0. ],
+       [0.1, 0.1]])
+>>> m.ndim()
+2
+</pre>
+    </div>
+
+    <pre class=code id=remove>IgtMix.<b>remove</b>(sid)</pre>
+    <div class=section>
+        <p>
+        Removes a substance from the mixture.  Returns nothing.
+        </p>
+        <table>
+            <tr><td><span class=code>sid</span></td><td align=left>Substance identifier [string or ig instance] (mandatory)</td></tr>
+        </table>
+        <pre class=code>
+>>> m = IgtMix('3 C3H8 + 4.7 CH4')
+>>> m.remove('C3H8')
+>>> print(m)
+[4.7]CH4
+</pre>
+    </div>
+
+    <pre class=code id=reshape>IgtMix.<b>reshape</b>(shape)</pre>
+    <div class=section>
+        <p>
+        Reshapes the mixture array in place.  Like Numpy reshape operations, this cannot change the total number of elements in the mixture array.  However, this operation can be used to change the number of dimensions.
+        </p>
+        <table>
+            <tr><td><span class=code>shape</span></td><td align=left>New shape [tuple] (mandatory)</td></tr>
+        </table>
+        <pre class=code>
+>>> m = IgtMix({'C2H2':[[0, 0.1],[0, 0.1]], 'C3H8':[[0,0],[0.1,0.1]]})
+>>> print(m)
+C2H2 : array([[0. , 0.1],
+       [0. , 0.1]])
+C3H8 : array([[0. , 0. ],
+       [0.1, 0.1]])
+>>> m.reshape((4,))
+>>> print(m)
+C2H2 : array([0. , 0.1, 0. , 0.1])
+C3H8 : array([0. , 0. , 0.1, 0.1])
+>>> m.reshape((1,2,2))
+>>> print(m)
+C2H2 : array([[[0. , 0.1],
+        [0. , 0.1]]])
+C3H8 : array([[[0. , 0. ],
+        [0.1, 0.1]]])
+</pre>
+    </div>
+
+    <pre class=code id=shape>shape = IgtMix.<b>shape</b>()</pre>
+    <div class=section>
+        <p>
+        Returns the shape of the current mixture array as a tuple.  This is similar to the Numpy shape attribute, but it is a method instead.
+        </p>
+        <pre class=code>
+>>> m = IgtMix({'C2H2':[[0, 0.1],[0, 0.1]], 'C3H8':[[0,0],[0.1,0.1]]})
+>>> print(m)
+C2H2 : array([[0. , 0.1],
+       [0. , 0.1]])
+C3H8 : array([[0. , 0. ],
+       [0.1, 0.1]])
+>>> m.shape()
+(2,2)
+</pre>
+    </div>
+
 
 <div id="contact">
 <hr>

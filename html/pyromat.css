@@ -16,7 +16,6 @@
     text-align:justify;
 }
 
-
 /* Section header font definitions
  *  Use the "title" or "subtitle" class to encase in a boarder
  */
@@ -152,22 +151,6 @@ span.code{
     border-collapse:collapse;
 }
 
-table.disptable td,tr{
-    border-style:solid;
-    border-collapse:collapse;
-    border-width:2px;
-}
-
-
-a:link, a:visited, a:active {
-    color:inherit;
-    text-decoration:underline;
-}
-
-a:hover {
-    color:var(--pyro-orange, orange);
-    text-decoration:underline;
-}
 
 
  /* Page Layout
@@ -319,6 +302,23 @@ td {
     padding: 10px;
 }
 
+
+table.disptable td,tr{
+    border-style:solid;
+    border-collapse:collapse;
+    border-width:2px;
+}
+
+
+a:link, a:visited, a:active {
+    color:inherit;
+    text-decoration:underline;
+}
+
+a:hover {
+    color:var(--pyro-orange, orange);
+    text-decoration:underline;
+}
 
 /* Live formatting rules
  *
