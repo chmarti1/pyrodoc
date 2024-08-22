@@ -304,7 +304,7 @@ array(2.2905867790156145)</pre>
 >>> H2O.T(h=1000, p=10)
 array([453.02797055])</pre>
     <p>
-    This has obvious benefits for cycle analysis, but it raises the question: "can I supply any two properties I want?"  Almost but not quite.  <a href=./features.html#argtab>Tables on the features page</a> list all property combinations accepted by the multi-phase and ideal gas classes in version 2.4.5.
+    This has obvious benefits for cycle analysis, but it raises the question: "can I supply any two properties I want?"  Almost but not quite.  <a href=./features.html#argtab>Tables on the features page</a> list all property combinations accepted by the multi-phase and ideal gas classes in version 2.2.5.
     </p>
     <p>
     There are many combinations of properties that are not theoretically valid; <span class=code>(T,T)</span> obviously, <span class=code>(d,v)</span> since they are equivalent, and quality with any property other than temperature or pressure.  That last one isn't obviously flawed, and there are applications where this actually comes in handy (like refrigeration), so why is it "invalid?"
@@ -323,7 +323,7 @@ array([453.02797055])</pre>
     If you have a case that isn't supported by PYroMat natively, that isn't the end of the story.  See this <a href="#cycle_custom">howto article</a> for an example for writing your own "inverse" algorithm.  Hopefully, this will make you aware of some of the numerical pitfalls awaiting you.
     </p>
     <p>
-  The only valid property combinations that are not supported by the version 2.4.5 multiphase class are marked with a o, but these special cases <i>are</i> supported by the version 2.4.5 ideal gas classes.  Specifying entropy and any other non-primary property requires iteration in multiple dimensions over functions with discontinuities and singularities.  This functionality is likely to be included one day, but not today.
+  The only valid property combinations that are not supported by the version 2.2.5 multiphase class are marked with a o, but these special cases <i>are</i> supported by the version 2.2.5 ideal gas classes.  Specifying entropy and any other non-primary property requires iteration in multiple dimensions over functions with discontinuities and singularities.  This functionality is likely to be included one day, but not today.
     </p>
 
 </div>
