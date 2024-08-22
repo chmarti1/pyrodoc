@@ -28,7 +28,7 @@
 
 <div class=section>
     <p>
-    The IgtMix class instances allow users to dynamically define mixtures of
+    The IGTools module (found in the package <span class=code>pyromat.igtools</span>) provides the <span class=code>IgtMix</span> class, which allows users to dynamically define mixtures of
 component ideal gases with a flexible interface convenient for the 
 command line and scripts alike.  IgtMix instances have property methods 
 just like the rest of the PYroMat classes, but the total quanitity 
@@ -40,7 +40,8 @@ calculate in total and not per unit metter (not intensive).
 hydrogen and balance argon by volume.
     </p>
     <pre class=code>
->>> mymix = IgtMix('0.35 H2 + .65 Ar', units='kmol')
+>>> from pyromat import igtools as igt
+>>> mymix = igt.IgtMix('0.35 H2 + .65Ar', units='kmol')
 >>> mymix.h(T=300)
 array([43.67153007])
 </pre>
@@ -116,9 +117,9 @@ array([43.67153007])
     To convert to other data types, see
     </p>
     <table class=texttable>
-        <tr><td><a href=#cp class=code>todict()</a></td> <td>A dictionary with keys=subst, values=quantities</td></tr>
-        <tr><td><a href=#cp class=code>toigmix()</a></td> <td>List of igmix instances</td></tr>
-        <tr><td><a href=#cp class=code>tolist()</a></td> <td>Return a list of the substances</td></tr>
+        <tr><td><a href=#todict class=code>todict()</a></td> <td>A dictionary with keys=subst, values=quantities</td></tr>
+        <tr><td><a href=#toigmix class=code>toigmix()</a></td> <td>List of igmix instances</td></tr>
+        <tr><td><a href=#tolist class=code>tolist()</a></td> <td>Return a list of the substances</td></tr>
     </table>
     <p>
     There is also <a href=#fromigmix class=code>fromigmix()</a> function.
@@ -380,7 +381,7 @@ method allows simultaneous iteration over the substances and quantities.
 <div class=section>
     <h3 id=init>Initializers</h3>
     <p>
-    Instances of the <span class=code>IgtMix</span> class are created by the class initializer or by the <span class=code>fromigmix()</span> function.  The class initializer signature appears
+    Instances of the <span class=code>IgtMix</span> class are created by the class initializer or by the <a href=#fromigmix class=code>fromigmix()</a> function.  The class initializer signature appears
     </p>
     <pre class=code>
 <b>IgtMix</b>(contents=<b>None</b>, units=<b>None</b>, ...)</pre>
@@ -511,7 +512,7 @@ m = igt.IgtMix('4.5 O2 + 2 N2', units='kmol')
     </div>
 
     <hr>
-    <h3 class=array>Array methods</h3>
+    <h3 id=array>Array methods</h3>
     
     <pre class=code id=insert>IgtMix.<b>insert</b>(sid, qty, units=<b>None</b>)</pre>
     <div class=section>
@@ -620,6 +621,88 @@ C3H8 : array([[0. , 0. ],
 </pre>
     </div>
 
+    <hr>
+    <h3 id=data>Data conversion methods</h3>
+    
+    <pre class=code id=todict>mdict = IgtMix.<b>todict</b>()</pre>
+    <div class=section>
+        <p>
+        Returns a dictionary with the constituent gas id strings as keys and their quantity arrays converted to the <span class=code>unit_matter</span> as values.
+        </p>
+        <pre class=code>
+>>> m = IgtMix({'C2H2':[[0, 0.1],[0, 0.1]], 'C3H8':[[0,0],[0.1,0.1]]})
+>>> print(m)
+C2H2 : array([[0. , 0.1],
+       [0. , 0.1]])
+C3H8 : array([[0. , 0. ],
+       [0.1, 0.1]])
+>>> m.todict()
+{'ig.C2H2': array([[0. , 0.1],
+       [0. , 0.1]]), 'ig.C3H8': array([[0. , 0. ],
+       [0.1, 0.1]])}</pre>
+    </div>
+
+    <pre class=code id=toigmix>mmix = IgtMix.<b>toigmix</b>(sid)</pre>
+    <div class=section>
+        <p>
+        Returns a list of <span class=code>igmix</span> instances, each corresponding to one of the mixtures in the mixture array.  The 1D list is a flattened version of the mixture array, so it has length equal to the total number of mixtures in the mixture array.
+        </p>
+        <p>
+        All built-in PYroMat substances require a substance ID string, so the required <span class=code>sid</span> parameter allows users to name the new mixture substance.  If the mixture array only contains a single mixture, then the substance ID string is used verbatim.  Otherwise, an underscore and integer are added, consistent with the naming convention used in PYroMat for dissimilar substances with identical Hill formulae.
+        </p>
+        <table>
+            <tr><td><span class=code>sid</span></td><td align=left>The substance id of the new mixtures [tuple] (mandatory)</td></tr>
+        </table>
+        <p>
+        This method allows users to dynamically form mixtures using the command line features of the IGTools package while still benefiting from the faster performance of the <span class=code>igmix</span> class.  In the example below, note that the <span class=code>IgtMix</span> specific heat is divided by the mass of the mixture to convert it back to an intensive property.
+        </p>
+        <pre class=code>
+>>> m = IgtMix({'C2H2':[[1, 2],[1, 2]], 'C3H8':[[1,1],[2,2]]}, units='kmol')
+>>> m2 = m.toigmix('ig.c')
+>>> print(m2)
+[&lt;igmix, ig.c_0>, &lt;igmix, ig.c_1>, &lt;igmix, ig.c_2>, &lt;igmix, ig.c_3>]
+>>> m.cp(T=400) / m.mass()
+array([[2.00136859, 1.94695158],
+       [2.04718287, 2.00136859]])
+>>> for this in m2:
+...     this.cp(T=400)
+... 
+array([2.00136859])
+array([1.94695158])
+array([2.04718287])
+array([2.00136859])</pre>
+    </div>
+
+    <pre class=code id=tolist>subst = IgtMix.<b>tolist</b>(mode='sid')</pre>
+    <div class=section>
+        <p>
+        Generates a list of the mixture contents without the quantities.  Optionally, the user may specify a string indicating the mode of the output.  
+        </p>
+        <table>
+            <tr><td><span class=code>'sid'</span></td><td align=left>(default) The full substance ID string (e.g. "ig.N2")</td></tr>
+            <tr><td><span class=code>'hill'</span></td><td align=left>Hill chemical notation (e.g. "N2")</td></tr>
+            <tr><td><span class=code>'instance'</span></td><td align=left>The PYroMat class instances (e.g. &lt;ig2, ig.N2>)</td></tr>
+        </table>
+        <pre class=code>
+>>> m.tolist()
+['ig.C2H2', 'ig.C3H8']
+>>> m.tolist('hill')
+['C2H2', 'C3H8']
+>>> m.tolist('instance')
+[&lt;ig2, ig.C2H2>, &lt;ig2, ig.C3H8>]</pre>
+    </div>
+
+    <pre class=code id=fromigmix>m = <b>fromigmix</b>(subst)</pre>
+    <div class=section>
+        <p>
+        Returns an <span class=code>IgtMix</span> instance built from a PYroMat core <span class=code>igmix</span> instance.  This is a convenient way to modify existing mixtures quickly from the command line.  Note that <span class=code>fromigmix()</span> is not a method, but a function provided in the root of the IGTools module.
+        </p>
+        <pre class=code>
+>>> air = pm.get('ig.air')
+>>> mix = fromigmix(air)
+>>> print(mix)
+[0.01289563]Ar + [0.00047711]CO2 + [0.75520558]N2 + [0.23142168]O2</pre>
+    </div>
 
 <div id="contact">
 <hr>
@@ -629,7 +712,7 @@ Associate Professor of Mechanical Engineering<br>
 The Pennsylvania State University, Altoona College<br>
 <a href="mailto:crm28@psu.edu">crm28@psu.edu</a><br>
 <br>
-&copy;2022 Released under the <a target="blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3 License</a>
+&copy;2024 Released under the <a target="blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3 License</a>
 </div>
 
 </div>

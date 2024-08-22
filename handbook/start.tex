@@ -250,7 +250,9 @@ array([4.18094321])
 \end{lstlisting}
 The last line uses quality to specify a 50/50 mixture of liquid and vapor nitrogen at 100 K.
 
-This works with all basic properties (see section \ref{sec:intro:basic}) $T$, $p$, $\rho$, $v$, and $x$ (multi-phase only).  Other properties like $e$, $h$, and $s$, may be specified as well, but only one at a time with a basic property.  For example, \PM\ does not support property evaluations with $h$ and $s$ simultaneously.  Instead $s$ \emph{or} $h$ may be specified with one of the basic properties like $T$.
+This works with all basic properties (see section \ref{sec:intro:basic}) $T$, $p$, $\rho$, $v$, and $x$ (multi-phase only).  In ideal gases, specifying $e$ or $h$ is equivalent to specifying $T$, so they can be expressed in almost any combination, just like a basic property.  However, simultaneously specifying $h$, $e$, and/or $T$ to an ideal gas property triggers an exception.  Meanwhile, multi-phase classes do not tolerate simultaneously specifying $h$, $e$, and $s$; not because it is theoretically invalid, but because it causes potentially unstable numerical iteration.  These nuances are tabulated in Tables \ref{tab:props:ig} and \ref{tab:props:mp}.
+
+Other properties like $e$, $h$, and $s$, may be specified as well, but only one at a time with a basic property.  For example, \PM\ does not support property evaluations with $h$ and $s$ simultaneously.  Instead $s$ \emph{or} $h$ may be specified with one of the basic properties like $T$.
 \begin{lstlisting}[language=Python]
 >>> n2.h(T=100,x=0.5)
 array([7.27884341])

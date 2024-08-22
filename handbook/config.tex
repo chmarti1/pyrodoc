@@ -49,9 +49,11 @@ Table \ref{tab:config} lists the configuration parameters, their hard-coded init
 \verb|dat_overwrite| & \verb|True| & Overwrite older substance ids with newer ones?\\
 \verb|dat_recursive| & \verb|True| & Recurse into sub-directories when looking for data files?\\
 \verb|dat_verbose| & \verb|False| & Print descriptions of the data load process?\\
-\verb|def_T| & \verb|298.15| & Default temperature in units, \verb|unit_temperature|\\
+\verb|def_T| & \verb|298.15| & Default temperature in units, \verb|def_T_unit|\\
+\verb|def_T_unit| & \verb|'K'| & Default temperature unit\\
 \verb|def_oob| & \verb|numpy.nan| & Value to use when the state is out-of-bounds\\
-\verb|def_p| & \verb|1.01325| & Default pressure in units, \verb|unit_pressure|\\
+\verb|def_p| & \verb|1.01325| & Default pressure in units, \verb|def_p_unit|\\
+\verb|def_p_unit| & \verb|'bar'| & Default pressure unit\\
 \verb|error_verbose| & \verb|True| & Is verbose PYroMat error printing enabled?\\
 \verb|install_dir| (R) & \verb|'./'| & Path to the \PM\ installation\\
 \verb|reg_dir| (A) & \tiny\verb|['./registry']| & A list of directories to scan for \texttt{.py} files containing \PM\ classes\\
