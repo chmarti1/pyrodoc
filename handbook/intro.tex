@@ -304,18 +304,18 @@ It has historically been called \emph{free enthalpy} or Gibbs free energy as wel
 
 Its use is primarily in systems with chemical or phase reactions.  In these applications, properties are written in terms of the \emph{chemical potential}, $\mu_i$, which is the contribution of each constituent to the internal energy,
 \begin{align*}
-\d e &= T \d s - p \d v + \sum_i \mu_i \d y_i\\
-\d \overline{e} &= T \d \overline{s} - p \d \overline{v} + \sum_i \overline{\mu}_i \d \chi_i.
+\d E &= T \d S - p \d V + \sum_i \mu_i \d m_i\\
+&= T \d S - p \d V + \sum_i \overline{\mu}_i \d N_i
 \end{align*}
-It bears mentioning that these potentials can be related to the enthalpies of formation and reference entropies of the pure constituents.
+Note that the properties in these formulae are extensive (total energy rather than energy per unit matter).  
 
-Here, chemical reactions or phase transitions cause changes in the mass fractions, $y_i$, or mole fractions, $\chi_i$, which can consume or release energy.  So, for a hypothetical reaction with constant entropy and volume,
+Here, chemical reactions or phase transitions cause changes in the mass, $m_i$, or moles, $N_i$, of each substance, which can consume or release energy.  So, for a hypothetical reaction with constant entropy and volume,
 \begin{align}
-\mu_i = \left(\frac{\partial e}{\partial y_i}\right)_{s,v}.
+\mu_i = \left(\frac{\partial E}{\partial m_i}\right)_{s,v} = \left(\frac{\partial e}{\partial y_i}\right)_{s,v}.
 \end{align}
-However, specifying properties in terms of volume and entropy in a reacting experiment is not particularly practical.  Examining chemical potential in terms of enthalpy merely transposes the expression into constant entropy and pressure.
+Because reactions conserve mass, it is equally valid to write the chemical potential in terms of the intensive properties.  This only works because $\d(e m) = m\d e$.  The same is not true of $\d(\overline{e} N)$, because $\d N$ is not necessarily zero in a chemical reaction.
 
-However, when we examine the differential of $g$,
+Specifying properties in terms of volume and entropy in a reacting experiment is not particularly practical.  Examining chemical potential in terms of enthalpy merely transposes the expression into constant entropy and pressure.  However, when we examine the differential of $g$,
 \begin{align*}
 \d g &= (\d e) + (p\d v + v \d p) - (T \d s + s \d T),
 \end{align*}
@@ -328,7 +328,12 @@ Temperature and pressure are among the most commonly specified properties when p
 \begin{align}
 \mu_i = \left(\frac{\partial g}{\partial y_i}\right)_{T,p}.
 \end{align}
-In fact, in the special case of ideal gas mixtures, $g = \sum y_i g_i(T,p_i)$, so $\mu_i = g_i(T,p_i)$.
+
+In chemical reactions, it is unusual to work in intensive units, since the number of moles changes.  Instead, this relationship is usually expressed extensively.
+\begin{align}
+\mu_i &= \left(\frac{\partial G}{\partial m_i}\right)_{T,p}.\\
+\overline{\mu}_i &= \left(\frac{\partial G}{\partial N_i}\right)_{T,p}.
+\end{align}
 
 \subsection{Specific Heats, $c_p$ $c_v$}\label{sec:intro:c}
 

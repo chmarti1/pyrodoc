@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2023.11.18)  22 AUG 2024 15:34
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2023.11.18)  7 SEP 2024 11:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1647,36 +1647,36 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 [21]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 333.
+(hyperref)                removing `math shift' on input line 338.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 333.
+(hyperref)                removing `subscript' on input line 338.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 333.
+(hyperref)                removing `math shift' on input line 338.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 333.
+(hyperref)                removing `math shift' on input line 338.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 333.
+(hyperref)                removing `subscript' on input line 338.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 333.
+(hyperref)                removing `math shift' on input line 338.
 
 [22] [23]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 378.
+(hyperref)                removing `math shift' on input line 383.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 378.
+(hyperref)                removing `math shift' on input line 383.
 
 ) [24]
 \openout2 = `start.aux'.
@@ -1877,7 +1877,7 @@ Chapter 6.
 
 
 ] [77] [78] [79] [80] [81] [82]
-<figures/dof.png, id=1469, 578.16pt x 433.62pt>
+<figures/dof.png, id=1472, 578.16pt x 433.62pt>
 File: figures/dof.png Graphic file (type png)
 <use figures/dof.png>
 Package pdftex.def Info: figures/dof.png  used on input line 140.
@@ -1895,7 +1895,7 @@ are \OT1/cmr/m/it/10.95 not \OT1/cmr/m/n/10.95 monoatomic
  []
 
 [86]
-<figures/hf.png, id=1504, 433.62pt x 289.08pt>
+<figures/hf.png, id=1507, 433.62pt x 289.08pt>
 File: figures/hf.png Graphic file (type png)
 <use figures/hf.png>
 Package pdftex.def Info: figures/hf.png  used on input line 211.
@@ -1932,7 +1932,7 @@ s, be-cause they
  []
 
 [125]
-<figures/benchmark.png, id=1993, 462.528pt x 346.896pt>
+<figures/benchmark.png, id=1996, 462.528pt x 346.896pt>
 File: figures/benchmark.png Graphic file (type png)
 <use figures/benchmark.png>
 Package pdftex.def Info: figures/benchmark.png  used on input line 51.
@@ -1945,19 +1945,19 @@ put line 222.
 LaTeX Warning: Float too large for page by 9.94191pt on input line 260.
 
 [132] [133]
-<figures/iter1.png, id=2108, 433.62pt x 289.08pt>
+<figures/iter1.png, id=2111, 433.62pt x 289.08pt>
 File: figures/iter1.png Graphic file (type png)
 <use figures/iter1.png>
 Package pdftex.def Info: figures/iter1.png  used on input line 305.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
  [134] [135 <./figures/iter1.png>] [136]
-<figures/bisection.png, id=2138, 433.62pt x 289.08pt>
+<figures/bisection.png, id=2141, 433.62pt x 289.08pt>
 File: figures/bisection.png Graphic file (type png)
 <use figures/bisection.png>
 Package pdftex.def Info: figures/bisection.png  used on input line 349.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
  [137] [138 <./figures/bisection.png>]
-<figures/hybrid1.png, id=2152, 433.62pt x 289.08pt>
+<figures/hybrid1.png, id=2155, 433.62pt x 289.08pt>
 File: figures/hybrid1.png Graphic file (type png)
 <use figures/hybrid1.png>
 Package pdftex.def Info: figures/hybrid1.png  used on input line 384.
@@ -2012,8 +2012,8 @@ LaTeX Warning: There were multiply-defined labels.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 89.
  ) 
 Here is how much of TeX's memory you used:
- 17425 strings out of 492982
- 237065 string characters out of 6134895
+ 17428 strings out of 492982
+ 237110 string characters out of 6134895
  421858 words of memory out of 5000000
  19690 multiletter control sequences out of 15000+600000
  19659 words of font info for 78 fonts, out of 8000000 for 9000
@@ -2045,9 +2045,9 @@ sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/sha
 re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texl
 ive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texli
 ve/texmf-dist/fonts/type1/public/wasy2-ps/wasy10.pfb>
-Output written on handbook.pdf (151 pages, 1110376 bytes).
+Output written on handbook.pdf (151 pages, 1112377 bytes).
 PDF statistics:
- 2534 PDF objects out of 2984 (max. 8388607)
- 1009 named destinations out of 1200 (max. 500000)
+ 2537 PDF objects out of 2984 (max. 8388607)
+ 1012 named destinations out of 1200 (max. 500000)
  936 words of extra memory for PDF output out of 10000 (max. 10000000)
 

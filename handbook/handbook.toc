@@ -13,7 +13,7 @@
 \contentsline {subsection}{\numberline {1.1.9}Entropy, $s$}{19}{subsection.1.1.9}
 \contentsline {subsection}{\numberline {1.1.10}Free (Helmholtz) energy, $f$}{20}{subsection.1.1.10}
 \contentsline {subsection}{\numberline {1.1.11}Gibbs energy, $g$}{21}{subsection.1.1.11}
-\contentsline {subsection}{\numberline {1.1.12}Specific Heats, $c_p$ $c_v$}{22}{subsection.1.1.12}
+\contentsline {subsection}{\numberline {1.1.12}Specific Heats, $c_p$ $c_v$}{23}{subsection.1.1.12}
 \contentsline {subsection}{\numberline {1.1.13}Speed of sound, $a$}{24}{subsection.1.1.13}
 \contentsline {chapter}{\numberline {2}Getting started}{25}{chapter.2}
 \contentsline {section}{\numberline {2.1}Installation}{25}{section.2.1}
