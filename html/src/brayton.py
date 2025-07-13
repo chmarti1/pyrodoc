@@ -1,20 +1,19 @@
 #
 #   Brayton cycle demo
-#   C.R. Martin (c) 2016-2018
 #   GPL v3.0
 #   Enjoy!
 #
 
-import pyromat as pyro
+import pyromat as pm
 import numpy as np
 import matplotlib.pyplot as plt
 
-air = pyro.get('ig.air')
+air = pm.get('ig.air')
 # Force the unit system into kJ,kg,bar,K
-pyro.config['unit_energy'] = 'kJ'
-pyro.config['unit_matter'] = 'kg'
-pyro.config['unit_pressure'] = 'bar'
-pyro.config['unit_temperature'] = 'K'
+pm.config['unit_energy'] = 'kJ'
+pm.config['unit_matter'] = 'kg'
+pm.config['unit_pressure'] = 'bar'
+pm.config['unit_temperature'] = 'K'
 
 # Let's design a gas turbine with a 100kW power output
 Wnet = 100.
@@ -24,8 +23,7 @@ Wnet = 100.
 #
 #(1) The inlet is ambient temperature and pressure.  In our example, we will
 #   use 1.013bar and 300K for p1 and T1
-p1 = 1.013
-T1 = 300.
+state1 = air.state(T=300.,p=1.01325)   # Establish the state of the inlet air
 
 #|Compressor| is ideally an isentropic process designed to compress the 
 # incoming air to a certain pressure ratio, pr.  Let's use pr=12.
@@ -33,30 +31,27 @@ pr = 12.
 
 #(2) Nothing about the compressor outlet is explicitly prescribed by design.
 # We'll have to calculate our way here.
-s1 = air.s(T1,p1)   # what was the entropy at (1)?
-p2 = p1*pr
-T2 = air.T_s(s=s1,p=p2)    # find T2 for s=s1 and p=p1*pr
+state2 = air.state(s=state1['s'], p=state1['p']*pr)
+
 # How much work did that require?
-wc = air.h(T2,p2) - air.h(T1,p1)
+wc = state2['h'] - state1['h']
 
 #|Combustor| is where we add heat.  We have to be careful not to damage
 #  the engine by adding too much heat.  We are limited by a maximum T3.
 #  For argument's sake, let's use 1700K.  That's pretty darn hot.
-T3 = 1700.
-p3 = p2
+state3 = air.state(T=1700, p=state2['p'])
+
 # How much heat did that take?
-qh = air.h(T3,p3) - air.h(T2,p2)
+qh = state3['h'] - state2['h']
 
 #|Turbine| is where we finally get our useful work.  Some of it will have to
 # go to the compressor to keep things going.  The rest of it, we keep.
 # The turbine outlet (4) is ambient pressure again, but its temperature
 # will be based on the turbine performance.
-s3 = air.s(T3,p3)
-s4 = s3 # Isentropic expansion to p1
-p4 = p1
-T4 = air.T_s(s=s4,p=p4)
+state4 = air.state(s=state3['s'], p=state1['p'])
+
 # How much work did we get?
-wt = air.h(T3,p3) - air.h(T4,p4)
+wt = state3['h'] - state4['h']
 # How much is left after we keep the compressor running?
 wnet = wt - wc
 
@@ -67,6 +62,20 @@ mdot = Wnet / wnet
 n = wnet / qh
 
 # Generate some process diagrams
+# First isolate the T,s coordinates
+s1 = state1['s']
+s2 = state2['s']
+s3 = state3['s']
+s4 = state4['s']
+T1 = state1['T']
+T2 = state2['T']
+T3 = state3['T']
+T4 = state4['T']
+p1 = state1['p']
+p2 = state2['p']
+p3 = state3['p']
+p4 = state4['p']
+
 plt.close('all')
 plt.figure(1)
 # isentropic compression is a vertical line
@@ -98,10 +107,10 @@ plt.text(s3+.1,T4,'(4)\nT={:.1f}\np={:.3f}'.format(float(T4),float(p4)),
     ha='left',backgroundcolor='white')
 # Add a summary
 plt.text(6.5,1200,
-"""$\dot{{m}}$ = {:.3f}kg/s
+"""$\\dot{{m}}$ = {:.3f}kg/s
 $p_r$={:.1f}
-$\eta$={:.3f}
-$\dot{{W}}_{{net}}$={:1}kW""".format(float(mdot),float(pr),float(n),float(Wnet)),
+$\\eta$={:.3f}
+$\\dot{{W}}_{{net}}$={:1}kW""".format(float(mdot),float(pr),float(n),float(Wnet)),
     backgroundcolor='white')
 plt.title('Brayton Cycle T-s Diagram')
 

@@ -1,4 +1,4 @@
-import pyromat as pyro
+import pyromat as pm
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -20,6 +20,17 @@ import matplotlib.pyplot as plt
 #
 #  Given the high and low pressures, this code determines the processes
 # so that the turbine exit (5) is precisely saturated steam.
+#
+#  There are multiple ways to approach a Rankine model.  In this one, 
+# we'll assume that the liquid exiting the condensor does not cool 
+# further than the saturation line, so T1 is the saturated liquid 
+# temperature at p1.
+#
+#  We'll approach the superheater design to attempt to place state 5 
+# precisely on the vapor saturation line. Reality will not be so kind,
+# and users may want to use different assumptions here.  After all, 
+# this is only a demo.
+
 
 # Use different color codes to change the color of the plots
 color = 'r'    # Red
@@ -39,43 +50,28 @@ Wnet = 100. # Let's make a 100kW engine
 
 
 # Get the steam data
-steam = pyro.get('mp.H2O')
+steam = pm.get('mp.H2O')
 
-# Assume the reservoir is a saturated liquid, as it would likely
-# be coming out of the condenser.  In reality some supercooling
-# is likely, but we will neglect it here.
-# States (5) and (1) will straddle the dome
-T1 = steam.Ts(p1)
-p5=p1   # Since it is spanning the done, (5) and (1) share T and p
-T5=T1
-h1,h5 = steam.hs(T=T1)
-s1,s5 = steam.ss(T=T1)
-d1,d5 = steam.ds(T=T1)
+# (1) Calculate the reservoir state
+# This will be saturated liquid at atmospheric pressure
+state1 = steam.state(p=p1, x=0.)
 
-# Isentropic compression of liquid water
-# It is common to assume that T1=T2 since liquid is very close 
-# to incompressible.  To compare results, remove the comment 
-# from the second line below.
-T2 = steam.T_s(p=p2,s=s1)
-#T2 = T1
-h2,s2,d2 = steam.hsd(T=T2,p=p2)
+# (2) Calculate the pump outlet state
+# This will be isentropic compression of the liquid
+state2 = steam.state(p=p2, s=state1['s'])
 
-# The boiler will span the dome
-# s2s, h2s, and T2s are the points where the process enters the dome
-T3 = steam.Ts(p=p2)
-p3 = p2
-p2s = p2
-T2s = T3
-s2s,s3 = steam.ss(T=T3) # these are faster with T and p
-h2s,h3 = steam.hs(T=T3) # specified
-d2s,d3 = steam.ds(T=T3)
+# (2s) Let state 2s be the point where the boiler heats the liquid to 
+# a saturated liquid.  It will be very close to (2).
+state2s = steam.state(p=p2, x=0.)
 
-# The turbine is an isentropic expansion to the low pressure
-# The superheater will end with the same entropy as s5
-p4 = p3
-T4 = steam.T_s(s=s5,p=p4)
-h4,s4,d4 = steam.hsd(T=T4,p=p4)
-# State (5) is already determined
+# (3) The boiler will span the dome
+state3 = steam.state(p=p2, x=1.)
+
+# (4,5) Next, the superheater will further heat the steam until it 
+# reaches the desired temperature.  To determine the amount of super-
+# heating required, first we establish the desired state 5.
+state5 = steam.state(p=p1, x=1.)
+state4 = steam.state(p=p2, s=state5['s'])
 
 
 # All the states are known, now.
@@ -83,19 +79,19 @@ h4,s4,d4 = steam.hsd(T=T4,p=p4)
 # How much work did the feed water pump do?
 # This might also be approximated as volume flow times
 # pressure change.
-w12 = -(h2-h1)
+w12 = state1['h'] - state2['h']
 
 # How much heat did the boiler add?
-q23 = h3-h2
+q23 = state3['h'] - state2['h']
 
 # How much heat did the superheater add?
-q34 = h4-h3
+q34 = state4['h'] - state3['h']
 
 # How much work did the turbine produce
-w45 = -(h5-h4)
+w45 = state4['h'] - state5['h']
 
 # How much heat is rejected by the condenser?
-q51 = h1-h5
+q51 = state1['h'] - state5['h']
 
 # calculate the net work per kg of water
 wnet = w45 + w12
@@ -109,7 +105,12 @@ n = wnet/qh
 Qboil = q23 * mdot
 Qsuper = q34 * mdot
 
+#####################################
 # Generate some diagrams
+#   Many users won't need to do this.
+#   It's just as valid to query the
+#   variables in the interpreter.
+#####################################
 # Let figure 1 be a T-s diagram
 f1 = plt.figure(1)
 if clear_plots:
@@ -141,40 +142,45 @@ ax2.plot(1./dL,p,'k')
 ax2.plot(1./dV,p,'k')
 
 # Process 1-2 (isentropic compression of a liquid)
-p = np.array([p1,p2])
-T = np.array([T1,T2])
-d = np.array([d1,d2])
-s = np.array([s1,s2])
+p = np.array([state1['p'],state2['p']])
+T = np.array([state1['T'],state2['T']])
+v = np.array([state1['v'],state2['v']])
+s = np.array([state1['s'],state2['s']])
 ax1.plot(s,T,color,linewidth=1.5)
-ax2.plot(1./d,p,color,linewidth=1.5)
+ax2.plot(v,p,color,linewidth=1.5)
 
 # Process 2-2s (constant-p heat until saturation)
-T = np.linspace(T2,T2s,10)
-p = p2 * np.ones(T.shape)
-s = steam.s(T=T,p=p)
-s[-1] = s2s # force the last points to be liquid - not vapor
-d[-1] = d2s # force the last points to be liquid - not vapor
-d = steam.d(T=T,p=p)
-ax1.plot(s,T,color,linewidth=1.5)
-ax2.plot(1./d,p,color,linewidth=1.5)
+T = np.linspace(state2['T'],state2s['T'],10)
+p = state2['p'] * np.ones(T.shape)
+curve = steam.state(T=T,p=p)
+curve['s'][-1] = state2s['s'] # force the last points to be liquid - not vapor
+curve['v'][-1] = state2s['v'] # force the last points to be liquid - not vapor
+
+ax1.plot(curve['s'],T,color,linewidth=1.5)
+ax2.plot(curve['v'],curve['p'],color,linewidth=1.5)
 
 # Process 2s-3 (constant-p boiling)
-ax1.plot([s2s,s3],[T2s,T3],color,linewidth=1.5)
-ax2.plot([1./d2s, 1./d3],[p2s,p3],color,linewidth=1.5)
+s = np.array([state2s['s'], state3['s']])
+T = np.array([state2s['T'], state3['T']])
+v = np.array([state2s['v'], state3['v']])
+p = np.array([state2s['p'], state3['p']])
+ax1.plot(s,T,color,linewidth=1.5)
+ax2.plot(v,p,color,linewidth=1.5)
 
 # Process 3-4 (constant-p superheating)
-T = np.linspace(T3,T4,20)
-p = p3*np.ones(T.shape)
-s = steam.s(T=T,p=p)
-d = steam.d(T=T,p=p)
-s[0] = s3
-d[0] = d3
-ax1.plot(s,T,color,linewidth=1.5)
-ax2.plot(1./d,p,color,linewidth=1.5)
+T = np.linspace(state3['T'],state4['T'],20)
+p = state3['p']*np.ones(T.shape)
+curve = steam.state(T=T,p=p)
+ax1.plot(curve['s'],T,color,linewidth=1.5)
+ax2.plot(curve['v'],p,color,linewidth=1.5)
 
 # process 4-5 (isentropic expansion)
-ax1.plot([s4,s5],[T4,T5],color,linewidth=1.5)
-ax2.plot([1./d4,1./d5],[p4,p5],color,linewidth=1.5)
+s = np.array([state4['s'], state5['s']])
+T = np.array([state4['T'], state5['T']])
+v = np.array([state4['v'], state5['v']])
+p = np.array([state4['p'], state5['p']])
+ax1.plot(s,T,color,linewidth=1.5)
+ax2.plot(v,p,color,linewidth=1.5)
 #p = np.linspace(p4,p5,20)
 #T = np.zeros(p.shape)
 #for index in range(p.size):
@@ -186,61 +192,64 @@ ax2.plot([1./d4,1./d5],[p4,p5],color,linewidth=1.5)
 
 # process 5-1 (constant-p heat rejection)
 # add the line across the dome
-ax1.plot([s1,s5],[T1, T5],color,linewidth=1.5)
-ax2.plot([1./d1,1./d5],[p1,p5],color,linewidth=1.5)
+s = np.array([state1['s'], state5['s']])
+T = np.array([state1['T'], state5['T']])
+v = np.array([state1['v'], state5['v']])
+p = np.array([state1['p'], state5['p']])
+ax1.plot(s,T,color,linewidth=1.5)
+ax2.plot(v,p,color,linewidth=1.5)
 
 
 # Add some labels
 if show_text:
-    ax1.text(s1-2.5,T1,
+    ax1.text(state1['s']-2.5,state1['T'],
     """(1) 
 T={0:.1f}K
 s={1:.3f}kJ/kg/K
 (2)
 T={2:.1f}K
-s={3:.3f}kJ/kg/K""".format(float(T1),float(s1),float(T2),float(s2)))
-    ax1.text(s3-3,T3+20,
+s={3:.3f}kJ/kg/K""".format(float(state1['T']),float(state1['s']),float(state2['T']),float(state2['s'])))
+    ax1.text(state3['s']-3,state3['T']+20,
     """(3) 
 T={0:.1f}K
-s={1:.3f}kJ/kg/K""".format(float(T3),float(s3)))
-    ax1.text(s4+.2,T4-100,
+s={1:.3f}kJ/kg/K""".format(float(state3['T']),float(state3['s'])))
+    ax1.text(state4['s']+.2,state4['T']-100,
     """(4) 
 T={0:.1f}K
-s={1:.3f}kJ/kg/K""".format(float(T4),float(s4)))
-    ax1.text(s5+.2,T5,
+s={1:.3f}kJ/kg/K""".format(float(state4['T']),float(state4['s'])))
+    ax1.text(state5['s']+.2,state5['T'],
     """(5) 
 T={0:.1f}K
-s={1:.3f}kJ/kg/K""".format(float(T5),float(s5)))
+s={1:.3f}kJ/kg/K""".format(float(state5['T']),float(state5['s'])))
     
-    v = 1./d1
-    ax2.text(v,p1/5.,
+    ax2.text(state1['v'],state1['p']/5.,
     """(1) 
 p={0:.2f}bar
-v={1:f}m$^3$/kg""".format(float(p1),float(v)))
-    v = 1./d2
-    ax2.text(v*1.5,p2*1.1,
+v={1:f}m$^3$/kg""".format(float(state1['p']),float(state1['v'])))
+    
+    ax2.text(state2['v']*1.5,state2['p']*1.1,
     """(2) 
 p={0:.2f}bar
-v={1:f}m$^3$/kg""".format(float(p2),float(v)))
-    v = 1./d3
-    ax2.text(v,p3,
+v={1:f}m$^3$/kg""".format(float(state2['p']),float(state2['v'])))
+    
+    ax2.text(state3['v'],state3['p'],
     """(3) 
 p={0:.2f}bar
 v={1:f}m$^3$/kg
 (4)
 p={2:.2f}bar
-v={3:f}m$^3$/kg""".format(float(p3),float(v),float(p4),float(1./d4)))
-    v = 1./d5
-    ax2.text(v/5,p5/5,
+v={3:f}m$^3$/kg""".format(float(state3['p']),float(state3['v']),float(state4['p']),float(state4['v'])))
+
+    ax2.text(state5['v']/5,state5['p']/5,
     """(5) 
 p={0:.2f}bar
-v={1:f}m$^3$/kg""".format(float(p5),float(v)))
+v={1:f}m$^3$/kg""".format(float(state5['p']),float(state5['v'])))
     
-    ax1.text(-.5,575,"""$\dot{{m}}$ = {0:.3f}kg/s
-$\eta$ = {1:.3f}
-$\dot{{W}}_{{NET}}$ = {2:.0f}kW
-$\dot{{Q}}_{{BOIL}}$ = {3:.1f}kW
-$\dot{{Q}}_{{SUPER}}$ = {4:.1f}kW""".format(float(mdot),float(n),float(Wnet),float(Qboil),float(Qsuper)))
+    ax1.text(-.5,575,"""$\\dot{{m}}$ = {0:.3f}kg/s
+$\\eta$ = {1:.3f}
+$\\dot{{W}}_{{NET}}$ = {2:.0f}kW
+$\\dot{{Q}}_{{BOIL}}$ = {3:.1f}kW
+$\\dot{{Q}}_{{SUPER}}$ = {4:.1f}kW""".format(float(mdot),float(n),float(Wnet),float(Qboil),float(Qsuper)))
 
 ax1.grid('on')
 ax2.grid('on')
