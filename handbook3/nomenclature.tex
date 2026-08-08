@@ -1,0 +1,90 @@
+\section*{Foreword}\label{sec:foreword}
+\addcontentsline{toc}{chapter}{\nameref{sec:foreword}}
+
+Because this book is long and has never been professionally edited, it suffers from the kinds of typos and errata that plague any work of its size.  That said, I have taken some pains to be certain that the information is accurate.  Still, errors do creep in.
+
+Corrections in the Second Edition:
+\begin{enumerate}
+\item Equation 6.9 originally read $p=3mn\left<u^2\right>$, which is an error. It now reads $p=\frac{1}{3}mn\left<u^2\right>$.
+\end{enumerate}
+
+Changes in the Third Edition:
+\begin{enumerate}
+\item Originally, the entropy of mixing was not calculated in the \texttt{igmix} class, and it was given no discussion in this handbook. The treatment in Chapter \ref{ch:ig} (specifically Sections \ref{sec:ig:mix} and \ref{sec:ig:igmix} now correctly treats the entropy of mixing.
+\item $f$ was adopted for Helmholtz free energy.  In Chapter \ref{ch:mp}, $a$ was replaced with $f$. Added Section \ref{sec:intro:f}.
+\item $g$ was adopted for Gibbs energy.  Added Section \ref{sec:intro:g}.
+\item $a$ was adopted for speed of sound.  Added Section \ref{sec:intro:a}.
+\item A number of minor corrections (e.g. typos, grammar, style) were made throughout.
+\end{enumerate}
+
+\section*{Nomenclature}\label{sec:nom}
+\addcontentsline{toc}{chapter}{\nameref{sec:nom}}
+
+These variables and units are restricted to derivations in this document.  Because \PM\ has a user-configurable unit system, any of these may be expressed in alternate units.  
+
+The following are parameters with units.
+
+\vspace{1em}
+\begin{tabular}{|ccl|}
+\hline
+Symb. & Units & Description\\
+\hline
+$a$ & m/s & Speed of sound\\
+$c$ & J/kg/K & Specific heat\\
+$e$ & J/kg & Internal energy\\
+$f$ & J/kg & Free energy\\
+$g$ & J/kg & Gibbs energy\\
+$h$ & J/kg & Enthalpy\\
+$k$ & J/K & Boltzmann constant\\
+$M$ & kg & Mass\\
+$N$ & count & Number of moles\\
+$n$ & m$^{-3}$ & Number density\\
+$p$ & Pa & Pressure\\
+$q$ & J kg$^{-1}$ & Normalized heat addition\\
+$R$ & J kg$^{-1}$ K$^{-1}$ & Gas constant\\
+$R_u$ & J kmol$^{-1}$ K$^{-1}$ & Universal gas const.\\
+$s$ & J/kg/K & Entropy\\
+$T$ & K & Temperature\\
+$v$ & m$^3$/kg & Specific volume\\
+$W$ & kg/kmol & Molar mass\\
+$\rho$ & kg/m$^3$ & Density\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+The following are dimensionless parameters.
+
+\vspace{1em}
+\begin{tabular}{|ccl|}
+\hline
+Symb. & Def. & Description\\
+\hline
+$\alpha$ & $f / RT$ & ND Free energy\\
+$\delta$ & $\rho/\rho_c$ & ND Density\\
+$\tau$ & $T_c / T$ & ND Temperature\\
+$\gamma$ & $c_p / c_v$ & Sp. heat ratio\\
+$y_i$ & $m_i / m$ & Mass fraction\\
+$\chi_i$ & $N_i / N$ & Mole fraction\\
+$\pi$ & $p / p_c$ & ND Pressure\\
+\hline
+\end{tabular}
+\vspace{1em}
+
+The following are subscripts used throughout the document.
+
+\vspace{1em}
+\begin{tabular}{|cl|}
+\hline
+Symb. & Description\\
+\hline
+$x_c$ & Critical point\\
+$x_f$ & Formation property (e.g. enthalpy of formation)\\
+$x_p$ & Constant-pressure (sp.heat)\\
+$x_t$ & Triple point\\
+$x_v$ & Constant-volume (sp.heat)\\
+$x^\circ$ & Property at reference pressure\\
+$\overline{x}$ & Property in molar or number units\\
+\hline
+\end{tabular}
+
+Special constants used in more fundamental calcuations are defined throughout this document.  Many are listed explicitly in Table \ref{tab:constants} in Chapter \ref{ch:units}.

@@ -1,0 +1,352 @@
+\chapter{Getting started}\label{ch:start}
+
+In this chapter, we discuss everything you should need to get your own installation of \PM\ working and providing properties.
+
+\section{Installation}
+
+\PM\ is distributed primarily through the Python package index (\url{https://pypi.org/}), but it can also be downloaded and installed ``manually'' if you have Python's setuptools installed.  \PM\ is written in plain Python, so there is no need to compile to binaries.  All data are encoded in \texttt{json} format (\url{https://docs.python.org/3/library/json.html}), and the configuration files are executable python code.  The result is that all of the code, data, and configuration files are in human readable text using only the ASCII character set.
+
+\subsection{Prerequisites}
+
+Obviously, a Python interpreter needs to be installed on your system, but \PM\ is deliberately designed to minimize the number of prerequisites.  Only Numpy version 1.7 or later is required.
+
+It is worth noting that \PM\ was originally developed in Python 2, but support for Python 3 was designed in from the start.  As of January 2020, Python 2 was officially depreciated, and \PM\ testing on Python 2 halted.  On a number of popular Linux systems, Python 2 is still the system default, though, so users should take note.  If your system has both Python 2 and Python 3 installed, it may be necessary to replace \texttt{python} in the instructions below with \texttt{python3} to specify the version.
+
+\subsection{Installation with \texttt{pip}}
+
+Python uses a package called \texttt{pip} (\url{https://pip.pypa.io}) to manage its own software.  You can use it to automatically download and install \PM\ and its dependencies with a single command.
+
+{\bf In an Anaconda installation} start the ``Anaconda Prompt'' to bring up a terminal.  See \url{https://www.anaconda.com/} for more information.
+
+{\bf In Windows} with a system-wide Python interpreter, bring up a command prompt or type \texttt{cmd} in the ``run'' field to bring up the prompt.  You may need to run the terminal as an administrator.  If so, right click on the icon and open using the ``run as administrator'' option in the menu.
+
+{\bf In Linux or MacOS} bring up a terminal any way you like.  In many popular installations \texttt{Ctrl+Alt+T} works by default.
+
+First, it is important to make sure your python package manager is installed and updated.  A Python installation without \texttt{pip} is ususual, but they do still appear from time to time.  If you do not have \texttt{pip} on your system, follow the directions from the Python packaging authority to get it up and working: \url{https://pip.pypa.io/en/stable/installation/}.
+
+On just about all systems, entering the following commands in a terminal will update \texttt{pip} and install \PM.
+\begin{lstlisting}[language=bash]
+$ python -m pip install --upgrade pip
+$ python -m pip install --upgrade pyromat
+\end{lstlisting}
+Note that you don't need to type the \verb|$|; it represents the command line prompt. On a Windows system, it might appear \verb|C:\>|, on most Unix-like terminals, it may appear \verb|user@machine:~\$|.  Your prompt may look a little different, and that's OK.  If Python is already correctly installed these commands should get you going.
+
+What are these commands doing?  The first part, \verb|python -m pip|, is executing Python's \texttt{pip} module with the options you pass next.  Next, \verb|install --upgrade|, tells \verb|pip| that you want to install something over the internet from the python package index (\url{https://pypi.org/}), and that if there is a newer version of an existing package available, it should be upgraded.  Finally, the last argument tells \texttt{pip} what to install.  So, the first line is telling \verb|pip| to upgrade itself, and the second line is actually installing \verb|pyromat|.
+
+It should be noted that many Linux systems still use Python 2 by default, so you may want to specify Python 3 specifically.  In most systems, this will make certain that the installation is in the Python 3 interpreter and not Python 2.
+\begin{lstlisting}[language=bash]
+$ python3 -m pip install --upgrade pip
+$ python3 -m pip install --upgrade pyromat
+\end{lstlisting}
+
+Installing in system-wide Python installations has gone out of popularity in recent years, but if that's what you're doing, you may need to run \texttt{pip} as an administrator.  Most installations these days are in virtual environments or some other needlessly complicated setup that obfuscates the whole thing, so if you're doing this the old-school global way, you have my respect, and I want to support you.
+
+On a Windows system, you will need to restart the prompt as a priviledged user (administrator).  Usually, you can right-click and select ``run as administrator'' when you start the command prompt.
+
+On a Linux, Mac, or Unix system, you may need to run as a super user, so you should use
+\begin{lstlisting}[language=bash]
+$ sudo -H python -m pip install --upgrade pip
+$ sudo -H python -m pip install --upgrade pyromat
+\end{lstlisting}
+The \texttt{-H} switch is recommended by the Python package index to be certain that the \texttt{root} user's home directory is used during install.
+
+\subsection{Manual installation with \texttt{git}}
+
+So-called manual installation is also quite easy using \texttt{git} if you already have Python's \texttt{setuptools} (\url{https://setuptools.readthedocs.io/en/latest/}) installed and udpated.
+
+Just clone the \texttt{git} repository, then navigate into the root directory and run the \texttt{setup.py} installation script.  This is the stage where an error will be generated if there is a problem with \texttt{setuptools}.
+
+\begin{lstlisting}[language=bash]
+$ git clone https://github.com/chmarti1/pyromat.git
+$ cd pyromat
+$ python setup.py install
+\end{lstlisting}
+
+\subsection{Manual installation from Sourceforge}
+
+This method has largely fallen out of favor, but it is still a perfectly valid way to perform an installation.  Like the GitHub method, this method only works if you have \texttt{setuptools} (\url{https://setuptools.readthedocs.io/en/latest/}) installed and updated.
+
+Download the latest version of \PM\ from \url{https://sourceforge.net/projects/pyromat/}.  Select whichever compression type that suits you (e.g. zip, bz2, gzip).  Then, extract the package, creating a \texttt{pyromat} directory.
+
+Bring up a command prompt (see above for how to do that on your system), and navigate to the extracted directory using the appropriate \texttt{cd} commands (\url{https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cd}).
+
+Finally, execute the Python setup script.
+
+\begin{lstlisting}[language=bash]
+$ cd /path/to/your/dir
+$ python setup.py install
+\end{lstlisting}
+
+\section{Using \PM }
+
+This section assumes that users already have a basic familiarity with the Python command line.  For users that are just getting started, try sampling the official Python Tutorial (\url{https://docs.python.org/3/tutorial/index.html}).
+
+First, open a command prompt (terminal) and start Python in interactive mode.
+\begin{lstlisting}[language=Python]
+$ python3  # On my system, I need to specify 3
+Python 3.6.9 (default, Jan 26 2021, 15:33:00) 
+[GCC 8.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> 
+\end{lstlisting}
+
+\subsection{Importing}
+
+Import \PM\ like any other package.  
+\begin{lstlisting}[language=Python]
+>>> import pyromat as pm
+\end{lstlisting}
+It automatically loads its modules, and automatically seeks out and loads data.
+
+Once loaded, there are only three functions in the base \PM\ package that most users will ever need: \texttt{get()}, \texttt{search()}, and \texttt{info()}.  These are tools that interact with the \PM\ data collection to retrieve data class instances and print information about them.  All of the rest of the functionality is offered by the class instances themselves.
+
+\subsection{Retrieving substance data}
+
+\PM\ identifies substances by a unique string called the substance identifier (ID).  The substance ID string for ideal gas nitrogen is \texttt{'ig.N2'}.  The \texttt{ig} prefix indicates that the substance model belongs to \PM's ideal gas collection.  The rest of the string is the substance's chemical formula using Hill notation.  
+
+Hill notation removes the ambiguity in how a chemical formula is represented by mandating that all substances with the same atomic composition will be represented by the same strings.  The atomic contents are listed in order of carbon, hydrogen, and then all others in alphabetical order.
+
+By deliberately omitting all chemical structure from the notation, there will be collisions between compounds with the same atomic composition in dissimilar arrangements.  So far, these collisions are rare in the \PM\ data collection, and they are addressed by appending an underscore and an index.  For example, the CNN radical and methanetetraylbis-amidogen both have the same chemical formula, so the former has the ID string, \texttt{ig.CN2}, and the latter is listed under \verb|ig.CN2_1|.
+
+Given an ID string, the \texttt{get} function returns the corresponding class instance.  This instance provides all of the property methods.  This example calculates the ideal gas enthalpy of nitrogen at 492 K.
+\begin{lstlisting}[language=Python]
+>>> n2 = pm.get('ig.N2')
+>>> n2.h(T=492)
+array([202.68455864])
+\end{lstlisting}
+
+In this example, the variable, \texttt{n2}, is an ideal gas class instance with all the methods (like \texttt{h()}) needed to calculate its properties.
+
+
+\subsection{Searching for substances with \texttt{search()}}
+
+There are about 1,000 unique substance models in PYroMat version 2.2.0, so manually skimming through the list is not a very efficient means of finding the species you want.  The \texttt{search()} function returns sets of substances that match the criteria supplied.  Those sets can either be used directly, or the \texttt{info()} function can display more information (see below).
+
+Searching is done by specifying keywords to the \texttt{search()} function.  Each one adds a new criterion that further narrows the search.  The results are 
+
+The {\bf name} keyword is used to search for an exact match with part of the substance ID or for a case-insensitive match with one of the substance's names.  For example, 
+\begin{lstlisting}[language=Python]
+>>> pm.search(name='Acetylene')
+{<ig2, ig.C2F2>, <ig2, ig.C2HCl>, <ig2, ig.C2HF>, ...
+>>> pm.search(name='C2H')
+{<ig2, ig.C2HCl>, <ig2, ig.C2HF>, <ig2, ig.C2HN>, ...
+\end{lstlisting}
+
+These show how a name string can be used to match part of one of a substance's common name \emph{or} part of the substance ID string.
+
+The {\bf pmclass} is the name of the class that is used to implement the data model for each substance.  As of version 3.0.1, there are four classes implemented: \texttt{ig}, \texttt{ig2}, \texttt{igmix}, \texttt{mp1}, and \texttt{mp2}. These are described in detail in sections \ref{sec:ig:ig}, \ref{sec:ig:ig2}, \ref{sec:ig:igmix}, \ref{sec:mp:mp1}, and \ref{sec:mp:mp2} respectively.
+
+The {\bf collection} keyword allows users to specify the collection to which species must belong.  This forces the substance id string to begin with ``\verb|collection.|''  For example \texttt{collection='ig'} forces all of the substances returned to belong to the ideal gas collection.
+
+The {\bf InChI}\cite{inchi:website} and {\bf CAS}\cite{cas:website} substance identifiers can also be used to narrow the search.  Since these are unique substance identifiers, they will only return multiple entries when the same substance is represented in multiple collections.  To specify these, use \texttt{inchi=...} or \texttt{cas=...} as keyword arguments.  It is important to keep in mind that as of version 3.0.1, not all entries have had these values added to the data, so some results may not come back as expected.
+
+Probably the most powerful of the search tools, the {\bf contains} keyword allows users to specify the atomic contents of the substance.  Values may be the string name of an element, or lists of element name strings, or dictionaries with element names and their precise amounts.  For example, these queries return all substances (1) with any amount of iron, (2) with any amount of bromine and carbon, and (3) with two hydrogen, one oxygen, and any nonzero amount of carbon.
+\begin{lstlisting}[language=Python]
+>>> pm.search(contains='Fe')
+{<ig, ig.Br4Fe2>, <ig, ig.FFe>, <ig2, ig.H2FeO2>, ...
+>>> pm.search(contains=['Br','C'])
+{<ig, ig.CBrF3>, <ig, ig.CBr4>, <ig, ig.CBr>, ...
+>>> pm.search(contains={'H':2, 'O':1, 'C':None})
+{<ig2, ig.C2H2O>, <ig2, ig.CH2O>}
+\end{lstlisting}
+
+Because the \texttt{search()} function returns a Python \texttt{set} instance, applications that demand more nuanced search operations can use the set operations to combine the results of separate searches.  For example, to find substances that contain two hydrogen \emph{or} three carbon,
+\begin{lstlisting}[language=Python]
+>>> h2 = pm.search(contains={'H':2})
+>>> c3 = pm.search(contains={'C':3})
+>>> h2.union(c3)
+{<ig, ig.H2P>, <ig2, ig.C6H2>, <ig2, ig.CH2Cl2>, ...
+\end{lstlisting}
+For more tips and tricks with sets, see the Python documentation \url{https://docs.python.org/3/tutorial/datastructures.html#sets}.
+
+\subsection{Finding substances with \texttt{info()}}
+
+When called without any arguments, the \texttt{info()} function lists all of the substances available, and it lists all of the property methods available for each.  That probably won't be useful for most users, so the function also passes any keyword arguments to \texttt{search()} internally to narrow down the set.
+\begin{lstlisting}[language=Python,style=tinystyle]
+>>> pm.info(contains=['Br','C'])
+  PYroMat
+Thermodynamic computational tools for Python
+version: 2.2.0
+------------------------------------------------------------------------------
+ ID       : class : name                  : properties
+------------------------------------------------------------------------------
+ ig.CBr   :  ig   : Bromomethylidyne      : T p d v cp cv gam e h s mw R    
+ ig.CBr4  :  ig   : Carbon tetrabromide   : T p d v cp cv gam e h s mw R    
+ ig.CBrF3 :  ig   : Bromotrifluoromethane : T p d v cp cv gam e h s mw R    
+ ig.CBrN  :  ig   : Cyanogen bromide      : T p d v cp cv gam e h s mw R    
+\end{lstlisting}
+
+Alternately, an iterable of substance instances (like the one generated by \texttt{search()} may be passed directly to \texttt{info()}.  
+
+The table shows each substance listed by its ID string and one of its common names (if one is included in the data).  There is also a list of the properties currently offered in the data model.
+
+If a substance ID string, a single substance instance, or a set (or other iterable) with only one entry is passed, the \texttt{info()} function prints detailed information on that substance.
+\begin{lstlisting}[language=Python,style=tinystyle]
+>>> pm.info('ig.N2')
+***
+Information summary for substance: "ig.N2"
+***
+
+    N 
+     2
+
+             Names : Nitrogen
+                     Nitrogen gas
+                     N2
+                     UN 1066
+                     UN 1977
+                     Dinitrogen
+                     Molecular nitrogen
+                     Diatomic nitrogen
+                     Nitrogen-14
+  Molecular Weight : 28.01348
+        CAS number : 7727-37-9
+      InChI string : InChI=1S/N2/c1-2
+        Data class : ig2
+       Loaded from : /home/chris/Documents/pyromat/src/pyromat/data/ig2/N2.hpd
+      Last updated : 21:11 April 20, 2022
+
+The supporting data for this object were adapted from: B. McBride, S.
+Gordon, M. Reno, "Coefficients for Calculating Thermodynamic and Transport
+Properties of Individual Species," NASA Technical Memorandum 4513, 1993.
+\end{lstlisting}
+
+\subsection{In-line documentation}
+
+While it is also designed to run efficiently in scripts, all aspects of \PM\ were designed with ease of use from the command line in mind.  Most users will first learn \PM\ through the command line and then go on to write scripts that automate their calculations.  
+
+With that in mind, every class instance, every method, and every module has in-line documentation that can be accessed using Python's built-in \texttt{help()} function.  For example, try typing:
+\begin{lstlisting}[language=Python]
+>>> help(n2)
+>>> help(n2.h)
+>>> help(pm)
+\end{lstlisting}
+
+\section{Property interface}
+
+The property methods that belong to the many substance class instances use flexible arguments that are as standardized as is practical.  Details about the individual properties and the theory behind them is included in chapters \ref{ch:ig} and \ref{ch:mp}, but there are some general rules that apply to all substances in \PM.
+
+\subsection{Property method arguments}
+
+With a few special exceptions, a thermodynamic state can be specified with any two properties (except specific heats).  For example,
+\begin{lstlisting}[language=Python]
+>>> n2 = pm.get('ig.N2')
+>>> T = 452.
+>>> p = 14.
+>>> n2.s(T=T, p=p)
+array([6.49072181])
+>>> n2.s(T=T, d=n2.d(T=T, p=p))
+array([6.49072181])
+\end{lstlisting}
+Or, with multi-phase data,
+\begin{lstlisting}[language=Python]
+>>> n2 = pm.get('mp.N2')
+>>> n2.s(T=T, p=p)
+array([6.48696146])
+>>> n2.s(T=T, d=n2.d(T=T, p=p))
+array([6.48696146])
+>>> n2.s(T=100, x=0.5)
+array([4.18094321])
+\end{lstlisting}
+The last line uses quality to specify a 50/50 mixture of liquid and vapor nitrogen at 100 K.
+
+This works with all basic properties (see section \ref{sec:intro:basic}) $T$, $p$, $\rho$, $v$, and $x$ (multi-phase only).  In ideal gases, specifying $e$ or $h$ is equivalent to specifying $T$, so they can be expressed in almost any combination, just like a basic property.  However, simultaneously specifying $h$, $e$, and/or $T$ to an ideal gas property triggers an exception.  Meanwhile, multi-phase classes do not tolerate simultaneously specifying $h$, $e$, and $s$; not because it is theoretically invalid, but because it causes potentially unstable numerical iteration.  These nuances are tabulated in Tables \ref{tab:props:ig} and \ref{tab:props:mp}.
+
+Other properties like $e$, $h$, and $s$, may be specified as well, but only one at a time with a basic property.  For example, \PM\ does not support property evaluations with $h$ and $s$ simultaneously.  Instead $s$ \emph{or} $h$ may be specified with one of the basic properties like $T$.
+\begin{lstlisting}[language=Python]
+>>> n2.h(T=100,x=0.5)
+array([7.27884341])
+>>> n2.h(s=4.18090744, T=100)
+array([7.27884313])
+>>> n2.T(s=4.18090744, h=7.27884313)
+  ...
+pyromat.utility.PMParamError: Properties may not be specified together: s, h
+\end{lstlisting}
+
+Note that some numerical accuracy is lost in the process of inverting the property.  Specifying a property like entropy is also far more computationally expensive than specifying basic properties like temperature, density, or pressure.  As a result, it is best practice to calculate temperature, density, pressure, or quality and calculate other properties in terms of those.
+\begin{lstlisting}[language=Python]
+>>> import pyromat as pm
+>>> n2.T(s=n2.s(T=300,p=2.5), p=2.5)
+array([299.99994672])
+\end{lstlisting}
+
+\subsection{Default values}
+
+It is not unusual that users may want vaguely defined properties.  For example, "what is the specific heat of water?"  That question has an infinite number of answers depending on the state of the water, so a property method really can't answer it.  On the other hand, when users want properties without specifying a state, they usually mean "\ldots at standard conditions."
+
+All property methods apply default primary property values when properties are unspecified.  For example,
+\begin{lstlisting}[language=Python]
+>>> h2o = pm.get('mp.H2O')
+>>> h2o.cp()
+array([4.18131499])
+\end{lstlisting}
+tells the user that the specific heat of liquid water is about 4.18 kJ/kg/K at 273.15 K and 1.01325 bar.  That default temperature and pressure can be changed by setting the \verb|def_T| and \verb|def_p| parameters in \texttt{pm.config}.  See chapter \ref{ch:config} for more information on configuring \PM.
+
+When only one property is specified, the second property will revert to a default value.  If temperature is specified, then pressure reverts to its default.  If any other property is specified, then temperature reverts to its default and pressure is unspecified.  For example,
+\begin{lstlisting}[language=Python]
+>>> h2o.cp(T=540)  # T=540K, p=1.01325bar
+array([1.99666454])
+>>> h2o.cp(p=0.01) # T=273.15K, p=0.01bar
+array([1.87429701])
+>>> h2o.cp(d=.01)  # T=273.15K, d=.01kg/m3
+array([1.87870465])
+\end{lstlisting}
+
+Note that the default values are specified in whatever units \PM\ has been configured to use.  By default, \PM\ uses K, kJ, kg, bar, m$^3$.  If the unit system is changed, the default values should also be changed to reflect the intended values in the new unit system.  See chapter \ref{ch:units} for more information on units and chapter \ref{ch:config} for more information on configuring \PM.
+
+\subsection{Inverse methods}\label{sec:start:inverse}
+
+Before version 2.2.0, the interface only accepted \emph{basic properties} (see section \ref{sec:intro:basic}) $T$, $p$, $\rho$, and $x$.  To handle cases where users had secondary properties like entropy or enthalpy, methods like \verb|T_s| were created to calculate ``temperature from entropy'' and one other property.  Originally, \verb|T_s|, \verb|p_s|, \verb|d_s|, \verb|T_h|, and other \emph{inverse property} methods were specific to the class and the property.  The new interface introduced in version 2.2.0 obsoleted these methods, but they are still available for reverse compatibility.  Table \ref{tab:start:inverse} shows the historical inverse property methods that are still available on the basic classes.  They should not be used in new codes.
+
+\begin{table}\label{tab:start:inverse}
+\centering
+\caption{Inverse property methods and their availability by class}
+\begin{tabular}{|c|ccc|}
+\hline
+ & \texttt{ig} & \texttt{ig2} & \texttt{mp1}\\
+\hline
+\verb|T_h| & \CheckedBox & \CheckedBox & \CheckedBox\\
+\verb|T_s| & \CheckedBox & \CheckedBox & \CheckedBox\\
+\verb|d_s| & \Square & \Square & \CheckedBox\\
+\verb|p_s| & \CheckedBox & \CheckedBox & \Square\\
+\hline
+\end{tabular}
+\end{table}
+
+New codes designed to determine temperature (or any other property) from enthalpy or entropy should merely use a direct call to \texttt{T()} or other desired methods.  
+
+
+\subsection{Tips and tricks}
+
+There are some guidelines that users can use to obtain dramatically better performance out of \PM.
+
+{\bf Avoid calculating property values in a for loop.}  Instead, construct property values as arrays, lists, tuples, or other iterables and pass them to a single property method call.  For example,
+\begin{lstlisting}[language=Python]
+>>> import numpy as np
+>>> import pyromat as pm
+>>> h2o = pm.get('mp.h2o')
+>>> ###### DON'T DO THIS ######
+>>> h = []
+>>> for T in np.linspace(300,1000,101):
+...     h.append(h2o.h(T))
+... 
+>>> ###### Do this instead ######
+>>> T = np.linspace(300,1000,101)
+>>> h = h2o.h(T)
+\end{lstlisting}
+On many systems, the first code segment can take four or five seconds to run!  The second code segment consistently takes a small fraction of a second to run and makes for much cleaner code.
+
+\PM\ is written to assume that all inputs and outputs are multi-dimensional arrays.  Simple floating point scalars are taken to be special cases.  Programming numerical codes like property evaluation in plain Python has a steep numerical penalty, but much of that can be regained by leaning on Numpy's (\url{https://numpy.org}) compiled back-end for efficient numerical methods on arrays.
+
+{\bf Ideal gases are faster than the \texttt{mp1} model.}  Ideal gases only have to evaluate a polynomial.  The multi-phase \texttt{mp1} model requires multiple parallel polynomials with computationally expensive exponential terms.  Single equation-of-state multi-phase models sacrifice computational speed in favor of a single model that works well in liquid, gas, near critical, and super-critical states.
+
+{\bf Prefer temperature and density when working with multi-phase substances.}  The \texttt{mp1} class calculates all properties (including pressure) in terms of temperature and density.  When another combination of properties is specified (e.g. temperature and pressure) an iterative routine has to run first to isolate temperature and density.  That is why the example above takes so long to run; it requires two iterative algorithms run in series.  When a series of properties are needed at a given state, it is much faster to calculate the density first and pass temperature and density to all of the successive property methods.
+
+{\bf Using the \texttt{state()} method is faster than separate calls to properties.}  In all classes, the \verb|state()| method minimizes the number of back-end polynomial evaluations to calculate the properties at a state.  If a user needs more than two properties, chances are good that it is worth it to just go ahead and calculate them all.  Multi-phase properties especially require the calculation of a number of intermediate parameters that can be re-used in successive property evaluations.
+
+{\bf The \texttt{mp1} property methods can return quality too.}  When running a property method like \verb|T()|, it is often a good idea to go ahead and calculate the quality by setting the optional keyword \verb|quality=True|.  All of these routines have to calculate the saturation properties anyway, so one might as well save the redudnant steps.
+\begin{lstlisting}[language=Python]
+>>> T,x = h2o.T(s=4.331, p=1.01325, quality=True)
+>>> print(T,x)
+[373.12429581] [0.50004124]
+\end{lstlisting}

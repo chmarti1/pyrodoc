@@ -1,0 +1,57 @@
+This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: handbook.aux
+A level-1 auxiliary file: nomenclature.aux
+A level-1 auxiliary file: intro.aux
+A level-1 auxiliary file: start.aux
+A level-1 auxiliary file: config.aux
+A level-1 auxiliary file: units.aux
+A level-1 auxiliary file: regdat.aux
+A level-1 auxiliary file: ig.aux
+A level-1 auxiliary file: multiphase.aux
+A level-1 auxiliary file: numerical.aux
+The style file: ieeetr.bst
+Database file #1: pyrodoc.bib
+Warning--empty institution in iapws:2014
+You've used 31 entries,
+            1876 wiz_defined-function locations,
+            655 strings with 8726 characters,
+and the built_in function-call counts, 6786 in all, are:
+= -- 658
+> -- 270
+< -- 4
++ -- 103
+- -- 72
+* -- 453
+:= -- 971
+add.period$ -- 37
+call.type$ -- 31
+change.case$ -- 29
+chr.to.int$ -- 0
+cite$ -- 32
+duplicate$ -- 380
+empty$ -- 660
+format.name$ -- 72
+if$ -- 1695
+int.to.chr$ -- 0
+int.to.str$ -- 31
+missing$ -- 25
+newline$ -- 102
+num.names$ -- 27
+pop$ -- 107
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 241
+stack$ -- 0
+substring$ -- 251
+swap$ -- 146
+text.length$ -- 4
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 1
+while$ -- 50
+width$ -- 33
+write$ -- 300
+(There was 1 warning)
