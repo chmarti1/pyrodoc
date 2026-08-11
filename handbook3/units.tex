@@ -1,6 +1,6 @@
 \chapter{Units}\label{ch:units}
 
-\PM\ handles a wide variety of units automatically, but interested users are also welcome to use the back-end algorithms for their own purposes.  All of the core substance methods deal in their own native units, but the \verb|pyromat.units| module contains the tools that are responsible for converting to and from the units specified in the \verb|pyromat.config| system (see Chapter \ref{ch:config}).
+\PM\ handles a wide variety of units automatically.  The configuration system (see Chapter \ref{ch:config}) allows users to select the units they prefer when interacting with the \PM\ user layer.  Meanwhile the raw data that form the back-end substance models are coded in standard units unique to each class.  The \verb|pyromat.units| module provides the tools that translate between them.  Interested users can use the back-end algorithms for their own purposes to convert between most units users need for their calculating pleasures.  
 
 A list of all currently available units is available by typing
 \begin{lstlisting}[language=Python]
@@ -13,22 +13,23 @@ or
 \end{lstlisting}
 To obtain information specific to one of the unit classes (length, for example), type
 \begin{lstlisting}[language=Python]
->>> help(pm.units.length)
+>>> pm.units.length.get()
+dict_keys(['km', 'm', 'cm', 'mm', 'um', 'nm', 'A', 'in', 'nmi', 'ft', 'yd', 'mile', 'mi'])
 \end{lstlisting}
 
 The unit systems used by the property methods and their corresponding configuration entries are listed in Tables \ref{tab:properties} and \ref{tab:units}.  
 
 This chapter infuses a little history along with the information \PM\ users are likely to find useful when interacting with the unit conversion system.
 
-There may seem to be a chauvinism in the author's choice of some units to include (such as the esoteric US customary volumetric units), and some of the sources are somewhat biased in favor of the US National Institute of Standards and Technology (NIST).  The author acknowledges this bias.  It is hoped that the reader will be reassured that first and foremost, the author has worked to include every unit common in international scientific and engineering fields.  Only then, did I indulge in a fascination in researching the history of the units I knew in my childhood.  
+There may seem to be a chauvinism in the author's choice of some units to include (such as the esoteric US customary volumetric units), and some of the sources are somewhat biased in favor of the US National Institute of Standards and Technology (NIST).  The author acknowledges this bias.  It is hoped that the reader will be reassured that first and foremost, units common in international scientific and engineering fields were included.  The inclusion of some (perhaps out-dated) units peculiar to the US is mostly an indulgence in the author's curiosity.
 
 \section{Unit definitions}\label{sec:units:def}
 
-The Bureau International des Poids et Mesures (BIPM) International Committee for Weights and Measures (CIPM) is the entity responsible for the definition of the fundamental units on which the SI system is based.  Nearly all other units in wide use are now derived from the SI units in some way, so rigorous treatment of their formal definition is worth some attention.  There are countless web-based unit conversion calculators, but few use sufficient care in the derivation of their conversion factors to be trusted for serious work.
+The Bureau International des Poids et Mesures (BIPM) International Committee for Weights and Measures (CIPM) is the entity responsible for the definition of the fundamental units on which the SI system is based, and from which almost all other units trace their definition.  Nearly all other units in wide use are now derived from the SI units in some way, so rigorous treatment of their formal definition is worth some attention.  There are countless web-based unit conversion calculators, but few use sufficient care in the derivation of their conversion factors to be trusted for serious work.
 
 The second (time), meter (length), kilogram (mass), ampere (electrical current), kelvin (temperature), mole (quantity), and candela (luminous intensity) are the fundamental units in terms of which all other measures are derived.  Contemporary definitions for these units are constructed so that certain important physical constants (like Plank's or Boltzmann's constants) may be represented exactly with finite precision, so the conversion factors used in \PM\ are, by definition, exact.
 
-Before the turn of the twentieth century, the United States and the British governments had adopted the international yard and avoirdupois pound.  This move re-defined the pound and the yard (and all those based on them) in terms of the meter and kilogram using an exact relationship with finite precision.  The contemporary definitions for those fundamental units are constructed from highly stable natural phenomena may be independently reproduced in a laboratory, but this idea is quite recent.  Abandoning the tradition of defining units from a standard bar or mass did not happen until the latter half of the twentieth century. \cite{nbs:sp447}
+Before the turn of the twentieth century, the United States and the British governments had adopted the international yard and avoirdupois pound.  This move re-defined the pound and the yard (and all those related to them) in terms of the meter and kilogram using an exact relationship with finite precision.  The contemporary definitions for those fundamental units are constructed from highly stable natural phenomena may be independently reproduced in a laboratory, but this idea is quite recent.  Abandoning the tradition of defining units from a standard bar or mass did not happen until the latter half of the twentieth century. \cite{nbs:sp447}
 
 This establishes a web of precise definitions of units for US customary, imperial, and SI systems.  However, there are still popular measures (like the inch water column for pressure or scf for quantity of a gas) that depend on establishing so-called ``standard'' conditions whose precise definitions are often neglected (and are far from standard).  
 
@@ -36,7 +37,7 @@ For example, water and mercury column measures for pressure depend on the densit
 
 \section{Setup}\label{sec:units:setup}
 
-To maintain transparency in regard to the standards used to derive unit conversions, the \PM\ units system includes a \verb|setup| function that is responsible for constructing all of the unit conversion routines.  Users can inspect the constants it defines, and users may change them at any time by re-calling the \verb|setup| function with new arguments.  Its behavior is fully documented and can be found by evoking \verb|help| as below.
+To maintain transparency in regard to the standards used to derive unit conversions, the \PM\ units system includes a \verb|setup| function that is responsible for constructing all of the unit conversion routines.  Users can inspect the constants it defines, and users may change them at any time by re-calling the \verb|pm.units.setup(()| function with new arguments.  Its behavior is fully documented and can be found by evoking \verb|help| as below.
 
 \begin{lstlisting}[language=Python]
 >>> import pyromat as pm
@@ -586,7 +587,7 @@ Setting & Value & Description\\
 \hline
 \verb|kN| & 1,000 N & kilonewton\\
 \verb|N| & 1 N & newton\\
-\verb|mN| & 0.001 N & millinewton
+\verb|mN| & 0.001 N & millinewton\\
 \verb|dyne| & $1\times 10^{-5}$ N & dyne\\
 \verb|lbf|$^*$ & $\approx$ 4.448 221 62 N & pound-force\\
 \verb|lb|$^*$ & \multicolumn{2}{c}{Alternate for \texttt{lbf}}\\

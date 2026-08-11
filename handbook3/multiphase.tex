@@ -103,7 +103,6 @@ where $\alpha^o_0$ is a polynomial on $\tau$,
 \begin{align}
 \alpha^o_0(\tau) = \sum_k c_j \tau^k \label{eqn:mp1:ao:0},
 \end{align}
-\end{subequations}
 and $\alpha^o_1$ includes the quantum terms,
 \begin{align}
 \alpha^o_1(\tau) = \sum_j b_j \ln\left(1 - \exp( -m_j \tau ) \right)\label{eqn:mp1:ao:1}.
@@ -290,13 +289,17 @@ f_{\delta\delta} &= -2C f - 2C(\delta-1) f_\delta
 Finally, the $\alpha_2^r$ derivatives may be constructed as
 \begin{subequations}
 \begin{align}
-\alpha^r_2 &= \Delta \delta f\\
-\alpha^r_{2,\tau} &= \Delta_\tau \delta f + \Delta \delta f_\tau\\
-\alpha^r_{2,\delta} &= \Delta_\delta \delta f + \Delta f + \Delta \delta f_\delta\\
-\alpha^r_{2,\tau\tau} &= \Delta_{\tau\tau} \delta f + 2 \Delta_\tau \delta f_\tau + \Delta \delta f_{\tau\tau}\\
-\alpha^r_{2,\tau\delta} &= \Delta_{\tau\delta} \delta f + \Delta_{\tau} f + \Delta_\tau \delta f_\delta + \ldots \nonumber\\
- &\hspace{2em} + \Delta_\delta \delta f_\tau+ \Delta f_\tau + \Delta \delta f_{\tau\delta}\\
-\alpha^r_{2,\delta\delta} &= \Delta_{\delta\delta} \delta f + 2\Delta_\delta f + 2\Delta_\delta \delta f_\delta + 2\Delta f_\delta + \Delta \delta f_{\delta\delta}
+\alpha^r_2 &= \Delta^b \delta f\\
+\alpha^r_{2,\tau} &= b \Delta_\tau \Delta^{b-1} \delta f + \Delta^b \delta f_\tau\\
+\alpha^r_{2,\delta} &= b \Delta_\delta \Delta^{b-1} \delta f + \Delta^b f + \Delta^b \delta f_\delta\\
+\alpha^r_{2,\tau\tau} &= b\left( \Delta_{\tau\tau} \Delta^{b-1} + (b-1)\Delta_\tau{^2}\Delta^{b-2} \right) \delta f + \ldots \nonumber\\
+ &\hspace{2em} 2 b \Delta_\tau \Delta^{b-1} \delta f_{\tau} + \Delta^b \delta f_{\tau\tau}\\
+\alpha^r_{2,\tau\delta} &= b \left(\Delta_{\tau\delta} \Delta^{b-1} + (b-1)\Delta_\tau \Delta_\delta \Delta^{b-2} \right) \delta f \ldots\nonumber\\
+ &\hspace{2em} + b\Delta_{\tau} \Delta^{b-1} f + \Delta^b f_\tau + \ldots \nonumber\\
+ &\hspace{2em} + b\Delta_{\tau} \Delta^{b-1} \delta f_\delta + \Delta^b \delta f_{\tau\delta}\\
+\alpha^r_{2,\delta\delta} &= b \left(\Delta_{\delta\delta} \Delta^{b-1} + (b-1)\Delta_\delta{^2} \Delta^{b-2} \right) \delta f \ldots\nonumber\\
+ &\hspace{2em} + b\Delta_{\delta} \Delta^{b-1} f + \Delta^b f_\delta + \ldots \nonumber\\
+ &\hspace{2em} + b\Delta_{\delta} \Delta^{b-1} \delta f_\delta + \Delta^b \delta f_{\delta\delta}
 \end{align}
 \end{subequations}
 

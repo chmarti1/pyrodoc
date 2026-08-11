@@ -4,17 +4,17 @@ In this chapter, we discuss everything you should need to get your own installat
 
 \section{Installation}
 
-\PM\ is distributed primarily through the Python package index (\url{https://pypi.org/}), but it can also be downloaded and installed ``manually'' if you have Python's setuptools installed.  \PM\ is written in plain Python, so there is no need to compile to binaries.  All data are encoded in \texttt{json} format (\url{https://docs.python.org/3/library/json.html}), and the configuration files are executable python code.  The result is that all of the code, data, and configuration files are in human readable text using only the ASCII character set.
+\PM\ is distributed primarily through the Python package index (\url{https://pypi.org/project/PYroMat/}), but it can also be downloaded and installed ``manually'' if you have Python's setuptools installed.  \PM\ is written in plain Python, so there is no need to compile to binaries.  All data are encoded in \texttt{json} format (\url{https://docs.python.org/3/library/json.html}), and the configuration files are executable python code.  The result is that all of the code, data, and configuration files are in human readable text using only the ASCII character set.
 
 \subsection{Prerequisites}
 
 Obviously, a Python interpreter needs to be installed on your system, but \PM\ is deliberately designed to minimize the number of prerequisites.  Only Numpy version 1.7 or later is required.
 
-It is worth noting that \PM\ was originally developed in Python 2, but support for Python 3 was designed in from the start.  As of January 2020, Python 2 was officially depreciated, and \PM\ testing on Python 2 halted.  On a number of popular Linux systems, Python 2 is still the system default, though, so users should take note.  If your system has both Python 2 and Python 3 installed, it may be necessary to replace \texttt{python} in the instructions below with \texttt{python3} to specify the version.
+It is worth noting that \PM\ was originally developed in Python 2, but support for Python 3 was designed in from the start.  As of January 2020, Python 2 was officially depreciated, and \PM\ support for Python 2 halted.  On a number of popular Linux systems, Python 2 is still the system default, though, so users should take note.  If your system has both Python 2 and Python 3 installed, it may be necessary to replace \texttt{python} in the instructions below with \texttt{python3} to specify the version.
 
 \subsection{Installation with \texttt{pip}}
 
-Python uses a package called \texttt{pip} (\url{https://pip.pypa.io}) to manage its own software.  You can use it to automatically download and install \PM\ and its dependencies with a single command.
+Python's package management system, \texttt{pip} (\url{https://pip.pypa.io}), manages packages and their dependencies automatically.  It to automatically download and install \PM\ and its dependencies with a single command.
 
 {\bf In an Anaconda installation} start the ``Anaconda Prompt'' to bring up a terminal.  See \url{https://www.anaconda.com/} for more information.
 
