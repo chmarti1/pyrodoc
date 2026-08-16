@@ -2,7 +2,7 @@
 
 \PM\ is a Python-based package for calculating the thermodynamic properties of fluids.  That includes liquids, gases, and plasmas.  It is written in pure Python, and the core algorithms only depend on the Numpy package for back-end numerical and array support.  This document is intended to serve as a reference manual for interpreting, using, or even writing your own \PM\ data sets.  
 
-Probably, no reader will need to digest this handbook in its entirity.  The goal is to include all the important information in a single portable document.  Chatper \ref{ch:start} on Getting Started is probably the one that most users will need, since it describes installation and basic use of the software.
+Probably, no reader will need to digest this handbook in its entirety.  The goal is to include all the important information in a single portable document.  Chatper \ref{ch:start} on Getting Started is probably the one that most users will need, since it describes installation and basic use of the software.
 
 For users who want a review of the thermodynamic properties, this introduction goes into detail on the fundamental definitions for the properties used.  First, we talk briefly about the ideas of \emph{primary} and \emph{basic properties}, which \PM\ uses to organize its work on the back-end.  Then, we will briefly define each property with a modest attempt to describe its origins and relevance.
 
@@ -68,48 +68,70 @@ V & \verb|unit_volume| & m$^3$ & Volume\\
 \end{tabular}
 \end{table}
 
-In theory, thermodynamics can make equal use of almost any pair of properties to discover the others, and as of version 2.2.0, \PM\ is quite flexible about which two are used.  While this kind of convenience is part of the purpose of a high-level software tool, users may notice that some combinations are faster than others, some produce more numerical inaccuracies than others, and some are simply not possible.
+\subsection{Property Groups}
 
-\subsection{Basic Properties}\label{sec:intro:basic}
+A detailed equation of state model can make equal use of almost any pair of properties to define the others, and since version 2.2.0, \PM\ is quite flexible about which two are used.  While this kind of convenience is part of the purpose of a high-level software tool, users may notice that some combinations are faster than others, some produce more numerical inaccuracies than others, and some are simply not possible.
 
-Users will see better performance when the state is specified with \emph{basic properties}:
+To help make sense of the different property combinations, \PM\ organizes properties into groups based on the information that can be gained from them.
 \begin{itemize}
-\item temperature, $T$,
-\item pressure, $p$,
-\item density, $\rho$,
-\item specific volume, $v$,
-\item quality, $x$.
+\item Basic properties: These are the most physically intuitive properties -- usually obtainable from direct physical measurement.  In general, specifying the thermodynamic state with these is faster and more numerically precise.
+    \begin{itemize}
+    \item Temperature, $T$,
+    \item Pressure, $p$,
+    \item Density, $\rho$,
+    \item Specific volume, $v$,
+    \item Quality, $x$.
+    \end{itemize}
+\item Primary properties: Every model uses two basic properties to uniquely define a thermodynamic state, from which all the others can be calculated.  Specifying the thermodynamic state with these is always the fastest, most precise method.
+    \begin{itemize}
+    \item Ideal gases: $T, p$,
+    \item Multi-phase models: $T, \rho$.
+    \end{itemize}
+\item Energy properties: These are different ways of quantifying the energy contained in the system.  Specifying pairs of energy properties is usually inadequate for defining the thermodynamic state, so it is almost always disallowed.
+    \begin{itemize}
+    \item Temperature, $T$,
+    \item Internal energy, $e$,
+    \item Enthalpy, $h$,
+    \item Free (Helmholtz) energy, $f$,
+    \item Gibbs energy, $g$.
+    \end{itemize}
+\item Inverse properties: In order to determine the state (in primary properties) from these properties, \PM\ either needs to perform numerical iteration, or (in rare exceptions) a precise algebraic inverse is available.
+    \begin{itemize}
+    \item Ideal gases: $d$, $e$, $f$, $g$, $h$, $s$,
+    \item Multi-phase models: $p$, $e$, $f$, $g$, $h$, $s$.
+    \end{itemize}
 \end{itemize}
-Except for quality, the state of any substance may always be specified with any two basic properties, and a basic property may be paired with any non-basic property.
 
-Other properties, like 
-\begin{itemize}
-\item internal energy, $e$,
-\item enthalpy, $h$, 
-\item entropy, $s$,
-\end{itemize}
-can also be used to specify the thermodynamic state, but the user should be aware of their limitations.  Specifying them forces \PM\ to use a slower back-end algorithm with inherent numerical precision limitations.  There may also be some limitation on how these properties are combined.
+\textbf{Ideal gas property combinations} supported by the \texttt{ig}, \texttt{ig2}, and \texttt{igmix} classes are listed in Table \ref{tab:props:ig}.  Combinations are marked with ``X'' when they would either be self-contradictory or redundant.  Every combination along the diagonal is obviously redundant, but simultaneously specifying specific volume and density is also redundant.  As we show in Chapter \ref{ch:ig}, for an ideal gas, specifying internal energy, enthalpy and temperature are all theoretically equivalent.
 
-Tables \ref{tab:props:ig} and \ref{tab:props:mp} show which property combinations are allowed to be combined to define the thermodynamic state.  Combinations are marked with ``X'' when they would either be self-contradictory or redundant.  Every combination along the diagonal is obviously redundant, but simultaneously specifying specific volume and density is also redundant.  Specifying enthalpy, internal energy, and temperature of an ideal gas is also redundant, so these combinations are ``invalid.''
+\textbf{The multi-phase property combinations} supported by the \texttt{mp1} and \texttt{mp2} classes are shown in Tables \ref{tab:props:mp1} and \ref{tab:props:mp2} respectively.  Almost all combinations that are theoretically valid are supported.  A ``o'' represents a combination that is not supported, though there may be some cases where it is theoretically possible.  The theory behind these combinations is somewhat more nuanced than in ideal gases.
 
-In Table \ref{tab:props:mp}, quality, $x$, is listed as being invalid in combination with any property that is not temperature or pressure, but the reason is less obvious than in the ideal gas cases.  For example, it is not at all redundant to specify an enthalpy and a quality.  However, for many qualities, there are multiple states that give the same enthalpy, so, for example, \texttt{T(h,x)}, is not theoretically even a function.  In more practical terms, the algorithm would converge to inconsistent results, and may even diverge due to singularities in the iteration.
+We regard a property combination as theoretically disallowed if there are at least two distinct states that can be found providing the same combination.  For example, Figure \ref{fig:Thd} shows a surface plot of density plotted against temperature and enthalpy for two-phase ammonia.  Except in the liquid region, the surface is very badly behaved numerically, but the important criterion that causes us to reject it as a valid property combination is that it wraps back on itself.  For given values of $T$ and $h$, and there are two values of $\rho$ that produce the same value of $h$.  Therefore, $h,T$ does not specify a unique state.
 
-Meanwhile, combinations of enthalpy, entropy, and internal energy are not supported purely for pragmatic reason.  The multi-dimensional iteration that results is easy to implement for specific cases, but it presents significant stability challenges in the general case.  There are plans to include this functionality in the future, but only when codes can be shown to deliver garanteed convergence over the entire domain.
+\begin{figure}
+\centering
+\includegraphics[width=0.9\linewidth]{figures/Thd}
+\caption{A surface plot of density plotted against temperature and enthalpy for a two-phase mixture of ammonia.}\label{fig:Thd}
+\end{figure}
+
+Despite this problem, $T,h$ and $T,e$ are both allowed in \texttt{mp1}, and they can only be expected to give reasonable results in (or near) the liquid region.  On the other hand, $f$ and $g$ are not permitted as arguments, and any combination of the inverse group is disallowed for reasons of numerical stability.  For example it is theoretically valid to specify enthalpy and entropy together, but it requires iteration in two dimensions to extract the $T,\rho$ state.  This presents a significant challenge for global numerical stability.
+
+The \texttt{mp2} class addresses the global numerical stability issue by stashing a table of property values that can be referenced to establish initial estimates for properties prior to local numerical polishing.  It recognizes $f$ and $g$ in its arguments, but it avoids the numerical problems seen in \texttt{mp1} by disallowing any combination of properties from the energy group.
 
 \begin{table}
 \centering
 \caption{Property combinations that are supported by ideal gas classes in version 2.4.5.  \checkmark = supported, X = not valid, o = not supported.}\label{tab:props:ig}
 \begin{tabular}{|c|cccc|ccc|}
 \hline
-  & \texttt{T} & \texttt{p} & \texttt{d} & \texttt{v} & \texttt{h} & \texttt{e} & \texttt{s}\\
+  & \texttt{T} & \texttt{p} & \texttt{d} & \texttt{v} & \texttt{e} & \texttt{h} & \texttt{s}\\
 \hline  %  & T   p   d   v   h   e   s
 \texttt{T} & X & \checkmark & \checkmark & \checkmark & X & X & \checkmark\\
 \texttt{p} & \checkmark & X & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark\\
 \texttt{d} & \checkmark & \checkmark & X & X & \checkmark & \checkmark & \checkmark\\
 \texttt{v} & \checkmark & \checkmark & X & X & \checkmark & \checkmark & \checkmark\\
 \hline
-\texttt{h} & X & \checkmark & \checkmark & \checkmark & X & X & \checkmark\\
 \texttt{e} & X & \checkmark & \checkmark & \checkmark & X & X & \checkmark\\
+\texttt{h} & X & \checkmark & \checkmark & \checkmark & X & X & \checkmark\\
 \texttt{s} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & X\\
 \hline
 \end{tabular}
@@ -117,47 +139,39 @@ Meanwhile, combinations of enthalpy, entropy, and internal energy are not suppor
 
 \begin{table}
 \centering
-\caption{Property combinations that are supported by the multi-phase class in version 2.4.5.  \checkmark = supported, X = not valid, o = not supported.}\label{tab:props:mp}
+\caption{Property combinations that are supported by the \texttt{mp1} class in version 3.0.1.  \checkmark = supported, X = not valid, o = not supported.}\label{tab:props:mp1}
 \begin{tabular}{|c|ccccc|ccc|}
 \hline
-  & \texttt{T} & \texttt{p} & \texttt{d} & \texttt{v} & \texttt{x} & \texttt{h} & \texttt{e} & \texttt{s}\\
-\hline  %  & T   p   d   v   h   e   s
+  & \texttt{T} & \texttt{p} & \texttt{d} & \texttt{v} & \texttt{x} & \texttt{e} & \texttt{h} & \texttt{s}\\
+\hline  %  & T   p   d   v   e   h   s
 \texttt{T} & X & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark\\
 \texttt{p} & \checkmark & X & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark\\
 \texttt{d} & \checkmark & \checkmark & X & X & X & \checkmark & \checkmark & \checkmark\\
 \texttt{v} & \checkmark & \checkmark & X & X & X & \checkmark & \checkmark & \checkmark\\
 \texttt{x} & \checkmark & \checkmark & X & X & X & X & X & X \\
 \hline
-\texttt{h} & \checkmark & \checkmark & \checkmark & \checkmark & X & X & o & o\\
-\texttt{e} & \checkmark & \checkmark & \checkmark & \checkmark & X & o & X & o\\
+\texttt{e} & \checkmark & \checkmark & \checkmark & \checkmark & X & X & X & o\\
+\texttt{h} & \checkmark & \checkmark & \checkmark & \checkmark & X & X & X & o\\
 \texttt{s} & \checkmark & \checkmark & \checkmark & \checkmark & X & o & o & X\\
 \hline
 \end{tabular}
 \end{table}
 
-\subsection{Primary Properties}\label{sec:intro:primary}
-
-Every thermodynamic model supported by \PM\ is formulated to calculate the substance's many properties in terms of temperature and one other property.  For ideal gases, it is temperature and pressure, and for multi-phase substances it is temperature and density.  The properties that are used in the back-end to calculate the others are called the \emph{primary properties} for each model.  \PM\ is designed so that users do not need to be aware of this distinction unless they are concerned with speed or extreme numerical precision.
-
-For example, an ideal gas model allows entropy (see sec. \ref{sec:ig:hs}) to be calculated from a polynomial in terms of temperature and pressure.  While this theoretically provides a means for calculating temperature from entropy and pressure, $T(s,p)$, the entropy polynomial is far too complex to be inverted explicitly, and defining a separate polynomial for every combination of properties is impractical.  That means that calculating temperature from entropy and pressure is theoretically sound, but it requires a (relatively) computationally expensive numerical iteration routine - $s(T,p)$ is evaluated repeatedly until a value of $T$ can be found that produces a value ``close enough'' to the desired value of $s$.  Chapter \ref{ch:num} discusses this process in some detail.
-
-Each class is designed around its own primary properties, and the performance will always be best if users can write their code to use these properties when they are available.  Table \ref{tab:primary} lists the current \PM\ substance classes and their primary properties.
-
-For most problems of engineering relevance, temperature and pressure $(T,p)$ are the favorite since both are readily measured, and both are of immediate importance to fluid machinery design.  Fortunately, all of the common properties of ideal gases can be conveniently constructed directly from these two properties.  Unfortunately, that is not the case with real fluids.
-
-It is intuitive that when gases are compressed into tighter spaces, the distance between the molecules becomes a vitally important parameter for predicting the substance's properties.  Pressure is not a convenient metric of that distance, but density is.  For this reason, nearly all non-ideal gas properties are modeled in terms of $(T,\rho)$, and pressure has to be calculated indirectly. 
-
 \begin{table}
 \centering
-\caption{The \PM\ substance classes and their primary property pairs}\label{tab:primary}
-\begin{tabular}{|lcc|}
+\caption{Property combinations that are supported by the multi-phase classes in version 3.0.1.  \checkmark = supported, X = not valid, o = not supported, E = energy group.}\label{tab:props:mp2}
+\begin{tabular}{|c|ccccc|cc|}
 \hline
-Desription & Class & Prim.\\
+  & \texttt{T} & \texttt{p} & \texttt{d} & \texttt{v} & \texttt{x} & E & \texttt{s}\\
+\hline  %  & T   p   d   v   E   s
+\texttt{T} & X & \checkmark & \checkmark & \checkmark & \checkmark & o & \checkmark\\
+\texttt{p} & \checkmark & X & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark\\
+\texttt{d} & \checkmark & \checkmark & X & X & X & \checkmark & \checkmark\\
+\texttt{v} & \checkmark & \checkmark & X & X & X & \checkmark & \checkmark\\
+\texttt{x} & \checkmark & \checkmark & X & X & X & X & X \\
 \hline
-Shomate Eqn. & \verb|ig| & $(T,p)$\\
-NASA poly. & \verb|ig2| & $(T,p)$\\
-IG mixture & \verb|igmix| & $(T,p)$\\
-Span \& Wagner & \verb|mp1| & $(T,\rho)$\\
+E          & o & \checkmark & \checkmark & \checkmark & X & o & \checkmark\\
+\texttt{s} & \checkmark & \checkmark & \checkmark & \checkmark & X & \checkmark & X\\
 \hline
 \end{tabular}
 \end{table}

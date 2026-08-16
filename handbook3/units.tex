@@ -7,13 +7,16 @@ A list of all currently available units is available by typing
 >>> import pyromat as pm
 >>> help(pm.units)
 \end{lstlisting}
-or
+or use the \texttt{show()} method
 \begin{lstlisting}[language=Python]
 >>> pm.units.show()
 \end{lstlisting}
-To obtain information specific to one of the unit classes (length, for example), type
+For a \texttt{dict\_keys} instance listing the supported units, use a conversion instance's \texttt{get()} method,
+%        1         2         3         4         5
+%23456789012345678901234567890123456789012345678901234567890
 \begin{lstlisting}[language=Python]
->>> help(pm.units.length)
+>>> pm.units.length.get()
+dict_keys(['km', 'm', 'cm', 'mm', 'um', 'nm', 'A', 'in', 'nmi', 'ft', 'yd', 'mile', 'mi'])
 \end{lstlisting}
 
 The unit systems used by the property methods and their corresponding configuration entries are listed in Tables \ref{tab:properties} and \ref{tab:units}.  
@@ -28,7 +31,7 @@ The Bureau International des Poids et Mesures (BIPM) International Committee for
 
 The second (time), meter (length), kilogram (mass), ampere (electrical current), kelvin (temperature), mole (quantity), and candela (luminous intensity) are the fundamental units in terms of which all other measures are derived.  Contemporary definitions for these units are constructed so that certain important physical constants (like Plank's or Boltzmann's constants) may be represented exactly with finite precision, so the conversion factors used in \PM\ are, by definition, exact.
 
-Before the turn of the twentieth century, the United States and the British governments had adopted the international yard and avoirdupois pound.  This move re-defined the pound and the yard (and all those based on them) in terms of the meter and kilogram using an exact relationship with finite precision.  The contemporary definitions for those fundamental units are constructed from highly stable natural phenomena may be independently reproduced in a laboratory, but this idea is quite recent.  Abandoning the tradition of defining units from a standard bar or mass did not happen until the latter half of the twentieth century. \cite{nbs:sp447}
+Before the turn of the twentieth century, the United States and the British governments had adopted the international yard and avoirdupois pound.  This move re-defined the pound and the yard (and all those based on them) in terms of the meter and kilogram using an exact relationship with finite precision.  The contemporary definitions for those fundamental units are constructed from highly stable natural phenomena may be independently reproduced in a laboratory, but this idea is quite recent.  \cite{nbs:sp447}
 
 This establishes a web of precise definitions of units for US customary, imperial, and SI systems.  However, there are still popular measures (like the inch water column for pressure or scf for quantity of a gas) that depend on establishing so-called ``standard'' conditions whose precise definitions are often neglected (and are far from standard).  
 
@@ -36,7 +39,7 @@ For example, water and mercury column measures for pressure depend on the densit
 
 \section{Setup}\label{sec:units:setup}
 
-To maintain transparency in regard to the standards used to derive unit conversions, the \PM\ units system includes a \verb|setup| function that is responsible for constructing all of the unit conversion routines.  Users can inspect the constants it defines, and users may change them at any time by re-calling the \verb|setup| function with new arguments.  Its behavior is fully documented and can be found by evoking \verb|help| as below.
+To maintain transparency in regard to the standards used to derive unit conversions, the \PM\ units system includes a \verb|setup| function that is responsible for constructing all of the unit conversion functions.  Users can inspect the constants and may change them at any time by re-calling the \texttt{setup()} function with new arguments.  Its behavior is fully documented and can be found by evoking \verb|help| as below.
 
 \begin{lstlisting}[language=Python]
 >>> import pyromat as pm
@@ -47,7 +50,7 @@ To maintain transparency in regard to the standards used to derive unit conversi
 
 It should be emphasized that there is a difference between the standard parameters used to construct the \PM\ unit system and the default parameters determined by \verb|pm.config|.  The standard conditions are only used to construct the unit conversion system, they are always given in the units documented below, and they are ignored outside of the \verb|units| module.  On the other hand, the default parameters are used in property methods when arguments are omitted, and they are interpreted in whatever units are currently configured.  See the configuration chapter (Chapter \ref{ch:config}) for more information.
 
-Standard temperature and pressure, \verb|Tstd| and \verb|pstd|, \emph{must} be entered in units of Kelvin and bar respectively (regardless of the units configured in \verb|pm.config|).  The standard atmosphere was set to precisely 1.013 25 bar by the BIPM General Conference on Weights and Measures (CGPM) in 1901 \cite{cgpm:3:2}, and has been almost universally adopted.  The default standard temperature is less universal, but is usually 273.15 K, the freezing point of water at one atmosphere of pressure.
+Standard temperature and pressure, \verb|Tstd| and \verb|pstd|, \emph{must} be entered in units of Kelvin and bar respectively (regardless of the units configured in \verb|pm.config|).  The standard atmosphere was set to precisely 1.01325 bar by the BIPM General Conference on Weights and Measures (CGPM) in 1901 \cite{cgpm:3:2}, and has been almost universally adopted.  The default standard temperature is less universal, but is usually 273.15 K, the freezing point of water at one atmosphere of pressure.
 
 The CGPM did not establish a standard acceleration due to gravity for the purpose of weights and measures until 1954.  It is set to be precisely 9.80665 m s$^{-2}$ \cite{cgpm:10:4}.  This is a mean of gravitational forces experienced at sea level at a latitude of 45 degrees.  This value can be found to agree precisely with the official conversions for pounds mass, pounds force, kilogram, and newton. 
 
@@ -64,23 +67,23 @@ The values in this table are, by the definitions of units, exact (unless noted w
 \begin{landscape}
 \begin{table}[p]
 \centering
-\caption{\PM\ constants and their default values.  Values with a * are affected by calls to \texttt{setup}.}\label{tab:constants}
+\caption{\PM\ constants and their default values.  Values with a * are affected by calls to \texttt{setup()}.}\label{tab:constants}
 \small
 \renewcommand{\arraystretch}{1.25}
-\begin{tabular}{ccrll}
+\begin{tabular}{ccD{.}{.}{-1}ll}
 \hline
 Sym. & Name & \multicolumn{2}{c}{Value} & Description \\
 \hline
 $g^*$ & \verb|const_g| & 9.806 65 & m s$^{-2}$ & Gravity at 45$^\circ$ lat.\\
-$h$ & \verb|const_h| & 6.626 070 15$\times 10^{-34}$ & J s & Plank constant\\
-$k$ & \verb|const_k| & 1.380 649 $\times 10^{-23}$ & J K$^{-1}$ & Boltzmann constant\\
-$N_a$ & \verb|const_Na| & 6.022 140 76$\times 10^{23}$ & mol$^{-1}$ & Avagadro number\\
-$N_c$ & \verb|const_Nc| & 6.241 509 34$\times 10^{18}$ & C$^{-1}$ & Electrons per Coulumb\\
+$h$ & \verb|const_h| & 6.626 070 15\times 10^{-34} & J s & Plank constant\\
+$k$ & \verb|const_k| & 1.380 649 \times 10^{-23} & J K$^{-1}$ & Boltzmann constant\\
+$N_a$ & \verb|const_Na| & 6.022 140 76 \times 10^{23} & mol$^{-1}$ & Avagadro number\\
+$N_c$ & \verb|const_Nc| & \approx 6.241 509 34 \times 10^{18} & C$^{-1}$ & Electrons per Coulumb\\
 $\overline{\rho}_{std}{^*}$ & \verb|const_nstd| & 44.615 048 197 83 & mol m$^{-3}$ & Standard molar density\\
 $p_{std}{^*}$ & \verb|const_pstd| & 1.013 25 & bar & Standard pressure\\
-$q$ & \verb|const_q| & 1.602 176 634 $\times 10^{-19}$ & C & Fundamental charge\\
-$R_u$ & \verb|const_Ru| & $\approx$ 8.314 462 618 & J mol$^{-1}$ K$^{-1}$ & Universal gas constant\\
-$T_{std}{^*}$ & \verb|const_Tstd| & $273.15$ & K & Standard temperature\\
+$q$ & \verb|const_q| & 1.602 176 634 \times 10^{-19} & C & Fundamental charge\\
+$R_u$ & \verb|const_Ru| & \approx 8.314 462 618 & J mol$^{-1}$ K$^{-1}$ & Universal gas constant\\
+$T_{std}{^*}$ & \verb|const_Tstd| & 273.15 & K & Standard temperature\\
 $\rho_\mathrm{H_2O}{^*}$ & \verb|const_dh2o| & 999.972 & kg m$^{-3}$ & Std. density of water\\
 $\rho_\mathrm{Hg}{^*}$ & \verb|const_dhg| & 1,3595.1 & kg m$^{-3}$ & Std. density of mercury\\
 \hline
@@ -278,9 +281,9 @@ To alter the \PM\ unit for mass,
 
 ``[The kilogram] is defined by taking the fixed numerical value of the Planck constant h to be 6.626 070 15$\times 10^{-34}$ when expressed in the unit J s, which is equal to kg m$^2$ s$^{-1}$''\cite[p.131]{si:2019}.  Like many of the remaining fundamental units, the kilogram is defined in terms of length and time, making it dependent on their definitions as well.
 
-Definitions for the pound and units derived from it are often confused by conflicting definitions of the term ``weight.''  For example, in NIST special publications it is possible to find ``[...] the  weight  of  a  body  in  a  particular  reference  frame  is  defined  as  the  force that gives the body an acceleration equal to the local acceleration of free fall in that reference frame''\cite[p.23]{nist:sp811} and ``In general usage, the term `weight' nearly always means mass, and this is the meaning given the term in U.S. laws and regulations.'' \cite[p.10]{nist:sp1038}
+Definitions for the pound and units derived from it are often confused by conflicting definitions of the term ``weight.''  For example, in NIST special publications it is possible to find ``[...] the  weight  of  a  body  in  a  particular  reference  frame  is  defined  as  the  force that gives the body an acceleration equal to the local acceleration of free fall in that reference frame''\cite[p.23]{nist:sp811} and ``In general usage, the term `weight' nearly always means mass, and this is the meaning given the term in U.S. laws and regulations'' \cite[p.10]{nist:sp1038}.  Unfortunately, to this day, the pound continues to exist with a kind of mass/force duality that is occasionally clarified by the invention of the ``pound-mass,'' lbm, and the ``pound-force,'' lbf.  The distinction became especially important as the precision of measuring instruments exceeded the consistency of the strength of gravity over the Earth's surface.  
 
-At the end of the nineteenth century, the definition of the avoirdupois pound was set to a fixed fraction of the kilogram, formalizing the definition of the pound officially as a measure of mass and not force.  The distinction became important as the precision of measuring instruments exceeded the consistency of the strength of gravity over the Earth's surface.  The contemporary value for the avoirdupois pound was established in the middle of the twentieth century, and is precisely 0.453 592 37 kg of mass.\cite{nbs:1959}  From this, the imperial ton (precisely 2,000 lb) and the long ton (precisely 2,240 lb) are derived.
+At the time, where the governing bodies were concerned, the earliest precise definitions of the pound in the UK and the US were primarily concerned with the quantity of precious metals in coinage\footnote{This footnote is my method of suppressing the urge to discuss (at length) the development of the troy pound that preceded the avoirdupois pound that is the standard today.}.  At the time, mass and force seemed virtually interchangeable under the assumption that a mass would always possess the same weight.  Especially because there was not internationally recognized standard for the measure of force, this lead countless industries to adopt the pound as a unit of force (including in derived units of pressure like psi), but since 1893, the United States' definition of the avoirdupois pound was set to a fixed fraction of the kilogram -- indisputably a measure of mass.  The contemporary value for the avoirdupois pound was established in the middle of the twentieth century, and is precisely 0.453 592 37 kg of mass.\cite{nbs:1959}  From this, the imperial ton (precisely 2,000 lb) and the long ton (precisely 2,240 lb) are derived.
 
 A slug is the unit of mass that has a weight of precisely one pound-force.  It is primarily useful as the nearest imperial equivalent to the kilogram -- a mass unit that works without adjustment in Newton's laws.  As is discussed in Section \ref{sec:units:force}, the pound-force is the quantity of force needed to support one pound mass in ``standard Earth gravity.''  Therefore, 1 lb of mass, $m_1$, expressed in slugs, would obey the equation
 \begin{align}
@@ -348,24 +351,30 @@ To alter the \PM\ unit for molar quantities,
 
 ``One mole contains exactly 6.022 140 76 $\times 10^{23}$ elementary entities. This number is the fixed numerical value of the Avogadro constant, $N_a$, when expressed in the unit mol$^{-1}$ and is called the Avogadro number.''\cite{si:2019}[p.134].  Because a mole is a unit of counting, it is equally valid to refer to a mole of planets (about right for our observable universe) as it is to refer to a mole of gas.
 
-The mole is the quantity of a substance with a total mass in grams numerically equal to the mass of the elementary entities expressed in atomic mass units (see Section \ref{sec:units:mass}).  This relationship is mirrored by more recently invented alternatives such as the kilogram-mole (kmol) or the pound-mole (lbmol), which enjoy the same relationships with their mass-based namesakes.
+Historically, the mole was the quantity of a substance with a total mass in grams equal to the mass of the elementary entities expressed in atomic mass units (see Section \ref{sec:units:mass}).  This relationship is echoed by more recently invented alternatives such as the kilogram-mole (kmol) or the pound-mole (lbmol), which enjoy the same relationships with their mass-based namesakes.  
 
-If the mass of a single molecule is $m_0$, a mass, $m$, of many such molecules must contain
+Neglecting relativistic effects, if the mass of a single molecule is $m_0$, a mass, $m$, of many such molecules must contain
 \begin{align}
 N = \frac{m}{m_0}
 \end{align}
 molecules.
 
-By definition, when $N = N_a$, the mass of the group expressed in grams will equal the mass of the molecule expressed in atomic mass units.  Therefore, the gram-mole is
+When $N = N_a$, the mass of the group expressed in grams will very nearly equal the mass of the molecule expressed in atomic mass units.  Therefore, the gram-mole is
 \begin{align}
-N_\mathrm{g} = N_a = \frac{1\mathrm{g}}{1\mathrm{u}}.
+N_\mathrm{g} = \frac{1\mathrm{g}}{1\mathrm{u}} \approx N_a.
 \end{align}
+Because both the kilogram and the atomic mass unit have precise definitions (see Section \ref{sec:units:mass}), the relationship between the gram-mole and the mass of a mole of particles is merely approximate rather than precise.  In fact, it would only be possible to define an integer precisely respecting this ratio if the masses of the molecules were precisely equal to integer multiples of fundamental particles -- close, but not precise.  However, because $N_a$ is defined to nine significant figures, the error is on the order of one part per billion.
+\begin{lstlisting}[language=Python]
+>>> import pyormat as pm
+>>> (pm.units.mass['g'] / pm.units.mass['u'] - pm.units.const_Na)/pm.units.const_Na
+-1.054689657647338e-09
+\end{lstlisting}
 
 The same process may be applied for any other unit of mass, so the quantity required for $m$ to be expressed in kilograms is
 \begin{align}
 N_\mathrm{kg} = \frac{1\mathrm{kg}}{1\mathrm{u}}.
 \end{align}
-Therefore,
+When we consider the ratio of kg to g, even the tiny disagreement in the relationship between $N_a$ and the atomic mass unit cancels, so
 \begin{align}
 \frac{N_\mathrm{kg}}{N_\mathrm{g}} = \frac{1 \mathrm{kg}}{1 \mathrm{g}} = 1000.
 \end{align}
@@ -388,7 +397,7 @@ Table \ref{tab:molar} shows the molar units and their values expressed in kilogr
 
 \begin{table}
 \centering
-\caption{Molar units recognized by \PM}\label{tab:molar}
+\caption{Molar units recognized by \PM.  Values with a $*$ are affected by calls to \texttt{setup()}.}\label{tab:molar}
 \begin{tabular}{crl}
 \hline
 Setting & Value & Description\\
@@ -569,25 +578,30 @@ To alter the \PM\ unit for force quantities,
 >>> pm.config['unit_force'] = 'kgf'
 \end{lstlisting}
 
-Force is a concept that finds rigorous definition in Newton's laws of motion, so it is fitting that the principle force unit be called the newton.  It is equivalent to one kg m s$^{-2}$ \cite[p.137]{si:2019}, corresponding to mass times acceleration.
+Force is a concept that finds rigorous definition in Newton's laws of motion, so it is fitting that the principle force unit be called the newton.  It is the force required to accelerate one kg of mass by one m/s every s \cite[p.137]{si:2019}, or simply one kg m s$^{-2}$.
 
-Force units that are derived from measures of mass (like kilogram-force and pound-force) can be calculated in terms of Newtons by calculating their weight (in Newtons) under Earth gravity.  These units depend on the value assigned to $g$ in the last call to \verb|setup()| (see Section \ref{sec:units:setup} of this chapter).
+Force units that are derived from measures of mass (like kilogram-force and pound-force) can be found to be defined in several (roughly equivalent) ways.  The unit force may be the force required to accelerate the respective unit mass at one ``gee,'' or it may be the force required to support the respective unit mass at rest under ``Earth's gravity.''  The ambiguity in the definition is obviously centered around a ``gee'' or Earth's gravity.  In 1901, the BIPM adopted precisely $g = 9.80665$ m s$^{-2}$ as standard Earth gravity\cite{cgpm:3:2}, and that value has been in common use ever since.  Because the force needed to support a mass varies over the surface of a planet that is neither perfectly spherical, nor uniform in density, and that spins with significant speed, the convention of equating weight and mass through local gravity is deeply problematic.  For that reason, the value 9.80665 m s$^{-2}$, regardless of how well it reflects local gravity, has been adopted as the universal relationship between the unit mass and its respective unit force\footnote{In technical communities, it is impossible to operate long without enduring a diatribe on the evils of inches when millimeters are so obviously superior.  While not factually incorrect, it is my personal opinion that those emotional discharges are misdirected, so long as kgf remains in use.  Some historical excuse may be made for the mass/force duality of the pound, but the kilogram has no such refuge.  I include kgf here as a peace offering -- from an engineer originally trained in inches and pounds.}.
 
-The dyne is mostly found in older scientific publications still using the centimeter-gram-second (CGS) system of units.  It is precisely 1 g cm s$^{-2}$.
+These units depend on the value assigned to $g$ in the last call to \verb|setup()| (see Section \ref{sec:units:setup} of this chapter).
+
+The dyne is mostly found in older scientific publications still using the centimeter-gram-second (CGS) system of units, and is precisely 1 g cm s$^{-2}$.  It is almost never in modern use, but writings on the theories of gases from the nineteenth century used CGS units commonly.  Some users may find it useful to be able to quickly translate between classic texts and our most modern writings\footnote{I certainly do.}.
 
 Table \ref{tab:force} lists the supported force units and their values in Newtons.
 
 \begin{table}
 \centering
-\caption{Force units recognized by \PM}\label{tab:force}
+\caption{Force units recognized by \PM.  Values with a * are dependent on the constants defined by \texttt{setup()}.}\label{tab:force}
 \begin{tabular}{crl}
 \hline
 Setting & Value & Description\\
 \hline
 \verb|kN| & 1,000 N & kilonewton\\
 \verb|N| & 1 N & newton\\
-\verb|mN| & 0.001 N & millinewton
+\verb|mN| & 0.001 N & millinewton\\
 \verb|dyne| & $1\times 10^{-5}$ N & dyne\\
+\verb|kgf|$^*$ & 9.80664 N & kilogram-force\\
+\verb|ton| & $\approx$ 8,896.443 23 N & tons\\
+\verb|kip| & 4,448.221 62 N & kips\\
 \verb|lbf|$^*$ & $\approx$ 4.448 221 62 N & pound-force\\
 \verb|lb|$^*$ & \multicolumn{2}{c}{Alternate for \texttt{lbf}}\\
 \verb|oz|$^*$ & $\approx$ 0.278 013 851 N & ounce\\
@@ -688,7 +702,7 @@ Because they are identical to practical precision, the Torr and the mmHg are oft
 
 \begin{table}
 \centering
-\caption{Pressure units recognized by \PM. Values with a * are affected by calls to \texttt{setup()}.}\label{tab:pressure}
+\caption{Pressure units recognized by \PM. Values with a * are dependent on the constants defined by \texttt{setup()}.}\label{tab:pressure}
 \begin{tabular}{crl}
 \hline
 Setting & Value & Description\\
@@ -733,15 +747,13 @@ To alter the \PM\ unit for volumetric quantities,
 >>> pm.config['unit_volume'] = 'gal'
 \end{lstlisting}
 
-Volume is the measure of the size of a region in space.  SI volumetric units are entirely derived from cubes of the linear units, with the liter being equivalent to 0.001 m$^3$.
+Volume is the measure of the size of a region in three-dimensional space.  SI volumetric units are entirely derived from cubes of the linear units, with the liter being equivalent to 0.001 m$^3$.  These are quite simply defined as the region of space occupied by a cube having the corresponding unit length on each of its sides.
 
-Historically the English units for fluid ounce, pint, quart, and gallon were based on the volume occupied by specific weights of water.  The English wine gallon was first implemented in 1707 as precisely 231 cubic inches, which was quite close to the gallon based on quantities of water.  Though the United Kingdom abandoned it in 1824, it was adopted as the official gallon by the United States Treasury Department in 1832 \cite{nbs:sp447}.  Today, the US gallon is still defined as precisely 231 cubic inches (implicitly defining it from the meter).  The customary volumetric measurements quart (one quarter gallon), pint (one half quart), cup (one half pint), the fluid ounce (one eighth of a cup), tablespoon (one half of a fluid ounce), and teaspoon (one third of a table spoon), all follow from the gallon.  
+Historically the English units for fluid ounce, pint, quart, and gallon were based on the volume occupied by specific weights of water.  By contrast, the English wine gallon was first implemented in 1707 as precisely 231 cubic inches, and though the UK abandoned it in favor of the imperial gallon (the volume occupied by 10 lb of water) in 1824, the wine gallon was adopted as the official gallon by the United States Treasury Department in 1832 \cite{nbs:sp447}.  Today, the US gallon is still defined as precisely 231 cubic inches (implicitly deriving it from the meter), and the imperial gallon is precisely 4.546 09 liters (also derived from the meter).  Though the source of these measures has converged to the meter, the world is left with these divergent vestiges of early attempts to construct rigorously defined units of volume.
 
-It should be emphasized that these are ``fluid'' volumes, and are distinct from the system of ``dry'' volumes in common commercial use in agriculture.  There are also parallel definitions for UK imperial volumes that have slightly different definitions based on the imperial gallon. The fluid ounce is especially misleading, since it is within 4\% of the volume occupied by one ounce of liquid water -- it's historic definition.
+The ``customary'' volumetric measurements quart (one quarter gallon), pint (one half quart), cup (one quarter of a pint), the fluid ounce (one eighth of a cup), tablespoon (one half of a fluid ounce), and teaspoon (one third of a tablespoon), all follow from the gallon\footnote{There are parallel definitions for imperial volumes derived from the imperial gallon.  Perhaps I am betraying some chauvinism by including the US customary and not the UK equivalents.  Personally, I sleep well with the assurance that I am probably the only user to calculate the density in ounces per ounce -- a feat that should not, on its face, be possible.}.  It should be emphasized that these are ``fluid'' volumes, and are distinct from the system of ``dry'' volumes in historical commercial use in agriculture.  Their name stems from their historical definitions.  For example, the ``fluid ounce'' was once known as the volume occupied by one ounce of distilled water, and its modern definition relating it to the gallon is within 4\% of its historical definition.
 
-The Imperial gallon, which the UK and Canada adopted in place of the wine gallon, was the volume occupied by 10 pounds of liquid water at atmospheric conditions.  Today, the imperial gallon is precisely 4.546 09 liters, which is roughly consistent with its original definition.
-
-Table \ref{tab:volume} shows the volumetric units recognized by \PM .
+Table \ref{tab:volume} shows the volumetric units recognized by \PM.
 
 \begin{table}
 \centering

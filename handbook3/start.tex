@@ -4,55 +4,103 @@ In this chapter, we discuss everything you should need to get your own installat
 
 \section{Installation}
 
-\PM\ is distributed primarily through the Python package index (\url{https://pypi.org/}), but it can also be downloaded and installed ``manually'' if you have Python's setuptools installed.  \PM\ is written in plain Python, so there is no need to compile to binaries.  All data are encoded in \texttt{json} format (\url{https://docs.python.org/3/library/json.html}), and the configuration files are executable python code.  The result is that all of the code, data, and configuration files are in human readable text using only the ASCII character set.
+\PM\ is distributed primarily through the Python package index\footnote{Python package index: \url{https://pypi.org/}}, but it can also be downloaded and installed ``manually'' if you have Python's setuptools installed.  \PM\ is written in plain Python, so there is no need to compile to binaries.  All data are encoded in \texttt{json} format (\url{https://docs.python.org/3/library/json.html}), and the configuration files are executable python code.  The result is that all of the code, data, and configuration files are in human readable text using only the ASCII character set.
 
 \subsection{Prerequisites}
 
 Obviously, a Python interpreter needs to be installed on your system, but \PM\ is deliberately designed to minimize the number of prerequisites.  Only Numpy version 1.7 or later is required.
 
-It is worth noting that \PM\ was originally developed in Python 2, but support for Python 3 was designed in from the start.  As of January 2020, Python 2 was officially depreciated, and \PM\ testing on Python 2 halted.  On a number of popular Linux systems, Python 2 is still the system default, though, so users should take note.  If your system has both Python 2 and Python 3 installed, it may be necessary to replace \texttt{python} in the instructions below with \texttt{python3} to specify the version.
+It is worth noting that \PM\ was originally developed in Python 2, but as of January 2020, Python 2 was officially depreciated, and \PM\ testing and support on Python 2 halted.  On a number of popular Linux systems, Python 2 is still the system default, so users should take note.  If your system has both Python 2 and Python 3 installed, it may be necessary to replace \texttt{python} in the instructions below with \texttt{python3} to specify the major version.
 
-\subsection{Installation with \texttt{pip}}
+The examples that follow use a \verb|$| to represent the prompt of a command line.  On Linux, it might appear \verb|user@machine ~ $| and on Windows it might appear \verb|C:\>|.  
 
-Python uses a package called \texttt{pip} (\url{https://pip.pypa.io}) to manage its own software.  You can use it to automatically download and install \PM\ and its dependencies with a single command.
+\subsection{Installation with a package manager}
 
-{\bf In an Anaconda installation} start the ``Anaconda Prompt'' to bring up a terminal.  See \url{https://www.anaconda.com/} for more information.
-
-{\bf In Windows} with a system-wide Python interpreter, bring up a command prompt or type \texttt{cmd} in the ``run'' field to bring up the prompt.  You may need to run the terminal as an administrator.  If so, right click on the icon and open using the ``run as administrator'' option in the menu.
-
-{\bf In Linux or MacOS} bring up a terminal any way you like.  In many popular installations \texttt{Ctrl+Alt+T} works by default.
-
-First, it is important to make sure your python package manager is installed and updated.  A Python installation without \texttt{pip} is ususual, but they do still appear from time to time.  If you do not have \texttt{pip} on your system, follow the directions from the Python packaging authority to get it up and working: \url{https://pip.pypa.io/en/stable/installation/}.
-
-On just about all systems, entering the following commands in a terminal will update \texttt{pip} and install \PM.
+\textbf{Global installation with pip} was once the most common way to install packages.  Python uses a package called \texttt{pip}\footnote{pip docs: \url{https://pip.pypa.io}} to manage its own dependencies.  You can use it to automatically download and install \PM\ and its dependencies with a single command.
 \begin{lstlisting}[language=bash]
 $ python -m pip install --upgrade pip
 $ python -m pip install --upgrade pyromat
 \end{lstlisting}
-Note that you don't need to type the \verb|$|; it represents the command line prompt. On a Windows system, it might appear \verb|C:\>|, on most Unix-like terminals, it may appear \verb|user@machine:~\$|.  Your prompt may look a little different, and that's OK.  If Python is already correctly installed these commands should get you going.
+This makes sure the package manager itself is up-to-date and installs or upgrades \PM\ to its latest released version.  In many systems, these commands are run globally, so you will need administrator permissions.  Otherwise, consider using a virtual environment (see below).
 
-What are these commands doing?  The first part, \verb|python -m pip|, is executing Python's \texttt{pip} module with the options you pass next.  Next, \verb|install --upgrade|, tells \verb|pip| that you want to install something over the internet from the python package index (\url{https://pypi.org/}), and that if there is a newer version of an existing package available, it should be upgraded.  Finally, the last argument tells \texttt{pip} what to install.  So, the first line is telling \verb|pip| to upgrade itself, and the second line is actually installing \verb|pyromat|.
-
-It should be noted that many Linux systems still use Python 2 by default, so you may want to specify Python 3 specifically.  In most systems, this will make certain that the installation is in the Python 3 interpreter and not Python 2.
+\textbf{Backwards comaptibility} is a high priority in \PM\ development, but major version changes (e.g. 1.X.X to 2.X.X to 3.X.X) allow changes to the user layer that might break some users' codes.  Users who need to enforce some specific rules can use the boolean operators to specify limits on the desired version.  
 \begin{lstlisting}[language=bash]
-$ python3 -m pip install --upgrade pip
-$ python3 -m pip install --upgrade pyromat
+$ python -m pip install pyromat==2.2.0
+$ python -m pip install 'pyromat<3.0.0'
+\end{lstlisting}
+See \url{https://pip.pypa.io/en/stable/user_guide/} for more information.
+
+\textbf{Virtual environments} are used pretty universally these days.  They are self-contained Python interpreters and packages, so users don't need to install their packages in the same interpreter that is used to run system scripts.  Virtual environments can be great tools for educators and students working on machines without administrator privileges and for developers who want to contain their testing.  As of Python 3.5, \texttt{venv}\footnote{venv docs: \url{https://docs.python.org/3/library/venv.html}} is the Python command for creating a virtual environment.
+
+(1) First, make sure \texttt{venv} is installed and updated.  On a Linux installation, the best way to do this is usually to use the system's native package manager system.  For example, on Ubuntu or Mint, 
+\begin{lstlisting}[language=bash]
+$ apt update
+$ apt install python3-venv
+\end{lstlisting}
+On systems without a package manager (like Windows),
+\begin{lstlisting}[language=bash]
+$ python -m pip install --upgrade venv
 \end{lstlisting}
 
-Installing in system-wide Python installations has gone out of popularity in recent years, but if that's what you're doing, you may need to run \texttt{pip} as an administrator.  Most installations these days are in virtual environments or some other needlessly complicated setup that obfuscates the whole thing, so if you're doing this the old-school global way, you have my respect, and I want to support you.
-
-On a Windows system, you will need to restart the prompt as a priviledged user (administrator).  Usually, you can right-click and select ``run as administrator'' when you start the command prompt.
-
-On a Linux, Mac, or Unix system, you may need to run as a super user, so you should use
+(2) Create your environment
 \begin{lstlisting}[language=bash]
-$ sudo -H python -m pip install --upgrade pip
-$ sudo -H python -m pip install --upgrade pyromat
+$ python -m venv <VENV DIRECTORY>
 \end{lstlisting}
-The \texttt{-H} switch is recommended by the Python package index to be certain that the \texttt{root} user's home directory is used during install.
+This command will create a directory and place in it all the files needed for an independent little world of Python.  The \texttt{VENV DIRECTORY} placeholder should be replaced with the path where you want your environment to be placed.
+
+(3) ``Activate'' the virtual environment.  This redirects terminal commands to the binaries in this virtual environment instead of the system-wide Python interpreter.  In Linux or MacOS distributions, these are located in a directory, \texttt{<VENV DIRECTORY>/bin/}, and on Windows, \verb|<VENV DIRECTORY>\Scripts\|.  On a Linux distribution (in a bash terminal), 
+\begin{lstlisting}[language=bash]
+$ source <VENV DIRECTORY>/bin/activate
+\end{lstlisting}
+and on Windows
+\begin{lstlisting}[language=bash]
+C:\> <VENV DIRECTORY>\Scripts\activate.bat
+\end{lstlisting}
+
+On most systems, the terminal will now appear
+\begin{lstlisting}[language=bash]
+(<VENV DIRECTORY>) $
+\end{lstlisting}
+to remind the user that your commands are being executed in the environment, and not on the system.
+
+(4) Install \PM\ and its dependencies
+\begin{lstlisting}[language=bash]
+(<VENV DIRECTORY>) $ pip install --upgrade pyromat
+\end{lstlisting}
+This should automatically install both \PM\ and the latest version of Numpy.
+
+(5) Start the interpreter, and start using \PM.  Here is what that looks like on my system.
+\begin{lstlisting}[language=bash]
+(<VENV DIRECTORY>) $ python
+Python 3.12.3 (main, Jun 19 2026, 12:46:00) [GCC 13.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import pyromat as pm
+>>> pm.config['install_dir']
+'/home/calc/Documents/test-env/lib/python3.12/site-packages/pyromat'
+\end{lstlisting}
+I have called up \PM's \verb|'install_dir'| parameter to verify that I am using the copy of \PM\ that is located in my virtual environment.  For me, that was an environment called \texttt{test-env}.
+
+For more information, see the \texttt{venv} documentation.
+
+\subsection{Installing in popular IDEs}
+
+\textbf{In an Anaconda installation} start the ``Anaconda Prompt'' to bring up a terminal, and use the \texttt{conda} command much like \texttt{pip}\footnote{Anaconda:\url{https://www.anaconda.com/docs/getting-started/working-with-conda/packages/install-packages}}.  
+\begin{lstlisting}[language=bash]
+$ conda install pyromat
+\end{lstlisting}
+This works inside Anaconda's own virtual environment with the advantage that you don't need to set it up yourself.
+
+\textbf{In a Spyder installation}, the IDE will be using either a virtual environment or the system's global Python interpreter.  Provided you have appropriate permissions, the IPython console will usually allow you to simply install packages
+\begin{lstlisting}[language=bash]
+In [1]: pip install pyromat
+\end{lstlisting}
+If that isn't working, there may be something unusual about your installation.  Refer to Spyder's documentation\footnote{Spyder: \url{https://docs.spyder-ide.org/current/index.html}} for guidance.
+
+\textbf{In a Thonny installation}, users can use a graphical package manager\footnote{Thonny: \url{https://thonny.org/}} to automatically install in Thonny's own virtual environment without ever needing to think about it.  For many educators, this may be the best option, since it is easy to use, and does not require administrator privileges.  In the top menu, navigate to "Tools > Manage Packages."  In the search bar, type "pyromat."  The manager should find \PM.  Click "Install."
 
 \subsection{Manual installation with \texttt{git}}
 
-So-called manual installation is also quite easy using \texttt{git} if you already have Python's \texttt{setuptools} (\url{https://setuptools.readthedocs.io/en/latest/}) installed and udpated.
+This method of installation is not recommended.  So-called manual installation is also quite easy using \texttt{git} if you already have Python's \texttt{setuptools}\footnote{Setuptools: \url{https://setuptools.readthedocs.io/en/latest/}} installed and udpated.
 
 Just clone the \texttt{git} repository, then navigate into the root directory and run the \texttt{setup.py} installation script.  This is the stage where an error will be generated if there is a problem with \texttt{setuptools}.
 
@@ -64,13 +112,11 @@ $ python setup.py install
 
 \subsection{Manual installation from Sourceforge}
 
-This method has largely fallen out of favor, but it is still a perfectly valid way to perform an installation.  Like the GitHub method, this method only works if you have \texttt{setuptools} (\url{https://setuptools.readthedocs.io/en/latest/}) installed and updated.
+This method has largely fallen out of favor, but it is still a perfectly valid way to perform an installation.  Like the GitHub method, this method only works if you have \texttt{setuptools} installed and updated (see the footnote below).
 
 Download the latest version of \PM\ from \url{https://sourceforge.net/projects/pyromat/}.  Select whichever compression type that suits you (e.g. zip, bz2, gzip).  Then, extract the package, creating a \texttt{pyromat} directory.
 
-Bring up a command prompt (see above for how to do that on your system), and navigate to the extracted directory using the appropriate \texttt{cd} commands (\url{https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cd}).
-
-Finally, execute the Python setup script.
+Bring up a command prompt (see above for how to do that on your system), and navigate to the extracted directory using the appropriate \texttt{cd} commands.  Finally, execute the Python setup script.
 
 \begin{lstlisting}[language=bash]
 $ cd /path/to/your/dir
