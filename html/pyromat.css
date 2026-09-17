@@ -141,13 +141,33 @@ span.code{
     position:static;
 }
 
+.scrolltable {
+    display: inline-block;
+    overflow: auto;
+    height: 300px;
+}
+
+table.pretty{
+    text-align:left;
+    padding: 5px;
+    border-spacing: 0px;
+    border-color: black;
+    border-style:solid;
+    border-width:1px;
+}
+
+table.pretty td, table.pretty th{
+    padding: 0px 5px;
+    text-align: left;
+}
+
 .disptable{
     width: 90%;
     text-align:center;
     position:static;
     border-color:black;
     border-style:solid;
-    border-width:2px;
+    border-width:1px;
     border-collapse:collapse;
 }
 
