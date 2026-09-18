@@ -22,12 +22,12 @@ P(X,Y) = \sum_{i,j} c_{i,j} X^i Y^j\label{eqn:num:PXY}
 where $a$ and $b$ are real coefficients such that $i$ and $j$ are integer indices. 
 
 \subsection{Modifying polynomials for non-integer and negative powers}
-Fractional and negative exponents are also possible within this framework if we were to accept input values $x$, and $y$, and adjust them according to pre-exponentials $a$ and $b$,
+Fractional and negative exponents are also possible within this framework if we were to accept input values $x$ and $y$, and adjust them according to pre-exponentials $a$ and $b$,
 \begin{align}
 X &= x^a\\
 Y &= y^b.
 \end{align}
-Then, if the polynomial were also multiplied by post-exponential terms, $x^\alpha$, and $y^\beta$, the new polynomial formed is
+Then, if the polynomial were also multiplied by post-terms, $x^\alpha$, and $y^\beta$, the new polynomial formed is
 \begin{align}
 p(x,y) = x^\alpha y^\beta P(X,Y).
 \end{align}
@@ -54,7 +54,7 @@ However, this also illustrates a potential problem in the approach.  For individ
 
 Because of the dominance of numerical overhead, repeated multiplication operations can be more expensive than a call to \texttt{power} on small arrays.  However, it should be emphasized that judicious use of computational effort is really only critical on large arrays, anyway.  For arrays with 100 elements, \texttt{power} operations are about 10 times as expensive, but \texttt{power} function calls on 10,000-element arrays are roughly equivalent to 100 multiplications.
 
-This leads to a careful choice for arrays with large exponents (or tiny fractional values).  The large exponents in the last example can be mitigated at the cost of added overhead and complexity by splitting the polynomial into two separate polynomials, each with its own scaling.
+This leads to a careful choice for arrays with large exponents (or tiny fractional values).  The large exponents in the last example can be mitigated at the cost of added, overhead and complexity by splitting the polynomial into two separate polynomials, each with its own scaling.
 \begin{align}
 p(x,y) &= 2x^{-2} + x^{0.1}y + xy^2.\nonumber\\
  &= x^{-2} \left(2 + x^3y^2 \right) + x^{0.1} y\nonumber\\
@@ -62,29 +62,83 @@ p(x,y) &= 2x^{-2} + x^{0.1}y + xy^2.\nonumber\\
 
 \subsection{Representation of polynomials in data}
 
-The \texttt{json} data representation of a polynomial on two dimensions uses three-deep series of nested lists to describe the pre- and post-exponents, the coefficients, and their corresponding exponents for multiple polynomial parts.  For example, the nested lists below define a polynomial with multiple parts.
+As of version 2.3.0, the \texttt{json} data representation of a polynomial on two dimensions uses dictionaries to define the polynomial elements.  Older versions of the \verb|mp1| class used nested lists, but with the addition of \verb|mp2| class, dictionaries were introduced to make the data files more readable (and more writeable).
 
+The simplest polynomial definition is a dictionary with only a coefficient table:
+\begin{lstlisting}{language=Python}
+poly = {
+    'coef' = [
+        [<i0>, <j0>, <c0>],
+        [<i1>, <j1>, <c1>],
+        <...>
+    ]
+}
+\end{lstlisting}
+2D polynomail coefficient tables are nested (2D) lists with each row containing 3 elements; $x$-exponent, $y$-exponent, and coefficient.  The $i$ and $j$ exponents must be non-negative integers, while the coefficient may be a float or integer.  The rows \emph{must} be sorted first by descending $x$-exponent and then by descending $y$-exponent.  For example, the polynomial,
+\begin{align}
+p(x,y) = 2x^2 + 0.5 xy - 2xy^2 + y^3 - 4.2,
+\end{align}
+is expressed
+\begin{lstlisting}{language=Python}
+poly = {
+    'coef' = [
+        [2, 0, 2.0],
+        [1, 2, -2.0],
+        [1, 1, 0.5],
+        [0, 3, 1.0],
+        [0, 0, -4.2]
+    ]
+}
+\end{lstlisting}
+The behavior of the multi-phase polynomial algorithms is undefined if the coefficient order is not correctly sorted.
+
+The addition of pre- and post-exponentials is optional, and is done by adding keywords to the dictionary.  The \verb|pre| keyword accepts a two-element list in the form \verb|[a,b]|, while \verb|post| accepts \verb|[alpha, beta]|.  For example,
+\begin{lstlisting}{language=Python}
+poly = {
+    'pre' = [0.5, 1],
+    'post' = [-1, 0]
+    'coef' = [
+        [1, 0, 1],
+        [0, 1, -1]
+    ]
+}
+\end{lstlisting}
+defines the function
+\begin{align}
+p(x,y) = \frac{1}{\sqrt{x}} - \frac{y}{x}.
+\end{align}
+Here, the coefficient table defines a basic polynomial,
+\begin{align}
+p(X,Y) = X - Y
+\end{align}
+The pre-exponential gives us, $X = \sqrt{x}$ and $Y = y$.  Then, due to the post values, the entire polynomial will be multiplied by $1/x$.  Note that specifying pre-exponentials of 1 and post-exponentials of 0 is the same as specifying none.
+
+In more complex formulae, it is often necessary to break the polynomial into parts with different pre- and post-exponential values.  In this case, the polynomial can be defined as a list of dictionaries, where each dictionary obeys the rules above.
+
+For example, the nested lists below define a polynomial with multiple parts.
 \begin{lstlisting}{language=Python}
 poly = [# This begins the list of sub-polynomials
-    [# This begins the first sub-polynomial
-        [<a>,<b>], 
-        [<alpha>, <beta>],
-        [<i0>, <j0>, <c0>],
-        [<i1>, <j1>, <c1>],
-        <...>
-    ],
-    [# This begins the second sub-polynomial
-        [<a>,<b>], 
-        [<alpha>, <beta>],
-        [<i0>, <j0>, <c0>],
-        [<i1>, <j1>, <c1>],
-        <...>
-    ],
+    {# This begins the first sub-polynomial
+        'pre' = [<a>,<b>], 
+        'post = [<alpha>, <beta>],
+        'coef' = [
+            [<i0>, <j0>, <c0>],
+            [<i1>, <j1>, <c1>],
+            <...>
+        ]
+    },
+    {# This begins the second sub-polynomial
+        'pre' = [<a>,<b>], 
+        'post' = [<alpha>, <beta>],
+        'coef' = [
+            [<i0>, <j0>, <c0>],
+            [<i1>, <j1>, <c1>],
+            <...>
+        ]
+    },
     <...more sub-polynomials...>
 ]
 \end{lstlisting}
-
-The exponents \texttt{i0}, \texttt{j0}, \texttt{i1}, etc., must be non-negative integers listed in descending order, sorted by $i$ first and then sorted by $j$.  An alternative approach is to define a two-dimensional polynomial with a matrix of coefficients, each row and column corresponding to a power of $x$ or $y$, but that method suffers when there are only a few terms with high powers.  This approach might be called a ``sparse coordinate matrix'' approach to defining a polynomial.
 
 \subsection{Efficient evaluation of the polynomial}
 
@@ -261,26 +315,28 @@ In Algorithm \ref{alg:poly2}, an outer loop over the range of values of $i$ and 
 
 \section{Polynomials in one dimension}\label{sec:num:poly1}
 
-Polynomials of one dimension benefit from the same approach as two-dimensional polynomials, but the algorithm is far simpler.  All the formulae and algorithms that apply to $q$ in the last section may simply be repurposed for a single dimensional polynomial.  
-
-The only topic that really requires special treatment is the format used in data.  One-dimensional polynomials are identical to two-dimensional polynomials, except (1) the pre- and post-exponent values are scalars instead of two-element lists, and (2) each term only needs two parameters instead of three.
+Polynomials of one dimension benefit from the same approach as two-dimensional polynomials, but the algorithm is far simpler.  All the formulae and algorithms that apply to $q$ in the last section may simply be repurposed for a single dimensional polynomial.  The only differences are (1) the pre- and post-exponent values are scalars instead of two-element lists, and (2) each term only needs two parameters instead of three.
 
 \begin{lstlisting}[language=Python]
-coef = [ # begins the polynomial
-    [ # begins a sub-polynomial
-        <a>, 
-        <alpha>,
-        [ <i0>, <c0> ],
-        [ <i1>, <c1> ],
-        <...>
-    ],
-    [ # begins a second sub-polynomial
-        <a>, 
-        <alpha>,
-        [ <i0>, <c0> ],
-        [ <i1>, <c1> ],
-        <...>
-    ],
+coef = [ # Optional opening list begins sub-polynomials
+    { # begins a sub-polynomial
+        'pre' = <a>, 
+        'post' = <alpha>,
+        'coef' = [
+            [ <i0>, <c0> ],
+            [ <i1>, <c1> ],
+            <...>
+        ]
+    },
+    { # begins a second sub-polynomial
+        'pre' = <a>, 
+        'post' = <alpha>,
+        'coef' = [
+            [ <i0>, <c0> ],
+            [ <i1>, <c1> ],
+            <...>
+        ]
+    },
     <... more sub-polynomials?...>
 ]
 \end{lstlisting}

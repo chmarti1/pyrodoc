@@ -6,11 +6,35 @@ When the \PM\ package is first imported, the load process is completed in three 
 
 \section{The class registry module, \texttt{reg}}
 
-The \texttt{reg} module only has three members of interest to a user; the \texttt{registry} dictionary, the \texttt{regload} function, and the \verb|__basedata__| class.  As a module, \texttt{reg} is responsible for maintaining the \texttt{reg.registry} dictionary, which contains all of the classes that provide the substance models.  Each entry of this dictionary is a child class of the \verb|reg.__basedata__| class.  The key for each member of the dictionary is the same as its name and serves as the string used to identify the class.  For example, in the default installation, \texttt{reg.registry['ig2']}, recalls the \texttt{ig2} class, so \texttt{'ig2'} can be used as a value for the \texttt{class} entry of a data file.
+The \texttt{reg} module only has three members of interest to a user -- the \texttt{registry} dictionary, the \texttt{regload()} function, and the \texttt{PYroMatModel} class.  As a module, \texttt{reg} is responsible for maintaining the \texttt{registry} dictionary, which contains all of the classes that provide the substance models.  Each entry of this dictionary is a child class of the \texttt{PYroMatModel} class.  When data files are loaded (see the \texttt{dat} module below), each substance data set is required to identify its class with a string.  That string is used as the key to the \texttt{registry} dictionary, which is expected to provide the correct class for handling that substance's data.  As of version 3.0.1, the default installation includes the classes listed in Table \ref{tab:regdat:classes}.
+
+\begin{table}
+\centering
+\caption{Default installation classes available as of version 3.0.1.}\label{tab:regdat:classes}
+\begin{tabular}{|ccp{2in}|}
+\hline
+Class & Section & Description \\
+\hline
+\verb|'ig'| & \ref{sec:ig:ig} & Ideal gas with the Shomate $c_p$ equation\\
+\verb|'ig2'| & \ref{sec:ig:ig2} & Ideal gas with the NASA $c_p$ polynomials \\
+\verb|'igmix'| & \ref{sec:ig:igmix} & Static ideal gas mixtures\\
+\verb|'mp1'| & \ref{sec:mp:mp1} & Multi-phase with separate saturation line models\\
+\verb|'mp2'| & \ref{sec:mp:mp2} & Multi-phase built on table lookups\\
+\hline
+\end{tabular}
+\end{table}
 
 When \PM\ is first imported, it calls \texttt{reg.regload()} with no arguments, which causes it to discover a list of possible registry directories from the \verb|config['reg_dir']| entry.  If the \verb|config['reg_recursive']| is set to \texttt{True}, the \texttt{reg.regload()} function will also descend into sub-directories.  Calling \texttt{reg.regload()} at any time causes it to repeat this process.  See the in-line documentation for how \texttt{reg.regload()} arguments can be used to override configuration entries when manually repeating the registry load process from the command line.
 
-Great care should be taken when specifying potential registry directories.  The \texttt{reg.regload()} function executes all Python codes in the registry directories to check for definition of \verb|reg.__basedata__| classes, so registry directories that define codes globally (for all users) should be protected just like system files, and users should be disallowed from loading each other's registries.
+The \texttt{reg.regload()} function calls \texttt{exec()} on all files with names ending in \texttt{.py} and without a leading \verb|.| or \verb|_|.  Each class that is found to be a child of \texttt{PYroMatModel} is added to the \texttt{registry} dictionary with its name as the key.  A \PM\ installation should \emph{never} be configured in such a way that one user can load registry files from a different user, as it would constitute a serious security concern.  Instead, shared registry files should be stored in administrator-controlled directories with read-only permissions, and users should be prohibited from saving their own files there.
+
+This concern is the reason multiple registry directories can be configured.  For example, on a Linux system, an administrator might configure a system-wide installation of \PM\ so that users can create their own private registries in their home directories by adding the line to a configuration file.
+\begin{lstlisting}[language=Python]
+reg_dir = '~/.pyromat/reg'
+\end{lstlisting}
+See Chapter \ref{ch:config} for more information on configuration.
+
+It is also important to understand that calling \texttt{regload()} does \emph{not} cause any instances loaded by the \texttt{dat} module to be associated with the newly loaded classes.  It will be important to also make a call to the \texttt{dat.load()} function to force reloading the substance model instances.  See below for more information.
 
 \section{The data module, \texttt{dat}}
 

@@ -1,31 +1,26 @@
 \chapter{Multi-phase substance models}\label{ch:mp}
 
-Unlike ideal gas properties, it is sensible to formulate multi-phase properties in terms of temperature and density instead of temperature and pressure.  Modeling phase changes with temperature and pressure as independent variables requires a discontinuity at the phase change.  On the other hand, using density requires no such discontinuity, and it even permits modeling meta-stable states.
+Once a thermodynamic model permits changes of phase, it makes little sense to specify the state in terms of temperature and pressure.  After all, boiling represents a massive isobaric and isothermal discontinuity in all other properties.  On the other hand, using density requires no such discontinuity, and it even permits modeling meta-stable states.  For this reason, contemporary multi-phase models use temperature and density to specify the thermodynamic state.
 
-Historically, there have been countless approaches to the problem, beginning with the so-called ``viral'' terms inspired by Van der Waals forces in early work on the kinetic theory of gases.  This approach began an evolution of increasingly complex variants of the ideal gas law, but parallel models for the specific heat are needed to establish a total substance model.  Eventually, this approach fell out of popularity in favor of single property models from which all other properties could be derived.  
+Historically, there have been countless approaches to the problem, beginning with the so-called ``viral'' terms inspired by Van der Waals forces in early work on the kinetic theory of gases.  This approach began an evolution of increasingly complex variants of the ideal gas law, from which pressure can be calculated form increasingly complicated formula in terms of temperature and density.  In this approach, parallel models for the specific heat are needed to establish a total substance model.  The so-called ``Span and Wagner'' models in broad use today manage to address all of these issues in a single, albeit rather cumbersome formula.
 
-If these general models have some basis in physics, these approaches have often been argued to be superior because they make it possible to derive properties that are not so easily measured.  For example, the specific heat or the speed of sound may be quite practical to measure precisely in a laboratory, and a substance model that reliably predicts them throughout the thermodynamic domain may also provide good predictions for a quantity that is harder to measure, like the precise location of the critical point.
+\section{Span and Wagner Equation of State}\label{sec:mp:sweos}
 
-It is possible that future releases of \PM\ may include other formulations, but the wide availability of works providing coefficients for more contemporary methods has made it practical to use a single multi-phase class to model pure substances.  There are works extending these models to mixtures like air, but those are not yet implemented.
+Both the \texttt{mp2} and its predecessor, \texttt{mp1}, use what is sometimes called the ``Span and Wagner'' model.  Its earliest publication appears to be in 1991\cite{stewart:1991, setzmann:1991}, but it was in a three-part paper in 2003 that Span and Wagner make a defense for the model's broad use for the description of the thermodynamic properties of substances across phase change boundaries\cite{span:2003:1, span:2003:2, span:2003:3}. Its most important feature is that it is generalizable to an incredible variety of substances without the need for custom formulae -- all the terms merely need their own coefficients, which a set algorithm can load and use for calculation.  
 
-\section{General formulation for \texttt{mp1}}\label{sec:mp:mp1}
-
-The models supported by the \texttt{mp1} class have explicit formulations for the Holmholtz free energy (or simply free energy) in terms of temperature and density, and all other properties are calculated from that formulation.  Free energy is defined as
+The models supported by \PM's multi-phase classes uses a single formula for Helmholtz free energy as a function of temperature and density,
 \begin{align}
 f(T,\rho) &\equiv e(T,\rho) - T s(T,\rho)\\
  &= h - \frac{p}{\rho} - T s.
 \end{align}
-By constructing the formulation from a bank of terms inspired by theoretical formulae for the intermolecular forces, there is greater hope of reducing the number of terms needed. 
 
-The formulation that we describe in this chapter is sometimes referred to as a ``Span and Wagner'' fit for Helmholtz free energy.  Though some version of the approach had already been applied successfully to specific substances over a decade earlier \cite{stewart:1991, setzmann:1991}, the need for a form that a code could apply generically to many substances prompted Span and Wagner's three-part 2003 paper defending its broad use for thermodynamic properties of fluids \cite{span:2003:1, span:2003:2, span:2003:3}.  Papers by Span, Wagner, Lemon, Jacobsen, and others for an expanding library of formulations for substances that use a standard bank of terms to construct the free energy equation.
+The impressive body of data on which \PM\ draws has been accumulated as follows.  First, individual researchers accumulate bodies of raw experimental data describing the properties like specific heat, pressure, phase-change boundary, critical point, etc. with as as great accuracy as is feasible.  The team wishing to produce a free energy model must accumulate these data, compare them for consistency, and make judgments about which are to be trusted, which discarded, and which kept with some skepticism.  A large bank of terms for an expansion representing $f(T,\rho)$ (described below) are used to fit raw data in a regression model, and the number of terms is iteratively reduced until the precision of the model drops to roughly match the uncertainty of the original data.  In well-studied cases like cryogenic nitrogen, this may be on the order of 0.01\%.  In other cases, like some more esoteric refrigerants, this might be on the order of 1\% or 2\%.
 
-In its independent implementation of this model, \PM\ is a modest open-source Pythonic alternative to REFPROP \cite{refprop}, the NIST code widely adopted for implementing these general forms.
+If the uncertainty implied in the model's calculation is of concern to the reader, it will be important to obtain the original publication to thoroughly understand the model's strengths and weaknesses.  This topic is far too deep, and \PM\ includes far too many individual substance models to go into this kind of detail on each one.
 
-\subsection{Nondimensionalization}
+\subsection{Nondimensionalization}\label{sec:mp:nd}
 
-It is generally sound practice to nondimensionalize formulae in all but the most trivial numerical problems.  Ensuring that parameters vary on the order of unity helps reduce the severity of numerical errors, and if the nondimensionalization is performed with special attention to the underlying physics, then it is highly likely that the complexity of the formulae required will be reduced.
-
-All of the substance models in the first multi-phase class use
+These models are built from a nondimensional formulation for free energy.  This means the terms can be scaled to be more or less on the order of unity, and the choice of molar versus mass density is irrelevant.  Many authors use $\alpha$ to represent a nondimensional free energy, and we adopt the same here.
 \begin{subequations}
 \begin{align}
 \alpha(\tau,\delta) &= \frac{f(T,\rho)}{R T}\\
@@ -38,11 +33,11 @@ The free energy is normalized by the quantity $R T$, which is motivated by (\ref
 
 The formulation for dimensionless free energy, $\alpha$, is split into two parts: the ideal gas part, $\alpha^o$, and the residual part, $\alpha^r$.  So, the total free energy is
 \begin{align}
-\alpha(\tau, \delta) = \alpha^o(\tau, \delta) + \alpha^r(\tau, \delta)
+\alpha(\tau, \delta) = \alpha^o(\tau, \delta) + \alpha^r(\tau, \delta)\label{eqn:mp:atotal}
 \end{align}
 This approach separates the problem of needing to model the energy contained in molecular vibration and translation of a large number of independent oscillators ($\alpha^o$) from the problem of modeling the effects of intermolecular forces with increasing density ($\alpha^r$).
 
-\subsection{Ideal gas portion of free energy}
+\subsection{Ideal gas portion of free energy}\label{sec:mp:ig}
 The ideal gas portion of the free energy can be constructed from a specific heat model, just as other properties were for the ideal gas substances in Chapter \ref{ch:ig}.  The ideal gas enthalpy is merely the integral of specific heat, and ideal gas entropy can be similarly constructed in terms of specific heat, temperature, and density,
 \begin{subequations}
 \begin{align}
@@ -58,15 +53,13 @@ s &= s_0 - \int_{\tau_0}^\tau \frac{c_p}{\tau} \d \tau - R \ln\left(\frac{\delta
 When these are used to calculate the dimensionless free energy,
 \begin{align}
 \alpha^o &= \frac{h - RT - Ts}{RT} = \frac{h \tau}{R T_c} - 1 - \frac{s}{R}\nonumber\\
- &= \frac{h_0}{RT_c} \tau - \frac{s_0}{R} - 1 + \ln\left(\frac{\delta \tau_0}{\delta_0 \tau}\right) + \left(-\tau\int_{\tau_0}^\tau \frac{c_p}{R \tau^2} \d \tau + \int_{\tau_0}^\tau \frac{c_p}{R \tau} \d \tau \right)\label{eqn:mp1:aodef}
+ &= \frac{h_0}{RT_c} \tau - \frac{s_0}{R} - 1 + \ln\left(\frac{\delta \tau_0}{\delta_0 \tau}\right) + \left(-\tau\int_{\tau_0}^\tau \frac{c_p}{R \tau^2} \d \tau + \int_{\tau_0}^\tau \frac{c_p}{R \tau} \d \tau \right)\label{eqn:mp:aodef}
 \end{align}
-Note that, for ease of interpretation, we have adopted a lazy notation with $\tau$ both inside and outside of the integrals.  We will adopt a more strict notation below.
+Note that, for ease of interpretation, we have adopted a lazy notation with $\tau$ both inside and outside of the integrals.  We will be more strict with our notation below.
 
-The difficulty in formulating the specific heat of even an ideal gas is introduced in Section \ref{sec:intro:e}.  It is, briefly, that portions of energy that a substance stores in translation (thermal energy) versus the many internal forms of vibration depends heavily on the temperature (and intermolecular distance for a real substance).  A fully detailed model would need to include molecular vibration, electronic, magnetic energies, and quantom mechanical effects.  Approaches to this problem range from a few relatively complicated terms derived from first principles to purely empirical approaches with many simple polynomial terms.  In this discussion, we will spend a little time addressing those approaches that are most common to the ideal gas portion of the \verb|mp1| model.
+The difficulty in formulating the specific heat of even an ideal gas is introduced in Section \ref{sec:intro:e}.  It is, briefly, that portions of energy that a substance stores in translation (thermal energy) versus the many internal forms of vibration depends heavily on the temperature.  A fully detailed model would need to include molecular vibration, electronic, magnetic energies, and quantom mechanical effects.  Within the confines of the Span and Wagner format, different authors are still able to approach this differently -- using formulations that range from polynomial fits to a more physics-based approach.
 
-In the ideal gas models described so far in Chapter \ref{ch:ig}, generic empirical polynomials do a reasonable job of matching the phenomena that dominate there with the advantage that a couple of standard algorithms can consistently evaluate them.  The caveat is that they require piece-wise definitions to adequately capture all of the relevant features of the curve, but the \verb|mp1| model covers the entire temperature range with a single expression.  Even though the residual terms are responsible for the intermolecular forces, low-temperature gas behaviors still need to be considered in the ideal gas portion.  As a result, many high-performing published models tend to include a mix of polynomial and physics-based terms derived from quantum theory.
-
-Models that include terms derived from quantum mechanics can compactly match the decrease in specific heat seen at low temperature.  The specific heat of many independent oscillators assuming a distribution of discrete energies adopts the form
+One of the biggest challenges in describing the specific heats of gases is found at low temperatures.  Here, the different modes of oscillation are found to have dramatically dissimilar energies (defying the equipartition assumption).  The specific heat of many independent oscillators assuming a distribution of discrete energies adopts the form
 \begin{align}
 \frac{c_p(\tau)}{R} = \ldots + b m^2 \frac{\tau^2 \exp(m\tau)}{\left(\exp(m\tau) - 1\right)^2} + \ldots\nonumber,
 \end{align}
@@ -97,110 +90,55 @@ Note that this analysis does not require that values of $k$ be limited to intege
 Collectively, these integrals motivate the form that is now commonplace in contemporary free-energy-based models,
 \begin{subequations}
 \begin{align}
-\alpha^o(\tau,\delta) = \ln \delta + (c_0 + c_1\tau) \ln \tau + \alpha^o_0(\tau) + \alpha^o_1(\tau),\label{eqn:mp1:ao}
+\alpha^o(\tau,\delta) = \ln \delta + (c_0 + c_1\tau) \ln \tau + \alpha^o_0(\tau) + \alpha^o_1(\tau),\label{eqn:mp:ao}
 \end{align}
 where $\alpha^o_0$ is a polynomial on $\tau$,
 \begin{align}
-\alpha^o_0(\tau) = \sum_k c_j \tau^k \label{eqn:mp1:ao:0},
+\alpha^o_0(\tau) = \sum_k c_j \tau^k \label{eqn:mp:ao:0},
 \end{align}
 and $\alpha^o_1$ includes the quantum terms,
 \begin{align}
-\alpha^o_1(\tau) = \sum_j b_j \ln\left(1 - \exp( -m_j \tau ) \right)\label{eqn:mp1:ao:1}.
+\alpha^o_1(\tau) = \sum_j b_j \ln\left(1 - \exp( -m_j \tau ) \right)\label{eqn:mp:ao:1}.
 \end{align}
 \end{subequations}
 
-In many models, the $\tau \ln \tau$ term is omitted from Equation \ref{eqn:mp1:ao}, implying that there was no linear term on $\tau$ (proportional to $1/T$) in the formulation of specific heat.  Because much of the complexity of the specific heat is captured by the $\alpha^o_1$ terms, the polynomial, $\alpha^o_0$, may only contain a constant and a linear term.  Still, exponentials and logarithms are numerically expensive, so this model is usually substantially slower than the polynomial ideal gas models.
-
-In the data files, the ideal gas terms are contained in a dictionary called the \texttt{"IGgroup"}.  An \texttt{"IGgroup"} entry in the file might appear like the example below.  The temperature and density scales are simply scalars, and they are expected (but not required) to be equal to the critical density and temperature.  The \texttt{logt} and \texttt{tlogt} entries are also scalar coefficients for their respective terms in Equation \ref{eqn:mp1:ao}.  The \texttt{coef0} is required to be a polynomial definition, as described in Section \ref{sec:num:poly1}.  The \texttt{coef1} value is expected to be a list of two-element lists or tuples used to define the quantum terms in Equation \ref{eqn:mp1:ao:1}.
-
-% This comment numbers the code columns.  There are 53 before a line overrun.
-%        1         2         3         4         5
-%2345678901234567890123456789012345678901234567890123
-\begin{lstlisting}[language=Python]
-"IGgroup" : {
-    "Tscale" : <Tc>,
-    "dscale" : <dc>,
-    "logt" : <c0>,
-    "tlogt" : <c1>,
-    "coef0" : <polynomial definition>,
-    "coef1" : [[<m0>, <b0>], [<m1>, <b1>], <...>]
-}
-\end{lstlisting}
-
-For more information on data files, see Section \label{sec:regdat:data}.
+In many models, the $\tau \ln \tau$ term is omitted from Equation \ref{eqn:mp:ao}, implying that there was no linear term on $\tau$ (proportional to $1/T$) in the formulation of specific heat.  Because much of the complexity of the specific heat is captured by the $\alpha^o_1$ terms, the polynomial, $\alpha^o_0$, may only contain a constant and a linear term.  Still, exponentials and logarithms are numerically expensive, so this model can already be significantly more expensive than their \texttt{ig} and \texttt{ig2} equivalents.
 
 \subsection{Residual portion of free energy}
-The residual (or real-fluid) portion of free energy attempts to account for everything that the ideal gas portion does not.  Many of these terms become especially important when the substance density is high, because intermolecular forces are specifically ignored in the ideal gas model.  The model is divided into three groups of terms,
+The residual (or real-fluid) portion of free energy attempts to account for everything that the ideal gas portion does not.  Many of these terms become especially important when the substance density is high, because they are responsible for quantifying the impact of the intermolecular forces ignored by the ideal gas model.  The model is divided into three groups of terms,
 \begin{subequations}
 \begin{align}
-\alpha^r &= \alpha^r_0(\tau, \delta) + \alpha^r_1(\tau, \delta) + \alpha^r_2(\tau, \delta)\label{eqn:mp1:ar}
+\alpha^r &= \alpha^r_0(\tau, \delta) + \alpha^r_1(\tau, \delta) + \alpha^r_2(\tau, \delta)\label{eqn:mp:ar}
 \end{align}
 Many of these terms are physically motivated, but that discussion is not included here.
 
 The first group of terms is a series of polynomials multiplied by exponentials of powers of density,
 \begin{align}
 \alpha^r_0 &= p_0(\tau, \delta) + \sum_{k=1}^K \exp\left(-\delta^k\right) p_k(\tau, \delta)\\
-& p_k = \sum_i c_i \tau^{a_i} \delta^{b_i}.\label{eqn:mp1:ar0}
+& p_k = \sum_i c_i \tau^{a_i} \delta^{b_i}.\label{eqn:mp:ar0}
 \end{align}
 While it is not explicitly forbidden, the $\delta$ exponent, $b$, is neither zero nor negative in these models, so $\alpha^r_0$ terms with the exponential multipliers vanish near $\delta \rightarrow 0$ and $\delta \rightarrow \infty$.  These terms model the complicated behaviors that occur near the phase change (when $\delta$ is on the order 1).
 
 In most models, the first group ($\alpha^r_0$) constitutes the largest number of terms (often dozens).  The exponents in the polynomial expansion are sometimes integers, but they are often rationals (which permits efficient evaluation using the method described in Section \ref{sec:num:poly2}), and they are rarely long decimal values.  
 
-The second group of terms, $\alpha^r_1$, is a Gaussian function multiplied by polynomial terms of $\tau$ and $\delta$.  It was first introduced in 1991 by Setzmann et al. to better model the severely distorted surface that occurs near the critical point in oxygen.  Most models only use a few of these terms at most, and they are usually centered (by $\epsilon$ and $\gamma$) very close to the critical point.  From to the 1991 paper, ``The opinion has been widely held that analytic equations of state covering the whole fluid region are not able to represent the properties in the critical region.'' The authors continue to say, ``We will show that our new equation is
-able to represent the existing experimental information on the thermodynamic properties of methane in the critical
+The second group of terms, $\alpha^r_1$, is a Gaussian function multiplied by powers of $\tau$ and $\delta$.  It was first introduced in 1991 by Setzmann et al. to better model the severely distorted surface that occurs near the critical point in oxygen.  Most models only use a few of these terms, and they are usually centered (by $\epsilon$ and $\gamma$) near the critical point.  From the 1991 paper, ``The opinion has been widely held that analytic equations of state covering the whole fluid region are not able to represent the properties in the critical region.'' The authors continue to say, ``We will show that our new equation is able to represent the existing experimental information on the thermodynamic properties of methane in the critical
 region at least as well as [competing models].'' \cite{setzmann:1991}
 
 The third group, $\alpha^r_2$, is a Gaussian centered on exactly the critical point, but the coefficient, $\Delta$, is a scaled distance from the critical point.  The term appears in a 1994 paper modeling carbon dioxide \cite{span:1994} and again in a 2014 revision to the properties of water and steam \cite{iapws:2014}, but in conspicuously few others.  While its formulation is not explained in detail in these sources, it allows for a more complicated shape from the term without the computational expense of additional polynomial terms.  It seems to have been designed to reduce the number of Gaussian terms required to produce the desired result at the critical point.
 
 \begin{align}
-\alpha^r_1 &= \sum_{l=0}^L c_l \delta^{d_l} \tau^{t_l} \exp\left( -a_l(\delta-\epsilon_l)^2 - b_l(\tau-\gamma_l)^2 \right)\label{eqn:mp1:ar1}\\
-\alpha^r_2 &= \sum_{m=0}^M c_m \Delta_m{^{b_m}} \delta \exp\left(-C_m(\delta-1)^2 - D_m(\tau-1)^2 \right)\label{eqn:mp1:ar2}\\
+\alpha^r_1 &= \sum_{l=0}^L c_l \delta^{d_l} \tau^{t_l} \exp\left( -a_l(\delta-\epsilon_l)^2 - b_l(\tau-\gamma_l)^2 \right)\label{eqn:mp:ar1}\\
+\alpha^r_2 &= \sum_{m=0}^M c_m \Delta_m{^{b_m}} \delta \exp\left(-C_m(\delta-1)^2 - D_m(\tau-1)^2 \right)\label{eqn:mp:ar2}\\
  &\Delta_m = \left[1-\tau + A_m\left((\delta-1)^2\right)^{1/2\beta_m} \right]^2 + B_m\left((\delta - 1)^2\right)^{a_m}.
 \end{align}
 \end{subequations}
 At first glance, these formulations may appear to be an inefficient tangled mess of nested exponents.  However, quantities like $\tau-1$ and $\delta-1$ may be positive or negative, and the exponents are not integers.  It is numerically elegant to square these quantities (requiring just a multiplication operation) before raising them to decimal or fractional powers.
 
-In the data files, these terms are encoded in a format shown below.  The \texttt{coef0} member contains a list of 2D polynomial coefficients.  Each polynomial, $p_k$, corresponds to an exponential term, $\exp(-\delta^k)$.  The \texttt{coef1} and \texttt{coef2} members are nested lists with each containing the necessary coefficients and exponents to construct the terms of $\alpha^r_1$ and $\alpha^r_2$ respectively.  
-% This comment numbers the code columns.  There are 53 before a line overrun.
-%        1         2         3         4         5
-%2345678901234567890123456789012345678901234567890123
-\begin{lstlisting}[language=Python]
-"Rgroup" : {
-    "Tscale" : <Tc>,
-    "dscale" : <dc>,
-    "coef0" : [<p0 coef>, <p1 coef>, ...]
-    "coef1" : [[<t>, <d>, <b>, <a>, <gamma>, <epsilon>, <c>], ...]
-    "coef2" : [[<a>, <b>, <beta>, <A>, <B>, <C>, <D>, <c>], ...]
-}
-\end{lstlisting}
-
-For more information on polynomial coefficients, see Section \ref{sec:num:poly2}.  It is worth emphasizing that \texttt{coef0} is a four-deep nested list.
-\begin{lstlisting}[language=Python]
-"coef0" : [# This begins the list of polynomials
-             [# This begins the first polynomial
-                 [# First sub-polynomial
-                     [<a>, <b>],
-                     [<alpha>, <beta>],
-                     [<i0>, <j0>, <c0>],
-                     <...>
-                 ], <...more sub-polynomials?...>
-             ],
-             [# This begins the exp(-delta) term
-                 <...polynomial definition...>
-             ],
-             [# This begins the exp(-delta**2) term
-                 <...polynomial definition...>
-             ],
-             <...>
-         ]
-             
-\end{lstlisting}
-
 \subsection{Derivatives of free energy}
 
 As we will address in the next section, it is also important to evaluate up to the second derivative of these terms.  This is sufficiently cumbersome to deserve some treatment here.  The efficient evaluation of derivatives of polynomials is addressed in Section \ref{sec:num:poly2}, so we only need to treat the other aspects of these functional forms.
 
-The ideal gas portion in (\ref{eqn:mp1:ao}) has derivatives
+The ideal gas portion in (\ref{eqn:mp:ao}) has derivatives
 \begin{subequations}
 \begin{align}
 \alpha^o_\tau &= (c_0-1)\tau^{-1} + c_1 (1 + \ln \tau) + \alpha^o_{0,\tau} + \alpha^o_{1,\tau}\\
@@ -219,7 +157,7 @@ The polynomial, $\alpha^o_0(\tau)$, and its derivatives can be evaluated separat
 \end{align}
 \end{subequations}
 
-Derivatives of the residual portion in (\ref{eqn:mp1:ar}) can be calculated individually.  Much of $\alpha^r_0$ in (\ref{eqn:mp1:ar0}) can be calculated trivially from the derivatives of the polynomials. 
+Derivatives of the residual portion in (\ref{eqn:mp:ar}) can be calculated individually.  Much of $\alpha^r_0$ in (\ref{eqn:mp:ar0}) can be calculated trivially from the derivatives of the polynomials. 
 \begin{subequations}
 \begin{align}
 \alpha^r_{0,\tau} &= p_{0,\tau} + \sum_{k=1}^K \exp\left( -\delta^k \right) p_{k,\tau}\\
@@ -231,7 +169,7 @@ Derivatives of the residual portion in (\ref{eqn:mp1:ar}) can be calculated indi
 \end{align}
 \end{subequations}
 
-Derivatives of the first Gaussian terms in (\ref{eqn:mp1:ar1}) are conveniently calculated as proportional to the terms themselves.  If each term were expressed as the polynomial term multiplier, $p_l$, and the Gaussian term, $g_l$, then $\alpha^r_1 = \sum_l p_l g_l$.  Derivatives on $\alpha^r_1$ can be conveniently constructed in terms of those intermediates.
+Derivatives of the first Gaussian terms in (\ref{eqn:mp:ar1}) are conveniently calculated as proportional to the terms themselves.  If each term were expressed as the polynomial term multiplier, $p_l$, and the Gaussian term, $g_l$, then $\alpha^r_1 = \sum_l p_l g_l$.  Derivatives on $\alpha^r_1$ can be conveniently constructed in terms of those intermediates.
 \begin{subequations}
 \begin{align}
 p_l &= c_l\ \tau^{t_l} \delta^{d_l}\\
@@ -262,7 +200,7 @@ g_{l,\delta\delta} &= -2 a_l\ g_l - 2 a_l (\delta - \epsilon_l)\ g_{l,\delta}
 \end{align}
 \end{subequations}
 
-This approach to evaluating derivatives in stages helps numerical efficiency, since there are obvious ways to make repeated use of intermediate values, but it also helps with the clarity of the code.  The same approach is even more valuable in the treatment of the second Gaussian terms in (\ref{eqn:mp1:ar2}).  First, we turn our attention to derivatives of the distance term, $\Delta$.  For ease of notation, we will omit the subscript, $m$, on all of the empirical coefficients.
+This approach to evaluating derivatives in stages helps numerical efficiency, since there are obvious ways to make repeated use of intermediate values, but it also helps with the clarity of the code.  The same approach is even more valuable in the treatment of the second Gaussian terms in (\ref{eqn:mp:ar2}).  First, we turn our attention to derivatives of the distance term, $\Delta$.  For ease of notation, we will omit the subscript, $m$, on all of the empirical coefficients.
 \begin{subequations}
 \begin{align}
 \Delta_\tau &= -2\left[ 1 - \tau + A\left((\delta-1)^2 \right)^{1/2\beta} \right]\\
@@ -289,13 +227,17 @@ f_{\delta\delta} &= -2C f - 2C(\delta-1) f_\delta
 Finally, the $\alpha_2^r$ derivatives may be constructed as
 \begin{subequations}
 \begin{align}
-\alpha^r_2 &= \Delta \delta f\\
-\alpha^r_{2,\tau} &= \Delta_\tau \delta f + \Delta \delta f_\tau\\
-\alpha^r_{2,\delta} &= \Delta_\delta \delta f + \Delta f + \Delta \delta f_\delta\\
-\alpha^r_{2,\tau\tau} &= \Delta_{\tau\tau} \delta f + 2 \Delta_\tau \delta f_\tau + \Delta \delta f_{\tau\tau}\\
-\alpha^r_{2,\tau\delta} &= \Delta_{\tau\delta} \delta f + \Delta_{\tau} f + \Delta_\tau \delta f_\delta + \ldots \nonumber\\
- &\hspace{2em} + \Delta_\delta \delta f_\tau+ \Delta f_\tau + \Delta \delta f_{\tau\delta}\\
-\alpha^r_{2,\delta\delta} &= \Delta_{\delta\delta} \delta f + 2\Delta_\delta f + 2\Delta_\delta \delta f_\delta + 2\Delta f_\delta + \Delta \delta f_{\delta\delta}
+\alpha^r_2 &= \Delta^b \delta f\\
+\alpha^r_{2,\tau} &= b \Delta_\tau \Delta^{b-1} \delta f + \Delta^b \delta f_\tau\\
+\alpha^r_{2,\delta} &= b \Delta_\delta \Delta^{b-1} \delta f + \Delta^b f + \Delta^b \delta f_\delta\\
+\alpha^r_{2,\tau\tau} &= b\left( \Delta_{\tau\tau} \Delta^{b-1} + (b-1)\Delta_\tau{^2}\Delta^{b-2} \right) \delta f \ldots  \nonumber\\
+ &\hspace{2em} + 2 b \Delta_\tau \Delta^{b-1} \delta f_{\tau} + \Delta^b \delta f_{\tau\tau}\\
+\alpha^r_{2,\tau\delta} &= b \left(\Delta_{\tau\delta} \Delta^{b-1} + (b-1)\Delta_\tau \Delta_\delta \Delta^{b-2} \right) \delta f \ldots\nonumber\\
+ &\hspace{2em} + b\Delta_{\tau} \Delta^{b-1} f + \Delta^b f_\tau + \ldots \nonumber\\
+ &\hspace{2em} + b\Delta_{\tau} \Delta^{b-1} \delta f_\delta + \Delta^b \delta f_{\tau\delta}\\
+\alpha^r_{2,\delta\delta} &= b \left(\Delta_{\delta\delta} \Delta^{b-1} + (b-1)\Delta_\delta{^2} \Delta^{b-2} \right) \delta f \ldots\nonumber\\
+ &\hspace{2em} + b\Delta_{\delta} \Delta^{b-1} f + \Delta^b f_\delta + \ldots \nonumber\\
+ &\hspace{2em} + b\Delta_{\delta} \Delta^{b-1} \delta f_\delta + \Delta^b \delta f_{\delta\delta}
 \end{align}
 \end{subequations}
 
@@ -305,32 +247,32 @@ The \texttt{mp1} class calculates all substance properties from temperature, den
 
 In this development, it will be useful to have this form of the first law:
 \begin{align}
-T\d s &= \d e - \frac{p}{\rho^2} \d \rho\label{eqn:mp1:law1}.
+T\d s &= \d e - \frac{p}{\rho^2} \d \rho\label{eqn:mp:law1}.
 \end{align}
 
 By definition,
 \begin{align}
-f &= e - Ts \label{eqn:mp1:f}.
+f &= e - Ts \label{eqn:mp:f}.
 \end{align}
-Its derivatives with respect to temperature and density may be simplified with some help from (\ref{eqn:mp1:law1}),
+Its derivatives with respect to temperature and density may be simplified with some help from (\ref{eqn:mp:law1}),
 \begin{align}
-\left(\frac{\partial f}{\partial T}\right)_\rho &= \left(\frac{\partial e}{\partial T}\right)_\rho - s - T \left(\frac{\partial s}{\partial T}\right)_\rho &=& \ -s\label{eqn:mp1:ft}\\
-\left(\frac{\partial f}{\partial \rho}\right)_T &= \left(\frac{\partial e}{\partial \rho}\right)_T - T \left(\frac{\partial s}{\partial \rho}\right)_T &=& \ \frac{p}{\rho^2} \label{eqn:mp1:fd}.
+\left(\frac{\partial f}{\partial T}\right)_\rho &= \left(\frac{\partial e}{\partial T}\right)_\rho - s - T \left(\frac{\partial s}{\partial T}\right)_\rho &=& \ -s\label{eqn:mp:ft}\\
+\left(\frac{\partial f}{\partial \rho}\right)_T &= \left(\frac{\partial e}{\partial \rho}\right)_T - T \left(\frac{\partial s}{\partial \rho}\right)_T &=& \ \frac{p}{\rho^2} \label{eqn:mp:fd}.
 \end{align}
 
 The properties below are calculated in a dimensionless form.  In this way, this document is relieved from needing to be sensitive to units -- including molar versus mass. 
  
 \subsection{Pressure}\label{sec:mp1:p}
 
-The pressure (and compressibility factor) can be calculated explicitly from (\ref{eqn:mp1:fd}),
+The pressure (and compressibility factor) can be calculated explicitly from (\ref{eqn:mp:fd}),
 \begin{align}
 \frac{p}{\rho R T} &=  \frac{\rho}{R T}\left(\frac{\partial f}{\partial \rho}\right)_T\nonumber\\
-&= \delta \alpha_\delta\label{eqn:mp1:p}.
+&= \delta \alpha_\delta\label{eqn:mp:p}.
 \end{align}
 
 \subsection{Entropy}\label{sec:mp1:s}
 
-Entropy appears explicitly in (\ref{eqn:mp1:ft}), so it only needs to be transformed into terms of $\alpha$.  First, it is helpful to observe that derivatives with respect to temperature may be transposed into derivatives with respect to $\tau$ 
+Entropy appears explicitly in (\ref{eqn:mp:ft}), so it only needs to be transformed into terms of $\alpha$.  First, it is helpful to observe that derivatives with respect to temperature may be transposed into derivatives with respect to $\tau$ 
 \begin{align}
 \frac{\partial}{\partial T} = -\frac{\tau}{T} \frac{\partial}{\partial \tau}.\nonumber
 \end{align}
@@ -342,22 +284,22 @@ s &= -\left(\frac{\partial f}{\partial T}\right)_\rho \nonumber\\
 \end{align}
 So, normalized by $R$, entropy is
 \begin{align}
-\frac{s}{R} = \tau \alpha_\tau - \alpha\label{eqn:mp1:s}
+\frac{s}{R} = \tau \alpha_\tau - \alpha\label{eqn:mp:s}
 \end{align}
 
 \subsection{Internal energy}\label{sec:mp1:e}
 
-Internal energy can be calculated in terms of $a$ and $s$ from (\ref{eqn:mp1:f}) and (\ref{eqn:mp1:s}),
+Internal energy can be calculated in terms of $a$ and $s$ from (\ref{eqn:mp:f}) and (\ref{eqn:mp:s}),
 \begin{align}
-\frac{e}{R T} &= \frac{f}{RT} + \frac{s}{R} \vspace{2em} =\ \tau \alpha_\tau\label{eqn:mp1:e}.
+\frac{e}{R T} &= \frac{f}{RT} + \frac{s}{R} \vspace{2em} =\ \tau \alpha_\tau\label{eqn:mp:e}.
 \end{align}
 
 \subsection{Enthalpy}\label{sec:mp1:h}
 
-Enthalpy is trivial to construct from (\ref{eqn:mp1:p}) and (\ref{eqn:mp1:e}).  By definition, 
+Enthalpy is trivial to construct from (\ref{eqn:mp:p}) and (\ref{eqn:mp:e}).  By definition, 
 \begin{align}
 \frac{h}{R T} &= \frac{e}{RT} + \frac{p}{\rho R T}\nonumber\\
- &= \tau \alpha_\tau + \delta \alpha_\delta.\label{eqn:mp1:h}
+ &= \tau \alpha_\tau + \delta \alpha_\delta.\label{eqn:mp:h}
 \end{align}
 
 \subsection{Gibbs free energy}\label{sec:mp1:g}
@@ -375,9 +317,9 @@ Constant-volume specific heat is obtained by differentiating internal energy by 
 c_v &= \frac{\partial e}{\partial T} = e_\tau \frac{\d \tau}{\d T}\\
  &= -e_\tau \frac{\tau}{T}
 \end{align*}
-From (\ref{eqn:mp1:e}), $e$ is simply $R T_c \, \alpha_\tau$, so
+From (\ref{eqn:mp:e}), $e$ is simply $R T_c \, \alpha_\tau$, so
 \begin{align}
-\frac{c_v}{R} = - \tau^2 \alpha_{\tau\tau}\label{eqn:mp1:cv}.
+\frac{c_v}{R} = - \tau^2 \alpha_{\tau\tau}\label{eqn:mp:cv}.
 \end{align}
 
 Constant-pressure specific heat is not so simply obtained since pressure is not one of the independent variables of the formulation.  Derivations for $c_p$ usually begin with enthalpy, but it will become aparent that the calculation benefits from the prior derivation for $c_v$.  Therefore, from (\ref{eqn:intro:1stlaw}) we may write
@@ -397,12 +339,12 @@ Substituting,
 \begin{align*}
 c_p &= \left(\frac{\partial e}{\partial T}\right)_\rho - \left(\left(\frac{\partial e}{\partial \rho}\right)_T - \frac{p}{\rho^2}\right) \frac{ \left(\frac{\partial p}{\partial T}\right)_\rho }{ \left(\frac{\partial p}{\partial \rho}\right)_T }.
 \end{align*}
-The first term (the derivative of interneral energy with respect to temperature) is merely $c_v$.  The second term may be simplified using (\ref{eqn:mp1:law1}), so
+The first term (the derivative of interneral energy with respect to temperature) is merely $c_v$.  The second term may be simplified using (\ref{eqn:mp:law1}), so
 \begin{align*}
 c_p &= c_v - T\left(\frac{\partial s}{\partial \rho}\right)_T \frac{ \left(\frac{\partial p}{\partial T}\right)_\rho }{ \left(\frac{\partial p}{\partial \rho}\right)_T }.
 \end{align*}
 
-Finally, this is in a form that can be conveniently substituted for free energy.  Using (\ref{eqn:mp1:ft}) and (\ref{eqn:mp1:fd}),
+Finally, this is in a form that can be conveniently substituted for free energy.  Using (\ref{eqn:mp:ft}) and (\ref{eqn:mp:fd}),
 \begin{align*}
 \left(\frac{\partial s}{\partial \rho}\right)_T &= - \frac{\partial^2 f}{\partial T \partial \rho} = - \frac{R}{\rho}\left( \delta \alpha_\delta - \tau \delta \alpha_{\tau\delta} \right)\\
 \left(\frac{\partial p}{\partial T}\right)_\rho &= \rho^2 \frac{\partial^2 f}{\partial T \partial \rho} = R \rho \left( \delta \alpha_\delta - \tau \delta \alpha_{\tau\delta} \right)\\
@@ -420,15 +362,15 @@ So,
 From its definition in Section \ref{sec:intro:a}, we write a dimensionless speed of sound
 \begin{align}
 \frac{a^2}{R T} &= \frac{1}{RT} \left(\frac{\partial p}{\partial \rho}\right)_s\nonumber\\
-  &= \frac{1}{RT} \left(\frac{\partial p}{\partial \rho}\right)_T + \frac{1}{RT} \left(\frac{\partial p}{\partial T}\right)_\rho\left(\frac{\partial T}{\partial \rho}\right)_s. \label{eqn:mp1:a0}
+  &= \frac{1}{RT} \left(\frac{\partial p}{\partial \rho}\right)_T + \frac{1}{RT} \left(\frac{\partial p}{\partial T}\right)_\rho\left(\frac{\partial T}{\partial \rho}\right)_s. \label{eqn:mp:a0}
 \end{align}
 
-The first term is obtained by differentiating (\ref{eqn:mp1:p}) with respect to density, producing
+The first term is obtained by differentiating (\ref{eqn:mp:p}) with respect to density, producing
 \begin{align}
 \frac{1}{RT} \left(\frac{\partial p}{\partial \rho}\right)_T &= 2 \delta \alpha_\delta + \delta^2 \alpha_{\delta\delta}
 \end{align}
 
-The second term in (\ref{eqn:mp1:a0}), we further sub-divide into two parts.  The first part is also obtained by differentiating (\ref{eqn:mp1:p}), giving
+The second term in (\ref{eqn:mp:a0}), we further sub-divide into two parts.  The first part is also obtained by differentiating (\ref{eqn:mp:p}), giving
 \begin{align}
 \left(\frac{\partial p}{\partial T}\right)_\rho = \rho R (\delta \alpha_\delta - \tau \delta \alpha_{\tau \delta}).
 \end{align}
@@ -436,7 +378,7 @@ The second part involves the heating of the substance due to its isentropic comp
 \begin{align*}
 0 = T \d s = \d e - \frac{p}{\rho^2}\d \rho.
 \end{align*}
-When we substitute (\ref{eqn:mp1:e}) for $e$ and (\ref{eqn:mp1:p}) for $p/\rho$, we obtain
+When we substitute (\ref{eqn:mp:e}) for $e$ and (\ref{eqn:mp:p}) for $p/\rho$, we obtain
 \begin{align*}
 0 &= -R \tau^2 \alpha_{\tau\tau} \d T + \frac{R T_c}{\rho_c} \alpha_{\tau\delta} \d \rho - \frac{RT}{\rho} \delta \alpha_\delta \d \rho
 \end{align*}
@@ -447,29 +389,98 @@ Solving for $\d T / \d \rho$, we obtain
 
 Finally, the dimensionless speed of sound is
 \begin{align}
-\frac{a^2}{RT} &= 2\delta \alpha_\delta + \delta^2 \alpha_{\delta\delta} - \frac{(\delta \alpha_\delta - \tau\delta \alpha_{\tau\delta})^2}{\tau^2\alpha_{\tau\tau}}.\label{eqn:mp1:a}
+\frac{a^2}{RT} &= 2\delta \alpha_\delta + \delta^2 \alpha_{\delta\delta} - \frac{(\delta \alpha_\delta - \tau\delta \alpha_{\tau\delta})^2}{\tau^2\alpha_{\tau\tau}}.\label{eqn:mp:a}
 \end{align}
 
 \subsection{Liquid-vapor line}
 
-A detailed formulation for pressure and Gibbs energy over a domain gives enough information to calculate saturated states between liquid and vapor using the Maxwell criteria.  At a given temperature, $T$, the Gibbs energy and pressure are equal for the liquid and vapor densities.  So,
+The Maxwell criteria provide a means for calculated the saturation line from a substance's properties -- the two phases will be at the same temperature, pressure, and their Gibbs energy is equal.  So,
 \begin{subequations}
 \begin{align}
-g(T,\rho_L) &= g(T,\rho_V)\\
-p(T,\rho_L) &= p(T,\rho_V).
+g(T,\rho_L) &= g(T,\rho_V)\label{eqn:mp:maxwellg}\\
+p(T,\rho_L) &= p(T,\rho_V)\label{eqn:mp:maxwellp},
 \end{align}
 \end{subequations}
-For Newton-like numerical iteration algorithms, it is essential to provide reasonable initial guesses for $\rho_L$ and $\rho_V$.  Careless guesses can simply result in $\rho_L = \rho_V$, which is a classic example of a computer solution being \emph{not wrong} but not helpful.  The worst case, especially problematic near the critical point, is convergence failure.
+where $\rho_V$ and $\rho_L$ are the vapor and liquid densities respectively.
 
-Many original sources for equation-of-state models include polynomial fits for saturation properties that are so accurate, they can even be implemented without applying the Maxwell criteria.  When these are used as initial guesses, the Maxwell criteria are simply used to ``polish'' the solution to agree more precisely with the equation of state.  As of version 2.4.5, an inner routine, \texttt{\_ds()}, is provided that implements the Maxwell criterion, but saturation property methods do not yet implement it.  At the time of this writing, it is planned to transition in version 2.4.6.
+For Newton-like numerical iteration algorithms, it is essential to provide reasonable initial guesses for $\rho_L$ and $\rho_V$.  Careless guesses can simply result in $\rho_L = \rho_V$, which is a classic example of a computer solution being \emph{not wrong} but not helpful.  The worst case, especially problematic near the critical point, is divergence.
 
-In many sources, formulae are provided for
-\begin{itemize}
-\item liquid saturation density given temperature,
-\item vapor saturation density given temperature,
-\item saturation pressure given temperature.
-\end{itemize}
-From them, all other properties can be obtained along the saturation line.  The \texttt{mp1} class exposes these properties through methods: \texttt{ds}, \texttt{ps}, \texttt{Ts} (not to be confused with \verb|T_s|), \texttt{es}, \texttt{hs}, and \texttt{ss}.  All of these depend on the three basic empirical formulae.
+
+\section{The multi-phase collection}
+
+In \PM, the Span and Wagner models are implemented in classes \texttt{mp1} and \texttt{mp2}.  These classes use wildly different approaches to establishing the state from the properties provided by the user, but there are quite a few common elements between them.  See Section \ref{ch:regdat:data} for more information on \PM\ data, and the individual classes are described in the following sections.
+
+\subsection{The model coefficients}
+
+In version 3.0.1, the multi-phase coefficient organization changed significantly to make data entry faster and less error prone.  Terms are organized into ``groups'' based on their characteristics.  At the top level of the multi-phase data dictionaries, there are two entries; the \texttt{"IGgroup"} representing the ideal gas group of terms, and the \texttt{"Rgroup"} representing the residual group terms from Equation \ref{eqn:mp:atotal}.
+
+The \texttt{"IGgroup"} is a dictionary, which further allows entries \texttt{"logt"}, \texttt{"tlogt"}, \texttt{"group0"}, and \texttt{"group1"}, corresponding to the individual portions of Equation \ref{eqn:mp:ao}.  They are all optional, and their respective terms will be presumed zero if they are omitted.  The \texttt{logt} and \texttt{tlogt} entries are scalar coefficients for $\log(\tau)$ and $\tau \log(\tau)$ respectively.  The \texttt{group0} entry is a 1-D polynomial (see Section \ref{sec:num:poly1}) defining $\alpha^\circ_0(\tau)$ from Equation \ref{eqn:mp:ao:0}.  The \texttt{group1} value is expected to be a list of two-element lists or tuples used to define the quantum terms in Equation \ref{eqn:mp:ao:1}.
+
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
+\begin{lstlisting}[language=Python]
+"IGgroup" : {
+    "logt" : <c0>,
+    "tlogt" : <c1>,
+    "group0" : <1D polynomial definition>,
+    "group1" : [[<m0>, <b0>], [<m1>, <b1>], <...>]
+}
+\end{lstlisting}
+
+Within the \texttt{"Rgroup"} dictionary, the \texttt{"group0"} member contains a list of 2D polynomials (see Section \ref{sec:num:poly2}).  Each a polynomial, $p_k(\tau,\delta)$, corresponds to an exponential term, $\exp(-\delta^k) p_k(\tau, \delta)$ in Equation \ref{mp:ar:0}.  They are listed in order, so the first polynomial definition corresponds to $k=0$, the second to $k=1$, and so on.  The \texttt{"group1"} and \texttt{"group2"} members are nested lists with each containing the necessary coefficients and exponents to construct the terms of $\alpha^r_1$ and $\alpha^r_2$ respectively.  
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
+\begin{lstlisting}[language=Python]
+"Rgroup" : {
+  "group0" : [<p0>, <p1>, ...]
+  "group1" : [
+    [<t>, <d>, <b>, <a>, <gamma>, <epsilon>, <c>],
+      ...    ]
+  "group2" : [
+    [<a>, <b>, <beta>, <A>, <B>, <C>, <D>, <c>], 
+      ...    ]
+}
+\end{lstlisting}
+
+Prior to version 3.0.1, the residual and ideal gas groups required \texttt{"Tscale"} and \texttt{"dscale"} entries to define the values used to nondimensionalize the models.  Their use is deprecated as it creates potentially problematic disagreements between the model's critical point and the critical point defined by the top-level data set.  However, if they are specified, they are still honored for now.  Future releases of \PM\ may change this behavior.
+
+\subsection{The \texttt{mp1} class}
+
+The \texttt{mp1} class is the older of the two multi-phase classes in \PM.  Its dictionary definition (in JSON) is in the form below.  To ensure interoperable unit values, the dataset uses J for energy, kg m$^{-3}$ for density, K for temperature, Pa for pressure, and J kg$^{-1}$ K$^{-1}$ for gas constant.
+
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
+\begin{lstlisting}[language=Python]
+{
+    "id"    : <substance ID string>
+    "class" : "mp2"
+    "doc"   : <documentation string>
+    "names" : [<string>, <string>, ...  # optional
+    "inchi" : <InChI string>            # optional
+    "cas"   : <CAS ID string>           # optional
+    "atoms" : { <dictionary of atoms> } # optional
+    "Tlim"  : [Tlow, Thigh]
+    "plim"  : [plow, phigh]
+    "dlim"  : [dlow, dhigh]
+    "mw"    : <molecular weight>
+    "R"     : <Gas Constant Scalar>
+    "Tc"    : <critical temperature>
+    "dc"    : <critical density>
+    "pc"    : <critical pressure>
+    "Tt"    : <triple temperature>
+    "pt"    : <triple pressure>
+    "IGgroup"  : { <ideal gas dictionary> }
+    "Rgroup"   : { <residual dictionary>  }
+    "PSgroup"  : { <saturation pressure model> }
+    "DSLgroup" : { <saturated liquid model> }
+    "DSVgroup" : { <saturated vapor model> }
+}
+\end{lstlisting}
+
+Many original sources for equation-of-state models include polynomial fits for saturation properties that are so accurate, they can even be implemented without applying the Maxwell criteria.  These are encoded in the \texttt{"PSgroup"}, \texttt{"DSLgroup"}, and \texttt{"DSVgroup"} entries as saturation properties as a function of temperature.  The \texttt{mp1} class exposes these properties through methods: \texttt{ds}, \texttt{ps}, \texttt{Ts}, \texttt{es}, \texttt{hs}, and \texttt{ss}.  
 
 These formulae are calculated from dimensionless temperature, 
 \begin{align}
@@ -526,6 +537,246 @@ In data, there are three groups that are used to define the saturation pressure 
 \end{lstlisting}
 
 The \texttt{fn} parameter is an index (0-3) that selects the form of the formula to use.  The \texttt{pscale} and \texttt{dscale} parameters are used to re-scale the dimensionless property calculated by the selected formula.  The \texttt{Tscale} parameter is used to normalize temperature to calculate $\theta$.  Finally, \texttt{coef} is a polynomial coefficient list described in Section \ref{sec:num:poly1}.
+
+These saturation models are evaluated by inner methods, \verb|_dsV()|, \verb|_dsL()|, and \verb|_ps()|, which accept a temperature array as their only argument.
+
+Saturation and ordinary property calculations are performed by inner methods, like \verb|_e()|, \verb|_cp()|, or \verb|_s()|, accept temperature and density arrays, and calculate their respective states in the appropriate default units.  The equivalent user-layer methods with no underscore, like \texttt{e()}, \texttt{cp()}, or \texttt{s()}, pass the user's raw arguments to \verb|_argparse()|, which is responsible for determining the thermodynamic state the user is specifying.  
+
+If more information is needed, the in-line help for each of the methods gives a full description of its purpose and arguments.
+
+\subsection{The \texttt{mp2} class}
+
+The \texttt{mp2} class is the newer of the two multi-phase classes, first released in version 3.0.1.  It design was motivated by two goals.  Firstly, the \texttt{mp1} class dependence on ancillary formulae to determine saturation states meant it was limited to sources that include those models.  Second, there is a significant amount of redundant (and potentially contradictory) information designed into the \texttt{mp1} approach, which creates potential issues.  For example, the equation of state, in theory, completely determines the saturation conditions, making the redundant saturation polynomials in (hopefully small) contradiction with the EOS model.
+
+Its dictionary definition (in JSON) is in the form below.  To ensure interoperable unit values, the dataset uses J for energy, kg m$^{-3}$ for density, K for temperature, Pa for pressure, and J kg$^{-1}$ K$^{-1}$ for gas constant.
+
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
+\begin{lstlisting}[language=Python]
+{
+    "id"    : <substance ID string>
+    "class" : "mp2"
+    "doc"   : <documentation string>
+    "names" : [<string>, <string>, ...  # optional
+    "inchi" : <InChI string>            # optional
+    "cas"   : <CAS ID string>           # optional
+    "atoms" : { <dictionary of atoms> } # optional
+    "Tlim"  : [Tlow, Thigh]
+    "plim"  : [plow, phigh]
+    "dlim"  : [dlow, dhigh]
+    "mw"    : <molecular weight>
+    "R"     : <Gas Constant Scalar>     # optional
+    "Tc"    : <critical temperature>
+    "dc"    : <critical density>
+    "Tt"    : <triple temperature>      # optional
+    "IGgroup" : { <ideal gas dictionary> }
+    "Rgroup"  : { <residual dictionary>  }
+}
+\end{lstlisting}
+
+Most of the optional entries are for data features that will simply be disabled if they are not provided.  For example, the \texttt{triple()} method raises an exception if the triple point temperature is not provided.  The name, CAS, and InChI strings all provide data to their respective \texttt{names()}, \texttt{cas()}, and \texttt{inchi()} methods, and are not required for class instances to function properly.  
+
+When omitted, the ideal gas constant is calculated precisely from the \verb|pm.units.const_Ru| value and the molecular mass, but allowing data authors to specify it explicitly is a vital feature for empowering the model to match precisely with the original publication.  Many authors have optimized their models with rounded values for the gas constant, so to encode a model that agrees precisely with their model design, it is also important to use a truncated gas constant value.
+
+Note that all pressure data (critical and triple) are absent, since they are determined from the equation of state model.  The chief challenge posed by a theoretically minimal data set is how to implement it in a way that is not horribly slow or numerically unstable.
+
+At retrieval using \texttt{get()} or the first time its \verb|_argparse()| method is called, a \texttt{mp2} instance's \verb|mp2._build()| method is called to construct a set of saturation and property look-up tables.  The process takes some computation time, so it is not performed on all substances -- only those retrieved for use.  If necessary, the \verb|_build()| method calls (in strict order) \verb|_build_sattab()| then \verb|_build_tab()|, which create instance attributes \verb|_sattable| and \verb|_table| respectively, which are dictionaries of property arrays.  
+
+The various property functions (especially \verb|_argparse()|) makes heavy use of these tables to establish initial guesses very close to an acceptable answer.  This allows the various iterative algorithms to abandon the \verb|_hybrid1()| numerical tool, developed for global numerical stability in \texttt{mp1}, in favor of basic Newton-Rhapson iteration.
+
+\textbf{Constructing the saturation table} is the first and slowest part of table construction.  When it is complete, it contains entries, which are identically sized 1D Numpy arrays representing the columns of a traditional saturation table.
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
+\begin{lstlisting}[language=Python]
+<substance>._sattable = {
+    'T'  : <saturation temperature array>,
+    'p'  : <saturation pressure array>,
+    'g'  : <saturation gibbs energy>
+    'dL' : <saturated liquid density>, 
+    'dV' : <saturated vapor density>,
+    'eL' : <saturated liquid int. energy>,
+    'eV' : <saturated vapor int. energy>, 
+    'hL' : <saturated liquid enthalpy>, 
+    'hV' : <saturated vapor enthalpy>,
+    'sL' : <saturated liquid entropy>, 
+    'sV' : <saturated vapor entropy>, 
+    'fL' : <saturated liquid free energy>, 
+    'fV' : <saturated vapor free energy>
+}
+\end{lstlisting}
+
+After initialization, the \texttt{mp2} instance has no explicit information on its saturation properties -- it must deduce the table from the critical temperature and density and from the Maxwell criteria in Equations \ref{eqn:mp:maxwellg} and \ref{eqn:mp:maxwellp}.  Especially near the critical point, guesses need to be extremely near to their actual values, lest they diverge.  To ensure numerical stability, \verb|_build_sattab()| calculates the table one point at a time, generating a guess by linear extrapolation from the last converged point.
+
+Extrapolation to the next point is accomplished from derivatives of the Maxwell criteria.  These represent two constraints with three variables, $T$, $\rho_L$, and $\rho_V$, so the tangent to the curve they form in 3-space can be calculated from their derivatives.  For ease of notation,
+\begin{subequations}
+\begin{align}
+g_{L,T} &= \frac{\partial g(T, \rho_L)}{\partial T}\\
+g_{L,\rho} &= \frac{\partial g(T, \rho_L)}{\partial \rho}\\ 
+p_{L,T} &= \frac{\partial p(T, \rho_L)}{\partial T}\\
+p_{L,\rho} &= \frac{\partial p(T, \rho_L)}{\partial \rho}
+\end{align}
+\end{subequations}
+The derivatives of the Maxwell criteria are, therefore,
+\begin{subequations}
+\begin{align}
+g_{L,T}\, \d T + g_{L,\rho}\, \d \rho_L &= g_{V,T}\, \d T + g_{V,\rho}\, \d \rho_V\\
+p_{L,T}\, \d T + p_{L,\rho}\, \d \rho_L &= p_{V,T}\, \d T + p_{V,\rho}\, \d \rho_V.
+\end{align}
+\end{subequations}
+
+It is possible to calculate the differential of any two of the variables in terms of the third.  For example, with respect to temperature,
+\begin{align}
+\left[\begin{array}{cc}
+g_{L,\rho} & -g_{V,\rho}\\
+p_{L,\rho} & -p_{V,\rho}
+\end{array}\right]  \left[\begin{array}{c}
+\d \rho_L \\
+\d \rho_V
+\end{array}\right] = 
+\left[\begin{array}{c}
+-g_{L,T} + g_{V,T} \\
+-p_{L,T} + p_{V,T}
+\end{array}\right] \d T
+\end{align}
+and finally
+\begin{align}
+\Delta &= -g_{L,\rho} p_{V,\rho} + g_{V,\rho} p_{L,\rho}\\
+\frac{\d \rho_L}{\d T} &= \frac{1}{\Delta}\big[(g_{L,T}-g_{V,T}) p_{V,\rho} + (-p_{L,T}+p_{V,T}) g_{V,\rho}  \big]\\
+\frac{\d \rho_V}{\d T} &= \frac{1}{\Delta}\big[(g_{L,T}-g_{V,T}) p_{L,\rho} + (-p_{L,T}+p_{V,T}) g_{L,\rho}  \big]
+\end{align}
+
+Unfortunately, very near the critical point, these derivatives become singular, since all of the properties (and their derivatives) are very nearly equal.  The problem is worsened, because the saturation curve is tangent to a line of constant temperature near the critical point.  To avoid this problem, \verb|_build_sattab()| uses similar derivatives with respect to vapor density, $\d T / \d \rho_V$ and $\d \rho_L / \d \rho_V$ instead, and transitions back to temperature far from the critical point.
+
+To keep the tabulated points very nearly equally spaced throughout the table, the ``distance'' to the next saturation point is scaled by the metric
+\begin{align}
+0.02 = \sqrt{\left(\frac{\Delta T}{T_c}\right)^2 + \left(\frac{\Delta \rho_V}{\rho_c}\right)^2 + \left(\frac{\Delta \rho_L}{\rho_c}\right)^2}.
+\end{align}
+The ``deltas'' are rescaled in proportion to force the ``step'' size to be 0.02.  Depending on the substance, this usually produces somewhere between 100 and 200 points in the saturation table.
+
+After the deltas are calculated, Newton-Rhapson iteration is performed on the Maxwell criteria while holding vapor density constant or temperature constant.  The transition between constant-density and constant-temperature iteration is made when the $-\Delta \rho_V / \rho_c < \Delta T / T_c$, indicating that the slope of the saturation curve is transitioning to be nearer to constant-density.
+
+Finally, the temperature and density arrays are used to construct arrays of other saturated liquid and saturated vapor properties.  Figure \ref{fig:mp:sattable} shows the $T,\rho$ saturation points automatically generated by this approach for acetone. The red points are saturated vapor, and the blue are saturated liquid.  In this table, there are 140 individual points, including the critical and triple points.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.97\linewidth]{figures/sattable}
+\caption{Points of the saturation table automatically generated by \texttt{mp2} for acetone.}\label{fig:mp:sattable}
+\end{figure}
+
+\textbf{Constructing the general property table} requires a rectangular grid of temperature and density values.  After \verb|_build_tab()| is complete, the \verb|_table| attribute of the substance instance appears as below.
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
+\begin{lstlisting}[language=Python]
+<substance>._table = {
+    'T'  : <m-element 1D array>,
+    'd'  : <n-element 1D array>,
+    'cI' : (<Tci>, <dci>),
+    'p'  : <m x n 2D array>,
+    'e'  : <m x n 2D array>,
+    'h'  : <m x n 2D array>,
+    's'  : <m x n 2D array>
+}
+\end{lstlisting}
+
+The grid is constructed automatically from the saturation curve using a series of rules:
+\begin{enumerate}
+\item Density and temperature arrays must be in ascending order.
+\item No step between any two adjacent $T$ or $\rho$ values may be larger than 1\% of the model's valid range.
+\item The temperature and density arrays must span between their respective minima and maxima.
+\item For each temperature below the critical temperature, the density array must contain values corresponding precisely to the liquid and vapor saturation densities at that temperature.
+\item For each density between the vapor and liquid triple point densities, the temperature array must contain a temperature corresponding precisely to the corresponding saturation temperature.
+\item The critical temperature and density must be represented precisely in their respective arrays.
+\end{enumerate}
+To obey these rules, it is essential that the saturation table is already available.
+
+From the resulting temperature and density grid values, all properties are evaluated in two-dimensional arrays, so that
+\begin{align}
+f_{i,j} \equiv f(T_i, \rho_j)
+\end{align}
+
+The location of the critical point in the tables is recorded in the \texttt{"cI"} entry, as a tuple with the temperature index first and the density index second.
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
+\begin{lstlisting}[language=Python]
+>>> ii, jj = _table['cI']
+>>> Tc = _table['T'][ii]
+>>> dc = _table['d'][jj]
+>>> pc = _table['p'][ii,jj]
+\end{lstlisting}
+Thanks to rules 4 and 5 above, it is always trivial to identify grid points precisely on the saturation line.  If we were to move $k$ indices below the critical temperature, the saturation properties are
+% This comment numbers the code columns.  There are 53 before a line overrun.
+%        1         2         3         4         5
+%2345678901234567890123456789012345678901234567890123
+\begin{lstlisting}[language=Python]
+>>> ii, jj = _table['cI']
+>>> k = 5
+>>> Ts = _table['T'][ii-k]
+>>> dsL = _table['d'][jj+k]
+>>> dsV = _table['d'][jj-k]
+>>> hsL = _table['h'][ii-k, jj+k]
+>>> hsV = _table['h'][ii-k, jj-k]
+\end{lstlisting}
+
+This approach naturally produces a high density of grid lines in regions where the saturation curves cause properties to be very steep.  Figure \ref{fig:mp:eTd} shows the internal energy table automatically generated for acetone.  There is a tight grouping of temperature grid lines near the critical point, but there is also a remarkably sharp vertical slope under ``the dome'' near the vapor line caused by the severely dissimilar densities between liquids and vapors far below the critical point.  It only takes a small amount of vapor to significantly drop the density, while adding relatively little to the mixture's energy.  It is not until the density has diminished to a tiny fraction (often around 0.2\% or so) of its liquid value that the higher vapor energy dominates.  Note that this grid generation strategy naturally densely populates this region with grid lines, producing a well formed, though nearly vertical surface.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.97\linewidth]{figures/eTd}
+\caption{Internal energy plotted against temperature and density with the grid values automatically generated by \texttt{mp2}.}\label{fig:mp:eTd}
+\end{figure}
+
+\textbf{Table lookup primitives} are responsible for casing out the various ways to interrogate the tables.  Numpy and Scipy offer interpolation algorithms, but they require the source data to be sorted.  This is fine when working from temperature and density, but they do not permit ``reverse'' table lookups.  The ``mapsearch'' algorithms address this issue.  Since their arrays are one-dimensional, the saturation tables use \verb|_mapsearch1()|.  The general property tables, on the other hand, use \verb|_mapsearch2()|, \verb|_Tmapsearch2()|, and \verb|_dmapsearch2()|.  Their inline documentation offers a detailed description of how their algorithms work.
+
+\textbf{Iterative routines} in \texttt{mp2} are not in specialized methods like \verb|_hybrid1| described in Chapter \ref{ch:num}.  Becuse Newton-Rhapson algorithms are so simple to code, a myriad of specialized inner routines are responsible for performing iteration custom to the particular job.  These are organized by which property is held constant while others are allowed to change.  The saturation algorithms include \verb|_Tsatiter()|, \verb|_dVsatiter()|, \verb|_dLsatiter()|, \verb|_dsatiter()| (which preserves mixture density),  \verb|_psatiter()|, \verb|_gsatiter()|, and \verb|_satiter2()| (which preserves two arbitrary mixture properties).  The generalized property iteration algorithms require only \verb|_Titer()| (holding temperature constant), \verb|_diter()| (holding density constant), and \verb|_iter2()| (simultaneous iteration on both temperature and density).
+
+\textbf{Inner property methods} in \texttt{mp2} behave fundamentally differently from their equivalents in \texttt{mp1}.  Rather than accepting a state definition in terms of temperature and density, the inner methods like \verb|_e()|, \verb|_cp()|, \verb|_h()|, or \verb|_s()| accept the explicit values of $\alpha(\tau, \delta)$ and its derivatives, as returned by a new inner method, \verb|_ff()|.  Though this makes the call signatures more cumbersome, it saves countless back-end methods from redundantly performing the most computationally expensive part of the process -- evaluation of $\alpha$.  Instead, methods that require multiple simultaneous properties (like while iterating on saturation states) merely make a single call to \verb|_ff()| and share its output with the relevant inner property methods.  All of this nuance is opaque to the user -- the user layer property methods function just like the other \PM\ classes.
+
+\subsection{Benchmarking}
+
+Improved computational speed was always a goal in the development of \texttt{mp2}, but it was secondary to broadening the number of substances included in \PM.  To gauge the relative strengths and weaknesses of the two classes, benchmarking was performed by passing randomly generated property arrays in different combinations.  The process of calculating properties is divided into two steps: (1) determination of the thermodynamic state in terms of temperature and density ($t_1$), and (2) calculation of the requested properties at that state ($t_2$).  
+
+The relative computational costs of these steps were measured as the average of ten repeated calls to \verb|_argparse()|, followed by ten repeated calls to \verb|state()| with the same datasets.  The time to calculate properties was assessed as the time required for \verb|state()| minus the time required for \verb|_argparse()|.  Tests were performed on a single core of an AMD Ryzen 9 7900 with array sizes ranging from 10 to 100,000.  The results for H$_2$O (representing \texttt{mp1}) and N$_2$ (representing \texttt{mp2}) are shown in Table \ref{tab:mp:benchmark}
+
+\begin{table}
+\centering
+\caption{Benchmarking tests comparing \texttt{mp1} against \texttt{mp2} for determining the state, $t_1$, and evaluating the state properties, $t_2$.  Values are in microseconds.}\label{tab:mp:benchmark}
+\begin{tabular}{|ccc|rrrrr|}
+\hline
+ & & N & 10 & 100 & 1,000 & 10,000 & 100,000\\
+\hline
+\multirow{4}*{$(T,d)$} & \multirow{2}*{\texttt{mp1}} & $t_1$ & 88 & 91 & 143 & 565 & 4,862\\
+                       &                             & $t_2$ & 1,841 & 1,930 & 2,961 & 9,947 & 110,323\\
+\cline{4-8}
+                       & \multirow{2}*{\texttt{mp2}} & $t_1$ & 11 & 2,824 & 4,524 & 6,536 & 16,979\\
+                       &                             & $t_2$ & 741 & 1,530 & 2,152 & 6,258 & 72,040\\
+\hline
+\multirow{4}*{$(T,p)$} & \multirow{2}*{\texttt{mp1}} & $t_1$ & 14,092 & 15,160 & 22,958 & 80,303 & 843,870\\
+                       &                             & $t_2$ & 1,679 & 1,270 & 1,992 & 6,620 & 87,956\\
+\cline{4-8}
+                       & \multirow{2}*{\texttt{mp2}} & $t_1$ & 2,358 & 4,268 & 17,889 & 115,795 & 1,16$\times 10^6$\\
+                       &                             & $t_2$ & 739 & 765 & 1,295 & 1,138 & 66,845\\
+\hline
+\multirow{4}*{$(s,p)$} & \multirow{2}*{\texttt{mp1}} & $t_1$ & 190,888 & 270,547 & 399,682 & 1.10$\times 10^6$ & 9.03$\times 10^6$\\
+                       &                             & $t_2$ & 1,347 & 1,006 & 3,757 & 19,521 & 223,192\\
+\cline{4-8}
+                       & \multirow{2}*{\texttt{mp2}} & $t_1$ & 2,229 & 15,008 & 74,794 & 643,537 & 6.42$\times 10^6$\\
+                       &                             & $t_2$ & 748 & 1,570 & 571 & 4,775 & 61,988\\
+\hline
+\end{tabular}
+\end{table}
+
+In general, \texttt{mp2} scales more poorly with array size than \texttt{mp1}.  This is expected, since many of the mapsearch algorithms are serialized in for loops.  When $(T,\rho)$ property pairs are specified, no iteration is required, so the improved initial guesses of \texttt{mp2} offers no benefit.  Instead, the extra overhead required to look up two-phase mixture information causes it to be somewhat slower.  
+
+It is seen that for any property combination other than $(T,\rho)$, the time required to determine the thermodynamic state, $t_1$, dominates the computational cost.  When iteration on one property is required (e.g. when $(T,p)$ property pairs are specified), \texttt{mp2} is about five times as fast as \texttt{mp1}, slowing to break even between 1,000 and 10,000 elements.  On huge datasets, \texttt{mp1}'s better vectorization makes it somewhat faster, but not much compared to \texttt{mp2}'s advantage in small datasets.
+
+When iteration on two simultaneous properties is required (as in the case of $(s,p)$) \texttt{mp2} is about 100 times faster for small datasets.  That advantage erodes in large data sets, but \texttt{mp1} never managed to overtake \texttt{mp2} in these tests.  The \texttt{mp1} algorithms suffers severely here because it does not perform true 2D numerical inversion.  For numerical stability, nested \verb|_hybrid1| algorithms provide a horribly inefficient, albeit extremely numerically stable facsimile of 2D inversion.  As a result, \texttt{mp2} is far superior in these cases.
+
+Except for users calling the property methods inside of a higher iterative process, these magnitudes of numerical costs are mostly insignificant.  Most users work on small datasets, and will not be bothered by the difference between a 1 millisecond versus a 10 millisecond calculation.  This comparison is entirely for the benefit of users considering doing something a little more adventurous with these models.
+
 
 \section{Sources implemented}
 Table \ref{tab:mp:source} lists the multi-phase models currently implemented in \PM\ as of version 2.2.0.  Entries marked with an asterisk were not yet complete for the 2.2.0 release, but are planned to be implemented later.

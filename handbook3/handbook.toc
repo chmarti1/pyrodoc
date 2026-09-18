@@ -55,57 +55,62 @@
 \contentsline {subsection}{\numberline {4.6.4}Volume}{71}{subsection.4.6.4}%
 \contentsline {chapter}{\numberline {5}The PYroMat\ modules}{74}{chapter.5}%
 \contentsline {section}{\numberline {5.1}The class registry module, \texttt {reg}}{74}{section.5.1}%
-\contentsline {section}{\numberline {5.2}The data module, \texttt {dat}}{75}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}The \texttt {load()} function}{75}{subsection.5.2.1}%
+\contentsline {section}{\numberline {5.2}The data module, \texttt {dat}}{76}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}The \texttt {load()} function}{76}{subsection.5.2.1}%
 \contentsline {subsection}{\numberline {5.2.2}Data files}{77}{subsection.5.2.2}%
-\contentsline {subsection}{\numberline {5.2.3}Tools for working with data files}{77}{subsection.5.2.3}%
-\contentsline {section}{\numberline {5.3}The utility module, \texttt {utility}}{78}{section.5.3}%
-\contentsline {subsection}{\numberline {5.3.1}PYroMat\ error types}{78}{subsection.5.3.1}%
-\contentsline {subsection}{\numberline {5.3.2}Redundancy tools}{78}{subsection.5.3.2}%
-\contentsline {subsection}{\numberline {5.3.3}Other tools}{80}{subsection.5.3.3}%
-\contentsline {chapter}{\numberline {6}Ideal Gases}{81}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Properties of ideal gases}{82}{section.6.1}%
-\contentsline {subsection}{\numberline {6.1.1}Ideal gas law}{82}{subsection.6.1.1}%
-\contentsline {subsection}{\numberline {6.1.2}Internal energy}{85}{subsection.6.1.2}%
-\contentsline {subsection}{\numberline {6.1.3}Enthalpy}{87}{subsection.6.1.3}%
-\contentsline {subsection}{\numberline {6.1.4}Specific heats}{87}{subsection.6.1.4}%
-\contentsline {subsection}{\numberline {6.1.5}Entropy and enthalpy revisited}{88}{subsection.6.1.5}%
-\contentsline {subsection}{\numberline {6.1.6}Formation properties}{91}{subsection.6.1.6}%
-\contentsline {subsection}{\numberline {6.1.7}Speed of sound}{94}{subsection.6.1.7}%
-\contentsline {subsection}{\numberline {6.1.8}Other properties}{95}{subsection.6.1.8}%
-\contentsline {subsection}{\numberline {6.1.9}Properties of mixtures}{95}{subsection.6.1.9}%
+\contentsline {subsection}{\numberline {5.2.3}Tools for working with data files}{79}{subsection.5.2.3}%
+\contentsline {section}{\numberline {5.3}The utility module, \texttt {utility}}{79}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}PYroMat\ error types}{79}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}Redundancy tools}{81}{subsection.5.3.2}%
+\contentsline {subsection}{\numberline {5.3.3}Other tools}{81}{subsection.5.3.3}%
+\contentsline {chapter}{\numberline {6}Ideal Gases}{82}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Properties of ideal gases}{83}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}Ideal gas law}{83}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}Internal energy}{86}{subsection.6.1.2}%
+\contentsline {subsection}{\numberline {6.1.3}Enthalpy}{88}{subsection.6.1.3}%
+\contentsline {subsection}{\numberline {6.1.4}Specific heats}{88}{subsection.6.1.4}%
+\contentsline {subsection}{\numberline {6.1.5}Entropy and enthalpy revisited}{89}{subsection.6.1.5}%
+\contentsline {subsection}{\numberline {6.1.6}Formation properties}{92}{subsection.6.1.6}%
+\contentsline {subsection}{\numberline {6.1.7}Speed of sound}{95}{subsection.6.1.7}%
+\contentsline {subsection}{\numberline {6.1.8}Other properties}{96}{subsection.6.1.8}%
+\contentsline {subsection}{\numberline {6.1.9}Properties of mixtures}{96}{subsection.6.1.9}%
 \contentsline {section}{\numberline {6.2}The ideal gas collection}{100}{section.6.2}%
-\contentsline {subsection}{\numberline {6.2.1}The Shomate equation: \texttt {ig}}{100}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.1}The Shomate equation: \texttt {ig}}{101}{subsection.6.2.1}%
 \contentsline {subsection}{\numberline {6.2.2}The NASA polynomial: \texttt {ig2}}{102}{subsection.6.2.2}%
-\contentsline {subsection}{\numberline {6.2.3}The ideal gas mixture: \texttt {igmix}}{104}{subsection.6.2.3}%
-\contentsline {chapter}{\numberline {7}Multi-phase substance models}{107}{chapter.7}%
-\contentsline {section}{\numberline {7.1}General formulation for \texttt {mp1}}{108}{section.7.1}%
-\contentsline {subsection}{\numberline {7.1.1}Nondimensionalization}{109}{subsection.7.1.1}%
-\contentsline {subsection}{\numberline {7.1.2}Ideal gas portion of free energy}{109}{subsection.7.1.2}%
-\contentsline {subsection}{\numberline {7.1.3}Residual portion of free energy}{113}{subsection.7.1.3}%
-\contentsline {subsection}{\numberline {7.1.4}Derivatives of free energy}{116}{subsection.7.1.4}%
-\contentsline {section}{\numberline {7.2}Calculation of properties}{120}{section.7.2}%
+\contentsline {subsection}{\numberline {6.2.3}The ideal gas mixture: \texttt {igmix}}{105}{subsection.6.2.3}%
+\contentsline {chapter}{\numberline {7}Multi-phase substance models}{108}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Span and Wagner Equation of State}{109}{section.7.1}%
+\contentsline {subsection}{\numberline {7.1.1}Nondimensionalization}{110}{subsection.7.1.1}%
+\contentsline {subsection}{\numberline {7.1.2}Ideal gas portion of free energy}{110}{subsection.7.1.2}%
+\contentsline {subsection}{\numberline {7.1.3}Residual portion of free energy}{114}{subsection.7.1.3}%
+\contentsline {subsection}{\numberline {7.1.4}Derivatives of free energy}{115}{subsection.7.1.4}%
+\contentsline {section}{\numberline {7.2}Calculation of properties}{119}{section.7.2}%
 \contentsline {subsection}{\numberline {7.2.1}Pressure}{120}{subsection.7.2.1}%
-\contentsline {subsection}{\numberline {7.2.2}Entropy}{121}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.2}Entropy}{120}{subsection.7.2.2}%
 \contentsline {subsection}{\numberline {7.2.3}Internal energy}{121}{subsection.7.2.3}%
 \contentsline {subsection}{\numberline {7.2.4}Enthalpy}{121}{subsection.7.2.4}%
-\contentsline {subsection}{\numberline {7.2.5}Gibbs free energy}{122}{subsection.7.2.5}%
-\contentsline {subsection}{\numberline {7.2.6}Specific heats}{122}{subsection.7.2.6}%
-\contentsline {subsection}{\numberline {7.2.7}Speed of sound}{124}{subsection.7.2.7}%
-\contentsline {subsection}{\numberline {7.2.8}Liquid-vapor line}{125}{subsection.7.2.8}%
-\contentsline {section}{\numberline {7.3}Sources implemented}{127}{section.7.3}%
-\contentsline {chapter}{\numberline {8}Numerical routines}{129}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Polynomials of two variables}{130}{section.8.1}%
-\contentsline {subsection}{\numberline {8.1.1}Modifying polynomials for non-integer and negative powers}{130}{subsection.8.1.1}%
-\contentsline {subsection}{\numberline {8.1.2}Representation of polynomials in data}{133}{subsection.8.1.2}%
-\contentsline {subsection}{\numberline {8.1.3}Efficient evaluation of the polynomial}{135}{subsection.8.1.3}%
-\contentsline {subsection}{\numberline {8.1.4}Efficient evaluation of derivatives}{136}{subsection.8.1.4}%
-\contentsline {subsection}{\numberline {8.1.5}Implementation of the algorithm}{137}{subsection.8.1.5}%
-\contentsline {section}{\numberline {8.2}Polynomials in one dimension}{140}{section.8.2}%
-\contentsline {section}{\numberline {8.3}Iteration with \texttt {iter1}}{141}{section.8.3}%
-\contentsline {section}{\numberline {8.4}Iteration with \texttt {hybrid1}}{141}{section.8.4}%
-\contentsline {subsection}{\numberline {8.4.1}Bisection iteration}{144}{subsection.8.4.1}%
-\contentsline {subsection}{\numberline {8.4.2}The \texttt {hybrid1} candidates}{144}{subsection.8.4.2}%
-\contentsline {subsection}{\numberline {8.4.3}Standard candidate selection}{146}{subsection.8.4.3}%
-\contentsline {subsection}{\numberline {8.4.4}Paranoid candidate selection}{148}{subsection.8.4.4}%
-\contentsline {chapter}{Bibliography}{153}{algorithm.6}%
+\contentsline {subsection}{\numberline {7.2.5}Gibbs free energy}{121}{subsection.7.2.5}%
+\contentsline {subsection}{\numberline {7.2.6}Specific heats}{121}{subsection.7.2.6}%
+\contentsline {subsection}{\numberline {7.2.7}Speed of sound}{123}{subsection.7.2.7}%
+\contentsline {subsection}{\numberline {7.2.8}Liquid-vapor line}{124}{subsection.7.2.8}%
+\contentsline {section}{\numberline {7.3}The multi-phase collection}{125}{section.7.3}%
+\contentsline {subsection}{\numberline {7.3.1}The model coefficients}{125}{subsection.7.3.1}%
+\contentsline {subsection}{\numberline {7.3.2}The \texttt {mp1} class}{126}{subsection.7.3.2}%
+\contentsline {subsection}{\numberline {7.3.3}The \texttt {mp2} class}{129}{subsection.7.3.3}%
+\contentsline {subsection}{\numberline {7.3.4}Benchmarking}{138}{subsection.7.3.4}%
+\contentsline {section}{\numberline {7.4}Sources implemented}{139}{section.7.4}%
+\contentsline {chapter}{\numberline {8}Numerical routines}{141}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Polynomials of two variables}{142}{section.8.1}%
+\contentsline {subsection}{\numberline {8.1.1}Modifying polynomials for non-integer and negative powers}{142}{subsection.8.1.1}%
+\contentsline {subsection}{\numberline {8.1.2}Representation of polynomials in data}{145}{subsection.8.1.2}%
+\contentsline {subsection}{\numberline {8.1.3}Efficient evaluation of the polynomial}{147}{subsection.8.1.3}%
+\contentsline {subsection}{\numberline {8.1.4}Efficient evaluation of derivatives}{148}{subsection.8.1.4}%
+\contentsline {subsection}{\numberline {8.1.5}Implementation of the algorithm}{149}{subsection.8.1.5}%
+\contentsline {section}{\numberline {8.2}Polynomials in one dimension}{152}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Iteration with \texttt {iter1}}{153}{section.8.3}%
+\contentsline {section}{\numberline {8.4}Iteration with \texttt {hybrid1}}{153}{section.8.4}%
+\contentsline {subsection}{\numberline {8.4.1}Bisection iteration}{156}{subsection.8.4.1}%
+\contentsline {subsection}{\numberline {8.4.2}The \texttt {hybrid1} candidates}{156}{subsection.8.4.2}%
+\contentsline {subsection}{\numberline {8.4.3}Standard candidate selection}{158}{subsection.8.4.3}%
+\contentsline {subsection}{\numberline {8.4.4}Paranoid candidate selection}{160}{subsection.8.4.4}%
+\contentsline {chapter}{Bibliography}{165}{algorithm.6}%

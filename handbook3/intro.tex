@@ -97,7 +97,7 @@ To help make sense of the different property combinations, \PM\ organizes proper
     \end{itemize}
 \item Inverse properties: In order to determine the state (in primary properties) from these properties, \PM\ either needs to perform numerical iteration, or (in rare exceptions) a precise algebraic inverse is available.
     \begin{itemize}
-    \item Ideal gases: $d$, $e$, $f$, $g$, $h$, $s$,
+    \item Ideal gases: $\rho$, $e$, $f$, $g$, $h$, $s$,
     \item Multi-phase models: $p$, $e$, $f$, $g$, $h$, $s$.
     \end{itemize}
 \end{itemize}
@@ -106,12 +106,12 @@ To help make sense of the different property combinations, \PM\ organizes proper
 
 \textbf{The multi-phase property combinations} supported by the \texttt{mp1} and \texttt{mp2} classes are shown in Tables \ref{tab:props:mp1} and \ref{tab:props:mp2} respectively.  Almost all combinations that are theoretically valid are supported.  A ``o'' represents a combination that is not supported, though there may be some cases where it is theoretically possible.  The theory behind these combinations is somewhat more nuanced than in ideal gases.
 
-We regard a property combination as theoretically disallowed if there are at least two distinct states that can be found providing the same combination.  For example, Figure \ref{fig:Thd} shows a surface plot of density plotted against temperature and enthalpy for two-phase ammonia.  Except in the liquid region, the surface is very badly behaved numerically, but the important criterion that causes us to reject it as a valid property combination is that it wraps back on itself.  For given values of $T$ and $h$, and there are two values of $\rho$ that produce the same value of $h$.  Therefore, $h,T$ does not specify a unique state.
+In \PM, a property combination is disallowed if there are at least two distinct states that can be found providing the same combination.  For example, Figure \ref{fig:Thd} shows a surface plot of density plotted against temperature and enthalpy for two-phase acetone.  Except in the liquid region, the surface is very badly behaved numerically, but the important criterion that causes us to reject it as a valid property combination is that it wraps back on itself.  For many values of $T$ and $h$, and there are two values of $\rho$ that produce the same value of $h$.  Therefore, $h,T$ does not specify a unique state.
 
 \begin{figure}
 \centering
 \includegraphics[width=0.9\linewidth]{figures/Thd}
-\caption{A surface plot of density plotted against temperature and enthalpy for a two-phase mixture of ammonia.}\label{fig:Thd}
+\caption{A surface plot of density plotted against temperature and enthalpy for a two-phase mixture of acetone.}\label{fig:Thd}
 \end{figure}
 
 Despite this problem, $T,h$ and $T,e$ are both allowed in \texttt{mp1}, and they can only be expected to give reasonable results in (or near) the liquid region.  On the other hand, $f$ and $g$ are not permitted as arguments, and any combination of the inverse group is disallowed for reasons of numerical stability.  For example it is theoretically valid to specify enthalpy and entropy together, but it requires iteration in two dimensions to extract the $T,\rho$ state.  This presents a significant challenge for global numerical stability.
