@@ -80,11 +80,7 @@
     Obtain a source distribution of PYroMat either from <a href="download.html#github">github</a> or from <a href="download.html#sourceforge">sourceforge</a>.  Decompress the distribution file (either a .zip or .tar.gz or .tar.bz2) and navigate into the root directory.  There, you should find a <span class="code">setup.py</span> file.
     </p>
     <div class="code">
-    python setup.py install
-    </div>
-    OR
-    <div class="code">
-    python setup.py --upgrade install
+    python -m pip install .
     </div>
     <p>
     If you have problems with direct installation like this, I would guess that they are probably due to some issue with <span class="code">setuptools</span>.  All of the recommended solutions seem to involve pip.  If you were trying to use setup.py in the first place because of a problem with pip, then you are probably pretty frustrated right now.  My only consolation to you is that I've been there before.  The solution is to <a href="#install_pip">fix pip</a>.

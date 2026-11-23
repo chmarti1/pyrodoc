@@ -79,37 +79,40 @@
 \contentsline {subsection}{\numberline {6.2.2}The NASA polynomial: \texttt {ig2}}{102}{subsection.6.2.2}%
 \contentsline {subsection}{\numberline {6.2.3}The ideal gas mixture: \texttt {igmix}}{105}{subsection.6.2.3}%
 \contentsline {chapter}{\numberline {7}Multi-phase substance models}{108}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Span and Wagner Equation of State}{108}{section.7.1}%
-\contentsline {subsection}{\numberline {7.1.1}Nondimensionalization}{109}{subsection.7.1.1}%
+\contentsline {section}{\numberline {7.1}Span and Wagner Equation of State}{109}{section.7.1}%
+\contentsline {subsection}{\numberline {7.1.1}Nondimensionalization}{110}{subsection.7.1.1}%
 \contentsline {subsection}{\numberline {7.1.2}Ideal gas portion of free energy}{110}{subsection.7.1.2}%
-\contentsline {subsection}{\numberline {7.1.3}Residual portion of free energy}{113}{subsection.7.1.3}%
+\contentsline {subsection}{\numberline {7.1.3}Residual portion of free energy}{114}{subsection.7.1.3}%
 \contentsline {subsection}{\numberline {7.1.4}Derivatives of free energy}{115}{subsection.7.1.4}%
-\contentsline {section}{\numberline {7.2}Calculation of properties}{122}{section.7.2}%
-\contentsline {subsection}{\numberline {7.2.1}Pressure}{124}{subsection.7.2.1}%
-\contentsline {subsection}{\numberline {7.2.2}Entropy}{124}{subsection.7.2.2}%
+\contentsline {section}{\numberline {7.2}Calculation of properties}{124}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}Pressure}{125}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}Entropy}{125}{subsection.7.2.2}%
 \contentsline {subsection}{\numberline {7.2.3}Internal energy}{125}{subsection.7.2.3}%
-\contentsline {subsection}{\numberline {7.2.4}Enthalpy}{125}{subsection.7.2.4}%
-\contentsline {subsection}{\numberline {7.2.5}Gibbs free energy}{125}{subsection.7.2.5}%
+\contentsline {subsection}{\numberline {7.2.4}Enthalpy}{126}{subsection.7.2.4}%
+\contentsline {subsection}{\numberline {7.2.5}Gibbs free energy}{126}{subsection.7.2.5}%
 \contentsline {subsection}{\numberline {7.2.6}Specific heats}{126}{subsection.7.2.6}%
-\contentsline {subsection}{\numberline {7.2.7}Speed of sound}{127}{subsection.7.2.7}%
-\contentsline {subsection}{\numberline {7.2.8}Liquid-vapor line}{128}{subsection.7.2.8}%
+\contentsline {subsection}{\numberline {7.2.7}Speed of sound}{128}{subsection.7.2.7}%
+\contentsline {subsection}{\numberline {7.2.8}Liquid-vapor line}{129}{subsection.7.2.8}%
 \contentsline {section}{\numberline {7.3}The multi-phase collection}{129}{section.7.3}%
 \contentsline {subsection}{\numberline {7.3.1}The model coefficients}{129}{subsection.7.3.1}%
 \contentsline {subsection}{\numberline {7.3.2}The \texttt {mp2} class}{130}{subsection.7.3.2}%
-\contentsline {subsection}{\numberline {7.3.3}The \texttt {mp1} class}{136}{subsection.7.3.3}%
-\contentsline {section}{\numberline {7.4}Sources implemented}{138}{section.7.4}%
-\contentsline {chapter}{\numberline {8}Numerical routines}{140}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Polynomials of two variables}{141}{section.8.1}%
-\contentsline {subsection}{\numberline {8.1.1}Modifying polynomials for non-integer and negative powers}{141}{subsection.8.1.1}%
-\contentsline {subsection}{\numberline {8.1.2}Representation of polynomials in data}{144}{subsection.8.1.2}%
-\contentsline {subsection}{\numberline {8.1.3}Efficient evaluation of the polynomial}{146}{subsection.8.1.3}%
-\contentsline {subsection}{\numberline {8.1.4}Efficient evaluation of derivatives}{147}{subsection.8.1.4}%
-\contentsline {subsection}{\numberline {8.1.5}Implementation of the algorithm}{148}{subsection.8.1.5}%
-\contentsline {section}{\numberline {8.2}Polynomials in one dimension}{151}{section.8.2}%
-\contentsline {section}{\numberline {8.3}Iteration with \texttt {iter1}}{152}{section.8.3}%
-\contentsline {section}{\numberline {8.4}Iteration with \texttt {hybrid1}}{152}{section.8.4}%
-\contentsline {subsection}{\numberline {8.4.1}Bisection iteration}{155}{subsection.8.4.1}%
-\contentsline {subsection}{\numberline {8.4.2}The \texttt {hybrid1} candidates}{155}{subsection.8.4.2}%
-\contentsline {subsection}{\numberline {8.4.3}Standard candidate selection}{157}{subsection.8.4.3}%
-\contentsline {subsection}{\numberline {8.4.4}Paranoid candidate selection}{159}{subsection.8.4.4}%
-\contentsline {chapter}{Bibliography}{164}{algorithm.6}%
+\contentsline {subsection}{\numberline {7.3.3}The \texttt {mp1} class}{135}{subsection.7.3.3}%
+\contentsline {subsection}{\numberline {7.3.4}The \texttt {mp1} class}{137}{subsection.7.3.4}%
+\contentsline {subsection}{\numberline {7.3.5}The \texttt {mp2} class}{140}{subsection.7.3.5}%
+\contentsline {subsection}{\numberline {7.3.6}Benchmarking}{149}{subsection.7.3.6}%
+\contentsline {section}{\numberline {7.4}Sources implemented}{150}{section.7.4}%
+\contentsline {chapter}{\numberline {8}Numerical routines}{153}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Polynomials of two variables}{154}{section.8.1}%
+\contentsline {subsection}{\numberline {8.1.1}Modifying polynomials for non-integer and negative powers}{154}{subsection.8.1.1}%
+\contentsline {subsection}{\numberline {8.1.2}Representation of polynomials in data}{157}{subsection.8.1.2}%
+\contentsline {subsection}{\numberline {8.1.3}Efficient evaluation of the polynomial}{159}{subsection.8.1.3}%
+\contentsline {subsection}{\numberline {8.1.4}Efficient evaluation of derivatives}{160}{subsection.8.1.4}%
+\contentsline {subsection}{\numberline {8.1.5}Implementation of the algorithm}{161}{subsection.8.1.5}%
+\contentsline {section}{\numberline {8.2}Polynomials in one dimension}{164}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Iteration with \texttt {iter1}}{165}{section.8.3}%
+\contentsline {section}{\numberline {8.4}Iteration with \texttt {hybrid1}}{165}{section.8.4}%
+\contentsline {subsection}{\numberline {8.4.1}Bisection iteration}{168}{subsection.8.4.1}%
+\contentsline {subsection}{\numberline {8.4.2}The \texttt {hybrid1} candidates}{168}{subsection.8.4.2}%
+\contentsline {subsection}{\numberline {8.4.3}Standard candidate selection}{170}{subsection.8.4.3}%
+\contentsline {subsection}{\numberline {8.4.4}Paranoid candidate selection}{172}{subsection.8.4.4}%
+\contentsline {chapter}{Bibliography}{177}{algorithm.6}%

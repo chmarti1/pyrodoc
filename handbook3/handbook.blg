@@ -16,55 +16,47 @@ Repeated entry---line 162 of file pyrodoc.bib
  : @article{lemmon:2000
  :                     ,
 I'm skipping whatever remains of this entry
-I was expecting an "="---line 210 of file pyrodoc.bib
- :   
- :   title = {Thermodynamic Properties of Propane. III. A Reference Equation of State for Temperatures from the Melting Line to 650 K and Pressures up to 1000 MPa},
-(Error may have been on previous line)
-I'm skipping whatever remains of this entry
 Warning--I didn't find a database entry for "codata:2022"
 Warning--empty institution in iapws:2014
-Warning--empty title in lemmon:2009
-Warning--empty journal in lemmon:2009
-Warning--empty year in lemmon:2009
 You've used 31 entries,
             1876 wiz_defined-function locations,
-            655 strings with 8704 characters,
-and the built_in function-call counts, 6753 in all, are:
-= -- 647
+            659 strings with 8865 characters,
+and the built_in function-call counts, 6969 in all, are:
+= -- 679
 > -- 271
 < -- 4
 + -- 103
 - -- 72
-* -- 464
-:= -- 980
-add.period$ -- 36
+* -- 477
+:= -- 1004
+add.period$ -- 37
 call.type$ -- 31
-change.case$ -- 29
+change.case$ -- 30
 chr.to.int$ -- 0
-cite$ -- 35
-duplicate$ -- 375
-empty$ -- 660
+cite$ -- 32
+duplicate$ -- 385
+empty$ -- 676
 format.name$ -- 72
-if$ -- 1676
+if$ -- 1738
 int.to.chr$ -- 0
 int.to.str$ -- 31
 missing$ -- 26
 newline$ -- 102
 num.names$ -- 28
-pop$ -- 107
+pop$ -- 100
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 226
+skip$ -- 241
 stack$ -- 0
-substring$ -- 246
-swap$ -- 136
+substring$ -- 282
+swap$ -- 147
 text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
-warning$ -- 4
-while$ -- 52
+warning$ -- 1
+while$ -- 54
 width$ -- 33
-write$ -- 302
-(There were 2 error messages)
+write$ -- 308
+(There was 1 error message)
