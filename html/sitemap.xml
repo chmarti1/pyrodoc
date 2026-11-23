@@ -33,5 +33,9 @@
         <loc>http://pyromat.org/features.html</loc>
         <priority>0.3</priority>
     </url>
+    <url>
+        <loc>http://pyromat.org/support.html</loc>
+        <priority>0.3</priority>
+    </url>
 </urlset>
 

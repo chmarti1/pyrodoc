@@ -8,16 +8,18 @@ Historically, there have been countless approaches to the problem, beginning wit
 
 Both the \texttt{mp2} and its predecessor, \texttt{mp1}, use what is sometimes called the ``Span and Wagner'' model.  Its earliest publication appears to be in 1991\cite{stewart:1991, setzmann:1991}, but it was in a three-part paper in 2003 that Span and Wagner make a defense for the model's broad use for the description of the thermodynamic properties of substances across phase change boundaries\cite{span:2003:1, span:2003:2, span:2003:3}. Its most important feature is that it is generalizable to an incredible variety of substances without the need for custom formulae -- all the terms merely need their own coefficients, which a set algorithm can load and use for calculation.  
 
-The models supported by \PM's multi-phase classes uses a single (albeit incredibly complicated) formula for Helmholtz free energy,
+The models supported by \PM's multi-phase classes use a single (albeit complicated) formula for Helmholtz free energy,
 \begin{align}
 f(T,\rho) &\equiv e(T,\rho) - T s(T,\rho)\\
- &= h - \frac{p}{\rho} - T s.
+ &= h - \frac{p}{\rho} - T s,
 \end{align}
-The model for implementing these models usually goes something like this: Individual researchers accumulate huge bodies of raw experimental data describing the properties like specific heat, pressure, phase-change boundary, critical point, etc.  Then, a team assembles a large bank of terms for an expansion representing $f(T,\rho)$, and iteratively narrows down the model until a minimum number of terms is found that still respects certain error thresholds.  In many cases, the errors are less than the uncertainty in the original data.
+from which all other properties are derived.
+
+The philosophy for implementing these models usually goes something like this: Individual researchers accumulate huge bodies of raw experimental data describing the properties like specific heat, pressure, speed of sound, phase-change boundary, critical point, etc.  Then, a team assembles a large bank of terms for an expansion representing $f(T,\rho)$, and iteratively narrows down the model until a minimum number of terms is found that still respects certain error thresholds.  In many cases, the errors are less than the uncertainty in the original data.
 
 \subsection{Nondimensionalization}\label{sec:mp:nd}
 
-These models are almost always published with a nondimensional formulation for free energy.  This means the terms can be scaled to be more or less on the order of unity, and the unit system used in the implementation is irrelevant.  Many authors use $\alpha$ to represent a nondimensional free energy, and we adopt the same here.
+These models are normally published with a nondimensional formulation for free energy.  This means the terms can be scaled to be more or less on the order of unity, and the unit system used in the implementation is irrelevant.  Many authors use $\alpha$ to represent a nondimensional free energy, and we adopt the same here.
 
 All of the substance models in the first multi-phase class use
 \begin{subequations}
@@ -28,7 +30,7 @@ All of the substance models in the first multi-phase class use
 \end{align}
 \end{subequations}
 
-The free energy is normalized by the quantity $R T$, which is motivated by (\ref{eqn:ig:efromt}) from the study of ideal gases.  Normalizing temperature and density by the critical point values acknowledges that the critical point is a natural scale for the important phenomena in this substance.  The choice to make $\tau$ scale like the inverse of temperature is motivated by the Boltzmann and Maxwell distributions for molecular velocity, in which temperature appears in a denominator.
+The free energy is normalized by the quantity $R T$, which is motivated by (\ref{eqn:ig:efromt}) from the study of ideal gases.  Normalizing temperature and density by the critical point is physically inspired by the importance of the critical point for shaping the property surface, $f(T, \rho)$.  The choice to make $\tau$ scale like the inverse of temperature is motivated by the Boltzmann and Maxwell distributions for molecular velocity, in which temperature appears in a denominator.
 
 The formulation for dimensionless free energy, $\alpha$, is split into two parts: the ideal gas part, $\alpha^o$, and the residual part, $\alpha^r$.  So, the total free energy is
 \begin{align}
@@ -139,7 +141,7 @@ At first glance, these formulations may appear to be an inefficient tangled mess
 
 As we will address in the next section, it is also important to evaluate up to the second derivative of these terms.  This is sufficiently cumbersome to deserve some treatment here.  The efficient evaluation of derivatives of polynomials is addressed in Section \ref{sec:num:poly2}, so we only need to treat the other aspects of these functional forms.
 
-The ideal gas portion in (\ref{eqn:mp:ao}) has derivatives
+\textbf{The ideal gas portion} in (\ref{eqn:mp:ao}) has derivatives
 \begin{subequations}
 \begin{align}
 \alpha^o_\tau &= (c_0-1)\tau^{-1} + c_1 (1 + \ln \tau) + \alpha^o_{0,\tau} + \alpha^o_{1,\tau}\\
@@ -158,7 +160,9 @@ The polynomial, $\alpha^o_0(\tau)$, and its derivatives can be evaluated separat
 \end{align}
 \end{subequations}
 
-Derivatives of the residual portion in (\ref{eqn:mp:ar}) can be calculated individually.  Much of $\alpha^r_0$ in (\ref{eqn:mp:ar0}) can be calculated trivially from the derivatives of the polynomials. 
+Derivatives of the residual portion (\ref{eqn:mp:ar}) are complicated enough to be calculated individually.  
+
+\textbf{Derivatives of the first residual portion}, $\alpha^r_0$ in (\ref{eqn:mp:ar0}), can be calculated trivially from the derivatives of the polynomials. 
 \begin{subequations}
 \begin{align}
 \alpha^r_{0,\tau} &= p_{0,\tau} + \sum_{k=1}^K \exp\left( -\delta^k \right) p_{k,\tau}\\
@@ -170,25 +174,25 @@ Derivatives of the residual portion in (\ref{eqn:mp:ar}) can be calculated indiv
 \end{align}
 \end{subequations}
 
-Derivatives of the first Gaussian terms in (\ref{eqn:mp:ar1}) are conveniently calculated as proportional to the terms themselves.  If each term were expressed as the polynomial term multiplier, $p_l$, and the Gaussian term, $g_l$, then $\alpha^r_1 = \sum_l p_l g_l$.  Derivatives on $\alpha^r_1$ can be conveniently constructed in terms of those intermediates.
+\textbf{Derivatives of the second residual portion}, containing Gaussian terms in (\ref{eqn:mp:ar1}), are conveniently calculated as proportional to the terms themselves.  If each term were expressed as the polynomial term multiplier, $p$, and the Gaussian term, $g$, then $\alpha^r_1 = \sum_l p_l g_l$.  Derivatives on $\alpha^r_1$ can be conveniently constructed in terms of those intermediates.
 \begin{subequations}
 \begin{align}
-p_l &= c_l\ \tau^{t_l} \delta^{d_l}\\
-p_{l,\tau} &= t_l \frac{p_l}{\tau}\\
-p_{l,\delta} &= d_l \frac{p_l}{\delta}\\
-p_{l,\tau\tau} &= t_l(t_l-1) \frac{p_l}{\tau^2}\\
-p_{l,\tau\delta} &= t_l d_l \frac{p_l}{\tau\delta}\\
-p_{l,\delta\delta} &= d_l (d_l-1) \frac{p_l}{\delta^2}
+p &= c\ \tau^{t} \delta^{d}\\
+p_{\tau} &= t \frac{p}{\tau}\\
+p_{\delta} &= d \frac{p}{\delta}\\
+p_{\tau\tau} &= t(t-1) \frac{p}{\tau^2} = (t-1) \frac{p_\tau}{\tau}\\
+p_{\tau\delta} &= t d \frac{p}{\tau\delta} = t \frac{p_\delta}{\tau} = d \frac{p_\tau}{\delta}\\
+p_{\delta\delta} &= (d-1) \frac{p}{\delta^2} = (d-1) \frac{p_\delta}{\delta}
 \end{align}
 \end{subequations}
 \begin{subequations}
 \begin{align}
-g_l &= \exp\left( -a_l(\delta-\epsilon_l)^2 - b_l (\tau-\gamma_l)^2 \right)\\
-g_{l,\tau} &= -2 b_l (\tau - \gamma_l)\ g_l\\
-g_{l,\delta} &= -2 a_l (\delta - \epsilon_l)\ g_l\\
-g_{l,\tau\tau} &= -2 b_l\ g_l - 2 b_l (\tau - \gamma_l)\ g_{l,\tau}\\
-g_{l,\tau\delta} &= -2 b_l (\tau - \gamma_l)\ g_{l,\delta} = -2 a_l (\delta - \epsilon_l)\ g_{l,\tau}\\
-g_{l,\delta\delta} &= -2 a_l\ g_l - 2 a_l (\delta - \epsilon_l)\ g_{l,\delta}
+g &= \exp\left( -a(\delta-\epsilon)^2 - b (\tau-\gamma)^2 \right)\\
+g_{\tau} &= -2 b (\tau - \gamma)\ g\\
+g_{\delta} &= -2 a (\delta - \epsilon)\ g\\
+g_{\tau\tau} &= -2 b\ g - 2 b (\tau - \gamma)\ g_{\tau}\\
+g_{\tau\delta} &= -2 b (\tau - \gamma)\ g_{\delta} = -2 a_l (\delta - \epsilon)\ g_{\tau}\\
+g_{\delta\delta} &= -2 a\ g - 2 a (\delta - \epsilon)\ g_{\delta}
 \end{align}
 \end{subequations}
 
@@ -201,46 +205,185 @@ g_{l,\delta\delta} &= -2 a_l\ g_l - 2 a_l (\delta - \epsilon_l)\ g_{l,\delta}
 \end{align}
 \end{subequations}
 
-This approach to evaluating derivatives in stages helps numerical efficiency, since there are obvious ways to make repeated use of intermediate values, but it also helps with the clarity of the code.  The same approach is even more valuable in the treatment of the second Gaussian terms in (\ref{eqn:mp:ar2}).  First, we turn our attention to derivatives of the distance term, $\Delta$.  For ease of notation, we will omit the subscript, $m$, on all of the empirical coefficients.
+This approach to evaluating derivatives in stages helps numerical efficiency, since there are obvious ways to make repeated use of intermediate values, but it also helps with the clarity of the code.  
+
+\textbf{Derivatives of the third residual portion}, containing the more complicated $\Delta$ terms as coefficients of the Gaussians in (\ref{eqn:mp:ar2}), are best approached in the same way, but with decidedly more nuance.  These terms can be written by nested intermediate variables, $d$, $f$, $g$, $h$, and $J$
 \begin{subequations}
 \begin{align}
-\Delta_\tau &= -2\left[ 1 - \tau + A\left((\delta-1)^2 \right)^{1/2\beta} \right]\\
-\Delta_\delta &= 2 \frac{A}{\beta} \left[ 1 - \tau + A\left((\delta-1)^2 \right)^{1/2\beta} \right] \left((\delta-1)^2 \right)^{1/2\beta - 1/2}\\
+\alpha^r_2 &= \sum^M_{m=0} c_m \delta d_m g_m\\
+d &= \Delta^b\\
+\Delta &= f^2 + h\\
+f &= (1-\tau) + J\\
+g &= \exp\left(-C (\delta-1)^2 - D(\tau-1)^2\right)\\
+h &= B\left(\delta - 1\right)^{2a}\\
+J &= A\left(\delta-1\right)^{1/\beta}
+\end{align}
+\end{subequations}
+Note that for ease of notation, the nested 1/2 and 2 powers on the $J$ term have been omitted, and represented merely as $1/\beta$.  Fortunately, this will not affect our analysis of derivatives.
+
+The derivatives of $h$ and $J$ are
+\begin{subequations}
+\begin{align}
+h_\delta &= 2a \frac{h}{(\delta-1)}\\
+h_{\delta\delta} &= (2a-1) \frac{h_\delta}{\delta-1}\\
+J_\delta &= \frac{1}{\beta}\frac{J}{\delta-1}\\
+J_{\delta\delta} &= \left(\frac{1}{\beta} - 1\right)\frac{J_\delta}{\delta-1}\\
+\end{align}
+\end{subequations}
+Already, it is apparent that singularities can appear when evaluating these intermediates by this technique.  We will deal with that concern below.
+
+The derivatives of $f$ are straightforward,
+\begin{subequations}
+\begin{align}
+f_{\tau} &= -1\\
+f_{\delta} &= J_\delta\\
+f_{\tau\tau} &= 0\\
+f_{\tau\delta} &= 0\\
+f_{\delta\delta} &= J_{\delta\delta}.
+\end{align}
+\end{subequations}
+These obey the same convergence criteria as $J$.
+
+Derivatives of $\Delta$ are
+\begin{subequations}
+\begin{align}
+\Delta_{\tau} &= 2 f f_\tau = -2 f\\
+\Delta_{\delta} &= 2 f f_\delta + h_\delta\\
 \Delta_{\tau\tau} &= 2\\
-\Delta_{\tau\delta} &= 2\frac{A}{\beta}\left((\delta-1)^2 \right)^{1/2\beta - 1/2}\\
-\Delta_{\delta\delta} &= 2\left(\frac{A}{\beta}\right)^2 \left((\delta-1)^2\right)^{1/\beta-1} \ldots \nonumber\\
-& + 2\frac{A}{\beta}\left(\frac{1}{\beta} - 1\right) \left[ 1 - \tau + A\left((\delta-1)^2 \right)^{1/2\beta} \right] \left((\delta-1)^2 \right)^{1/2\beta - 1}
+\Delta_{\tau\delta} &= -2 f_\delta\\
+\Delta_{\delta\delta} &= 2 f_\delta{^2} + 2 f f_{\delta\delta} + h_{\delta\delta}.
 \end{align}
 \end{subequations}
 
-Next, we will consider the exponential term separately,
+The derivatives of $d$ are
 \begin{subequations}
 \begin{align}
-f(\tau, \delta) &= \exp(-C (\delta-1)^2 - D(\tau-1)^2)\\
-f_\tau &= -2D(\tau-1) f\\
-f_\delta &= -2C(\delta-1) f\\
-f_{\tau\tau} &= -2D f - 2D(\tau-1) f_\tau\\
-f_{\tau\delta} &= -2D(\tau-1) f_\delta = -2C(\delta-1) f_\tau\\
-f_{\delta\delta} &= -2C f - 2C(\delta-1) f_\delta
+d &= \Delta^b\\
+d_{\tau} &= b d \frac{\Delta_\tau}{\Delta}\\
+d_{\delta} &= b d \frac{\Delta_\delta}{\Delta}\\
+d_{\tau\tau} &= (b-1) d_\tau \frac{\Delta_{\tau}}{\Delta} + b d \frac{\Delta_{\tau\tau}}{\Delta}\\
+d_{\tau\delta} &= (b-1) d_\tau \frac{\Delta_{\delta}}{\Delta} + b d \frac{\Delta_{\tau\delta}}{\Delta}\\
+d_{\delta\delta} &= (b-1) d_\delta \frac{\Delta_{\delta}}{\Delta} + b d \frac{\Delta_{\delta\delta}}{\Delta}.
 \end{align}
 \end{subequations}
 
 Finally, the $\alpha_2^r$ derivatives may be constructed as
 \begin{subequations}
 \begin{align}
-\alpha^r_2 &= \Delta^b \delta f\\
-\alpha^r_{2,\tau} &= b \Delta_\tau \Delta^{b-1} \delta f + \Delta^b \delta f_\tau\\
-\alpha^r_{2,\delta} &= b \Delta_\delta \Delta^{b-1} \delta f + \Delta^b f + \Delta^b \delta f_\delta\\
-\alpha^r_{2,\tau\tau} &= b\left( \Delta_{\tau\tau} \Delta^{b-1} + (b-1)\Delta_\tau{^2}\Delta^{b-2} \right) \delta f \ldots  \nonumber\\
- &\hspace{2em} + 2 b \Delta_\tau \Delta^{b-1} \delta f_{\tau} + \Delta^b \delta f_{\tau\tau}\\
-\alpha^r_{2,\tau\delta} &= b \left(\Delta_{\tau\delta} \Delta^{b-1} + (b-1)\Delta_\tau \Delta_\delta \Delta^{b-2} \right) \delta f \ldots\nonumber\\
- &\hspace{2em} + b\Delta_{\tau} \Delta^{b-1} f + \Delta^b f_\tau + \ldots \nonumber\\
- &\hspace{2em} + b\Delta_{\tau} \Delta^{b-1} \delta f_\delta + \Delta^b \delta f_{\tau\delta}\\
-\alpha^r_{2,\delta\delta} &= b \left(\Delta_{\delta\delta} \Delta^{b-1} + (b-1)\Delta_\delta{^2} \Delta^{b-2} \right) \delta f \ldots\nonumber\\
- &\hspace{2em} + b\Delta_{\delta} \Delta^{b-1} f + \Delta^b f_\delta + \ldots \nonumber\\
- &\hspace{2em} + b\Delta_{\delta} \Delta^{b-1} \delta f_\delta + \Delta^b \delta f_{\delta\delta}
+\alpha^r_{2,\tau} &= c \delta d_\tau g + c \delta d g_\tau\\
+\alpha^r_{2,\delta} &= c d g + c \delta d_\delta g + c \delta d g_\delta\\
+\alpha^r_{2,\tau\tau} &= c \delta d_{\tau\tau} g + 2 c \delta d_\tau g_\tau + c \delta d g_{\tau\tau}\\
+\alpha^r_{2,\tau\delta} &= c d_\tau g + c \delta d_{\tau\delta} g + c \delta d_\tau g_\delta \ldots\nonumber\\
+  &\hspace{2em} + c d g_\tau + c \delta d_\delta g_\tau + c \delta d g_{\tau\delta}\\
+\alpha^r_{2,\delta\delta} &= 2 c d_\delta g + 2 c d g_\delta + 2 \delta d_\delta g_\delta \ldots\nonumber\\
+  &\hspace{2em} c \delta d_{\delta\delta} + c \delta d g_{\delta\delta}
 \end{align}
 \end{subequations}
+
+\textbf{Convergence near the critical point} of the third residual terms is not guaranteed.  In fact, common models use terms that have singularities when $\tau\rightarrow 1$ and $\delta \rightarrow 1$.  The problem arises in $d$ and its derivatives.  From the ``inside out,'' we examine the order by which the individual terms approach zero.
+\begin{subequations}
+\begin{align}
+f &\sim \mathcal{O}\left(\tau-1\right) + \mathcal{O}\left((\delta-1)^{1/\beta}\right)\\
+f_{\tau} &= -1\\
+f_{\delta} &\sim \mathcal{O}\left((\delta-1)^{1/\beta-1}\right)\\
+f_{\tau\tau} &\sim \mathcal{O}(0)\\
+f_{\tau\delta} &\sim \mathcal{O}(0)\\
+f_{\delta\delta} &\sim \mathcal{O}\left((\delta-1)^{1/\beta-2}\right).
+\end{align}
+\end{subequations}
+The implied order of $\Delta$ and its derivatives are
+\begin{subequations}
+\begin{align}
+\Delta &\sim \mathcal{O}\left((\tau-1)^2\right) + \mathcal{O}\left((\delta-1)^{n_0}\right)\\
+\Delta_{\tau} &\sim \mathcal{O}(\tau-1) + \mathcal{O}\left((\delta-1)^{1/\beta}\right)\\
+\Delta_{\delta} &\sim \mathcal{O}\left((\delta-1)^{n_1}\right)\\
+\Delta_{\tau\tau} &= 2\\
+\Delta_{\tau\delta} &\sim \mathcal{O}\left((\delta-1)^{(1/\beta - 1)}\right)\\
+\Delta_{\delta\delta} &\sim \mathcal{O}\left((\delta-1)^{n_2}\right)
+\end{align}
+\end{subequations}
+where the $\delta$ exponents are
+\begin{subequations}
+\begin{align}
+n_0 &= \min\left[ \frac{2}{\beta},\ 2a \right]\\
+n_1 &= \min\left[ \frac{1}{\beta}\left(\frac{1}{\beta}-1\right),\ 2a-1 \right]\\
+n_2 &= \min\left[ \frac{1}{\beta}\left(\frac{1}{\beta}-1\right),\ 2\left(\frac{1}{\beta}-1\right),\ 2a-2 \right].
+\end{align}
+\end{subequations}
+These come from sums of powers of $(\delta-1)$, so the lowest power will determine how the sum approaches zero.
+
+It is here that the analysis for convergence comes to its most critical stage.  
+\begin{subequations}
+\begin{align}
+d &\sim \mathcal{O}\left((\tau-1)^{2b}\right) + \mathcal{O}\left((\delta-1)^{n_0 b}\right)\\
+d_{\tau} &\sim \mathcal{O}\left((\tau-1)^{2b-1}\right) + \mathcal{O}\left((\delta-1)^{(b-1) n_0 + 1/\beta}\right)\\
+d_{\delta} &\sim \mathcal{O}\left((\delta-1)^{(b-1) n_0 + n_1}\right)\\
+d_{\tau\tau} &\sim \mathcal{O}\left((\tau-1)^{2b-2}\right) + \mathcal{O}\left((\delta-1)^{n_3}\right)\\
+d_{\tau\delta} &\sim \mathcal{O}\left((\delta-1)^{n_4}\right)\\
+d_{\delta\delta} &\sim \mathcal{O}\left((\delta-1)^{n_5}\right).
+\end{align}
+\end{subequations}
+where
+\begin{subequations}
+\begin{align}
+n_3 &= \min\left[ n_0(b-2) + \frac{2}{\beta},\ n_0(b-1)\right]\\
+n_4 &= \min\left[ n_0(b-2) + \frac{1}{\beta} + n_1,\ n_0(b-1)+\frac{1}{\beta} -1\right]\\
+n_5 &= \min\left[ n_0(b-2) + 2n_1,\ n_0(b-1) + n_2\right]
+\end{align}
+\end{subequations}
+
+As of version 3.0.1, water and carbon dioxide are the only substances in the \PM\ collection that include the third residual term.  Table \ref{tab:mp:ar2} shows the values of the exponents most likely to be negative, which would indicate a singularity as either $\delta \rightarrow 1$ or $\tau \rightarrow 1$.  Though both $a$ and $\beta$ are consistently chosen to avoid problems, when $b < 1$, there is the potential for divergence in nearly all the terms.  The only divergence in the values tabulated here are in $\alpha_{\tau\tau}$.  Figure \ref{fig:mp:delta} visually confirms that $\Delta^b$ and its derivatives rapidly approach zero as $\delta\rightarrow 1$, but the same is not true for $\tau \rightarrow 1$.  There is a discontinuity in slope, causing $\alpha_{\tau\tau}$ to diverge.
+
+\begin{table}
+\centering
+\caption{Third residual group exponents determining convergence when $\tau \rightarrow 1$ and $\delta \rightarrow 1$.}\label{tab:mp:nn}
+\begin{tabular}{|c|ccc|cc|}
+\hline
+ & \multicolumn{3}{l|}{Carbon Dioxide} & \multicolumn{2}{l|}{Water}\\
+\hline
+$a$ &       3.5 &   3.5 &   3.0 &   3.5 &   3.5\\
+$b$ &       0.85 &  0.925 & 0.875 & 0.85 &  0.95\\ 
+$\beta$ &   0.3 &   0.3 &   0.3 &   0.3 &   0.3\\
+\hline
+$1/\beta-2$ & 1.333 & 1.333 & 1.333 & 1.333 & 1.333\\
+$n_0$ &     6.667 & 6.667 & 6.000 & 6.667 & 6.667\\
+$n_1$ &     4.667 & 4.667 & 4.000 & 4.667 & 4.667\\
+$n_2$ &     4.667 & 4.667 & 3.000 & 4.667 & 4.667\\
+$n_3$ &    -0.833 &-0.500 &-0.750 &-1.000 &-0.333\\
+$n_4$ &     0.500 & 0.833 & 0.583 & 0.333 & 1.000\\
+$n_5$ &     1.833 & 2.167 & 1.250 & 1.667 & 2.333\\
+\hline 
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\begin{tabular}{cc}
+\includegraphics[width=0.49\linewidth]{figures/delta_tau} & 
+\includegraphics[width=0.49\linewidth]{figures/delta_delta}\\
+(a) & (b)
+\end{tabular}
+\caption{The $\Delta^b$ values plotted for carbon dioxide (black) and water (blue) (a) $\tau$ and (b) $\delta$ pass through unity.}\label{fig:mp:delta}
+\end{figure}
+
+The only singularities appear in the second derivative with respect to temperature.  This is readily confirmed by inspection of Figure \ref{fig:mp:delta}, which shows $\Delta^b$ plotted against $\tau$ and $\delta$ around the potential singularity.  It is subtle, but an abrupt discontinuity in temperature derivative can be seen at the critical point.  This only affects specific heat and the speed of sound.  All other properties converge.
+
+\begin{table}
+\centering
+\caption{Criteria for convergence of derivatives of the third residual terms}
+\begin{tabular}{|c|l|}
+\hline
+Term & Criteria \\
+\hline
+$\alpha$ & None \\
+$\alpha^r_{2,\tau}$ & $b > 0.5$,\hspace{0.5em} $b > 1 - \frac{1}{2a\beta}$\\
+$\alpha^r_{2,\delta}$ & $b > 0.5$,\hspace{0.5em} $b > 1 - \frac{n_1}{n_0}$\\
+$\alpha^r_{2,\tau\tau}$ & $b > 1$,\hspace{0.5em} $b > 2 - \frac{2}{n_0 \beta}$\\
+$\alpha^r_{2,\tau\delta}$ & $b > 2 - \frac{1 + \beta n_1}{n_0\beta}$,\hspace{0.5em} $b > 1 - \frac{1 - \beta}{n_0\beta}$\\
+$\alpha^r_{2,\delta\delta}$ & $b > 2 - 2\frac{n_1}{n_0}$,\hspace{0.5em} $b > 1 - \frac{n_2}{n_0}$\\
+\hline
+\end{tabular}
+\end{table}
 
 \section{Calculation of properties}\label{sec:mp1:properties}
 
@@ -447,8 +590,9 @@ The residual coefficients are contained in a similar dictionary called \texttt{"
 
 The \texttt{mp2} class is the newer of the two multi-phase classes, first implemented in version 3.0.1.  It has a number of powerful advantages over the \texttt{mp1} class
 \begin{itemize}
-\item For the vast majority of user cases, it is significantly faster.
-\item It extends property specification to nearly all valid input combinations.
+\item For the vast majority of user cases, \texttt{mp2} is significantly faster.
+\item The thermodynamic state may be specified by almost any theoretically valid combination (and even a few that are not theoretically valid).
+\item The back-end gracefully resolves the limits as density approaches zero and as the state approaches the critical point.
 \item The free energy model coefficients and the critical points are the only information required -- no saturation curves are needed.
 \item The algorithms in \texttt{mp2} eliminate the possibility for redundant contradictory information -- all numerical calculations have a single authoritative source data set.
 \end{itemize}
@@ -554,9 +698,7 @@ The development of the \texttt{mp2} class is essential to the expansion of the \
 
 \subsection{The \texttt{mp1} class}
 
-The \texttt{mp1} class is the older of the two multi-phase classes in \PM.  It 
-
-Many original sources for equation-of-state models include polynomial fits for saturation properties that are so accurate, they can even be implemented without applying the Maxwell criteria.  When these are used as initial guesses, the Maxwell criteria are simply used to ``polish'' the solution to agree more precisely with the equation of state.  As of version 2.4.5, an inner routine, \texttt{\_ds()}, is provided that implements the Maxwell criterion, but saturation property methods do not yet implement it.  At the time of this writing, it is planned to transition in version 2.4.6.
+The \texttt{mp1} class is the older of the two multi-phase classes in \PM.  Many original sources for equation-of-state models include polynomial fits for saturation properties that are so accurate, they can even be implemented without applying the Maxwell criteria.  When these are used as initial guesses, the Maxwell criteria are simply used to ``polish'' the solution to agree more precisely with the equation of state.  As of version 2.4.5, an inner routine, \texttt{\_ds()}, is provided that implements the Maxwell criterion, but saturation property methods do not yet implement it.  At the time of this writing, the plan is to ultimately transition older models over to the \texttt{mp2} class.  This has already been done for water.
 
 In many sources, formulae are provided for
 \begin{itemize}
@@ -624,26 +766,47 @@ The \texttt{fn} parameter is an index (0-3) that selects the form of the formula
 
 
 \section{Sources implemented}
-Table \ref{tab:mp:source} lists the multi-phase models currently implemented in \PM\ as of version 2.2.0.  Entries marked with an asterisk were not yet complete for the 2.2.0 release, but are planned to be implemented later.
+Table \ref{tab:mp:source} lists the multi-phase models currently implemented in \PM\ as of version 3.0.1.  Entries marked with an asterisk were not yet complete for the 3.0.1 release, but are planned to be implemented later.
 
-\begin{table}
-\centering
-\caption{Sources for multi-phase data used in \PM.  Substances with a * were not yet implemented in version 2.2.0, but they are planned for a later release.}\label{tab:mp:source}
-\begin{tabular}{|ccc|}
-\hline
-Argon* & Ar & \cite{tegeler:1999}\\
+\begin{longtable}{|lcc|}
+\caption{Sources for multi-phase data used in \PM.  Substances with a * were not yet implemented in version 3.0.1, but they are planned for a later release.}\label{tab:mp:source}\\
+\hline\endhead
+\hline\endfoot
+Acetone & C$_3$H$_6$O & \cite{lemmon:2006}\\
+Argon & Ar & \cite{tegeler:1999}\\
 Carbon dioxide & CO$_2$ & \cite{span:1994}\\
-Deuterium* & D$_2$ & \cite{richardson:2013}\\
-Hydrogen* & H$_2$ & \cite{leachman:2009}\\
+Carbon monoxide & CO & \cite{lemmon:2006}\\
+Carbonyl sulfide & COS & \cite{lemmon:2006}\\
+Decane & C$_{10}$H$_{22}$ & \cite{lemmon:2006}\\
+Dichlorofluoroethane (R-141b) & C$_2$H$_3$Cl$_2$F & \cite{lemmon:2006}\\
+Fluoromethane (R-41) & CH$_3$F & \cite{lemmon:2006}\\
+Hexafluoroethane (R-116) & C$_2$H$_6$ & \cite{lemmon:2006}\\
+Hexane (iso-) & C$_6$H$_{14}$ & \cite{lemmon:2006}\\
+Hydrogen & H$_2$ & \cite{leachman:2009}\\
+Hydrogen (para-) & H$_2$ & \cite{leachman:2009}\\
+Hydrogen (ortho-) & H$_2$ & \cite{leachman:2009}\\
+Hydrogen sulfide & H$_2$S & \cite{lemmon:2006}\\
+Krypton & Kr & \cite{lemmon:2006}\\
+Methane (R-50) & CH$_4$ & \cite{setzmann:1991}\\
+Monochlorodifluoroethane (R-142b) & C$_2$H$_3$ClF$_2$ & \cite{lemmon:2006}\\
 Nitrogen & N$_2$ & \cite{span:2000}\\
+Nitrous oxide & ON$_2$ & \cite{lemmon:2006}\\
+Nonane & C$_9$H$_20$ & \cite{lemmon:2006}\\
+Octafluoropropane (R-218) & C$_3$F$_8$ & \cite{lemmon:2006}\\
 Oxygen & O$_2$ & \cite{stewart:1991}\\
+Pentafluoropropane (R-456fa) & C$_3$H$_3$F$_5$ & \cite{lemmon:2006}\\
+Pentane (iso-) & C$_5$H$_12$ & \cite{lemmon:2006}\\
+Pentane (neo-) & C$_5$H$_12$ & \cite{lemmon:2006}\\
+Propane (R-290) & C$_3$H$_8$ & \cite{lemmon:2009}\\
+Sulfur dioxide & O$_2$S & \cite{lemmon:2006}\\
+Tetrafluoroethane (R-134a) & C$_2$H$_2$F$_4$ & \cite{tilner:1994}\\
+Tetrafluoropropene (R-1234yf) & C$_3$H$_2$F$_4$ & \cite{lemmon:2022}\\
+Tetrafluoropropene (R-1234ze(E)) & C$_3$H$_2$F$_4$ & \cite{thol:2016}\\
+Toluene & C$_7$H$_8$ & \cite{lemmon:2006}\\
 Water & H$_2$O & \cite{iapws:2014}\\
-R-125* & C$_2$HF$_5$ & \cite{piao:1998}\\
-R-134a & C$_2$H$_2$F$_4$ & \cite{tilner:1994}\\
-R-143a* & C$_2$H$_2$F$_3$ & \cite{lemmon:2000}\\
-R-245fa* & C$_3$H$_3$F$_5$ & \cite{akasaka:2015}\\
-R-1234yf* & C$_3$H$_2$F$_4$ & \cite{richter:2011}\\
-R-1234ze & C$_3$H$_2$F$_4$ & \cite{thol:2016}\\
+Xenon & Xe & \cite{lemmon:2006}\\
 \hline
-\end{tabular}
-\end{table}
+Deuterium* & D$_2$ & \cite{richardson:2014}\\
+R-125* & C$_2$HF$_5$ & \cite{piao:1998}\\
+R-143a* & C$_2$H$_2$F$_3$ & \cite{lemmon:2000}\\
+\end{longtable}

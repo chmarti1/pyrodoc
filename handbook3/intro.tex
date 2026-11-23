@@ -98,7 +98,7 @@ To help make sense of the different property combinations, \PM\ organizes proper
 \item Inverse properties: In order to determine the state (in primary properties) from these properties, \PM\ either needs to perform numerical iteration, or (in rare exceptions) a precise algebraic inverse is available.
     \begin{itemize}
     \item Ideal gases: $\rho$, $e$, $f$, $g$, $h$, $s$,
-    \item Multi-phase models: $p$, $e$, $f$, $g$, $h$, $s$.
+    \item Multi-phase models: $p$, $e$, $h$, $s$.
     \end{itemize}
 \end{itemize}
 
@@ -106,7 +106,7 @@ To help make sense of the different property combinations, \PM\ organizes proper
 
 \textbf{The multi-phase property combinations} supported by the \texttt{mp1} and \texttt{mp2} classes are shown in Tables \ref{tab:props:mp1} and \ref{tab:props:mp2} respectively.  Almost all combinations that are theoretically valid are supported.  A ``o'' represents a combination that is not supported, though there may be some cases where it is theoretically possible.  The theory behind these combinations is somewhat more nuanced than in ideal gases.
 
-In \PM, a property combination is disallowed if there are at least two distinct states that can be found providing the same combination.  For example, Figure \ref{fig:Thd} shows a surface plot of density plotted against temperature and enthalpy for two-phase acetone.  Except in the liquid region, the surface is very badly behaved numerically, but the important criterion that causes us to reject it as a valid property combination is that it wraps back on itself.  For many values of $T$ and $h$, and there are two values of $\rho$ that produce the same value of $h$.  Therefore, $h,T$ does not specify a unique state.
+We define a property combination (such as $(T,h)$) as ``invalid'' if there are at least two distinct states that can be found at which the property pair have the same values.  Figure \ref{fig:Thd} shows a surface plot of density plotted against temperature and enthalpy for two-phase acetone.  Except in the liquid region, the surface is very badly behaved numerically, but the important criterion that causes us to reject it as a valid property combination is that it wraps back on itself.  For many values of $T$ and $h$, and there are two values of $\rho$ that produce the same value of $h$.  Therefore, $(T,h)$ does not specify a unique state.
 
 \begin{figure}
 \centering
@@ -114,9 +114,13 @@ In \PM, a property combination is disallowed if there are at least two distinct 
 \caption{A surface plot of density plotted against temperature and enthalpy for a two-phase mixture of acetone.}\label{fig:Thd}
 \end{figure}
 
-Despite this problem, $T,h$ and $T,e$ are both allowed in \texttt{mp1}, and they can only be expected to give reasonable results in (or near) the liquid region.  On the other hand, $f$ and $g$ are not permitted as arguments, and any combination of the inverse group is disallowed for reasons of numerical stability.  For example it is theoretically valid to specify enthalpy and entropy together, but it requires iteration in two dimensions to extract the $T,\rho$ state.  This presents a significant challenge for global numerical stability.
+Despite this problem, $(T,h)$ and $(T,e)$ are both allowed in \texttt{mp1}, and they can only be expected to give reasonable results in (or near) the liquid region.  The newer \texttt{mp2} class permits $(s,e)$, $(s,h)$, and $(p,h)$, but these have significant problems in the liquid region; including numerical instability, redundant solutions, and degraded numerical precision.  As of v3.0.1, this dissimilar treatment of properties between \texttt{mp1} and \texttt{mp2} is tolerated with the intention of reconciling it later -- informed by user feedback.
 
-The \texttt{mp2} class addresses the global numerical stability issue by stashing a table of property values that can be referenced to establish initial estimates for properties prior to local numerical polishing.  It recognizes $f$ and $g$ in its arguments, but it avoids the numerical problems seen in \texttt{mp1} by disallowing any combination of properties from the energy group.
+On the other hand, $f$ and $g$ are not permitted as arguments in any of the multi-phase classes.  Though their use to specify a state can be valid in some restricted regions, it not common practice, and it forms a problem so poorly numerically conditions, it was deemed inappropriate to include the free energies as means to specify the state.
+
+Note also that quality is not allowed to be specified with any but the basic properties.  In the first place, quality is only valid in a small region (the two-phase mixture), and over much of that, it can lead to duplicated solutions for many of the potential combinations.
+
+Temperature, pressure, and quality, $(T,p,x)$, is the only property combination permitted in a group of 3, since $(T,p)$ cannot describe the state of a two-phase mixture alone.  Adding quality permits using $(T,p)$ without losing the capacity to specify states under the dome.
 
 \begin{table}
 \centering
@@ -150,28 +154,29 @@ The \texttt{mp2} class addresses the global numerical stability issue by stashin
 \texttt{v} & \checkmark & \checkmark & X & X & X & \checkmark & \checkmark & \checkmark\\
 \texttt{x} & \checkmark & \checkmark & X & X & X & X & X & X \\
 \hline
-\texttt{e} & \checkmark & \checkmark & \checkmark & \checkmark & X & X & X & o\\
-\texttt{h} & \checkmark & \checkmark & \checkmark & \checkmark & X & X & X & o\\
-\texttt{s} & \checkmark & \checkmark & \checkmark & \checkmark & X & o & o & X\\
+\texttt{e} & \checkmark & \checkmark & \checkmark & \checkmark & X & X & X & X\\
+\texttt{h} & \checkmark & \checkmark & \checkmark & \checkmark & X & X & X & X\\
+\texttt{s} & \checkmark & \checkmark & \checkmark & \checkmark & X & X & X & X\\
 \hline
 \end{tabular}
 \end{table}
 
 \begin{table}
 \centering
-\caption{Property combinations that are supported by the multi-phase classes in version 3.0.1.  \checkmark = supported, X = not valid, o = not supported, E = energy group.}\label{tab:props:mp2}
-\begin{tabular}{|c|ccccc|cc|}
+\caption{Property combinations that are supported by the \texttt{mp2} class in version 3.0.1.  \checkmark = supported, X = not valid, o = not supported.}\label{tab:props:mp2}
+\begin{tabular}{|c|ccccc|ccc|}
 \hline
-  & \texttt{T} & \texttt{p} & \texttt{d} & \texttt{v} & \texttt{x} & E & \texttt{s}\\
-\hline  %  & T   p   d   v   E   s
-\texttt{T} & X & \checkmark & \checkmark & \checkmark & \checkmark & o & \checkmark\\
-\texttt{p} & \checkmark & X & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark\\
-\texttt{d} & \checkmark & \checkmark & X & X & X & \checkmark & \checkmark\\
-\texttt{v} & \checkmark & \checkmark & X & X & X & \checkmark & \checkmark\\
-\texttt{x} & \checkmark & \checkmark & X & X & X & X & X \\
+  & \texttt{T} & \texttt{p} & \texttt{d} & \texttt{v} & \texttt{x} & \texttt{e} & \texttt{h} & \texttt{s}\\
+\hline  %  & T   p   d   v   e   h   s
+\texttt{T} & X & \checkmark & \checkmark & \checkmark & \checkmark & X & X & \checkmark\\
+\texttt{p} & \checkmark & X & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark\\
+\texttt{d} & \checkmark & \checkmark & X & X & X & \checkmark & \checkmark & \checkmark\\
+\texttt{v} & \checkmark & \checkmark & X & X & X & \checkmark & \checkmark & \checkmark\\
+\texttt{x} & \checkmark & \checkmark & X & X & X & X & X & X \\
 \hline
-E          & o & \checkmark & \checkmark & \checkmark & X & o & \checkmark\\
-\texttt{s} & \checkmark & \checkmark & \checkmark & \checkmark & X & \checkmark & X\\
+\texttt{e} & X & \checkmark & \checkmark & \checkmark & X & X & X & \checkmark\\
+\texttt{h} & X & \checkmark & \checkmark & \checkmark & X & X & X & \checkmark\\
+\texttt{s} & \checkmark & \checkmark & \checkmark & \checkmark & X & \checkmark & \checkmark & X\\
 \hline
 \end{tabular}
 \end{table}
