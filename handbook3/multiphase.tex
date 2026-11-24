@@ -102,7 +102,7 @@ and $\alpha^o_1$ includes the quantum terms,
 \end{align}
 \end{subequations}
 
-In many models, the $\tau \ln \tau$ term is omitted from Equation \ref{eqn:mp:ao}, implying that there was no linear term on $\tau$ (proportional to $1/T$) in the formulation of specific heat.  Because much of the complexity of the specific heat is captured by the $\alpha^o_1$ terms, the polynomial, $\alpha^o_0$, may only contain a constant and a linear term.  Still, exponentials and logarithms are numerically expensive, so this model can already be significantly more expensive than their \texttt{ig} and \texttt{ig2} equivalents.
+In many models, the $\tau \ln \tau$ term is omitted from Equation \ref{eqn:mp:ao}, implying that there was no linear term on $\tau$ (proportional to $1/T$) in the formulation of specific heat.  Because much of the complexity of the specific heat is captured by the $\alpha^o_1$ terms, the polynomial, $\alpha^o_0$, may only contain a constant and a linear term.  Still, exponentials and logarithms are numerically expensive, so this model can already be significantly more expensive than their \texttt{ig1} and \texttt{ig2} equivalents.
 
 \subsection{Residual portion of free energy}
 The residual (or real-fluid) portion of free energy attempts to account for everything that the ideal gas portion does not.  Many of these terms become especially important when the substance density is high, because they are responsible for quantifying the impact of the intermolecular forces ignored by the ideal gas model.  The model is divided into three groups of terms,
@@ -136,7 +136,7 @@ At first glance, these formulations may appear to be an inefficient tangled mess
 
 \subsection{Derivatives of free energy}
 
-As we will address in the next section, it is also important to evaluate up to the second derivative of these terms.  This is sufficiently cumbersome to deserve some treatment here.  The efficient evaluation of derivatives of polynomials is addressed in Section \ref{sec:num:poly2}, so we only need to treat the other aspects of these functional forms.
+As we will address in the next section, it is important to evaluate up to the second derivative of these terms.  The task is sufficiently cumbersome to deserve some formal treatment here.  The efficient evaluation of derivatives of polynomials is addressed in Section \ref{sec:num:poly2}, so we only need to treat the other aspects of these functional forms.
 
 The ideal gas portion in (\ref{eqn:mp:ao}) has derivatives
 \begin{subequations}
@@ -200,46 +200,54 @@ g_{l,\delta\delta} &= -2 a_l\ g_l - 2 a_l (\delta - \epsilon_l)\ g_{l,\delta}
 \end{align}
 \end{subequations}
 
-This approach to evaluating derivatives in stages helps numerical efficiency, since there are obvious ways to make repeated use of intermediate values, but it also helps with the clarity of the code.  The same approach is even more valuable in the treatment of the second Gaussian terms in (\ref{eqn:mp:ar2}).  First, we turn our attention to derivatives of the distance term, $\Delta$.  For ease of notation, we will omit the subscript, $m$, on all of the empirical coefficients.
+This approach to evaluating derivatives in stages helps numerical efficiency, since there are obvious ways to make repeated use of intermediate values, but it also helps with the clarity of the code.  The same approach is even more valuable in the treatment of the second Gaussian terms in (\ref{eqn:mp:ar2}).  First, we turn our attention to derivatives of the distance term, $\Delta$.  
+
+For ease of notation, we will omit the subscript, $m$, on all of the empirical coefficients.  We also abbreviate nested squares, so terms like $((\delta-1)^2)^{\beta/2}$ will be written simply $(\delta-1)^{1/\beta}$ with the understanding that its actual evaluation will retain the inner square.  This does not affect the final result if the nested square are restored in code.
 \begin{subequations}
 \begin{align}
-\Delta_\tau &= -2\left[ 1 - \tau + A\left((\delta-1)^2 \right)^{1/2\beta} \right]\\
-\Delta_\delta &= 2 \frac{A}{\beta} \left[ 1 - \tau + A\left((\delta-1)^2 \right)^{1/2\beta} \right] \left((\delta-1)^2 \right)^{1/2\beta - 1/2}\\
+\Delta_\tau &= -2\left[ 1 - \tau + A(\delta-1)^{1/\beta} \right]\\
+\Delta_\delta &= 2 \frac{A}{\beta} \left[ 1 - \tau + A(\delta-1)^{1/\beta} \right] (\delta-1)^{1/\beta - 1} \ldots\nonumber\\
+&\hspace{2em} + 2 a B (\delta-1)^{2a-1}\\
 \Delta_{\tau\tau} &= 2\\
-\Delta_{\tau\delta} &= 2\frac{A}{\beta}\left((\delta-1)^2 \right)^{1/2\beta - 1/2}\\
-\Delta_{\delta\delta} &= 2\left(\frac{A}{\beta}\right)^2 \left((\delta-1)^2\right)^{1/\beta-1} \ldots \nonumber\\
-& + 2\frac{A}{\beta}\left(\frac{1}{\beta} - 1\right) \left[ 1 - \tau + A\left((\delta-1)^2 \right)^{1/2\beta} \right] \left((\delta-1)^2 \right)^{1/2\beta - 1}
+\Delta_{\tau\delta} &= -2\frac{A}{\beta}(\delta-1)^{1/\beta - 1}\\
+\Delta_{\delta\delta} &= 2\left(\frac{A}{\beta}\right)^2 (\delta-1)^{2/\beta-2} \ldots\nonumber\\
+& \hspace{2em} + 2\frac{A}{\beta}\left(\frac{1}{\beta} - 1\right) \left[ 1 - \tau + A(\delta-1)^{1/\beta} \right] (\delta-1)^{1/\beta - 2} \ldots\nonumber\\
+& \hspace{2em} + 2a(2a-1)B(\delta-1)^{2a-2}
 \end{align}
 \end{subequations}
 
-Next, we will consider the exponential term separately,
+Next, we will consider the exponential term separately, calling it $q$,
 \begin{subequations}
 \begin{align}
-f(\tau, \delta) &= \exp(-C (\delta-1)^2 - D(\tau-1)^2)\\
-f_\tau &= -2D(\tau-1) f\\
-f_\delta &= -2C(\delta-1) f\\
-f_{\tau\tau} &= -2D f - 2D(\tau-1) f_\tau\\
-f_{\tau\delta} &= -2D(\tau-1) f_\delta = -2C(\delta-1) f_\tau\\
-f_{\delta\delta} &= -2C f - 2C(\delta-1) f_\delta
+q(\tau, \delta) &= \exp(-C (\delta-1)^2 - D(\tau-1)^2)\\
+q_\tau &= -2D(\tau-1) q\\
+q_\delta &= -2C(\delta-1) q\\
+q_{\tau\tau} &= -2D q - 2D(\tau-1) q_\tau\\
+q_{\tau\delta} &= -2D(\tau-1) q_\delta = -2C(\delta-1) q_\tau\\
+q_{\delta\delta} &= -2C q - 2C(\delta-1) q_\delta
 \end{align}
 \end{subequations}
 
 Finally, the $\alpha_2^r$ derivatives may be constructed as
 \begin{subequations}
 \begin{align}
-\alpha^r_2 &= \Delta^b \delta f\\
-\alpha^r_{2,\tau} &= b \Delta_\tau \Delta^{b-1} \delta f + \Delta^b \delta f_\tau\\
-\alpha^r_{2,\delta} &= b \Delta_\delta \Delta^{b-1} \delta f + \Delta^b f + \Delta^b \delta f_\delta\\
-\alpha^r_{2,\tau\tau} &= b\left( \Delta_{\tau\tau} \Delta^{b-1} + (b-1)\Delta_\tau{^2}\Delta^{b-2} \right) \delta f \ldots  \nonumber\\
- &\hspace{2em} + 2 b \Delta_\tau \Delta^{b-1} \delta f_{\tau} + \Delta^b \delta f_{\tau\tau}\\
-\alpha^r_{2,\tau\delta} &= b \left(\Delta_{\tau\delta} \Delta^{b-1} + (b-1)\Delta_\tau \Delta_\delta \Delta^{b-2} \right) \delta f \ldots\nonumber\\
- &\hspace{2em} + b\Delta_{\tau} \Delta^{b-1} f + \Delta^b f_\tau + \ldots \nonumber\\
- &\hspace{2em} + b\Delta_{\tau} \Delta^{b-1} \delta f_\delta + \Delta^b \delta f_{\tau\delta}\\
-\alpha^r_{2,\delta\delta} &= b \left(\Delta_{\delta\delta} \Delta^{b-1} + (b-1)\Delta_\delta{^2} \Delta^{b-2} \right) \delta f \ldots\nonumber\\
- &\hspace{2em} + b\Delta_{\delta} \Delta^{b-1} f + \Delta^b f_\delta + \ldots \nonumber\\
- &\hspace{2em} + b\Delta_{\delta} \Delta^{b-1} \delta f_\delta + \Delta^b \delta f_{\delta\delta}
+\alpha^r_2 &= \Delta^b \delta q\\
+\alpha^r_{2,\tau} &= b \Delta_\tau \Delta^{b-1} \delta q + \Delta^b \delta q_\tau\\
+\alpha^r_{2,\delta} &= b \Delta_\delta \Delta^{b-1} \delta q + \Delta^b q + \Delta^b \delta q_\delta\\
+\alpha^r_{2,\tau\tau} &= b\left( \Delta_{\tau\tau} \Delta^{b-1} + (b-1)\Delta_\tau{^2}\Delta^{b-2} \right) \delta q \ldots  \nonumber\\
+ &\hspace{2em} + 2 b \Delta_\tau \Delta^{b-1} \delta q_{\tau} + \Delta^b \delta q_{\tau\tau}\\
+\alpha^r_{2,\tau\delta} &= b \left(\Delta_{\tau\delta} \Delta^{b-1} + (b-1)\Delta_\tau \Delta_\delta \Delta^{b-2} \right) \delta q \ldots\nonumber\\
+ &\hspace{2em} + b\Delta_{\tau} \Delta^{b-1} q + \Delta^b q_\tau + \ldots \nonumber\\
+ &\hspace{2em} + b\Delta_{\tau} \Delta^{b-1} \delta q_\delta + \Delta^b \delta q_{\tau\delta}\\
+\alpha^r_{2,\delta\delta} &= b \left(\Delta_{\delta\delta} \Delta^{b-1} + (b-1)\Delta_\delta{^2} \Delta^{b-2} \right) \delta q \ldots\nonumber\\
+ &\hspace{2em} + b\Delta_{\delta} \Delta^{b-1} q + \Delta^b q_\delta + \ldots \nonumber\\
+ &\hspace{2em} + b\Delta_{\delta} \Delta^{b-1} \delta q_\delta + \Delta^b \delta q_{\delta\delta}
 \end{align}
 \end{subequations}
+
+\subsection{Singularities in the residual terms}
+
+At the critical point, $(\tau-1)$ and $(\delta-1)$
 
 \section{Calculation of properties}\label{sec:mp1:properties}
 
@@ -414,7 +422,10 @@ In \PM, the Span and Wagner models are implemented in classes \texttt{mp1} and \
 
 In version 3.0.1, the multi-phase coefficient organization changed significantly to make data entry faster and less error prone.  Terms are organized into ``groups'' based on their characteristics.  At the top level of the multi-phase data dictionaries, there are two entries; the \texttt{"IGgroup"} representing the ideal gas group of terms, and the \texttt{"Rgroup"} representing the residual group terms from Equation \ref{eqn:mp:atotal}.
 
-The \texttt{"IGgroup"} is a dictionary, which further allows entries \texttt{"logt"}, \texttt{"tlogt"}, \texttt{"group0"}, and \texttt{"group1"}, corresponding to the individual portions of Equation \ref{eqn:mp:ao}.  They are all optional, and their respective terms will be presumed zero if they are omitted.  The \texttt{logt} and \texttt{tlogt} entries are scalar coefficients for $\log(\tau)$ and $\tau \log(\tau)$ respectively.  The \texttt{group0} entry is a 1-D polynomial (see Section \ref{sec:num:poly1}) defining $\alpha^\circ_0(\tau)$ from Equation \ref{eqn:mp:ao:0}.  The \texttt{group1} value is expected to be a list of two-element lists or tuples used to define the quantum terms in Equation \ref{eqn:mp:ao:1}.
+The \texttt{"IGgroup"} is a dictionary, which may contain entries \texttt{"logt"}, \texttt{"tlogt"}, \texttt{"group0"}, and \texttt{"group1"}, corresponding to the individual portions of Equation \ref{eqn:mp:ao}.  They are all optional, and their respective terms will be presumed zero if they are omitted.  The \texttt{logt} and \texttt{tlogt} entries are scalar coefficients for $\log(\tau)$ and $\tau \log(\tau)$ respectively.  The \texttt{group0} entry is a 1-D polynomial (see Section \ref{sec:num:poly1}) defining $\alpha^\circ_0(\tau)$ from Equation \ref{eqn:mp:ao:0}.  The \texttt{group1} value is expected to be a list of two-element lists or tuples used to define the quantum terms in Equation \ref{eqn:mp:ao:1},
+\begin{align*}
+b \ln\left(1 - \exp( -m \tau )\right).
+\end{align*}
 
 % This comment numbers the code columns.  There are 53 before a line overrun.
 %        1         2         3         4         5
@@ -443,6 +454,24 @@ Within the \texttt{"Rgroup"} dictionary, the \texttt{"group0"} member contains a
       ...    ]
 }
 \end{lstlisting}
+
+For reference, group 1 terms correspond to the formula
+\begin{align*}
+c\, \tau^t \delta^d \exp\left(-b(\tau-\gamma)^2 - a(\delta-\epsilon)^2 \right),
+\end{align*}
+while group 2 terms correspond to the formula
+\begin{align*}
+&c\, \Delta^b \delta \exp\left(-D(\tau-1)^2 + C(\delta-1)^2 \right)\\
+& \hspace{2em} \Delta = \left(1 -\tau + A(\delta-1)^{1/\beta}\right)^2 + B(\delta-1)^{2a}.
+\end{align*}
+
+At this point, it will surely become apparent that the ordering of the coefficients in group 1, albeit arbitrary, may seem a bit unnatural.  Across the many publications that use these terms, there is not a strict convention for how their tables are ordered, but the vast majority of \PM\ back-end utilities obey a few conventions for how coefficients should be ordered in data structures.
+\begin{enumerate}
+\item The values that define the term should always precede the coefficient, so natural list sorting will correctly sort terms by their exponents.
+\item Temperature always comes first, and density always comes second.  Parameters that apply to temperature and density obey the same preference.
+\item Wherever there is symmetry in their formulation, coefficients and exponents of temperature and density are grouped in pairs.
+\end{enumerate}  
+The choice of placing $a$ and $b$ in the ``wrong'' order above was merely an early attempt to honor the naming conventions common to many of the publications from which the data are taken\footnote{We all make mistakes.}.  That group 2 has not been modified to obey the same convention is only a reflection of how few models use it\footnote{Maybe one day\ldots}.
 
 Prior to version 3.0.1, the residual and ideal gas groups required \texttt{"Tscale"} and \texttt{"dscale"} entries to define the values used to nondimensionalize the models.  Their use is deprecated as it creates potentially problematic disagreements between the model's critical point and the critical point defined by the top-level data set.  However, if they are specified, they are still honored for now.  Future releases of \PM\ may change this behavior.
 
@@ -737,46 +766,27 @@ This approach naturally produces a high density of grid lines in regions where t
 
 \subsection{Benchmarking}
 
-Improved computational speed was always a goal in the development of \texttt{mp2}, but it was secondary to broadening the number of substances included in \PM.  To gauge the relative strengths and weaknesses of the two classes, benchmarking was performed by passing randomly generated property arrays in different combinations.  The process of calculating properties is divided into two steps: (1) determination of the thermodynamic state in terms of temperature and density ($t_1$), and (2) calculation of the requested properties at that state ($t_2$).  
+The disadvantage of automatically performing complicated iteration is the difficulty making informed decisions about the relative costs of different ways of approaching the same operation.  In this section, we measure the relative speeds of the two multi-phase classes performing a series of operations.  
 
-The relative computational costs of these steps were measured as the average of ten repeated calls to \verb|_argparse()|, followed by ten repeated calls to \verb|state()| with the same datasets.  The time to calculate properties was assessed as the time required for \verb|state()| minus the time required for \verb|_argparse()|.  Tests were performed on a single core of an AMD Ryzen 9 7900 with array sizes ranging from 10 to 100,000.  The results for H$_2$O (representing \texttt{mp1}) and N$_2$ (representing \texttt{mp2}) are shown in Table \ref{tab:mp:benchmark}
+All \PM\ classes perform calculations in two steps.  First, the \verb|_argparse()| method inspects the user's arguments and establishes the thermodynamic state.  For the multi-phase classes, this means determining the temperature and density or (if necessary) the temperature, saturated densities, and quality.  Finally, the method called uses this definition of the state to calculate the requested property.  
 
-\begin{table}
+In this process, the difficulty of determining the state in \verb|_argparse()| depends heavily on how the user has chosen to specify the state.  For example, if the user has specified $(T,\rho)$, all that remains is to check for saturation conditions -- a relatively inexpensive process.  On the other hand, specifying $(T,p)$ requires an iteration on density until a $(T,\rho)$ state can be found with the same pressure as the one the user has requested.  Worse still, specifying two simultaneous properties that require iteration, like $(s,p)$, requires iterating in two dimensions.
+
+Figure \ref{fig:mp:benchmark} shows the results of a brief study timing a series of calls to multi-phase methods.  Solid lines show the total average execution time for a call to \texttt{state()}, while dashed lines show only the time required for \verb|_argparse()| to determine the state at the same conditions.  The difference between them may be regarded as the time required to calculate the properties.  The three colors correspond to the three use cases above; $(T,\rho)$ is black, $(T,p)$ is blue, and $(s,p)$ is red.  The test is repeated for a \texttt{mp1} instance (\texttt{mp.H2O}) with square markers and a \texttt{mp2} instance (\texttt{mp.N2}) with triangle markers.
+
+\begin{figure}
 \centering
-\caption{Benchmarking tests comparing \texttt{mp1} against \texttt{mp2} for determining the state, $t_1$, and evaluating the state properties, $t_2$.  Values are in microseconds.}\label{tab:mp:benchmark}
-\begin{tabular}{|ccc|rrrrr|}
-\hline
- & & N & 10 & 100 & 1,000 & 10,000 & 100,000\\
-\hline
-\multirow{4}*{$(T,d)$} & \multirow{2}*{\texttt{mp1}} & $t_1$ & 88 & 91 & 143 & 565 & 4,862\\
-                       &                             & $t_2$ & 1,841 & 1,930 & 2,961 & 9,947 & 110,323\\
-\cline{4-8}
-                       & \multirow{2}*{\texttt{mp2}} & $t_1$ & 11 & 2,824 & 4,524 & 6,536 & 16,979\\
-                       &                             & $t_2$ & 741 & 1,530 & 2,152 & 6,258 & 72,040\\
-\hline
-\multirow{4}*{$(T,p)$} & \multirow{2}*{\texttt{mp1}} & $t_1$ & 14,092 & 15,160 & 22,958 & 80,303 & 843,870\\
-                       &                             & $t_2$ & 1,679 & 1,270 & 1,992 & 6,620 & 87,956\\
-\cline{4-8}
-                       & \multirow{2}*{\texttt{mp2}} & $t_1$ & 2,358 & 4,268 & 17,889 & 115,795 & 1,16$\times 10^6$\\
-                       &                             & $t_2$ & 739 & 765 & 1,295 & 1,138 & 66,845\\
-\hline
-\multirow{4}*{$(s,p)$} & \multirow{2}*{\texttt{mp1}} & $t_1$ & 190,888 & 270,547 & 399,682 & 1.10$\times 10^6$ & 9.03$\times 10^6$\\
-                       &                             & $t_2$ & 1,347 & 1,006 & 3,757 & 19,521 & 223,192\\
-\cline{4-8}
-                       & \multirow{2}*{\texttt{mp2}} & $t_1$ & 2,229 & 15,008 & 74,794 & 643,537 & 6.42$\times 10^6$\\
-                       &                             & $t_2$ & 748 & 1,570 & 571 & 4,775 & 61,988\\
-\hline
-\end{tabular}
-\end{table}
+\includegraphics[width=0.97\linewidth]{figures/benchmark_mp}
+\caption{Multi-phase benchmarking results. Triangles are \texttt{mp2}, squares are \texttt{mp1}; dashed lines are the \texttt{\_argparse()} cost, solid are the total \texttt{state()} cost; black is $(T,\rho)$, blue is $(T,p)$, and red is $(s,p)$.}\label{fig:mp:benchmark}
+\end{figure}
 
-In general, \texttt{mp2} scales more poorly with array size than \texttt{mp1}.  This is expected, since many of the mapsearch algorithms are serialized in for loops.  When $(T,\rho)$ property pairs are specified, no iteration is required, so the improved initial guesses of \texttt{mp2} offers no benefit.  Instead, the extra overhead required to look up two-phase mixture information causes it to be somewhat slower.  
+When little or no iteration is required, as in the $(T,\rho)$ cases shown in black, \texttt{mp1} and \texttt{mp2} provide similar total performance.  There is scatter in the data for small datasets generated by the random number of saturated states included in the test cases, but the solid curves are quite similar.  The \texttt{mp2} time required to determine the state is significantly longer, since lookup tables are slower than polynomial fits, but the net effect is roughly the same.  All of the total \texttt{state()} execution times may be regarded as having a floor somewhere around 1 ms, representing the overhead associated with the entire process.
 
-It is seen that for any property combination other than $(T,\rho)$, the time required to determine the thermodynamic state, $t_1$, dominates the computational cost.  When iteration on one property is required (e.g. when $(T,p)$ property pairs are specified), \texttt{mp2} is about five times as fast as \texttt{mp1}, slowing to break even between 1,000 and 10,000 elements.  On huge datasets, \texttt{mp1}'s better vectorization makes it somewhat faster, but not much compared to \texttt{mp2}'s advantage in small datasets.
+As soon as iteration is required, as the cases of $(T,p)$ (blue) and $(s,p)$ (red) calls, the time to establish the thermodynamic state dominates the computational cost.  For $(T,p)$, \texttt{mp2}'s algorithms do not rise from the overhead ``floor'' until dataset sizes are over 100, while \texttt{mp1} is roughly 10 times the cost for small datasets.  For large (> 10,000) datasets, the two classes converge to be more or less the same cost.
 
-When iteration on two simultaneous properties is required (as in the case of $(s,p)$) \texttt{mp2} is about 100 times faster for small datasets.  That advantage erodes in large data sets, but \texttt{mp1} never managed to overtake \texttt{mp2} in these tests.  The \texttt{mp1} algorithms suffers severely here because it does not perform true 2D numerical inversion.  For numerical stability, nested \verb|_hybrid1| algorithms provide a horribly inefficient, albeit extremely numerically stable facsimile of 2D inversion.  As a result, \texttt{mp2} is far superior in these cases.
+There is a similar trend for two-dimensional iteration $(s,p)$ (red), but the small dataset divide is about 100 times, and the \texttt{mp1} class never manages to overtake \texttt{mp2}.  This is largely due to the extreme measures taken to ensure numerical convergence in the \texttt{mp1} class, despite iterating over the entire (horribly nonlinear) domain.
 
-Except for users calling the property methods inside of a higher iterative process, these magnitudes of numerical costs are mostly insignificant.  Most users work on small datasets, and will not be bothered by the difference between a 1 millisecond versus a 10 millisecond calculation.  This comparison is entirely for the benefit of users considering doing something a little more adventurous with these models.
-
+In general, the thermodynamic state should always be specified using $(T,\rho)$ when practical.  Specifying the thermodynamic state with a property pair like $(s,p)$, $(s,e)$, or $(s,h)$ that requires iteration in two dimensions should be regarded as about 100 times the numerical cost, while substituting pressure for density is about ten times the cost.  For small datasets, the difference is mostly irrelevant, but for larger datasets, it can be significant.
 
 \section{Sources implemented}
 Table \ref{tab:mp:source} lists the multi-phase models currently implemented in \PM\ as of version 2.2.0.  Entries marked with an asterisk were not yet complete for the 2.2.0 release, but are planned to be implemented later.

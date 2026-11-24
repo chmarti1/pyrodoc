@@ -1044,11 +1044,15 @@ Through a convenient object interface, the following properties are available:
         <li><span class="code">cv</span> Isochoric specific heat</li>
         <li><span class="code">d</span> Density</li>
         <li><span class="code">e</span> Internal energy</li>
+        <li><span class="code">f</span> Free (Helmholtz) energy</li>
+        <li><span class="code">g</span> Gibbs energy</li>
         <li><span class="code">gam</span> Specific heat ratio</li>
         <li><span class="code">h</span> Enthalpy</li>
         <li><span class="code">mw</span> Molecular weight</li>
+        <li><span class="code">p</span> Pressure</li>
         <li><span class="code">R</span> Ideal gas constant</li>
         <li><span class="code">s</span> Entropy</li>
+        <li><span class="code">T</span> Temperature</li>
         <li><span class="code">v</span> Specific volume</li>
     </ul>
 
@@ -1132,20 +1136,22 @@ Through a convenient object interface, the following properties are available:
     </p>
     <pre class="code">
 >>> pm.units.show()
-         length : km m cm mm um nm A in nmi ft yd mile mi 
+         length : km m dm cm mm um nm A in nmi ft yd mile mi 
            time : ns us ms s min hr day year 
-           mass : kg g mg lbm lb oz slug u amu 
-          force : N kN lb kgf lbf oz 
+           mass : mg g kg Mg T lbm u lb oz ton longton slug Da 
+          force : kN N mN dyne lb kgf lbf oz kip ton 
           molar : kmol mol lbmol n Nm3 Ncum NL Ncc scf sci 
     temperature : K C F R eV 
-         energy : J kJ cal kcal eV BTU 
-         volume : m3 mm3 cm3 in3 ft3 L mL uL cum cc cumm cuin cuft gal USgal UKgal qt pt 
+         energy : mJ J kJ MJ cal kcal eV erg BTU 
+         volume : m3 dm3 mm3 cm3 in3 ft3 L mL uL cum cc cumm cuin cuft gal USgal 
+                    UKgal qt pt cup floz oz tbsp tsp 
        pressure : Pa kPa MPa GPa bar atm Torr mmHg mmH2O psi psf ksi inHg inH2O 
 See also...
   abs_to_gauge()        Absolute to gauge pressure
   gauge_to_abs()        Gauge to absolute pressure
   matter()              Moles and mass conversions
   temperature_scale()   Correct handling of non-absolute temperatures
+
 </pre>
     <p>
     Tired of always reconfiguring the units when you start PYroMat?  Make your changes persistent in a configuration file!
@@ -1160,21 +1166,22 @@ See also...
     </p>
     <pre class=code>
 >>> pm.search('water')
-{&lt;ig, ig.DHO&gt;, &lt;ig, ig.BrH&gt;, &lt;ig2, ig.H2S&gt;, &lt;ig2, ig.CHN&gt;, &lt;ig2, ig.H2O&gt;, &lt;ig, ig.ClH&gt;, &lt;mp1, mp.H2O&gt;}
+{&lt;ig1, ig.BrH&gt;, &lt;mp1, mp.H2O&gt;, &lt;ig2, ig.CHN&gt;, &lt;ig2, ig.H2O&gt;, &lt;ig2, ig.H2S&gt;, &lt;ig1, ig.ClH&gt;, 
+    &lt;ig1, ig.DHO&gt;}
 >>> pm.info(pm.search('water'))
   PYroMat
 Thermodynamic computational tools for Python
-version: 2.2.4
-------------------------------------------------------------------------
- ID     : class : name              : properties
-------------------------------------------------------------------------
- ig.BrH :  ig   : Hydrogen bromide  : T p d v cp cv gam e h s mw R    
- ig.CHN :  ig2  : Hydrogen cyanide  : T p d v cp cv gam e h s mw R    
- ig.ClH :  ig   : Hydrogen chloride : T p d v cp cv gam e h s mw R    
- ig.DHO :  ig   : Water-d           : T p d v cp cv gam e h s mw R    
- ig.H2O :  ig2  : Water             : T p d v cp cv gam e h s mw R    
- ig.H2S :  ig2  : Hydrogen sulfide  : T p d v cp cv gam e h s mw R    
- mp.H2O :  mp1  : Water             : T p d v cp cv gam e h s mw R  
+version: 3.0.0
+------------------------------------------------------------
+ SID    : class  :      MW :   CAS ID   : name             
+------------------------------------------------------------
+ ig.BrH :  ig1   :  80.912 : 10035-10-6 : Hydrogen bromide 
+ ig.CHN :  ig2   :  27.026 :  74-90-8   : Hydrogen cyanide 
+ ig.ClH :  ig1   :  36.461 : 7647-01-0  : Hydrogen chloride
+ ig.DHO :  ig1   :  19.021 : 14940-63-7 : Water-d          
+ ig.H2O :  ig2   :  18.015 : 7732-18-5  : Water            
+ ig.H2S :  ig2   :  34.082 : 7783-06-4  : Hydrogen sulfide 
+ mp.H2O :  mp1   :  18.015 : 7732-18-5  : water     
 </pre>
     <p>
     Users can gain detailed information on a specific substance by passing its instance or its substance ID string to <span class=code>info()</span>.  For example, why did hydrogen sulfide come up when we searched for "water?"  One of its listed alternate names is "Zwavelwaterstof."
@@ -1215,12 +1222,13 @@ Information summary for substance: "ig.H2S"
         CAS number : 7783-06-4
       InChI string : InChI=1S/H2S/h1H2
         Data class : ig2
-       Loaded from : /home/chris/Documents/pyromat/src/pyromat/data/ig2/H2_S.hpd
-      Last updated : 16:54 August 17, 2022
+       Loaded from : /home/calc/Documents/pyromat-dev/pyromat/src/pyromat/data/ig2/H2_S.hpd
+      Last updated : 17:04 February 1, 2026
 
 The supporting data for this object were adapted from: B. McBride, S.
 Gordon, M. Reno, "Coefficients for Calculating Thermodynamic and Transport
 Properties of Individual Species," NASA Technical Memorandum 4513, 1993.
+
 </pre>
 
     <p>
@@ -1236,7 +1244,7 @@ Properties of Individual Species," NASA Technical Memorandum 4513, 1993.
 <h3 class=subtitle id=interface>Intuitive flexible interface</h3>
 <div class=section>
     <p>
-    In addition to the usualy temperature, pressure, or density, property methods accept almost any combination of two properties.  The tables below show valid argument combinations are makred with *, invalid combinations are marked with X, and unsupported valid combinations are marked with o.  
+    In addition to the usual temperature, pressure, or density, property methods accept almost any combination of two properties.  The tables below show valid argument combinations are makred with *, invalid combinations are marked with X, and unsupported valid combinations are marked with o.  
     </p>
     <pre class="code">
 >>> h2o = pm.get('mp.H2O')

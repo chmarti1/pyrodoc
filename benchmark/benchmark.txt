@@ -1,0 +1,26 @@
+Bechmarking notes
+
+Tests were performed on version 3.0.0 while in development.
+
+The benchmark data were collected using the following procedure:
+(1) A data set was generated for N random temperature, density pairs.
+(2) The state() method was evaluated at the entire data set.
+(3) The _argparse() method was called with (T,d), (T,p), and (s,p) from the 
+    resulting data set.
+(4) The state() method was called with (T,d), (T,p), and (s,p) from the 
+    resulting data set.
+
+In the plots, the colors are
+    'k': (T,d)
+    'b': (T,p)
+    'r': (s,p)
+the linestyles are
+    '-': state()
+    '--': _argparse()
+In benchmark_mp, the substances are:
+    '^': mp.N2 as mp2 
+    's': mp.H2O as mp1
+In benchmark_ig, the substances are:
+    's': ig.air as igmix
+    '^': ig.N2 as ig2
+    'o': ig.CHF as ig1

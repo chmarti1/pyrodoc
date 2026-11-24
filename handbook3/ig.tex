@@ -421,16 +421,16 @@ There are several classes that implement various data models for ideal gas prope
 
 All property methods accept any two of temperature, density, or pressure to specify the state.
 
-\subsection{The Shomate equation: \texttt{ig}}\label{sec:ig:ig}
+\subsection{The Shomate equation: \texttt{ig1}}\label{sec:ig:ig1}
 
-\PM's \texttt{ig} class is built on the Shomate equation for constant-pressure specific heat $c_p$.  This is the formulation used by the NIST webbook \cite{nist:webbook}.  It has the advantage of using a simple standard piece-wise formulation for specific heat, but it does suffer from certain limitations.
+\PM's \texttt{ig1} class is built on the Shomate equation for constant-pressure specific heat $c_p$.  This is the formulation used by the NIST webbook \cite{nist:webbook}.  Prior to version 3.0.1, it was called \texttt{ig} with the conceit that it might be the only ideal gas class needed.  While it is an important part of PYroMat, it is just one model.
 
 The Shomate equation takes the form
 \begin{align}
 \theta &= \frac{T}{T_s}\\
 c_p(t) &= c_0 + c_1 \theta + c_2 \theta^2 + c_3 \theta^3 + \frac{c_4}{\theta^2},
 \end{align}
-where the scaling temperature, $T_s$ is 1000K for all species.  The decision to scale the temperature by a large value has the effect of scaling $\tau$ so that it will not be much larger than 5 or 6.  That helps reduce numerical errors in high-order polynomials.
+where the scaling temperature, $T_s$ is 1000 K for all species.  The decision to scale the temperature by a large value has the effect of scaling $\tau$ so that it will not be much larger than 5 or 6.  That helps reduce numerical errors in high-order polynomials.
 
 Because of its simplicity, the Shomate equations lack the degrees of freedom to express specific heat over wide ranges, so data are usually given in piece-wise formulations.  For example, tungsten dioxide (WO$_2$), has a set of coefficients for $298\mathrm{K} \le T < 1100\mathrm{K}$ and $1100\mathrm{K} \le T \le 6000\mathrm{K}$.
 
@@ -451,37 +451,28 @@ s(T,p) &= s^\circ(T) - R \ln \left( \frac{p}{p^\circ} \right)\nonumber
 \end{align}
 Just like in the enthalpy integral, a new coefficient, $c_6$, has been introduced to represent the integration constant.
 
-Table \ref{tab:class:ig} lists the data elements that define the \texttt{ig} class.  For more information on how \texttt{.hpd} files are stored, see Section \ref{sec:regdat:data}.  Most of the essential data elements are self explanatory, but the coefficients and temperature limits must have compatible sizes.  Even though the \texttt{ig} class only uses seven coefficients, there are eight provided in the NIST data sets.  If there are $N$ sets of coefficients defined over $N$ temperature ranges, there must be $N$ arrays of eight coefficients and $N+1$ temperature limit values.
-5
-For example, in a data set with two temperature ranges, the following would define a data set valid between \texttt{<T0>} and \texttt{<T2>}, and the transition between the two piece-wise data sets is at \texttt{<T1>}.
-\begin{lstlisting}[language=Python]
-"Tlim":[<T0>, <T1>, <T2>]
-"C":[
-  [ <c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6>, <c7> ],
-  [ <c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6>, <c7> ],
-]
-\end{lstlisting}
+An \texttt{ig1} data dictionary takes the form shown below.  For more information on how \texttt{.hpd} files are stored, see Section \ref{sec:regdat:data}.  Most of the essential data elements are self explanatory, but the coefficients and temperature limits must have compatible sizes.  The eighth, $c_7$, coefficient is the enthalpy of formation at the reference state, $(T=298.15 \mathrm{K}, p=1 \mathrm{bar})$.  
 
-\begin{table}
-\centering
-\caption{HPD data file elements for the \texttt{ig} class}\label{tab:class:ig}
-\begin{tabular}{|ccp{2.5in}|}
-\hline
-Name & Type & Description\\
-\hline
-\texttt{id} & \texttt{str} & Unique substance identifier string\\
-\texttt{class} & \texttt{='ig'} & Class identifier string\\
-\texttt{doc} & \texttt{str} & Documentation string\\
-\hline
-\texttt{atoms} & \texttt{dict} & Keys are elemental atoms, and values are their integer quantities in the substance.\\
-\texttt{mw} & \texttt{float} & The molecular weight.\\
-\texttt{Tlim} & \texttt{list} & A sorted list of $N+1$ floating point temperatures.  Middle values define the boundaries between piece-wise coefficient ranges.  High and low values define the limits of the model.\\
-\texttt{C} & nested \texttt{list} & The value, $C[i][j]$, corresponds to coefficient $c_j$ in the temperature interval \texttt{Tlim[i]} to \texttt{Tlim[i+1]}.\\
-\hline
-\texttt{TAB} & nested \texttt{list} & Optional table of truth values published by NIST used for validation\\
-\hline
-\end{tabular}
-\end{table}
+If there are $N$ sets of coefficients defined over $N$ temperature ranges, there must be $N+1$ temperature limiting values to define the upper and lower boundaries of each range.  In turn, each temperature range must correspond to a list of eight coefficients.
+
+\begin{lstlisting}[language=Python]
+{
+    "class" : "ig1",
+    "id"    : <substance ID string>,
+    "mw"    : <molecular weight>,
+    "doc"   : <documentation string>,
+    "atoms" : { ... dict of atoms ... },    # optional
+    "names" : [ ... list of strings ... ],  # optional
+    "inchi" : <InChI ID string>,            # optional
+    "cas"   : <CAS ID string>,              # optional
+    "Tlim":[<T0>, <T1>, ..., <TN>],
+    "C":[
+          [ <c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6>, <c7> ],
+            ...
+          [ <c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6>, <c7> ]
+        ]
+}
+\end{lstlisting}
 
 
 \subsection{The NASA polynomial: \texttt{ig2}}\label{sec:ig:ig2}
@@ -509,36 +500,27 @@ There is some significant overlap in the species offered by the two classes.  Fo
 \end{itemize}
 Otherwise, the two have been found to be sufficiently equivalent that most users will not find a reason to be aware of the distinction.
 
-Table \ref{tab:class:ig2} lists the data elements that define the \texttt{ig2} class.  For more information on how \texttt{.hpd} files are stored, see Section \ref{sec:regdat:data}.  Most of the essential data elements are self explanatory, but the coefficients and temperature limits must have compatible sizes.  Even though the \texttt{ig2} class only uses seven coefficients, there are eight provided in the NIST data sets.  If there are $N$ sets of coefficients defined over $N$ temperature ranges, there must be $N$ arrays of eight coefficients and $N+1$ temperature limit values.
+The dictionary format of the \texttt{ig2} class data is shown below.  For more information on how \texttt{.hpd} files are stored, see Section \ref{sec:regdat:data}.  Most of the essential data elements are self explanatory, but the coefficients and temperature limits must have compatible sizes.  If there are $N$ sets of 7 coefficients defined over $N$ temperature ranges, there must be $N+1$ temperature limit values defining the boundaries between the ranges.  
 
-For example, in a data set with two temperature ranges, the following would define a data set valid between \texttt{<T0>} and \texttt{<T2>}, and the transition between the two piece-wise data sets is at \texttt{<T1>}.
 \begin{lstlisting}[language=Python]
-"Tlim":[<T0>, <T1>, <T2>]
-"C":[
-  [<c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6>, <c7>],
-  [<c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6>, <c7>],
-]
+{
+    "class" : "ig2",
+    "id"    : <substance ID string>,
+    "mw"    : <molecular weight>,
+    "doc"   : <documentation string>,
+    "atoms" : { ... dict of atoms ... },    # optional
+    "names" : [ ... list of strings ... ],  # optional
+    "inchi" : <InChI ID string>,            # optional
+    "cas"   : <CAS ID string>,              # optional
+    "pref"  : <pressure reference in Pa>,
+    "Tlim":[<T0>, <T1>, ..., <TN>],
+    "C":[
+          [ <c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6> ],
+            ...
+          [ <c0>, <c1>, <c2>, <c3>, <c4>, <c5>, <c6> ]
+        ]
+}
 \end{lstlisting}
-
-\begin{table}
-\centering
-\caption{HPD data file elements for the \texttt{ig2} class}\label{tab:class:ig2}
-\begin{tabular}{|ccp{2.5in}|}
-\hline
-Name & Type & Description\\
-\hline
-\texttt{id} & \texttt{str} & Unique substance identifier string\\
-\texttt{class} & \texttt{='ig2'} & Class identifier string\\
-\texttt{doc} & \texttt{str} & Documentation string\\
-\hline
-\texttt{atoms} & \texttt{dict} & Keys are elemental atoms, and values are their integer quantities in the substance.\\
-\texttt{pref} & \texttt{float} & Reference pressure in Pascals\\
-\texttt{mw} & \texttt{float} & The molecular weight.\\
-\texttt{Tlim} & \texttt{list} & A sorted list of $N+1$ floating point temperatures: Middle values define the boundaries between piece-wise coefficient ranges.  High and low values define the limits of the model.\\
-\texttt{C} & nested \texttt{list} & The value, $C[i][j]$, corresponds to coefficient $c_j$ in the temperature interval \texttt{Tlim[i]} to \texttt{Tlim[i+1]}.\\
-\hline
-\end{tabular}
-\end{table}
 
 \subsection{The ideal gas mixture: \texttt{igmix}}\label{sec:ig:igmix}
 
@@ -593,3 +575,22 @@ Name & Type & Description\\
 \end{tabular}
 \end{table}
 
+\subsection{Benchmarking}
+
+The disadvantage of automatically performing complicated iteration is the difficulty making informed decisions about the relative costs of different ways of approaching the same operation.  In this section, we measure the relative speeds of the two multi-phase classes performing a series of operations.  
+
+All \PM\ classes perform calculations in two steps.  First, the \verb|_argparse()| method inspects the user's arguments and establishes the thermodynamic state.  For the multi-phase classes, this means determining the temperature and density or (if necessary) the temperature, saturated densities, and quality.  Finally, the method called uses this definition of the state to calculate the requested property.  
+
+In this process, the difficulty of determining the state in \verb|_argparse()| depends heavily on how the user has chosen to specify the state.  For example, if the user has specified $(T,p)$ to an ideal gas class, the state is already completely specified.  On the other hand, specifying $(s,p)$ requires an iteration on temperature until a $(T,p)$ state can be found with the same entropy as the one the user has requested.  
+
+Figure \ref{fig:ig:benchmark} shows the results of a brief study timing a series of calls to ideal gas methods.  Solid lines show the total average execution time for a call to \texttt{state()}, while dashed lines show only the time required for \verb|_argparse()| to determine the state at the same conditions.  The difference between them may be regarded as the time required to calculate the properties.  The three colors correspond to the three use cases; $(T,\rho)$ is black, $(T,p)$ is blue, and $(s,p)$ is red.  The test is repeated for an \texttt{igmix} instance (\texttt{ig.air}) with square markers, an \texttt{ig2} instance (\texttt{ig.N2}) with triangle markers, and an \texttt{ig1} instance (\texttt{ig.CHF}) with circle markers.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.97\linewidth]{figures/benchmark_ig}
+\caption{Ideal gas benchmarking results. Squares are \texttt{igmix}, triangles are \texttt{ig2}, circles are \texttt{ig1}; dashed lines are the \texttt{\_argparse()} cost, solid are the total \texttt{state()} cost; black is $(T,\rho)$, blue is $(T,p)$, and red is $(s,p)$.}\label{fig:ig:benchmark}
+\end{figure}
+
+In both $(T,\rho)$ and $(T,p)$ cases, the cost to determine the thermodynamic state is very small -- \verb|_argparse()| only needs to check the units and force a correctly formatted Numpy array.  As a result, the two cases are essentially identical.  However, as soon as iteration is required, the cost of determining the state quickly rises to dominate the computation cost.  In general, specifying state with something other than $(T,p)$ or $(T,\rho)$ is at least twice as expensive.
+
+Of the classes, \texttt{igmix} is the slowest, since it essentially wraps the property methods of its constituent gases.  Since air has four constituents (nitrogen, oxygen, argon, and carbon dioxide), its cost is roughly four times the cost of the constituent models.  The reason for the increased cost of the NASA polynomials (triangles, \texttt{ig2}) relative to the Shomate equation (circles, \texttt{ig1}) is not entirely clear.  
