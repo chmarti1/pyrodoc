@@ -103,7 +103,7 @@ and $\alpha^o_1$ includes the quantum terms,
 \end{align}
 \end{subequations}
 
-In many models, the $\tau \ln \tau$ term is omitted from Equation \ref{eqn:mp:ao}, implying that there was no linear term on $\tau$ (proportional to $1/T$) in the formulation of specific heat.  Because much of the complexity of the specific heat is captured by the $\alpha^o_1$ terms, the polynomial, $\alpha^o_0$, may only contain a constant and a linear term.  Still, exponentials and logarithms are numerically expensive, so this model can already be significantly more expensive than their \texttt{ig} and \texttt{ig2} equivalents.
+In many models, the $\tau \ln \tau$ term is omitted from Equation \ref{eqn:mp:ao}, implying that there was no linear term on $\tau$ (proportional to $1/T$) in the formulation of specific heat.  Because much of the complexity of the specific heat is captured by the $\alpha^o_1$ terms, the polynomial, $\alpha^o_0$, may only contain a constant and a linear term.  Still, exponentials and logarithms are numerically expensive, so this model can already be significantly more expensive than their \texttt{ig1} and \texttt{ig2} equivalents.
 
 \subsection{Residual portion of free energy}
 The residual (or real-fluid) portion of free energy attempts to account for everything that the ideal gas portion does not.  Many of these terms become especially important when the substance density is high, because they are responsible for quantifying the impact of the intermolecular forces ignored by the ideal gas model.  The model is divided into three groups of terms,
@@ -137,7 +137,7 @@ At first glance, these formulations may appear to be an inefficient tangled mess
 
 \subsection{Derivatives of free energy}
 
-As we will address in the next section, it is also important to evaluate up to the second derivative of these terms.  This is sufficiently cumbersome to deserve some treatment here.  The efficient evaluation of derivatives of polynomials is addressed in Section \ref{sec:num:poly2}, so we only need to treat the other aspects of these functional forms.
+As we will address in the next section, it is important to evaluate up to the second derivative of these terms.  The task is sufficiently cumbersome to deserve some formal treatment here.  The efficient evaluation of derivatives of polynomials is addressed in Section \ref{sec:num:poly2}, so we only need to treat the other aspects of these functional forms.
 
 \textbf{The ideal gas portion} in (\ref{eqn:mp:ao}) has derivatives
 \begin{subequations}
@@ -556,7 +556,10 @@ In \PM, the Span and Wagner models are implemented in classes \texttt{mp1} and \
 
 In version 3.0.1, the multi-phase coefficient organization changed significantly to make data entry faster and less error prone.  Terms are organized into ``groups'' based on their characteristics.  At the top level of the multi-phase data dictionaries, there are two entries; the \texttt{"IGgroup"} representing the ideal gas group of terms, and the \texttt{"Rgroup"} representing the residual group terms from Equation \ref{eqn:mp:atotal}.
 
-The \texttt{"IGgroup"} is a dictionary, which further allows entries \texttt{"logt"}, \texttt{"tlogt"}, \texttt{"group0"}, and \texttt{"group1"}, corresponding to the individual portions of Equation \ref{eqn:mp:ao}.  They are all optional, and their respective terms will be presumed zero if they are omitted.  The \texttt{logt} and \texttt{tlogt} entries are scalar coefficients for $\log(\tau)$ and $\tau \log(\tau)$ respectively.  The \texttt{group0} entry is a 1-D polynomial (see Section \ref{sec:num:poly1}) defining $\alpha^\circ_0(\tau)$ from Equation \ref{eqn:mp:ao:0}.  The \texttt{group1} value is expected to be a list of two-element lists or tuples used to define the quantum terms in Equation \ref{eqn:mp:ao:1}.
+The \texttt{"IGgroup"} is a dictionary, which may contain entries \texttt{"logt"}, \texttt{"tlogt"}, \texttt{"group0"}, and \texttt{"group1"}, corresponding to the individual portions of Equation \ref{eqn:mp:ao}.  They are all optional, and their respective terms will be presumed zero if they are omitted.  The \texttt{logt} and \texttt{tlogt} entries are scalar coefficients for $\log(\tau)$ and $\tau \log(\tau)$ respectively.  The \texttt{group0} entry is a 1-D polynomial (see Section \ref{sec:num:poly1}) defining $\alpha^\circ_0(\tau)$ from Equation \ref{eqn:mp:ao:0}.  The \texttt{group1} value is expected to be a list of two-element lists or tuples used to define the quantum terms in Equation \ref{eqn:mp:ao:1},
+\begin{align*}
+b \ln\left(1 - \exp( -m \tau )\right).
+\end{align*}
 
 % This comment numbers the code columns.  There are 53 before a line overrun.
 %        1         2         3         4         5
@@ -586,121 +589,24 @@ Within the \texttt{"Rgroup"} dictionary, the \texttt{"group0"} member contains a
 }
 \end{lstlisting}
 
-<<<<<<< HEAD
-\subsection{The \texttt{mp2} class}
+For reference, group 1 terms correspond to the formula
+\begin{align*}
+c\, \tau^t \delta^d \exp\left(-b(\tau-\gamma)^2 - a(\delta-\epsilon)^2 \right),
+\end{align*}
+while group 2 terms correspond to the formula
+\begin{align*}
+&c\, \Delta^b \delta \exp\left(-D(\tau-1)^2 + C(\delta-1)^2 \right)\\
+& \hspace{2em} \Delta = \left(1 -\tau + A(\delta-1)^{1/\beta}\right)^2 + B(\delta-1)^{2a}.
+\end{align*}
 
-The \texttt{mp2} class is the newer of the two multi-phase classes, first implemented in version 3.0.1.  It has a number of powerful advantages over the \texttt{mp1} class
-\begin{itemize}
-\item For the vast majority of user cases, \texttt{mp2} is significantly faster.
-\item The thermodynamic state may be specified by almost any theoretically valid combination (and even a few that are not theoretically valid).
-\item The back-end gracefully resolves the limits as density approaches zero and as the state approaches the critical point.
-\item The free energy model coefficients and the critical points are the only information required -- no saturation curves are needed.
-\item The algorithms in \texttt{mp2} eliminate the possibility for redundant contradictory information -- all numerical calculations have a single authoritative source data set.
-\end{itemize}
-
-The last item is a nuanced, but very important idea.  In \texttt{mp1}, the critical temperature, density, and pressure are all specified, along with models for the saturation lines.  However, those data are all redundant with the thermodynamic model, since they can also be calculated explicitly (albeit very slowly) from the model.  Though \texttt{mp1}'s design improves its performance, it creates strange edges cases, where slightly contradictory saturation properties can be calculated, for the same state, depending on the method used.  A big part of \texttt{mp2}'s design is eliminating those problems without sacrificing speed.
-
-When a \texttt{mp2} instance is retrieved with \texttt{get()} and every time a property is evaluated, the \verb|mp2._build()| method is called to verify that the substance's tables have been calculated.  The process takes some computation time, so it is not performed on all substances -- only those called up for use.  If necessary, the \verb|_build()| method calls (in strict order) \verb|_build_sattab()| then \verb|_build_tab()|, which create dictionary attributes \verb|_sattable| and \verb|_table| respectively.  These lookup tables are central to the algorithm's speed and superior numerical stability.  For any iterative calculation, the tables provide initial guesses very close to the correct state.  As a result, even the most difficult calculations usually converge in only two or three standard Newton-Rhapson iterations.
-
-\textbf{Constructing the saturation table} is the first and slowest part of table construction.  After initialization, the \texttt{mp2} instance has no information on its saturation properties -- only its critical temperature and density and the triple point temperature.  Especially near the critical point, guesses need to be extremely near to their actual values, lest they diverge, so \verb|_build_sattab()| calculates the table one point at a time.  Once a point on the saturation curve converges, its local derivatives are used to extrapolate to the next point a small step away.
-
-Derivatives are calculated from the Maxwell criteria in Equations \ref{eqn:mp:maxwellg} and \ref{eqn:mp:maxwellp}.  These represent two constraints with three variables, $T$, $\rho_L$, and $\rho_V$, so the tangent to the curve they form in 3-space can be calculated from their derivatives.  For ease of notation,
-\begin{subequations}
-\begin{align}
-g_{L,T} &= \frac{\partial g(T, \rho_L)}{\partial T}\\
-g_{L,\rho} &= \frac{\partial g(T, \rho_L)}{\partial \rho}\\ 
-p_{L,T} &= \frac{\partial p(T, \rho_L)}{\partial T}\\
-p_{L,\rho} &= \frac{\partial p(T, \rho_L)}{\partial \rho}
-\end{align}
-\end{subequations}
-The derivatives of the Maxwell criteria are, therefore,
-\begin{subequations}
-\begin{align}
-g_{L,T}\, \d T + g_{L,\rho}\, \d \rho_L &= g_{V,T}\, \d T + g_{V,\rho}\, \d \rho_V\\
-p_{L,T}\, \d T + p_{L,\rho}\, \d \rho_L &= p_{V,T}\, \d T + p_{V,\rho}\, \d \rho_V.
-\end{align}
-\end{subequations}
-
-It is possible to calculate the differential of any two of the variables in terms of the third.  For example, with respect to temperature,
-\begin{align}
-\left[\begin{array}{cc}
-g_{L,\rho} & -g_{V,\rho}\\
-p_{L,\rho} & -p_{V,\rho}
-\end{array}\right]  \left[\begin{array}{c}
-\d \rho_L \\
-\d \rho_V
-\end{array}\right] = 
-\left[\begin{array}{c}
--g_{L,T} + g_{V,T} \\
--p_{L,T} + p_{V,T}
-\end{array}\right] \d T
-\end{align}
-and finally
-\begin{align}
-\Delta &= -g_{L,\rho} p_{V,\rho} + g_{V,\rho} p_{L,\rho}\\
-\frac{\d \rho_L}{\d T} &= \frac{1}{\Delta}\big[(g_{L,T}-g_{V,T}) p_{V,\rho} + (-p_{L,T}+p_{V,T}) g_{V,\rho}  \big]\\
-\frac{\d \rho_V}{\d T} &= \frac{1}{\Delta}\big[(g_{L,T}-g_{V,T}) p_{L,\rho} + (-p_{L,T}+p_{V,T}) g_{L,\rho}  \big]
-\end{align}
-
-Unfortunately, very near the critical point, these derivatives become singular, since all of the properties (and their derivatives) are very nearly equal.  The problem is yet worse, because the saturation curve is tangent to a line of constant temperature near the critical point.  To avoid this problem, \verb|_build_sattab()| uses similar derivatives with respect to vapor density, $\d T / \d \rho_V$ and $\d \rho_L / \d \rho_V$ instead, and transitions back to temperature far from the critical point.
-
-To keep the tabulated points very nearly equally spaced throughout the table, the ``distance'' to the next saturation point is scaled by the metric
-\begin{align}
-0.02 = \sqrt{\left(\frac{\Delta T}{T_c}\right)^2 + \left(\frac{\Delta \rho_V}{\rho_c}\right)^2 + \left(\frac{\Delta \rho_L}{\rho_c}\right)^2}.
-\end{align}
-The ``deltas'' are rescaled in proportion to force the ``step'' size to be 0.02.  Depending on the substance, this usually produces somewhere between 100 and 200 points in the saturation table.
-
-After the deltas are calculated, Newton-Rhapson iteration is performed on the Maxwell criteria while holding vapor density constant or temperature constant.  The transition between constant-density and constant-temperature iteration is made when the $-\Delta \rho_V / \rho_c < \Delta T / T_c$, indicating that the slope of the saturation curve is transitioning to be nearer to constant-density.
-
-Finally, the temperature and density arrays are used to construct arrays of other saturated liquid and saturated vapor properties.  Figure \ref{fig:mp:sattable} shows the $T,\rho$ saturation points automatically generated by this approach for acetone. The red points are saturated vapor, and the blue are saturated liquid.  In this table, there are 140 individual points, including the critical and triple points.
-
-\begin{figure}
-\centering
-\includegraphics[width=0.97\linewidth]{figures/sattable}
-\caption{Points of the saturation table automatically generated by \texttt{mp2} for acetone.}\label{fig:mp:sattable}
-\end{figure}
-
-\textbf{Constructing the general property table} requires a rectangular grid of temperature and density values.  The grid is constructed automatically from the saturation curve using a series of rules:
+At this point, it will surely become apparent that the ordering of the coefficients in group 1, albeit arbitrary, may seem a bit unnatural.  Across the many publications that use these terms, there is not a strict convention for how their tables are ordered, but the vast majority of \PM\ back-end utilities obey a few conventions for how coefficients should be ordered in data structures.
 \begin{enumerate}
-\item Density and temperature arrays must be in ascending order.
-\item No step between any two adjacent values may be larger than a threshold (set in software).
-\item The temperature and density arrays must span between their respective minima and maxima.
-\item For each temperature below the critical temperature, the density array must be values corresponding precisely to the liquid and vapor saturation densities at that temperature.
-\item For each density between the vapor and liquid triple point densities, the temperature array must contain a temperature corresponding precisely to the corresponding saturation temperature.
-\end{enumerate}
-To obey these rules, it is essential that the saturation table is already available.
+\item The values that define the term should always precede the coefficient, so natural list sorting will correctly sort terms by their exponents.
+\item Temperature always comes first, and density always comes second.  Parameters that apply to temperature and density obey the same preference.
+\item Wherever there is symmetry in their formulation, coefficients and exponents of temperature and density are grouped in pairs.
+\end{enumerate}  
+The choice of placing $a$ and $b$ in the ``wrong'' order above was merely an early attempt to honor the naming conventions common to many of the publications from which the data are taken\footnote{We all make mistakes.}.  That group 2 has not been modified to obey the same convention is only a reflection of how few models use it\footnote{Maybe one day\ldots}.
 
-From the resulting temperature and density grid values, all properties are evaluated in two-dimensional arrays, so that
-\begin{align}
-f_{i,j} \equiv f(T_i, \rho_j)
-\end{align}
-
-This approach has some very useful consequences.  Firstly, if the critical temperature is found at index, \texttt{i}, and the critical density is found at density index, \texttt{j}.  It is always trivial to identify grid points precisely on the saturation line.  If we were to move $k$ indices below the critical temperature,
-\begin{align}
-T_s &= T_{i-k}\\
-\rho_L &= \rho_{j+k}\\
-\rho_V &= \rho_{j-k}
-\end{align}
-
-Also, it naturally produces a high density of grid lines in regions where the saturation curves cause properties to be very steep.  Figure \ref{fig:mp:eTd} shows the internal energy table automatically generated for acetone.  There is a tight grouping of temperature grid lines near the critical point, but there is also a remarkably sharp vertical slope under ``the dome'' near the vapor line caused by the severely dissimilar densities between liquids and vapors far below the critical point.  It only takes a small amount of vapor to significantly drop the density, while adding relatively little to the mixture's energy.  It is not until the density has diminished to a tiny fraction (often around 0.2\% or so) of its liquid value that the higher vapor energy dominates.  Note that this grid generation strategy naturally densely populates this region with gridlines, producing a well formed, though nearly vertical surface.
-
-\begin{figure}
-\centering
-\includegraphics[width=0.97\linewidth]{figures/eTd}
-\caption{Internal energy plotted against temperature and density with the grid values automatically generated by \texttt{mp2}.}\label{fig:mp:eTd}
-\end{figure}
-
-When any properties other than temperature and/or density are used to reference the state, the tables are used to produce an initial guess for the $T,\rho$ state values that are quite close to the actual solutions.  This relieves \texttt{mp2} of the burden of numerically robust iteration solved by the \texttt{mp1.hybrid1()} algorithm (see Section \ref{sec:num:hybrid1}), so Newton-Rhapson root polishing can be used.
-
-This has quite a few benefits over the approach in \texttt{mp1}:
-
-
-The development of the \texttt{mp2} class is essential to the expansion of the \PM\ multi-phase data offerings, since many authors who publish coefficients for the Span and Wagner models do not also publish saturation line curves.  This proved quite limiting when attempting to broaden the number of multi-phase substance models.
-
-\subsection{The \texttt{mp1} class}
-
-The \texttt{mp1} class is the older of the two multi-phase classes in \PM.  Many original sources for equation-of-state models include polynomial fits for saturation properties that are so accurate, they can even be implemented without applying the Maxwell criteria.  When these are used as initial guesses, the Maxwell criteria are simply used to ``polish'' the solution to agree more precisely with the equation of state.  As of version 2.4.5, an inner routine, \texttt{\_ds()}, is provided that implements the Maxwell criterion, but saturation property methods do not yet implement it.  At the time of this writing, the plan is to ultimately transition older models over to the \texttt{mp2} class.  This has already been done for water.
-=======
 Prior to version 3.0.1, the residual and ideal gas groups required \texttt{"Tscale"} and \texttt{"dscale"} entries to define the values used to nondimensionalize the models.  Their use is deprecated as it creates potentially problematic disagreements between the model's critical point and the critical point defined by the top-level data set.  However, if they are specified, they are still honored for now.  Future releases of \PM\ may change this behavior.
 
 \subsection{The \texttt{mp1} class}
@@ -736,7 +642,6 @@ The \texttt{mp1} class is the older of the two multi-phase classes in \PM.  Its 
     "DSVgroup" : { <saturated vapor model> }
 }
 \end{lstlisting}
->>>>>>> 8521ca5470a4d6c84553f3a7570c648b855318e3
 
 Many original sources for equation-of-state models include polynomial fits for saturation properties that are so accurate, they can even be implemented without applying the Maxwell criteria.  These are encoded in the \texttt{"PSgroup"}, \texttt{"DSLgroup"}, and \texttt{"DSVgroup"} entries as saturation properties as a function of temperature.  The \texttt{mp1} class exposes these properties through methods: \texttt{ds}, \texttt{ps}, \texttt{Ts}, \texttt{es}, \texttt{hs}, and \texttt{ss}.  
 
@@ -995,46 +900,27 @@ This approach naturally produces a high density of grid lines in regions where t
 
 \subsection{Benchmarking}
 
-Improved computational speed was always a goal in the development of \texttt{mp2}, but it was secondary to broadening the number of substances included in \PM.  To gauge the relative strengths and weaknesses of the two classes, benchmarking was performed by passing randomly generated property arrays in different combinations.  The process of calculating properties is divided into two steps: (1) determination of the thermodynamic state in terms of temperature and density ($t_1$), and (2) calculation of the requested properties at that state ($t_2$).  
+The disadvantage of automatically performing complicated iteration is the difficulty making informed decisions about the relative costs of different ways of approaching the same operation.  In this section, we measure the relative speeds of the two multi-phase classes performing a series of operations.  
 
-The relative computational costs of these steps were measured as the average of ten repeated calls to \verb|_argparse()|, followed by ten repeated calls to \verb|state()| with the same datasets.  The time to calculate properties was assessed as the time required for \verb|state()| minus the time required for \verb|_argparse()|.  Tests were performed on a single core of an AMD Ryzen 9 7900 with array sizes ranging from 10 to 100,000.  The results for H$_2$O (representing \texttt{mp1}) and N$_2$ (representing \texttt{mp2}) are shown in Table \ref{tab:mp:benchmark}
+All \PM\ classes perform calculations in two steps.  First, the \verb|_argparse()| method inspects the user's arguments and establishes the thermodynamic state.  For the multi-phase classes, this means determining the temperature and density or (if necessary) the temperature, saturated densities, and quality.  Finally, the method called uses this definition of the state to calculate the requested property.  
 
-\begin{table}
+In this process, the difficulty of determining the state in \verb|_argparse()| depends heavily on how the user has chosen to specify the state.  For example, if the user has specified $(T,\rho)$, all that remains is to check for saturation conditions -- a relatively inexpensive process.  On the other hand, specifying $(T,p)$ requires an iteration on density until a $(T,\rho)$ state can be found with the same pressure as the one the user has requested.  Worse still, specifying two simultaneous properties that require iteration, like $(s,p)$, requires iterating in two dimensions.
+
+Figure \ref{fig:mp:benchmark} shows the results of a brief study timing a series of calls to multi-phase methods.  Solid lines show the total average execution time for a call to \texttt{state()}, while dashed lines show only the time required for \verb|_argparse()| to determine the state at the same conditions.  The difference between them may be regarded as the time required to calculate the properties.  The three colors correspond to the three use cases above; $(T,\rho)$ is black, $(T,p)$ is blue, and $(s,p)$ is red.  The test is repeated for a \texttt{mp1} instance (\texttt{mp.H2O}) with square markers and a \texttt{mp2} instance (\texttt{mp.N2}) with triangle markers.
+
+\begin{figure}
 \centering
-\caption{Benchmarking tests comparing \texttt{mp1} against \texttt{mp2} for determining the state, $t_1$, and evaluating the state properties, $t_2$.  Values are in microseconds.}\label{tab:mp:benchmark}
-\begin{tabular}{|ccc|rrrrr|}
-\hline
- & & N & 10 & 100 & 1,000 & 10,000 & 100,000\\
-\hline
-\multirow{4}*{$(T,d)$} & \multirow{2}*{\texttt{mp1}} & $t_1$ & 88 & 91 & 143 & 565 & 4,862\\
-                       &                             & $t_2$ & 1,841 & 1,930 & 2,961 & 9,947 & 110,323\\
-\cline{4-8}
-                       & \multirow{2}*{\texttt{mp2}} & $t_1$ & 11 & 2,824 & 4,524 & 6,536 & 16,979\\
-                       &                             & $t_2$ & 741 & 1,530 & 2,152 & 6,258 & 72,040\\
-\hline
-\multirow{4}*{$(T,p)$} & \multirow{2}*{\texttt{mp1}} & $t_1$ & 14,092 & 15,160 & 22,958 & 80,303 & 843,870\\
-                       &                             & $t_2$ & 1,679 & 1,270 & 1,992 & 6,620 & 87,956\\
-\cline{4-8}
-                       & \multirow{2}*{\texttt{mp2}} & $t_1$ & 2,358 & 4,268 & 17,889 & 115,795 & 1,16$\times 10^6$\\
-                       &                             & $t_2$ & 739 & 765 & 1,295 & 1,138 & 66,845\\
-\hline
-\multirow{4}*{$(s,p)$} & \multirow{2}*{\texttt{mp1}} & $t_1$ & 190,888 & 270,547 & 399,682 & 1.10$\times 10^6$ & 9.03$\times 10^6$\\
-                       &                             & $t_2$ & 1,347 & 1,006 & 3,757 & 19,521 & 223,192\\
-\cline{4-8}
-                       & \multirow{2}*{\texttt{mp2}} & $t_1$ & 2,229 & 15,008 & 74,794 & 643,537 & 6.42$\times 10^6$\\
-                       &                             & $t_2$ & 748 & 1,570 & 571 & 4,775 & 61,988\\
-\hline
-\end{tabular}
-\end{table}
+\includegraphics[width=0.97\linewidth]{figures/benchmark_mp}
+\caption{Multi-phase benchmarking results. Triangles are \texttt{mp2}, squares are \texttt{mp1}; dashed lines are the \texttt{\_argparse()} cost, solid are the total \texttt{state()} cost; black is $(T,\rho)$, blue is $(T,p)$, and red is $(s,p)$.}\label{fig:mp:benchmark}
+\end{figure}
 
-In general, \texttt{mp2} scales more poorly with array size than \texttt{mp1}.  This is expected, since many of the mapsearch algorithms are serialized in for loops.  When $(T,\rho)$ property pairs are specified, no iteration is required, so the improved initial guesses of \texttt{mp2} offers no benefit.  Instead, the extra overhead required to look up two-phase mixture information causes it to be somewhat slower.  
+When little or no iteration is required, as in the $(T,\rho)$ cases shown in black, \texttt{mp1} and \texttt{mp2} provide similar total performance.  There is scatter in the data for small datasets generated by the random number of saturated states included in the test cases, but the solid curves are quite similar.  The \texttt{mp2} time required to determine the state is significantly longer, since lookup tables are slower than polynomial fits, but the net effect is roughly the same.  All of the total \texttt{state()} execution times may be regarded as having a floor somewhere around 1 ms, representing the overhead associated with the entire process.
 
-It is seen that for any property combination other than $(T,\rho)$, the time required to determine the thermodynamic state, $t_1$, dominates the computational cost.  When iteration on one property is required (e.g. when $(T,p)$ property pairs are specified), \texttt{mp2} is about five times as fast as \texttt{mp1}, slowing to break even between 1,000 and 10,000 elements.  On huge datasets, \texttt{mp1}'s better vectorization makes it somewhat faster, but not much compared to \texttt{mp2}'s advantage in small datasets.
+As soon as iteration is required, as the cases of $(T,p)$ (blue) and $(s,p)$ (red) calls, the time to establish the thermodynamic state dominates the computational cost.  For $(T,p)$, \texttt{mp2}'s algorithms do not rise from the overhead ``floor'' until dataset sizes are over 100, while \texttt{mp1} is roughly 10 times the cost for small datasets.  For large (> 10,000) datasets, the two classes converge to be more or less the same cost.
 
-When iteration on two simultaneous properties is required (as in the case of $(s,p)$) \texttt{mp2} is about 100 times faster for small datasets.  That advantage erodes in large data sets, but \texttt{mp1} never managed to overtake \texttt{mp2} in these tests.  The \texttt{mp1} algorithms suffers severely here because it does not perform true 2D numerical inversion.  For numerical stability, nested \verb|_hybrid1| algorithms provide a horribly inefficient, albeit extremely numerically stable facsimile of 2D inversion.  As a result, \texttt{mp2} is far superior in these cases.
+There is a similar trend for two-dimensional iteration $(s,p)$ (red), but the small dataset divide is about 100 times, and the \texttt{mp1} class never manages to overtake \texttt{mp2}.  This is largely due to the extreme measures taken to ensure numerical convergence in the \texttt{mp1} class, despite iterating over the entire (horribly nonlinear) domain.
 
-Except for users calling the property methods inside of a higher iterative process, these magnitudes of numerical costs are mostly insignificant.  Most users work on small datasets, and will not be bothered by the difference between a 1 millisecond versus a 10 millisecond calculation.  This comparison is entirely for the benefit of users considering doing something a little more adventurous with these models.
-
+In general, the thermodynamic state should always be specified using $(T,\rho)$ when practical.  Specifying the thermodynamic state with a property pair like $(s,p)$, $(s,e)$, or $(s,h)$ that requires iteration in two dimensions should be regarded as about 100 times the numerical cost, while substituting pressure for density is about ten times the cost.  For small datasets, the difference is mostly irrelevant, but for larger datasets, it can be significant.
 
 \section{Sources implemented}
 Table \ref{tab:mp:source} lists the multi-phase models currently implemented in \PM\ as of version 3.0.1.  Entries marked with an asterisk were not yet complete for the 3.0.1 release, but are planned to be implemented later.

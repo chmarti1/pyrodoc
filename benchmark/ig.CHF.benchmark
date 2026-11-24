@@ -1,0 +1,11 @@
+# Benchmarking data for substance ig.CHF
+# Each entry is a duration (in seconds) to complete an operation.
+# Each column represents the same operation, each row represents the same dataset size.
+# The operations are: _argparse(T,d), state(T,d), _argparse(T,p), state(T,p), _argparse(s,p), state(s,p)
+# Array sizes are: [1, 10, 100, 1000, 10000, 100000]
+6.826401e-06	5.371213e-05	6.412029e-06	5.222392e-05	1.424682e-04	1.893983e-04
+6.983519e-06	5.720305e-05	6.454229e-06	5.653787e-05	1.814232e-04	1.862841e-04
+5.681515e-06	4.824400e-05	5.276203e-06	4.725218e-05	1.905680e-04	2.356863e-04
+7.057190e-06	8.075237e-05	6.461143e-06	7.557869e-05	3.377438e-04	4.071474e-04
+1.006126e-05	3.065348e-04	9.131432e-06	3.083944e-04	1.855874e-03	2.212977e-03
+4.329681e-05	5.172777e-03	4.322529e-05	5.104375e-03	2.186646e-02	2.715595e-02

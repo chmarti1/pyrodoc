@@ -45,23 +45,23 @@
     PYroMat is a Python package for conveniently retrieving the thermodynamic properties of substances.  PYroMat is and will always be free and open.  The original source data will always be fully disclosed.  If you'd like to help support the project, please consider <a href="./support.html">supporting</a> me.
     </p>
     <p>
-    Providing the properties of substances is an awfully broad mandate; so we have to start somewhere.  As of version 2.0.1, PYroMat had over 390 substances and it's very first multi-phase substance - water.  By version 2.1.0, it had nearly 1,000 unique substances.  By version 2.2.0, it included two-phase models for multiple refrigerants, methane, carbon dioxide, nitrogen, and oxygen.  Work continues today.
+    As of version 3.0.1, PYroMat has over 1,000 individual fluid models, including 33 multi-phase (gas, liquid, and super-critical) models.  There are plans to expand the ideal gas database further, and there are also loose plans to start including the thermodynamics of solids.
     </p>
     <p>
     If you find out that PYroMat doesn't do something you need, don't stay silent!  My favorite way for users to make feature requests is on the Github <a href="https://github.com/chmarti1/PYroMat/issues">issues page</a>.  You can also just <a href="mailto:crm28@psu.edu">email me</a>.  Many of the features available in PYroMat today are because users told us they wanted it.
     </p>
     <p>
-    We really like PYroMat because it does things a little differently (mostly, because it is open, free, and pythonic).  Still, if PYroMat just doesn't do what you need it to, there are some excellent alternatives out there that do some similar things.  <a href="https://www.nist.gov/srd/refprop">REFPROP</a> is a widely recognized standard in the thermal sciences licensed by NIST.  <a href="http://www.coolprop.org/">CoolProp</a> is an excellent package that extends REFPROP to numerous languages while also implementing its own models.
+    We really like PYroMat because it does things a little differently from other sofware working in this space.  It is open, free, and inherently pythonic -- but more than that -- the interface is written to be a joy to use.  It is has been a genuine privilege to correspond with engineers, scientists, students, and educators around the world who have all found something they were looking for in PYroMat.  Thanks for your interest.
     </p>
 </div>
 
 <h3 id="who" class="subtitle">Who maintains PYroMat?</h3>
 <div class="section">
     <p>
-    Hi, I'm <a href="https://sites.psu.edu/cmartin/">Chris Martin</a>, an Associate Professor of Mechanical Engineering at Penn State Altoona.  I wrote the core of the PYroMat package in 2015.
+    My name is <a href="https://sites.psu.edu/cmartin/">Chris Martin</a>, an Associate Professor of Mechanical Engineering at Penn State Altoona.  I wrote the original core of the PYroMat package in 2015, and it has evolved steadily ever since.
     </p>
     <p>
-    It wasn't long thereafter, though, that <a href="https://hazleton.psu.edu/person/joseph-ranalli">Joe Ranalli</a> picked up a keen interest in the project.  Today, he pours in effort and code alike to helping PYroMat be as reliable as we can make it.
+    It wasn't long after the project's founding, that <a href="https://hazleton.psu.edu/person/joseph-ranalli">Joe Ranalli</a> picked up a keen interest in the project.  Today, he pours in effort and code alike to helping PYroMat be as reliable as we can make it.
     </p>
     <p>
     <a href="http://personal.psu.edu/jpm46/">Jacob Moore</a> is our team's pedagogist.  A non-Python user (we'll convert him one day!), he keeps us honest - forcing us to keep the interface simple, clean, and clearly documented.  Not least of all, he has helped us run multiple user studies in thermodynamics classrooms.
@@ -140,25 +140,28 @@ within all your projects is lurking.
 
     <h3 id="history_story">The story behind PYroMat</h3>
     <p>
-    If you're still reading, you are probably pretty curious.  Good for you!
+    If you're still reading, you must be pretty curious.  Good for you!
     </p>
     <p>
-    <b>Origins:</b> In 2006, I needed to calculate enthalpies of lots of ideal gases for combustion modeling, and I was disappointed with my options.  I created HOT for Matlab and Octave, and it's still available from <a href="https://sourceforge.net/projects/hot-tdb/">Sourceforge</a> and the <a href="https://www.mathworks.com/matlabcentral/fileexchange/26430-hot-thermodynamic-tools-for-matlab" target="blank">Mathworks File Exchange</a>.  In my opinion, that code is a mess, and I haven't supported it since 2010.  I moved to Python for all my scientific computing in 2011, and I've never looked back.
+    <b>Origins:</b> In 2006, I needed to calculate enthalpies of lots of ideal gases for combustion modeling, and I was disappointed with my options.  I created HOT for Matlab and Octave, and it's still available from <a href="https://sourceforge.net/projects/hot-tdb/">Sourceforge</a> and the <a href="https://www.mathworks.com/matlabcentral/fileexchange/26430-hot-thermodynamic-tools-for-matlab" target="blank">Mathworks File Exchange</a>.  In my opinion, that code is a HOT mess, and I haven't supported it since 2010.  I moved to Python for all my scientific computing in 2011, and I've never looked back.
     </p>
     <p>
-    In 2015, I shared PYroMat version 1.1 on Sourceforge.  Even though the back-end has changed massively over the years since then, users have only had to tolerate small changes in the interface.  I have a policy against deliberately breaking reverse compatibility without a major revision change, and there has only ever been one of those: version 2.0.1.
+    In 2015, I shared PYroMat version 1.1 on Sourceforge.  Even though there isn't much left of my original code, users have rarely ever needed to tolerate changes in the API.  Releases do not break reverse compatibility without a major revision change.  Since 2015, that has only happened twice, leading us to the version 3.X.X.  In each case, the changes were minor; marked for deprecation and removed from documentation years in advance.
     </p>
     <p>
-    <b>The name:</b> PYroMat is constructed from "PY" for PYthon, the Greek "pyro" for fire, and the suffix "Mat", doubling both as a reference to "automat" and a shortening of "material."  My earliest working title was "HOTpy," which still has vestiges in the data file extensions, <span class="code">*.hpd</span>, or originally "Hot Py Data" file.  Very briefly when I first shared my early work, the package was called "PYro," but that name collided with <a href="https://pypi.python.org/pypi/Pyro4" target="blank">Pyro</a>, which is a popular remote object toolkit for Python.
+    <b>The name:</b> PYroMat is constructed from "PY" for PYthon, the Greek "pyro" for fire, and the suffix "Mat", doubling both as a reference to "automat" and a shortening of "material."  My earliest working title was "HOTpy," which still has vestiges in the data file extensions, <span class="code">*.hpd</span>, or originally "Hot Py Data" file.
     </p>
     <p>
     <b>The evolution of the substance models:</b> The first release of PYroMat only supported ideal gas data through two classes; <span class="code">igfit</span> and <span class="code">igtab</span>.  The <span class="code">igfit</span> class supplied properties through the so-called <a target="blank" href="http://combustion.berkeley.edu/gri_mech/data/nasa_plnm.html">NASA polynomials</a>.  Meanwhile, <span class="code">igtab</span> objects simply performed interpolation on tabulated data.
     </p>
     <p>
-    At the close of 2017, I abandoned table look-ups altogether, and version 2.0.1 marked a total transition to the <a target="blank" href="http://webbook.nist.gov/cgi/cbook.cgi?ID=C7732185&Mask=1#Thermo-Gas">Shomate Equation</a> for ideal gas data.  Even though this let me dramatically expand the number of substances PYroMat offered, I quickly regretted the transition.  The folks at NIST do a great job, but the temperature ranges on these fits are narrower, and I even identified the occasional discontinuity in the specific heat functions.  The <span class="code">ig</span> class still implements a number of species using the Shomate Equation, but I introduced the <span class="code">ig2</span> class, which brought back the NASA polynomials.
+    At the close of 2017, I abandoned table lookups, and version 2.0.1 marked a total transition to the <span class="code">ig</span> class, implementing the <a target="blank" href="http://webbook.nist.gov/cgi/cbook.cgi?ID=C7732185&Mask=1#Thermo-Gas">Shomate Equation</a> for ideal gas data.  Even though this let me dramatically expand the number of substances PYroMat offered, I quickly reinstating the NASA polynomials in the <span class="code">ig2</span> class in version 2.0.7.  The folks at NIST do a great job, but the temperature ranges on these fits are narrower, and I even identified the occasional discontinuity in the specific heat functions.  As of version 3.0.1, <span class="code">ig</span> was finally demoted to <span class="code">ig1</span>, which still implements a number of species using the Shomate Equation, while the <span class="code">ig2</span> class uses the NASA polynomials for the most commonly used gases.
     </p>
     <p>
-    In 2018, the first multi-phase substances found their debut in PYroMat, and I began experimenting with different back-end codes.  The first liquid-vapor substance model was the <a href="http://www.iapws.org/relguide/IF97-Rev.html">IF-97 industrial steam formulation</a> implemented in the <span class="code">if97</span> class.  The IF-97 formulation is especially useful for engineers, because it provides direct functions for calculating properties both "forward" and "backwards," but is built on a piece-wise formulation that makes its implementation tricky and highly substance dependent.  By version 2.0.7, the Span and Wagner model was implemented in the <span class="code">mp1</span> class, which replaced <span class="code">if97</span>, and allowed the inclusion of many more substances.  Today, the inclusion of more multi-phase models is a high priority.
+    In 2018, the first multi-phase substances found their debut in PYroMat, and I began experimenting with different back-end codes.  The first liquid-vapor substance model was the <a href="http://www.iapws.org/relguide/IF97-Rev.html">IF-97 industrial steam formulation</a> implemented in the <span class="code">if97</span> class.  The IF-97 formulation seemed especially useful for engineers, because it provides direct functions for calculating properties both "forward" and "backwards," but is built on a piece-wise formulation that makes its implementation tricky and highly substance dependent.  By version 2.0.7, the Span and Wagner model was implemented in the <span class="code">mp1</span> class, which replaced <span class="code">if97</span>, and allowed the inclusion of many more substances.
+    </p>
+    <p>
+    Up to 2026, the vast majority of the work was incrementally adding features (like more flexibility in the property interface, search, and info functions), applying bugfixes, addressing user comments and questions, and adding new substances (like refrigerants).  Finally, the release of version 3.0.1 saw the addition of the <span class="code">mp2</span> class, which enabled the most rapid addition new multi-phase models in the project's history, dramatically better computational performance, and the most flexible property interface yet.
     </p>
     <p>
     <b>Units:</b> Version 2.0.1 also saw the addition of a user-configurable system of units.  Because unit conversion is dangerously more complicated than one might expect at first glance, the PYroMat unit conversion system is carefully documented in the <a href="pdf/handbook.pdf">PYroMat User and Developer Handbook</a>.
@@ -170,25 +173,30 @@ within all your projects is lurking.
         <li> These algorithms have been studied and tuned specifically for the types of functions one is likely to get in thermodynamic property calculations, </li>
         <li> Design control over the algorithm makes studying and correcting numerical convergence issues much easier, </li>
         <li> It is much easier to carefully engineer a balance between speed and reliable numerical convergence, and</li>
-        <li> Because it's fun!  OK, that last one is a bad reason. </li>
+        <li> Because it's fun! </li>
     </ol>
     </p>
     <p>
     In PYroMat version 1, the <span class="code">psolve</span> function was exposed to the user alongside the methods that calculated properties.  The user was expected to just "figure it out."  It was slow, buggy, had no array support, and required quite a bit from the user.  By version 1.4, I abandoned this approach in favor of class- and property-specific methods like <span class="code">T_h()</span>.  By version 2.2.0, those methods are still in the core code for reverse compatibility, but now we use a different approach.
     </p>
     <p>
-    The oldest codes used in PYroMat were variations on Newton-Rhapson iteration with maximum and minimum guesses set to guard against divergence.  That approach is still implemented in the back-end <span class="code">_iter1</span> method.  While it works well with ideal gas properties, <span class="code">_iter1</span> fails miserably with multi-phase properties.  Tests with bisection methods were highly stable, but disappointingly slow.  The <span class="code">_hybrid1</span> back-end method was introduced in version 2.1.0, which implements a custom hybrid of Newton and bisection iteration.  It is described in detail in the <a href="pdf/handbook.pdf">User and Developer Handbook</a>.
+    The oldest codes used in PYroMat were variations on Newton-Rhapson iteration with maximum and minimum guesses set to guard against divergence.  That approach is still implemented in the back-end <span class="code">_iter1</span> method.  While it works well with ideal gas properties, <span class="code">_iter1</span> fails miserably with multi-phase properties unless very good initial guesses can be found.  Tests with bisection methods were highly stable, but disappointingly slow.  The <span class="code">mp1._hybrid1</span> back-end method was introduced in version 2.1.0, which implements a custom hybrid of Newton and bisection iteration.  It is described in detail in the <a href="pdf/handbook.pdf">User and Developer Handbook</a>.
     </p>
     <p>
-    PYroMat also uses its own codes for evaluating polynomials and their derivatives.  Of course, Numpy has algorithms for this, but they use a one-dimensional "dense" list of coefficients.  In multi-phase models with two-dimensional polynomials on both temperature and density, there might be hundreds of possible combinations of powers of the two, but most of them will not be represented in the model.  PYroMat implements a two-dimensional "sparse" polynomial representation, where only non-zero terms are stored and dealt with, and derivatives can be calculated simultaneously.  
+    In sharp contrast, the <span class="code">mp2</span> class was introduced in 2026 with version 3.0.1, which automatically builds lookup tables for saturation lines and multi-dimensional property data.  These are used to establish close initial guesses, which merely need to be polished by fast and flexible Newton-Rhapson algorithm.  With the exception of the <span class="code">mp1</span> class, the vast majority of the back-end numerical iteration is some variant of Newton-Rhapson.  I experimented with simplex-based global search algorithms, but rested with this incredibly simple approach when I realized how reliable and how fast it is.
     </p>
     <p>
-    <b>Big improvements</b> Version 2.1.0 represented the single largest rewrite of the back-end since PYroMat's original release.  It was released in 2021 after a long investment in writing and testing, and it made a number of important improvements to back-end numerical methods, added a number of new multi-phase substances, and finally exceeded 1,000 total substances.  With more substances came better methods to search them; the <span class="code">info()</span> function was improved as well, allowing users to search for substances by class, collection, atomic contents, name, and more.
+    PYroMat also uses its own codes for evaluating polynomials and their derivatives.  Of course, Numpy has algorithms for this, but they use a one-dimensional "dense" list of coefficients.  In multi-phase models with two-dimensional polynomials on both temperature and density, there might be hundreds of possible combinations of powers of the two, but most of them will not be represented in the model.  PYroMat implements a two-dimensional "sparse" polynomial representation, where only non-zero terms are stored and dealt with, and derivatives can be calculated simultaneously.  See the numerical methods chapter of the <a href="pdf/handbook.pdf">User and Developer Handbook</a> for more information.
     </p>
     <p>
-    Released in 2022, version 2.2.0 competes with 2.1.0 for the biggest back-end rewrite.  The most substantial change was that all inverse property methods are now hidden from the user in a generic back-end argument parsing system, <span class="code">_argparse()</span>.  Instead of calculating temperature with <span class="code">T_h()</span>, users can simply call <span class="code">T(h=...)</span>, and the argument parsing automatically handles the property inversion.  A new <span class="code">search()</span> and <span class="code">info()</span> function were added to the package front-end, which allow users to view and search the database entries more easily.  Substance meta-data were added to the back-end like common name lists, InChI, and CAS designations, and these fields were made searchable. Finally, a number of redundant ideal gas entries were eliminated by converting to the Hill naming convention, so the substance total dipped just below 1,000. 
+    <b>Big improvements:</b> Version 2.1.0 represented the single largest rewrite of the back-end since PYroMat's original release.  It was released in 2021 after a long investment in writing and testing, and it made a number of important improvements to back-end numerical methods, added a number of new multi-phase substances, and finally exceeded 1,000 total substances.  With more substances came better methods to search them; the <span class="code">info()</span> function was improved as well, allowing users to search for substances by class, collection, atomic contents, name, and more.
     </p>
-
+    <p>
+    Released in 2022, version 2.2.0 competes with 2.1.0 for the biggest back-end rewrite.  The most substantial change was that all inverse property methods are now hidden from the user in a generic back-end argument parsing system, <span class="code">_argparse()</span>, which remains the back-end structure today.  To calculate temperature from enthalpy (an "inverse" operation), users can simply call <span class="code">T(h=...)</span>, and the argument parsing automatically algorithm automatically handles determining the thermodynamic state.  A new <span class="code">search()</span> and <span class="code">info()</span> function were added to the package front-end, which allow users to view and search the database entries more easily.  Substance meta-data were added to the back-end like common name lists, InChI, and CAS designations, and these fields were made searchable. 
+    </p>
+    <p>
+    In 2026, version 3.0.1 finally released the long awaited <span class="code">mp2</span> class, which automatically explores the properties of a multi-phase equation of state models to generate its saturation lines with no ancillary data needed.  Rather than making the algorithm slower, the multi-dimensional table lookup system implemented in the <span class="code">mp2</span> primitives actually dramatically speeds numerical iteration, while allowing the most flexible <span class="code">_argparse()</span> algorithm yet.
+    </p>
     <h3 id="history_logo">Logo</h3>
     <p>
     The PYroMat logo is entirely thanks to the wonderful and talented <a href="https://www.behance.net/janetmontgomery">Janet Montgomery</a>.  I mentioned to her that the package needed an icon, and before I had time to think I had a multitude of options of every color and shape.  Together, we whittled it down to a snake's head combined with a flame to represent the union of Python and thermal properties.  Thanks, Janet.
@@ -198,13 +206,15 @@ within all your projects is lurking.
 <h3 class="subtitle">Future plans</h3>
 <div class="section">
     <p>
-    My first priority is to broaden the number of multi-phase substances supported.  As of version 2.1.0, only five were supported (R134a, CH<sub>4</sub>, CO<sub>2</sub>, H<sub>2</sub>O, and N<sub>2</sub>).  Now that the <span class="code">mp1</span> class is mature with stable numerical tools, the work required to add these sophisticated models should be much less than in the past.
+    The project has three primary priorities:
     </p>
+    <ul>
+        <li>Broaden the multi-phase substances included.
+        <li>Release a desktop GUI for PYroMat.
+        <li>Restore the PYroMat Live pages for web access to PYroMat models.
+    </ul>
     <p>
-    I would like to add viscosity, heat transfer, and other transport models to the ideal gas and possibly the multi-phase classes.  This has long been a goal of mine, but so far people have not been requesting it.
-    </p>
-    <p>
-    A web-based GUI for PYroMat is under active development and will be released just as soon as we can complete it.  We look forward to a launch!
+    Long term aspirations still include adding transport properties to ideal gasses, and I have long had aspirations to write <span class="code">ig3</span> to explicitly model the raw rotational, vibrational, and electronic energies used to generate the JANAF tables from which the polynomials are derived.  Then, the mind-numbingly large effort will be systematically encoding the coefficients into HPD files.
     </p>
 
 </div>

@@ -1,0 +1,11 @@
+# Benchmarking data for substance ig.air
+# Each entry is a duration (in seconds) to complete an operation.
+# Each column represents the same operation, each row represents the same dataset size.
+# The operations are: _argparse(T,d), state(T,d), _argparse(T,p), state(T,p), _argparse(s,p), state(s,p)
+# Array sizes are: [1, 10, 100, 1000, 10000, 100000]
+7.071018e-06	2.381644e-04	6.330729e-06	2.333276e-04	6.712611e-04	8.289790e-04
+5.559921e-06	2.252860e-04	5.219221e-06	2.238493e-04	8.680069e-04	1.091146e-03
+5.707741e-06	2.499676e-04	5.276203e-06	2.494049e-04	9.991598e-04	1.242259e-03
+6.961823e-06	6.301641e-04	6.318092e-06	6.233215e-04	2.450657e-03	3.110361e-03
+1.029968e-05	3.735065e-03	9.346008e-06	3.776860e-03	1.366189e-02	1.749709e-02
+4.475117e-05	6.242282e-02	4.754066e-05	6.249382e-02	2.287691e-01	2.930170e-01

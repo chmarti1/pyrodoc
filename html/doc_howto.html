@@ -29,7 +29,7 @@
 <div class="section">
     <div class="toc0"><a href="#install">Installation questions</a></div>
     <div class="toc1"><a href="#install_pip">PIP problems</a></div>
-    <div class="toc1"><a href="#install_setup">Legacy installation</a></div>
+    <div class="toc1"><a href="#install_setup">Manual installation</a></div>
     <div class="toc0"><a href="#cycle">Cycle analysis</a></div>
     <div class="toc1"><a href="#cycle_brayton">Brayton cycle</a></div>
     <div class="toc1"><a href="#cycle_rankine">Rankine cycle</a></div>
@@ -69,21 +69,9 @@
     I have not yet run into a case where these steps did not address the problem, but if you STILL can't get pip to work, you might have success installing from the <a href="download.html#github">github</a> repository using the legacy method below.
     </p>
     
-    <h3 id="install_setup">Legacy installation</h3>
+    <h3 id="install_setup">Manual installation</h3>
     <p>
-    The Python Packaging Authority has moved away from recommending installation using direct calls to a <span class="code">setup.py</span> script, but they still work.  If you are having a hard time getting <span class="code">pip</span> to work, or if you are experimenting with a non-standard installation, this could be a useful option.
-    </p>
-    <p>
-    If you are working inside an integrated development environment (IDE), make sure the python binary you are using to evoke <span class="code">setup.py</span> is the same one your IDE uses.  For example, many Python installations have moved towards virtual environments despite the complexity and obfuscation they bring with them.
-    </p>
-    <p>
-    Obtain a source distribution of PYroMat either from <a href="download.html#github">github</a> or from <a href="download.html#sourceforge">sourceforge</a>.  Decompress the distribution file (either a .zip or .tar.gz or .tar.bz2) and navigate into the root directory.  There, you should find a <span class="code">setup.py</span> file.
-    </p>
-    <div class="code">
-    python -m pip install .
-    </div>
-    <p>
-    If you have problems with direct installation like this, I would guess that they are probably due to some issue with <span class="code">setuptools</span>.  All of the recommended solutions seem to involve pip.  If you were trying to use setup.py in the first place because of a problem with pip, then you are probably pretty frustrated right now.  My only consolation to you is that I've been there before.  The solution is to <a href="#install_pip">fix pip</a>.
+    If you're having difficulty with the <a href="download.html#github">Github</a> or <a href="download.html#sourceforge">Sourceforge</a> installation options, it could be because pip has not been updated.  Ever since the packaging authority unified behind pip for all installation management, things became much simpler for end users.  Try the pip upgrade procedure above.
     </p>
 </div>
 

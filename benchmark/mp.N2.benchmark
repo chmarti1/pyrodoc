@@ -1,0 +1,11 @@
+# Benchmarking data for substance mp.N2
+# Each entry is a duration (in seconds) to complete an operation.
+# Each column represents the same operation, each row represents the same dataset size.
+# The operations are: _argparse(T,d), state(T,d), _argparse(T,p), state(T,p), _argparse(s,p), state(s,p)
+# Array sizes are: [1, 10, 100, 1000, 10000, 100000]
+6.239891e-06	7.893274e-04	1.277520e-03	1.910996e-03	1.361885e-03	2.006932e-03
+5.074978e-06	5.914142e-04	1.264909e-03	1.863614e-03	2.523155e-03	3.113544e-03
+2.235346e-03	2.856772e-03	2.925801e-03	3.546731e-03	7.896430e-03	8.529487e-03
+3.632259e-03	5.339527e-03	1.420927e-02	1.523550e-02	7.060800e-02	7.237706e-02
+5.191684e-03	1.014092e-02	1.164705e-01	1.212968e-01	6.479226e-01	6.539860e-01
+1.620486e-02	6.190808e-02	1.143450e+00	1.189388e+00	6.450600e+00	6.482662e+00

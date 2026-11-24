@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.5.11)  23 NOV 2026 17:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.4.30)  24 NOV 2026 08:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -534,12 +534,6 @@ File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 (./handbook.aux (./nomenclature.aux) (./intro.aux) (./start.aux) (./config.aux)
 (./units.aux) (./regdat.aux) (./ig.aux) (./multiphase.aux
 
-LaTeX Warning: Label `fig:mp:sattable' multiply defined.
-
-
-LaTeX Warning: Label `fig:mp:eTd' multiply defined.
-
-
 LaTeX Warning: Label `tab:mp:source' multiply defined.
 
 ) (./numerical.aux))
@@ -628,7 +622,7 @@ Package hyperref Info: Link coloring ON on input line 59.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-<figures/PYro_Black_Small.png, id=478, 55.6479pt x 50.1072pt>
+<figures/PYro_Black_Small.png, id=470, 55.6479pt x 50.1072pt>
 File: figures/PYro_Black_Small.png Graphic file (type png)
 <use figures/PYro_Black_Small.png>
 Package pdftex.def Info: figures/PYro_Black_Small.png  used on input line 65.
@@ -688,7 +682,7 @@ Chapter 1.
 
 
 ] [9] [10] [11{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-<figures/Thd.png, id=699, 462.528pt x 346.896pt>
+<figures/Thd.png, id=689, 462.528pt x 346.896pt>
 File: figures/Thd.png Graphic file (type png)
 <use figures/Thd.png>
 Package pdftex.def Info: figures/Thd.png  used on input line 113.
@@ -833,80 +827,72 @@ File: ts1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
 (Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 53.
  [28]
-Underfull \hbox (badness 10000) in paragraph at lines 87--87
+Underfull \hbox (badness 10000) in paragraph at lines 85--85
 [][][]\OT1/cmr/m/n/9 Anaconda:[][]$\OT1/cmtt/m/n/9 https : / / www . anaconda .
  com / docs / getting-[]started /
  []
 
 [29]
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 101.
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 99.
 
-Overfull \hbox (11.18608pt too wide) in paragraph at lines 117--118
-[]\OT1/cmr/m/n/10.95 Download the lat-est ver-sion of PY-ro-Mat from [][]$\OT1/
-cmtt/m/n/10.95 https : / / sourceforge .
- []
-
-
-Overfull \hbox (0.83713pt too wide) in paragraph at lines 117--118
+Overfull \hbox (0.83713pt too wide) in paragraph at lines 113--114
 \OT1/cmtt/m/n/10.95 net / projects / pyromat/$[][]\OT1/cmr/m/n/10.95 . Se-lect 
 whichever com-pres-sion type that suits
  []
 
-[30] (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2023/02/27 1.9 listings language file
-)
-Overfull \hbox (3.31079pt too wide) in paragraph at lines 151--152
+) [30]
+Overfull \hbox (3.31079pt too wide) in paragraph at lines 136--137
 \OT1/cmr/m/n/10.95 iden-ti-fier (ID). The sub-stance ID string for ideal gas ni
 -tro-gen is \OT1/cmtt/m/n/10.95 'ig.N2'\OT1/cmr/m/n/10.95 .
  []
 
-[31] [32]
+[31]
 
-LaTeX Warning: Reference `sec:mp:mp1' on page 33 undefined on input line 183.
+LaTeX Warning: Reference `sec:ig:ig' on page 32 undefined on input line 168.
 
 
-LaTeX Warning: Reference `sec:mp:mp2' on page 33 undefined on input line 183.
+LaTeX Warning: Reference `sec:mp:mp1' on page 32 undefined on input line 168.
 
-[33]
-Overfull \hbox (6.47174pt too wide) in paragraph at lines 206--207
+
+LaTeX Warning: Reference `sec:mp:mp2' on page 32 undefined on input line 168.
+
+[32]
+Overfull \hbox (6.47174pt too wide) in paragraph at lines 191--192
 [][]$\OT1/cmtt/m/n/10.95 https : / / docs . python . org / 3 / tutorial / datas
 tructures . html # sets$[][]\OT1/cmr/m/n/10.95 . 
  []
 
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <6> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 214.
-[34] [35]
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 199.
+[33] [34]
 
-LaTeX Warning: Reference `sec:intro:basic' on page 36 undefined on input line 2
-99.
-
-
-LaTeX Warning: Reference `tab:props:mp' on page 36 undefined on input line 299.
+LaTeX Warning: Reference `sec:intro:basic' on page 35 undefined on input line 2
+84.
 
 
-[36] [37]
+LaTeX Warning: Reference `tab:props:mp' on page 35 undefined on input line 284.
 
-LaTeX Warning: Reference `sec:intro:basic' on page 38 undefined on input line 3
-45.
 
-[38]
+[35] [36] [37]
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 387.
- [39]
-Overfull \hbox (3.73752pt too wide) in paragraph at lines 393--394
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 350.
+ [38]
+Overfull \hbox (3.73752pt too wide) in paragraph at lines 356--357
 \OT1/cmr/m/n/10.95 and cal-cu-late the qual-ity by set-ting the op-tional key-w
 ord [][]\OT1/cmtt/m/n/10.95 quality=True[]\OT1/cmr/m/n/10.95 .
  []
 
-) [40]
+) [39]
 \openout2 = `config.aux'.
 
  (./config.tex
 Chapter 3.
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <14.4> not available
 (Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 5.
-[41
+[40
 
 
 
@@ -941,7 +927,7 @@ Underfull \hbox (badness 5652) in paragraph at lines 74--75
 []|\OT1/cmr/m/n/10 Is ver-bose PY-ro-Mat warn-ing
  []
 
-[42] [43]
+[41] [42]
 Overfull \hbox (30.83794pt too wide) in paragraph at lines 96--97
 []\OT1/cmr/m/n/10.95 Undoing a con-fig-u-ra-tion change can be done us-ing the 
 \OT1/cmtt/m/n/10.95 restore[]default()
@@ -953,12 +939,12 @@ Underfull \hbox (badness 3179) in paragraph at lines 104--105
 l-ing
  []
 
-[44] [45]) [46]
+[43] [44]) [45]
 \openout2 = `units.aux'.
 
  (./units.tex
 Chapter 4.
-[47
+[46
 
 
 
@@ -969,36 +955,36 @@ Overfull \hbox (2.36958pt too wide) in paragraph at lines 34--35
 and avoirdupois
  []
 
-[48] [49] [50] [51] [52
+[47] [48] [49] [50] [51
 
 
-] [53]
+] [52]
 Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
 nput line 196.
- [54] [55] [56]
+ [53] [54] [55]
 
-LaTeX Warning: Citation `codata:2022' on page 57 undefined on input line 294.
+LaTeX Warning: Citation `codata:2022' on page 56 undefined on input line 294.
 
-[57] [58] [59] [60]
+[56] [57] [58] [59]
 Overfull \hbox (11.7654pt too wide) in paragraph at lines 396--397
 []\OT1/cmr/m/n/10.95 Table [][]4.5[][] shows the mo-lar units and their val-ues
  ex-pressed in kilogram-
  []
 
-[61] [62] [63]
+[60] [61] [62]
 Overfull \hbox (21.37817pt too wide) in paragraph at lines 519--520
 \OT1/cmr/m/n/10.95 off-sets be-tween them must be re-spected, the [][]\OT1/cmtt
 /m/n/10.95 pm.units.temperature_scale
  []
 
-[64]
+[63]
 Overfull \hbox (9.3911pt too wide) in paragraph at lines 527--528
 []\OT1/cmr/m/n/10.95 Just like the [][]\OT1/cmtt/m/n/10.95 Conversion []\OT1/cm
 r/m/n/10.95 in-stances, it re-spects the [][]\OT1/cmtt/m/n/10.95 unit_temperatu
 re
  []
 
-[65] [66] [67] [68] [69] [70] [71]) [72] [73]
+[64] [65] [66] [67] [68] [69] [70]) [71] [72]
 \openout2 = `regdat.aux'.
 
  (./regdat.tex
@@ -1010,17 +996,20 @@ f the \OT1/cmtt/m/n/10.95 PYroMatModel
  []
 
 
-LaTeX Warning: Reference `sec:mp:mp1' on page 74 undefined on input line 21.
+LaTeX Warning: Reference `sec:ig:ig' on page 73 undefined on input line 18.
 
 
-LaTeX Warning: Reference `sec:mp:mp2' on page 74 undefined on input line 22.
+LaTeX Warning: Reference `sec:mp:mp1' on page 73 undefined on input line 21.
+
+
+LaTeX Warning: Reference `sec:mp:mp2' on page 73 undefined on input line 22.
 
 
 Underfull \hbox (badness 4072) in paragraph at lines 22--23
 []|\OT1/cmr/m/n/10.95 Multi-phase built on ta-ble
  []
 
-[74
+[73
 
 
 
@@ -1032,30 +1021,30 @@ T1/cmr/m/n/10.95 en-try. If the [][]\OT1/cmtt/m/n/10.95 config['reg_recursive']
 
  []
 
-[75] [76] [77] [78]
+[74] [75] [76] [77]
 Overfull \hbox (2.49344pt too wide) in paragraph at lines 97--98
 []\OT1/cmr/bx/n/10.95 The \OT1/cmtt/m/n/10.95 dat.updatefiles() \OT1/cmr/bx/n/1
 0.95 func-tion \OT1/cmr/m/n/10.95 runs \OT1/cmtt/m/n/10.95 dat.load() \OT1/cmr/
 m/n/10.95 in check mode
  []
 
-[79] [80]) [81]
+[78] [79]) [80]
 \openout2 = `ig.aux'.
 
  (./ig.tex
 Chapter 6.
-[82
+[81
 
 
 
 
-] [83] [84] [85] [86] [87] [88]
-<figures/dof.png, id=1583, 578.16pt x 433.62pt>
+] [82] [83] [84] [85] [86] [87]
+<figures/dof.png, id=1556, 578.16pt x 433.62pt>
 File: figures/dof.png Graphic file (type png)
 <use figures/dof.png>
 Package pdftex.def Info: figures/dof.png  used on input line 140.
 (pdftex.def)             Requested size: 325.67064pt x 244.2481pt.
- [89] [90 <./figures/dof.png>] [91]
+ [88] [89 <./figures/dof.png>] [90]
 Overfull \hbox (1.57867pt too wide) in paragraph at lines 190--191
 \OT1/cmr/m/n/10.95 When a sub-stance is formed ei-ther by nu-clear, chem-i-cal 
 or phase change,
@@ -1067,39 +1056,50 @@ Overfull \hbox (16.15282pt too wide) in paragraph at lines 195--197
 are \OT1/cmr/m/it/10.95 not \OT1/cmr/m/n/10.95 monoatomic
  []
 
-[92]
-<figures/hf.png, id=1618, 433.62pt x 289.08pt>
+[91]
+<figures/hf.png, id=1591, 433.62pt x 289.08pt>
 File: figures/hf.png Graphic file (type png)
 <use figures/hf.png>
 Package pdftex.def Info: figures/hf.png  used on input line 211.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
- [93 <./figures/hf.png>] [94] [95] [96] [97] [98] [99] [100] [101] [102]
-[103] [104] [105] [106]
-Underfull \hbox (badness 2478) in paragraph at lines 591--592
+ [92 <./figures/hf.png>] [93] [94] [95] [96] [97] [98] [99] [100] [101]
+[102] [103] [104]
+Underfull \hbox (badness 2478) in paragraph at lines 573--574
 []|\OT1/cmr/m/n/10.95 Specifies the mix-ture com-po-si-tion:
  []
 
-) [107]
+[105]
+Overfull \hbox (5.10341pt too wide) in paragraph at lines 584--585
+[]\OT1/cmr/m/n/10.95 In this pro-cess, the dif-fi-culty of de-ter-min-ing the s
+tate in [][]\OT1/cmtt/m/n/10.95 _argparse()
+ []
+
+<figures/benchmark_ig.png, id=1755, 462.528pt x 346.896pt>
+File: figures/benchmark_ig.png Graphic file (type png)
+<use figures/benchmark_ig.png>
+Package pdftex.def Info: figures/benchmark_ig.png  used on input line 590.
+(pdftex.def)             Requested size: 325.67064pt x 244.26529pt.
+) [106] [107 <./figures/benchmark_ig.png>] [108]
 \openout2 = `multiphase.aux'.
 
  (./multiphase.tex
 Chapter 7.
-[108
+[109
 
 
 
 
-] [109] [110] [111] [112] [113] [114] [115] [116] [117] [118] [119]
-[120] [121]
+] [110] [111] [112] [113] [114] [115] [116] [117] [118] [119] [120]
+[121] [122]
 
-LaTeX Warning: Reference `tab:mp:ar2' on page 122 undefined on input line 333.
+LaTeX Warning: Reference `tab:mp:ar2' on page 123 undefined on input line 333.
 
-<figures/delta_tau.png, id=1967, 462.528pt x 346.896pt>
+<figures/delta_tau.png, id=1971, 462.528pt x 346.896pt>
 File: figures/delta_tau.png Graphic file (type png)
 <use figures/delta_tau.png>
 Package pdftex.def Info: figures/delta_tau.png  used on input line 360.
 (pdftex.def)             Requested size: 164.51567pt x 123.38448pt.
-<figures/delta_delta.png, id=1968, 462.528pt x 346.896pt>
+<figures/delta_delta.png, id=1972, 462.528pt x 346.896pt>
 File: figures/delta_delta.png Graphic file (type png)
 <use figures/delta_delta.png>
 Package pdftex.def Info: figures/delta_delta.png  used on input line 361.
@@ -1109,50 +1109,45 @@ Overfull \hbox (17.28886pt too wide) in paragraph at lines 359--364
  [][] 
  []
 
-[122] [123 <./figures/delta_tau.png> <./figures/delta_delta.png>] [124]
-[125] [126] [127] [128]
+[123] [124 <./figures/delta_tau.png> <./figures/delta_delta.png>] [125]
+[126] [127] [128] [129]
 
-LaTeX Warning: Reference `ch:regdat:data' on page 129 undefined on input line 5
+LaTeX Warning: Reference `ch:regdat:data' on page 130 undefined on input line 5
 53.
 
-[129]
+[130]
 
-LaTeX Warning: Reference `mp:ar:0' on page 130 undefined on input line 573.
+LaTeX Warning: Reference `mp:ar:0' on page 131 undefined on input line 576.
 
-[130] [131] [132]
-<figures/sattable.png, id=2108, 573.1011pt x 346.896pt>
+[131] [132] [133] [134] [135] [136] [137] [138]
+<figures/sattable.png, id=2228, 573.1011pt x 346.896pt>
 File: figures/sattable.png Graphic file (type png)
 <use figures/sattable.png>
-Package pdftex.def Info: figures/sattable.png  used on input line 659.
+Package pdftex.def Info: figures/sattable.png  used on input line 827.
 (pdftex.def)             Requested size: 325.67064pt x 197.12404pt.
- [133] [134 <./figures/sattable.png>]
-<figures/eTd.png, id=2128, 536.2434pt x 508.0581pt>
+ [139] [140 <./figures/sattable.png>] [141]
+<figures/eTd.png, id=2276, 536.2434pt x 508.0581pt>
 File: figures/eTd.png Graphic file (type png)
 <use figures/eTd.png>
-Package pdftex.def Info: figures/eTd.png  used on input line 689.
+Package pdftex.def Info: figures/eTd.png  used on input line 891.
 (pdftex.def)             Requested size: 325.67064pt x 308.56607pt.
- [135] [136 <./figures/eTd.png>] [137] [138] [139] [140] [141] [142] [143]
-File: figures/sattable.png Graphic file (type png)
-<use figures/sattable.png>
-Package pdftex.def Info: figures/sattable.png  used on input line 922.
-(pdftex.def)             Requested size: 325.67064pt x 197.12404pt.
- [144] [145]
-File: figures/eTd.png Graphic file (type png)
-<use figures/eTd.png>
-Package pdftex.def Info: figures/eTd.png  used on input line 986.
-(pdftex.def)             Requested size: 325.67064pt x 308.56607pt.
- [146] [147]
-[148]
-Overfull \hbox (8.84401pt too wide) in paragraph at lines 1005--1028
- [][] 
+ [142 <./figures/eTd.png>] [143]
+Overfull \hbox (5.10341pt too wide) in paragraph at lines 907--908
+[]\OT1/cmr/m/n/10.95 In this pro-cess, the dif-fi-culty of de-ter-min-ing the s
+tate in [][]\OT1/cmtt/m/n/10.95 _argparse()
  []
 
-[149] [150] [151]) [152]
+<figures/benchmark_mp.png, id=2289, 462.528pt x 346.896pt>
+File: figures/benchmark_mp.png Graphic file (type png)
+<use figures/benchmark_mp.png>
+Package pdftex.def Info: figures/benchmark_mp.png  used on input line 913.
+(pdftex.def)             Requested size: 325.67064pt x 244.26529pt.
+[144] [145 <./figures/benchmark_mp.png>] [146]) [147]
 \openout2 = `numerical.aux'.
 
  (./numerical.tex
 Chapter 8.
-[153
+[148
 
 
 
@@ -1163,45 +1158,45 @@ Overfull \hbox (1.45416pt too wide) in paragraph at lines 40--41
 s, be-cause they
  []
 
-[154]
-<figures/benchmark.png, id=2412, 462.528pt x 346.896pt>
+[149]
+<figures/benchmark.png, id=2372, 462.528pt x 346.896pt>
 File: figures/benchmark.png Graphic file (type png)
 <use figures/benchmark.png>
 Package pdftex.def Info: figures/benchmark.png  used on input line 51.
 (pdftex.def)             Requested size: 325.67064pt x 244.26529pt.
- [155] [156 <./figures/benchmark.png>] [157] [158] [159] [160] [161]
+ [150] [151 <./figures/benchmark.png>] [152] [153] [154] [155] [156]
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
 put line 259.
 
 
 LaTeX Warning: Float too large for page by 9.94191pt on input line 297.
 
-[162] [163] [164]
-<figures/iter1.png, id=2568, 433.62pt x 289.08pt>
+[157] [158] [159]
+<figures/iter1.png, id=2527, 433.62pt x 289.08pt>
 File: figures/iter1.png Graphic file (type png)
 <use figures/iter1.png>
 Package pdftex.def Info: figures/iter1.png  used on input line 353.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
- [165] [166 <./figures/iter1.png>] [167]
-<figures/bisection.png, id=2589, 433.62pt x 289.08pt>
+ [160] [161 <./figures/iter1.png>] [162]
+<figures/bisection.png, id=2548, 433.62pt x 289.08pt>
 File: figures/bisection.png Graphic file (type png)
 <use figures/bisection.png>
 Package pdftex.def Info: figures/bisection.png  used on input line 397.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
- [168] [169 <./figures/bisection.png>]
-<figures/hybrid1.png, id=2602, 433.62pt x 289.08pt>
+ [163] [164 <./figures/bisection.png>]
+<figures/hybrid1.png, id=2561, 433.62pt x 289.08pt>
 File: figures/hybrid1.png Graphic file (type png)
 <use figures/hybrid1.png>
 Package pdftex.def Info: figures/hybrid1.png  used on input line 432.
 (pdftex.def)             Requested size: 325.67064pt x 217.12263pt.
- [170] [171 <./figures/hybrid1.png>]) [172] [173] [174]
-[175] [176] (./handbook.bbl
+ [165] [166 <./figures/hybrid1.png>]) [167] [168] [169]
+[170] [171] (./handbook.bbl
 Underfull \hbox (badness 2662) in paragraph at lines 11--13
 []\OT1/cmr/m/n/10.95 ``Inchi trust home page.'' InChI Trust, https://www.inchi-
 
  []
 
-[177
+[172
 
 
 
@@ -1210,13 +1205,13 @@ Underfull \hbox (badness 10000) in paragraph at lines 58--60
 []\OT1/cmr/m/n/10.95 National In-sti-tute for Stan-dards and Tech-nol-ogy,
  []
 
-[178]
+[173]
 Underfull \hbox (badness 1817) in paragraph at lines 136--140
 []\OT1/cmr/m/n/10.95 R. Tilner-Roth and H. D. Baehr, ``An in-ter-na-tional stan
 -
  []
 
-[179]
+[174]
 Underfull \hbox (badness 2772) in paragraph at lines 148--152
 []\OT1/cmr/m/n/10.95 M. Thol and E. W. Lem-mon, ``Ther-mo-dy-namic equa-tion
  []
@@ -1227,7 +1222,7 @@ Underfull \hbox (badness 2253) in paragraph at lines 148--152
 ,3-
  []
 
-) [180] (./handbook.aux (./nomenclature.aux) (./intro.aux) (./start.aux)
+) [175] (./handbook.aux (./nomenclature.aux) (./intro.aux) (./start.aux)
 (./config.aux) (./units.aux) (./regdat.aux) (./ig.aux) (./multiphase.aux)
 (./numerical.aux))
  ***********
@@ -1242,13 +1237,13 @@ LaTeX Warning: There were undefined references.
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `handbook.out' has not changed.
-(rerunfilecheck)             Checksum: 810813695833443DCFFE5C2EE801F734;8878.
+(rerunfilecheck)             Checksum: D875D8A7ADFF87AD8806B08265C3AE0D;8725.
  ) 
 Here is how much of TeX's memory you used:
- 19507 strings out of 474222
- 290070 string characters out of 5748733
- 2094975 words of memory out of 5000000
- 40134 multiletter control sequences out of 15000+600000
+ 19508 strings out of 474222
+ 290497 string characters out of 5748733
+ 2101975 words of memory out of 5000000
+ 40148 multiletter control sequences out of 15000+600000
  574937 words of font info for 103 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,16n,79p,1641b,3692s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1279,11 +1274,10 @@ re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texl
 ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share/texlive/tex
 mf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texmf/fonts/
 type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-supe
-r/sftt1000.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/wasy-type1/was
-y10.pfb>
-Output written on handbook.pdf (182 pages, 1572888 bytes).
+r/sftt1000.pfb>
+Output written on handbook.pdf (177 pages, 1644217 bytes).
 PDF statistics:
- 3050 PDF objects out of 3580 (max. 8388607)
- 1276 named destinations out of 1440 (max. 500000)
- 1017 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 3002 PDF objects out of 3580 (max. 8388607)
+ 1263 named destinations out of 1440 (max. 500000)
+ 1011 words of extra memory for PDF output out of 10000 (max. 10000000)
 

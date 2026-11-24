@@ -31,7 +31,7 @@
 
     <div class="toc0"><a href=#import>Importing the package</a></div>
     <div class="toc0"><a href=#get>Retrieving substance objects</a></div>
-    <div class="toc0"><a href=#data>Retrieving properties</a></div>
+    <div class="toc0"><a href=#data>Calculating properties</a></div>
     <div class="toc0"><a href=#help>Navigating in-line help</a></div>
     <div class="toc0"><a href=#search>Searching for substances</a></div>
     <div class="toc0"><a href=#units>Working with units</a></div>
@@ -59,7 +59,7 @@
 >>> O2 = pm.get('ig.O2')
 >>> CO2 = pm.get('ig.CO2')</pre>
     <p>
-    The argument to the <span class="code">get</span> function is the species ID.  It is comprised of two parts: the chemical compound expressed in <a href="https://en.wikipedia.org/wiki/Chemical_formula#Hill_system">Hill notation</a> (e.g. "N2") and the data collection to which it belongs (e.g. "ig" for ideal gas).  So far, there are only two collections: "ig" for ideal gas and "mp" for multi-phase.  The collection helps organize the PYroMat substance models by their capabilities.  For example, there is a "ig.N2" and a "mp.N2" found in PYroMat.  The first is an ideal gas model, and the second is a multi-phase model for cryogenic nitrogen - same substance, but different model.
+    The argument to the <span class="code">get</span> function is the species ID (or SID).  It is comprised of two parts: the chemical compound expressed in <a href="https://en.wikipedia.org/wiki/Chemical_formula#Hill_system">Hill notation</a> (e.g. "N2") and the data collection to which it belongs (e.g. "ig" for ideal gas).  So far, there are only two collections: "ig" for ideal gas and "mp" for multi-phase.  The collection helps organize the PYroMat substance models by their capabilities.  For example, there is a "ig.N2" and a "mp.N2" found in PYroMat.  The first is an ideal gas model, and the second is a multi-phase model for cryogenic nitrogen - same substance, but different model.
     </p>
     <p>
     Of course, the problem, here, is that the <span class="code">get</span> function requires users to already know the substance ID string that they are looking for.  What if users want to <a href=#search>browse or search for substances?</a>  Never fear; read on.
@@ -292,74 +292,86 @@ h(*varg, **kwarg) method of builtins.ig2 instance
     <p>
     The <span class="code">info</span> and <span class="code">search</span> functions are powerful tools for finding what you need inside of PYroMat.  <span class="code">search</span> accepts a series of arguments to help users narrow down PYroMat's collection of substances.  For example,
     </p>
+<h3>Searching by name</h3>
     <pre class="code">
 >>> import pyromat as pm
->>> pm.search('water')
-{&lt;ig2, ig.H2S>, &lt;ig2, ig.CHN>, &lt;ig, ig.BrH>, &lt;ig2, ig.H2O>, &lt;ig, ig.ClH>, &lt;mp1, mp.H2O>, &lt;ig, ig.DHO>}
+>>> pm.search('water')          # Searching by name
+{&lt;ig1, ig.BrH&gt;, &lt;mp1, mp.H2O&gt;, &lt;ig2, ig.CHN&gt;, &lt;ig2, ig.H2O&gt;, &lt;ig2, ig.H2S&gt;, &lt;ig1, ig.ClH&gt;, 
+    &lt;ig1, ig.DHO&gt;}
+
 >>> pm.search(name='water')     # This is equivalent.</pre>
     <p>
     In the above example, the "name" argument allowed us to search for substances that contained the string "water" in any of their common names <i>or</i> somewhere in their ID string.  The result came back as a Python set containing all of the substance instances matching the search criteria.
     </p>
-    <p>  
+<h3>More powerful search tools</h3>
+    <p>
     The search function can do more than just look at a substance's name.  Users can also specify the collection (<span class="code">'ig'</span> or <span class="code">'mp'</span>), the PYroMat class, the CAS identifier string, the InChI identifier string, or the molecular makeup of the substance.  Any of these can be combined 
     </p>
     <pre class="code">
 >>> pm.search(collection='ig', pmclass='igmix')     # Class AND collection
 {&lt;igmix, ig.air>, &lt;igmix, ig.f5>, &lt;igmix, ig.h35>}
+
 >>> pm.search(inchi = 'InChI=1S/H2O/h1H2')          # Inchi string
 {&lt;ig2, ig.H2O>, &lt;mp1, mp.H2O>}
+
 >>> pm.search(contains='C')     # All substances with carbon in their formula
 ... huge set ...
+
 >>> pm.search(contains={'C':2}) # All substances with precisely two carbon
 {&lt;ig2, ig.C2H4O2>, &lt;ig2, ig.C2H4O4>, &lt;ig2, ig.C2H5>, &lt;ig2, ig.C2H6>, &lt;ig2, ig.C2H6N2>, &lt;ig2, ig.C2H6O>, ...
+
 >>> pm.search(contains={'C':2, 'Cl':None})  # Precisely two carbon and any clorine
 {&lt;ig2, ig.C2HCl>, &lt;ig2, ig.C2Cl6>, &lt;ig2, ig.C2Cl4>, &lt;ig2, ig.C2Cl2>}</pre>
     <p>
+
+<h3>Combining search results</h3>
     It is also possible to build multi-step "and" and "or" operations with searches.  In an "and" operation between two searches, the conditions specified in both searches must be true for all returned values.  If the results of a previous search is passed to the <span class="code">members</span> keyword of a search, that set (and not the set of all PYroMat substances) will be searched.  This has the effect of producing an "and" operation between the two searches.
     <pre class="code">
 >>> result = pm.search(contains='C')
 >>> pm.search(contains='D', members=result)                   # Returns substances with carbon and deuterium
-{&lt;ig2, ig.C6D6>, &lt;ig2, ig.C6D5>, &lt;ig2, ig.C12D10>, &lt;ig2, ig.C12D9>}     
+{&lt;ig2, ig.C6D6>, &lt;ig2, ig.C6D5>, &lt;ig2, ig.C12D10>, &lt;ig2, ig.C12D9>}
+
 >>> pm.search(contains={'Br':1}).union( pm.search(contains={'Hg':1}))   # One bromine OR one mercury
 {&lt;ig, ig.BrF5&gt;, &lt;ig2, ig.Br&gt;, &lt;ig2, ig.HBr&gt;, &lt;ig, ig.BrF5S&gt;, &lt;ig, ig.CBrN&gt;, &lt;ig, ig.BrH&gt;, &lt;ig, ...
     </pre>
     <p>
     In the second example above, we have combined two searches using the set's <span class="code">union</span> method.  This just combines them (while eliminating redundant entries) in an "or" operation.  These, and the other built-in Python set operations allow users to construct searches with arbitrary complexity.
     </p>
+<h3>Visualizing search results</h3>
     <p>
     Finally, once we have a search we are happy with, we may want to display the results more elegantly than just seeing a set of the substance IDs.  The <span class="code">info</span> function accepts these search result sets as an argument, and it displays a table of the results.  When it is called with no arguments, it merely displays a table of all the substances supported by PYroMat.  Alternately, the <span class="code">info</span> function also accepts all the same arguments as  <span class="code">search</span>, so if you want, you can just let  <span class="code">info</span> perform the search for you.
     </p>
     <pre class="code">
->>> pm.info(name='water')
+>>> pm.info(pm.search('water'))
   PYroMat
 Thermodynamic computational tools for Python
-version: 2.2.0
-------------------------------------------------------------------------
- ID     : class : name              : properties
-------------------------------------------------------------------------
- ig.BrH :  ig   : Hydrogen bromide  : T p d v cp cv gam e h s mw R    
- ig.CHN :  ig2  : Hydrogen cyanide  : T p d v cp cv gam e h s mw R    
- ig.ClH :  ig   : Hydrogen chloride : T p d v cp cv gam e h s mw R    
- ig.DHO :  ig   : Water-d           : T p d v cp cv gam e h s mw R    
- ig.H2O :  ig2  : Water             : T p d v cp cv gam e h s mw R    
- ig.H2S :  ig2  : Hydrogen sulfide  : T p d v cp cv gam e h s mw R    
- mp.H2O :  mp1  : Water             : T p d v cp cv gam e h s mw R  
+version: 3.0.0
+------------------------------------------------------------
+ SID    : class  :      MW :   CAS ID   : name             
+------------------------------------------------------------
+ ig.BrH :  ig1   :  80.912 : 10035-10-6 : Hydrogen bromide 
+ ig.CHN :  ig2   :  27.026 :  74-90-8   : Hydrogen cyanide 
+ ig.ClH :  ig1   :  36.461 : 7647-01-0  : Hydrogen chloride
+ ig.DHO :  ig1   :  19.021 : 14940-63-7 : Water-d          
+ ig.H2O :  ig2   :  18.015 : 7732-18-5  : Water            
+ ig.H2S :  ig2   :  34.082 : 7783-06-4  : Hydrogen sulfide 
+ mp.H2O :  mp1   :  18.015 : 7732-18-5  : water     
 
 >>> pm.info(pm.search(inchi = 'InChI=1S/H2O/h1H2'))
   PYroMat
 Thermodynamic computational tools for Python
-version: 2.2.0
-------------------------------------------------------------
- ID     : class : name  : properties
-------------------------------------------------------------
- ig.H2O :  ig2  : Water : T p d v cp cv gam e h s mw R    
- mp.H2O :  mp1  : Water : T p d v cp cv gam e h s mw R   
+version: 3.0.0
+-----------------------------------------------
+ SID    : class  :      MW :  CAS ID   : name 
+-----------------------------------------------
+ ig.H2O :  ig2   :  18.015 : 7732-18-5 : Water
+ mp.H2O :  mp1   :  18.015 : 7732-18-5 : water 
     </pre>
     <p>
     If an exact match with a substance ID string is found, or if the search results only contain a single substance, detailed information is printed on that substance instead of the table.
     </p>
     <pre class="code">
->>> pm.info('mp.C2H2F4')    # pm.info(name='R-134a') also works
+>>> pm.info('mp.C2H2F4')
 ***
 Information summary for substance: "mp.C2H2F4"
 ***
@@ -367,42 +379,48 @@ Information summary for substance: "mp.C2H2F4"
     C H F 
      2 2 4
 
-             Names : R-134a
+             Names : tetrafluoroethane (R-134a)
+                     tetrafluoroethane
                      1,1,1,2-tetrafluoroethane
-                     Norfurane
-                     CF3CH2F
-                     Freon 134
-                     HFA-134a
+                     norfurane
+                     freon-134
+                     R-134a
                      HFC-134a
+                     CF3CH2F
   Molecular Weight : 102.032
         CAS number : 359-35-3
       InChI string : InChI=1S/C2H2F4/c3-1(4)2(5)6/h1-2H
         Data class : mp1
-       Loaded from : /home/chris/Documents/pyromat/src/pyromat/data/mp/C2_H2_F4.hpd
-      Last updated : 12:18 June 30, 2022
+       Loaded from : /home/calc/Documents/pyromat-dev/pyromat/src/pyromat/data/mp/C2_H2_F4.hpd
+      Last updated : 7:48 September 16, 2026
 
 The PYroMat R134a multiphase data are adapted from [1]. The equation of
 state used to calculate most properties is their original work, but the
 saturation conditions are derived from Wagner [2].
+
 The data are implemented with the MP1 class. In-line help describes the
 available funcitons and their proper use.
+
 Adaptation to PYroMat was by Chris Martin in June 2018 thanks, in part, to
 a grant from Penn State's Open Education Resources Initiative.
+
 [1] R. Tilner-Roth and H. Baehr, An International Standard Formulation for
 the Thermodynamic Properties of Tetrafluoroethane (HFC-134a) for
 Temperatures from 170K to 455K and Pressure up to 70MPa, Journal of
 Physical and Chemical Reference Data, v23, pp 657, 1994. doi:
 10.1063/1.555958
+
 [2] W. Wagner, Eine mathematisch statistische Methode zum Aufstellen
 thermodynamischer Gleichungen-gezeigt am Beispiel der Dampfdruckkurve
 reiner fluider Stoffe. Fortschr.-Ber. VDI-Z, v3, n39. 1974.
+
 </pre>
 </div>
 
 <h3 class="subtitle" id="units">Working with units</h3>
 <div class="section">
     <p>
-    By default, all energy is in kJ, and intensive properties are by mass (in kg).  Volume is in cubic meters, and molar units are in kmols.  Pressure is in bar and temperature is in Kelvin.  These units are pretty broadly used, but if developing thermodynamic codes teaches us anything, it is that no system of units is pleasing to every audience.  PYroMat has a configuration object that, among other things, allows the user to change the system of units.
+    By default, all energy is in kJ, and intensive properties are by mass (in kg).  Volume is in cubic meters, and molar units are in kmols.  Pressure is in bar, and temperature is in Kelvin.  These units are pretty broadly used, but if developing thermodynamic codes teaches us anything, it is that no system of units is pleasing to every audience.  PYroMat has a configuration object that, among other things, allows the user to change the system of units.
     </p>
     <pre class="code">
 >>> N2.s(T=700.,p=50.)
@@ -428,7 +446,7 @@ unit_temperature : 'K'
      unit_volume : 'm3'
 ...</pre>
     <p>
-    Most of these are self-explanatory, but the subtle distinctions between <span class="code">unit_mass</span>, <span class="code">unit_molar</span>, and <span class="code">unit_matter</span> definitely deserves some explanation.  Mass and molar specify how mass and mole count will be specified in properties like molecular weight, but matter specifies how extensive properties like entropy and enthalpy will be reported.  Unit matter can be in mass or molar units.
+    Most of these are self-explanatory except, perhaps, the distinctions between <span class="code">unit_mass</span>, <span class="code">unit_molar</span>, and <span class="code">unit_matter</span>.  Intuitively, mass and molar specify how mass and mole count will be specified in properties like molecular weight, but it is valid to describe the quantity of a substance in either molar or mass units.  For this reason, the separate <span class="code">unit_matter</span> specifies how extensive properties like entropy and enthalpy will be reported.  Note that it is possible (but not recommended) to put these three in bizarrely contradictory units like lbmol and kg at the same time.
     </p>
     <pre class="code">
 >>> N2.mw()
@@ -442,19 +460,69 @@ array(191.4994778037166)
 6.8359955522612958</pre>
 
     <p>
-    For a list of all units supported, the <span class="code">units</span> module offers the <span class="code">show()</span> funciton.  This shows a space separated list of every string argument that the unit configuration parameters will accept.  Matter is not shown because it can be either mass or molar units.
+    For a list of all units supported, the <span class="code">units</span> module offers the <span class="code">show()</span> funciton.  This shows a space separated list of every string argument that the unit configuration parameters will accept.  See the "Units" chapter for detailed information in the <a href="./pdf/handbook.pdf">handbook</href>.
     </p>
     <pre class="code">
 >>> pm.units.show()
-          force : lb lbf kN N oz kgf 
-         energy : BTU kJ J cal eV kcal BTU_ISO 
-    temperature : K R eV C F 
-       pressure : mmHg psi inHg MPa inH2O kPa Pa bar atm GPa torr mmH2O ksi 
-          molar : Ncum NL Nm3 kmol scf n mol sci Ncc lbmol 
-         volume : cumm cc mL L mm3 in3 gal UKgal cuin ft3 cuft USgal m3 cum 
-         length : ft nm cm mm m km um mile in 
-           mass : mg kg g oz lb lbm slug 
-           time : s ms min hr ns year day us </pre>
+         length : km m dm cm mm um nm A in nmi ft yd mile mi 
+           time : ns us ms s min hr day year 
+           mass : mg g kg Mg T lbm u lb oz ton longton slug Da 
+          force : kN N mN dyne lb kgf lbf oz kip ton 
+          molar : kmol mol lbmol n Nm3 Ncum NL Ncc scf sci 
+    temperature : K C F R eV 
+         energy : mJ J kJ MJ cal kcal eV erg BTU 
+         volume : m3 dm3 mm3 cm3 in3 ft3 L mL uL cum cc cumm cuin cuft gal USgal 
+                    UKgal qt pt cup floz oz tbsp tsp 
+       pressure : Pa kPa MPa GPa bar atm Torr mmHg mmH2O psi psf ksi inHg inH2O 
+See also...
+  abs_to_gauge()        Absolute to gauge pressure
+  gauge_to_abs()        Gauge to absolute pressure
+  matter()              Moles and mass conversions
+  temperature_scale()   Correct handling of non-absolute temperatures
+</pre>
+    <p>
+    PYroMat calls on the unit conversion utilities automatically in the course of doing its calculations, but users are free to call them for their own purposes.  There is a utility for each class of units listed (including in the "See also" list).  Each unit utility is a callable instance, accepting the value to convert, <span class="code">from_units</span> and <span class="code">to_units</span> arguments.  If either of the from or to unit strings is omitted, the utility will automatically use the value in the appropriate configuration entry.
+    </p>
+    <pre class="code">
+>>> pm.units.length(1, from_units='m', to_units='in')
+np.float64(39.37007874015748)
+>>> pm.units.length(1, to_units='in')
+np.float64(39.37007874015748)
+</pre>
+    <p>
+    The unit utilities also expose the keywords <span class="code">exponent</span> for conveniently converting compound units and <span class="code">inplace</span> for converting arrays in-place rather than making a copy.
+    </p>
+    <pre class="code">
+>>> speed = np.array([14., 30.])  # In miles per hour
+>>> pm.units.length(speed, from_units='mi', to_units='m', inplace=True)
+array([22530.816, 48280.32 ])     # In meters per hour
+>>> pm.units.time(speed, from_units='hr', to_units='s', inplace=True, exponent=-1)
+array([ 6.25856, 13.4112 ])       # In meters per second
+</pre>
+    <p>
+    Users should beware of working in pressure, temperature, and matter units due to some nuances.  For example, using the temperature utility, it would appear that 20 Celsius is equal to 20 Kelvin.  
+    </p>
+    <pre class="code">
+>>> pm.units.temperature(20, from_units='C', to_units='K')
+np.float64(20.0)
+</pre>
+    <p>
+    Both the temperature and pressure utilities work in differential units, so they are appropriate for converting quantities like specific heats and entropy.  In other words, heating a substance by 20 degrees Celsius is equivalent to heating the same substance by 20 Kelvin.  The classical temperature scales (predating kinetic theory) do not behave like other units in algebra, but their differentials do.  The <span class="code">temperature_scale()</span> function provides the behavior most users will expect, and the PYroMat back-end relies on both.
+    </p>
+    <pre class="code">
+>>> pm.units.temperature_scale(20, from_units='C', to_units='K')
+array(293.15)
+</pre>
+    <p>
+    The same problem due to an offset exists for absolute and gauge pressures is addressed by the to/from gauge functions.
+    </p>
+    <p>
+    Finally, the <span class="code">matter()</span> function is used to bridge the gap between molar- and mass-based measures of quantities of matter.  However, doing so depends on the molecular weight of the substance, so it must be passed as a mandatory argument.  In this example, one kilogram of something with a molecular weight of 28.96 is found to be about 0.0345 kmol.
+    </p>
+    <pre class="code">
+>>> pm.units.matter(1, 28.96, from_units='kg', to_units='kmol')
+np.float64(0.034530386740331494)
+</pre>
 </div>
 
 <h3 class="subtitle" id="arrays">Working with arrays</h3>
@@ -469,7 +537,7 @@ array(191.4994778037166)
 array([    53.90750325,   2971.32964933,   5910.75444792,   8893.9164816 ,
         11936.61265198,  15046.59932493,  18223.31173227])</pre>
     <p>
-    When parameters are mixed together, they must obey Numpy's rules for array <a href="https://docs.scipy.org/doc/numpy-1.13.0/user/basics.broadcasting.html">broadcasting</a>.  For example, when T is a list and p is a scalar, the same pressure will be used at each temperature specified.
+    When parameters are mixed together, they must obey Numpy's rules for array <a href="https://numpy.org/doc/stable/user/basics.broadcasting.html">broadcasting</a>.  For example, when T is a list and p is a scalar, the same pressure will be used at each temperature specified.
     </p>
     <pre class="code">
 >>> T = np.array([500., 550., 600.])

@@ -1,0 +1,11 @@
+# Benchmarking data for substance mp.H2O
+# Each entry is a duration (in seconds) to complete an operation.
+# Each column represents the same operation, each row represents the same dataset size.
+# The operations are: _argparse(T,d), state(T,d), _argparse(T,p), state(T,p), _argparse(s,p), state(s,p)
+# Array sizes are: [1, 10, 100, 1000, 10000, 100000]
+7.948279e-05	1.821033e-03	3.633214e-03	5.086842e-03	7.624863e-03	9.250731e-03
+6.357718e-05	1.552219e-03	1.525415e-02	1.644510e-02	1.944932e-01	1.941923e-01
+6.603003e-05	1.624444e-03	1.544354e-02	1.670189e-02	3.454778e-01	3.458064e-01
+9.720325e-05	2.480340e-03	2.431788e-02	2.621131e-02	4.376325e-01	4.411985e-01
+3.946543e-04	9.379220e-03	9.034181e-02	9.696450e-02	1.148694e+00	1.162964e+00
+4.395962e-03	8.372815e-02	8.615364e-01	9.245340e-01	9.461839e+00	9.595845e+00
