@@ -19,7 +19,7 @@
     <li class="menuitem"><a href="./features.html">Features</a></li>
     <li class="menuitem"><a href="./download.html">Download</a></li>
     <li class="menuitem"><a href="./documentation.html">Docs</a></li>
-    <li class="menuitem"><a href="./donate.html">Donate</a></li>
+    <li class="menuitem"><a href="./support.html">Support</a></li>
 </ul>
 
 <div id="content">
@@ -95,13 +95,14 @@
     <pre class="code">
 $ git clone https://github.com/chmarti1/pyromat.git
 $ cd pyromat
-$ python setup.py install</pre>
+$ python -m pip install .</pre>
     <p>
-    The last command might need to be executed by an administrator on your system.  In Linux, this is usually best done with the command
+    When installing from a repository, there are some out-dated installation practices that are no longer recommended:
     </p>
-    <div class="code">
-    sudo -H python setup.py install</pre>
-    </div>
+    <ol>
+        <li>Instead of using <span class=code>sudo</span> or running as an administrator, install in a <a href="https://docs.python.org/3/library/venv.html">virtual environment</a> instead.  See the <a href=pdf/handbook.pdf>User Handbook</a> for more information.</li>
+        <li>Never call <span class=code>setup.py</span> directly.  Let pip do that.  Future distributions of PYroMat may finally transition fully or partially away from the legacy packaging methods.</li>
+    </ol>
 </div>
 
 

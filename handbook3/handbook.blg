@@ -1,5 +1,5 @@
-This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
-Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+This is BibTeX, Version 0.99d (TeX Live 2023/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: handbook.aux
 A level-1 auxiliary file: nomenclature.aux
 A level-1 auxiliary file: intro.aux
@@ -12,46 +12,51 @@ A level-1 auxiliary file: multiphase.aux
 A level-1 auxiliary file: numerical.aux
 The style file: ieeetr.bst
 Database file #1: pyrodoc.bib
+Repeated entry---line 162 of file pyrodoc.bib
+ : @article{lemmon:2000
+ :                     ,
+I'm skipping whatever remains of this entry
+Warning--I didn't find a database entry for "codata:2022"
 Warning--empty institution in iapws:2014
 You've used 31 entries,
             1876 wiz_defined-function locations,
-            655 strings with 8726 characters,
-and the built_in function-call counts, 6786 in all, are:
-= -- 658
-> -- 270
+            659 strings with 8865 characters,
+and the built_in function-call counts, 6969 in all, are:
+= -- 679
+> -- 271
 < -- 4
 + -- 103
 - -- 72
-* -- 453
-:= -- 971
+* -- 477
+:= -- 1004
 add.period$ -- 37
 call.type$ -- 31
-change.case$ -- 29
+change.case$ -- 30
 chr.to.int$ -- 0
 cite$ -- 32
-duplicate$ -- 380
-empty$ -- 660
+duplicate$ -- 385
+empty$ -- 676
 format.name$ -- 72
-if$ -- 1695
+if$ -- 1738
 int.to.chr$ -- 0
 int.to.str$ -- 31
-missing$ -- 25
+missing$ -- 26
 newline$ -- 102
-num.names$ -- 27
-pop$ -- 107
+num.names$ -- 28
+pop$ -- 100
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
 skip$ -- 241
 stack$ -- 0
-substring$ -- 251
-swap$ -- 146
+substring$ -- 282
+swap$ -- 147
 text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 1
-while$ -- 50
+while$ -- 54
 width$ -- 33
-write$ -- 300
-(There was 1 warning)
+write$ -- 308
+(There was 1 error message)
